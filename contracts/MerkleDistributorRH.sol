@@ -9,7 +9,7 @@ error EndTimeInPast();
 error ClaimWindowFinished();
 error NoWithdrawDuringClaim();
 
-contract MerkleDistributorWithDeadline is MerkleDistributor, Ownable {
+contract MerkleDistributorRH is MerkleDistributor, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 public immutable endTime;
