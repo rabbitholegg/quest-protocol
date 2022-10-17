@@ -1,18 +1,18 @@
 {
-  "name": "rabbitholegg/quest_merkle_distributor",
+  "name": "@uniswap/merkle-distributor",
   "author": {
     "name": "Moody Salem"
   },
   "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
   "version": "1.0.1",
-  "homepage": "https://rabbithole.gg",
+  "homepage": "https://uniswap.org",
   "keywords": [
     "uniswap",
     "erc20"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/rabbitholegg/quest_merkle_distributor"
+    "url": "https://github.com/Uniswap/merkle-distributor"
   },
   "files": [
     "build"

@@ -3,9 +3,8 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main(tokenAddress, root, expiry) {
-  const MerkleDistributorWithDeadline = await ethers.getContractFactory('MerkleDistributorWithDeadline')
+  const MerkleDistributorWithDeadline = await ethers.getContractFactory('MerkleDistributorRH')
   const merkleDistributorWithDeadline = await MerkleDistributorWithDeadline.deploy(
-    // USDC
     tokenAddress,
     root,
     expiry
