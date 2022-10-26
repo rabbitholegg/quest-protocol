@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.8.15;
+pragma solidity ^0.8.15;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -17,41 +17,35 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     bytes32 public override merkleRoot;
 
     // This is a packed array of booleans.
-    mapping(uint256 => uint256) private claimedBitMap;
+    mapping(address => bool) private claimedList;
 
     constructor(address token_) public {
-        token = token_;
+      token = token_;
     }
 
     function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
-        merkleRoot = merkleRoot_;
+      merkleRoot = merkleRoot_;
     }
 
-    function isClaimed(uint256 index) public view override returns (bool) {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        uint256 claimedWord = claimedBitMap[claimedWordIndex];
-        uint256 mask = (1 << claimedBitIndex);
-        return claimedWord & mask == mask;
+    function isClaimed(address account) public view override returns (bool) {
+      return claimedList[account] && claimedList[account] == true;
     }
 
-    function _setClaimed(uint256 index) private {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
+    function _setClaimed(address account) private {
+      claimedList[account] = true;
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual override {
-        if (isClaimed(index)) revert AlreadyClaimed();
+      if (isClaimed(account)) revert AlreadyClaimed();
 
-        // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
+      // Verify the merkle proof.
+      bytes32 node = keccak256(abi.encodePacked(index, account, amount));
+      if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
-        // Mark it claimed and send the token.
-        _setClaimed(index);
-        IERC20(token).safeTransfer(account, amount);
+      // Mark it claimed and send the token.
+      _setClaimed(account);
+      IERC20(token).safeTransfer(account, amount);
 
-        emit Claimed(index, account, amount);
+      emit Claimed(index, account, amount);
     }
 }

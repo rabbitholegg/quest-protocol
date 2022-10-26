@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/pritamroy/Documents/workspace/rabbithole/quest_merkle_distributor/contracts/MerkleDistributor.sol": {
-      "lastModificationDate": 1666162149001,
-      "contentHash": "6f1e32804232e0ddaf356ca23a43f4e0",
+      "lastModificationDate": 1666762540660,
+      "contentHash": "be8c42557d1990c26e0dc4fff4c7bfb3",
       "sourceName": "contracts/MerkleDistributor.sol",
       "solcConfig": {
         "version": "0.8.15",
@@ -36,15 +36,15 @@
         "@openzeppelin/contracts/proxy/utils/Initializable.sol"
       ],
       "versionPragmas": [
-        "=0.8.15"
+        "^0.8.15"
       ],
       "artifacts": [
         "MerkleDistributor"
       ]
     },
     "/Users/pritamroy/Documents/workspace/rabbithole/quest_merkle_distributor/contracts/interfaces/IMerkleDistributor.sol": {
-      "lastModificationDate": 1666002516623,
-      "contentHash": "80b1d3f7f811cf837711b98b94327494",
+      "lastModificationDate": 1666762605648,
+      "contentHash": "b3261c72f894e4bd2eeac038414eaf3e",
       "sourceName": "contracts/interfaces/IMerkleDistributor.sol",
       "solcConfig": {
         "version": "0.8.15",
@@ -257,8 +257,8 @@
       ]
     },
     "/Users/pritamroy/Documents/workspace/rabbithole/quest_merkle_distributor/contracts/MerkleDistributorRH.sol": {
-      "lastModificationDate": 1666162197101,
-      "contentHash": "88364baa50207f4c09a3099d6e4ae35e",
+      "lastModificationDate": 1666759938626,
+      "contentHash": "2c80c398fb0be7be85e9ffbad5a02f5f",
       "sourceName": "contracts/MerkleDistributorRH.sol",
       "solcConfig": {
         "version": "0.8.15",
