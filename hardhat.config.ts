@@ -2,8 +2,10 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
+require("@nomicfoundation/hardhat-chai-matchers")
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+
 
 module.exports = {
   solidity: {

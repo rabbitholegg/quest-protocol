@@ -21,6 +21,7 @@
     "node": ">=10"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
     "@openzeppelin/contracts": "4.7.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
@@ -46,6 +47,7 @@
     "prepublishOnly": "yarn test"
   },
   "dependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "dotenv": "^16.0.1",
