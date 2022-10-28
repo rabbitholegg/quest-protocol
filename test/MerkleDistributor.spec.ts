@@ -2,42 +2,25 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 // advantage of Hardhat Network's snapshot functionality.
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+import { parseBalanceMap } from '../src/parse-balance-map'
 
 describe("Token contract", function () {
   
   async function deployRewardTokenFixture() {
-    // Get the ContractFactory and Signers here.
     const RewardToken = await ethers.getContractFactory("SampleERC20");
     const [owner, addr1, addr2] = await ethers.getSigners();
-
-    // To deploy our contract, we just have to call Token.deploy() and await
-    // its deployed() method, which happens onces its transaction has been
-    // mined.
     const expiryDate = Math.floor(Date.now() /1000) + 10000;
-
     const hardhatRewardToken = await RewardToken.deploy("RewardToken", "RTC", 1000, owner.address);
-
     await hardhatRewardToken.deployed();
-
-    // Fixtures can return anything you consider useful for your tests
     return { RewardToken, hardhatRewardToken, owner, addr1, addr2 };    
   }
 
   async function deployTokenFixture() {
-    // Get the ContractFactory and Signers here.
     const Token = await ethers.getContractFactory("MerkleDistributorRH");
     const [owner, addr1, addr2] = await ethers.getSigners();
-
-    // To deploy our contract, we just have to call Token.deploy() and await
-    // its deployed() method, which happens onces its transaction has been
-    // mined.
     const expiryDate = Math.floor(Date.now() /1000) + 10000;
-
     const hardhatToken = await Token.deploy("0x0000000000000000000000000000000000000000", expiryDate);
-
     await hardhatToken.deployed();
-
-    // Fixtures can return anything you consider useful for your tests
     return { Token, hardhatToken, owner, addr1, addr2 };
   }
 
@@ -45,16 +28,34 @@ describe("Token contract", function () {
     const { RewardToken, hardhatRewardToken } = await deployRewardTokenFixture();
     const rewardTokenAddress = hardhatRewardToken.address;
     const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0];
-
     const DisperseToken = await ethers.getContractFactory("MerkleDistributorRH");
     const expiryDate = Math.floor(Date.now() /1000) + 10000;
-    
     const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate);
     await hardhatDisperseToken.deployed();
     const disperseTokenAddresss = await hardhatDisperseToken.address;
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000);
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss };
+  }
 
+  async function deployAndTransferRewardToDisperserWithExpiry() {
+    const { RewardToken, hardhatRewardToken } = await deployRewardTokenFixture();
+    const rewardTokenAddress = hardhatRewardToken.address;
+    const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0];
+    const DisperseToken = await ethers.getContractFactory("MerkleDistributorRH");
+    const expiryDate = Math.floor(Date.now() /1000) + 10;   
+    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate);
+    await hardhatDisperseToken.deployed();
+    const disperseTokenAddresss = await hardhatDisperseToken.address;
+    await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000);
+    return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss };
+  }
+
+  async function getTimeout() {
+    return new Promise((resolve) => {
+      setTimeout(function(){ 
+        resolve({});
+      }, 100);
+    });
   }
 
   describe("Deployment", function () {
@@ -104,11 +105,91 @@ describe("Token contract", function () {
       const supply = await hardhatRewardToken.totalSupply();
       expect(supply).to.equal(1000);
     });   
-    it("Deployment should mint and transfer rewad token to disperse contract", async function() {
+    it("Deployment should mint and transfer reward token to disperse contract", async function() {
       const {hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress } = await loadFixture(deployAndTransferRewardToDisperser);
       const disperseTokenBalance = (await hardhatRewardToken.functions.balanceOf(disperseTokenAddresss)).toString();
       expect(disperseTokenBalance).to.equal('1000');
     }); 
-  }); 
+  });
 
+  describe("Claim rewards", function() {
+    it("Valid redeemer should be able to claim reward", async function() {  
+      const {hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress }
+        = await loadFixture(deployAndTransferRewardToDisperser);
+      const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      const arr = [ owner.address, addr1.address, addr2.address, addr3.address, addr4.address];
+      let dataObject: any = {};
+      arr.forEach(function(item) {
+        dataObject[item] = 250;
+      });
+      const balanceMap = parseBalanceMap(dataObject);
+      const merkleRoot = balanceMap.merkleRoot;
+      await hardhatDisperseToken.setMerkleRoot(merkleRoot);
+      const getMerkleRoot = await hardhatDisperseToken.merkleRoot();
+      expect(merkleRoot).to.equal(getMerkleRoot);
+      const checksumAddr = ethers.utils.getAddress(addr1.address);
+      const testClaim = balanceMap.claims[checksumAddr];
+      const claimTxn = await hardhatDisperseToken.connect(addr1)
+      .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
+      const testAddrBalance = await hardhatRewardToken.functions.balanceOf(checksumAddr);
+    });
+    it("Valid redeemer should not be be able to claim reward twice ", async function() {  
+      const {hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress }
+        = await loadFixture(deployAndTransferRewardToDisperser);
+      const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      const arr = [ owner.address, addr1.address, addr2.address, addr3.address, addr4.address];
+      let dataObject: any = {};
+      arr.forEach(function(item) {
+        dataObject[item] = 250;
+      });
+      const balanceMap = parseBalanceMap(dataObject);
+      const merkleRoot = balanceMap.merkleRoot;
+      await hardhatDisperseToken.setMerkleRoot(merkleRoot);
+      const getMerkleRoot = await hardhatDisperseToken.merkleRoot();
+      expect(merkleRoot).to.equal(getMerkleRoot);
+      const checksumAddr = ethers.utils.getAddress(addr1.address);
+      const testClaim = balanceMap.claims[checksumAddr];
+      const claimTxn = await hardhatDisperseToken.connect(addr1)
+      .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
+      await expect(hardhatDisperseToken.connect(addr1)
+      .claim(testClaim.index, checksumAddr, 250, testClaim.proof))
+      .to.be.reverted;      
+    });
+    it("Invalid redeemer should not be be able to claim reward", async function() {  
+      const {hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress }
+        = await loadFixture(deployAndTransferRewardToDisperser);
+      const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      const arr = [ owner.address, addr1.address, addr2.address, addr3.address, addr4.address];
+      let dataObject: any = {};
+      arr.forEach(function(item) {
+        dataObject[item] = 250;
+      });
+      const balanceMap = parseBalanceMap(dataObject);
+      const merkleRoot = balanceMap.merkleRoot;
+      await hardhatDisperseToken.setMerkleRoot(merkleRoot);
+      const getMerkleRoot = await hardhatDisperseToken.merkleRoot();
+      expect(merkleRoot).to.equal(getMerkleRoot);
+      const checksumAddr = ethers.utils.getAddress(addr1.address);
+      const testClaim = balanceMap.claims[checksumAddr];
+      const sampleAddress = "0xdafea492d9c6733ae3d56b7ed1adb60692c98bc5";
+      await expect(hardhatDisperseToken.connect(addr2)
+      .claim(testClaim.index, sampleAddress, 250, testClaim.proof))
+      .to.be.reverted;        
+    });  
+  });
+  describe("Admin withdraw tokens", function() {
+    it("Admin should be able to withdraw remaining tokens after redemption expiry", async function() {  
+      const {hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress }
+        = await loadFixture(deployAndTransferRewardToDisperserWithExpiry);
+      const [owner] = await ethers.getSigners();        
+      await getTimeout();
+      const contractBalanceBefore = await hardhatRewardToken.functions.balanceOf(disperseTokenAddresss);   
+      const tx = await hardhatDisperseToken.withdraw();
+      await expect(tx).not.to.be.reverted;  
+      const adminBalanceAfter = await hardhatRewardToken.functions.balanceOf(owner.address);
+      const cbString = contractBalanceBefore.toString();
+      const abAfter = adminBalanceAfter.toString();
+      expect(cbString).to.equal(abAfter);
+    });
+  });
 });
