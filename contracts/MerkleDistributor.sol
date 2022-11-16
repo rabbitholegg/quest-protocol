@@ -47,6 +47,14 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     hasStarted = true;
   }
 
+  function pause() public onlyOwner {
+    hasStarted = false;
+  }
+
+  function unPause() public onlyOwner {
+    hasStarted = true;
+  }
+
   function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
     if (block.timestamp > endTime) revert ClaimWindowFinished();
