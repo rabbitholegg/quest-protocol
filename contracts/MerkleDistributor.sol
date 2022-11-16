@@ -9,43 +9,55 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 
 error AlreadyClaimed();
 error InvalidProof();
+error EndTimeInPast();
+error ClaimWindowFinished();
+error NoWithdrawDuringClaim();
 
 contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
-    using SafeERC20 for IERC20;
+  using SafeERC20 for IERC20;
 
-    address public immutable override token;
-    bytes32 public override merkleRoot;
+  address public immutable override token;
+  uint256 public immutable endTime;
+  bytes32 public override merkleRoot;
 
-    // This is a packed array of booleans.
-    mapping(address => bool) private claimedList;
+  // This is a packed array of booleans.
+  mapping(address => bool) private claimedList;
 
-    constructor(address token_) public {
-      token = token_;
-    }
+  constructor(address token_, uint256 endTime_) {
+    if (endTime_ <= block.timestamp) revert EndTimeInPast();
+    endTime = endTime_;
+    token = token_;
+  }
 
-    function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
-      merkleRoot = merkleRoot_;
-    }
+  function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
+    merkleRoot = merkleRoot_;
+  }
 
-    function isClaimed(address account) public view override returns (bool) {
-      return claimedList[account] && claimedList[account] == true;
-    }
+  function isClaimed(address account) public view returns (bool) {
+    return claimedList[account] && claimedList[account] == true;
+  }
 
-    function _setClaimed(address account) private {
-      claimedList[account] = true;
-    }
+  function _setClaimed(address account) private {
+    claimedList[account] = true;
+  }
 
-    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual override {
-      if (isClaimed(account)) revert AlreadyClaimed();
+  function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
+    if (block.timestamp > endTime) revert ClaimWindowFinished();
+    if (isClaimed(account)) revert AlreadyClaimed();
 
-      // Verify the merkle proof.
-      bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-      if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
+    // Verify the merkle proof.
+    bytes32 node = keccak256(abi.encodePacked(index, account, amount));
+    if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
-      // Mark it claimed and send the token.
-      _setClaimed(account);
-      IERC20(token).safeTransfer(account, amount);
+    // Mark it claimed and send the token.
+    _setClaimed(account);
+    IERC20(token).safeTransfer(account, amount);
 
-      emit Claimed(index, account, amount);
-    }
+    emit Claimed(index, account, amount);
+  }
+
+  function withdraw() external onlyOwner {
+    if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
+    IERC20(token).safeTransfer(msg.sender, IERC20(token).balanceOf(address(this)));
+  }
 }
