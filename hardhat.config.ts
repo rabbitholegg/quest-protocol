@@ -2,10 +2,9 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
-require("@nomicfoundation/hardhat-chai-matchers")
+require('@nomicfoundation/hardhat-chai-matchers')
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-
 
 module.exports = {
   solidity: {
@@ -29,7 +28,7 @@ module.exports = {
         },
       },
     },
-    
+
     tenderly: {
       chainId: 1,
       url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,

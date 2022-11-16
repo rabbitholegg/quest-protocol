@@ -1,7 +1,7 @@
-# @uniswap/merkle-distributor
+# Quest Merkle Distributor
 
-[![Tests](https://github.com/Uniswap/merkle-distributor/workflows/Tests/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ATests)
-[![Lint](https://github.com/Uniswap/merkle-distributor/workflows/Lint/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ALint)
+[![Tests](https://github.com/rabbitholegg/quest_merkle_distributor/workflows/Tests/badge.svg)](https://github.com/rabbitholegg/quest_merkle_distributor/actions?query=workflow%3ATests)
+[![Lint](https://github.com/rabbitholegg/quest_merkle_distributor/workflows/Lint/badge.svg)](https://github.com/rabbitholegg/quest_merkle_distributor/actions?query=workflow%3ALint)
 
 # Local Development
 
