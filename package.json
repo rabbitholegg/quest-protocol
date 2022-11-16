@@ -1,13 +1,14 @@
 {
-  "name": "@rabbitholegg/quest_merkle_distributor/",
+  "name": "quest_merkle_distributor",
   "author": {
-    "name": "RabbitHoleGG",
+    "name": "rabbitholegg"
   },
   "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "homepage": "https://rabbithole.gg",
   "keywords": [
-    "uniswap",
+    "rabbitholegg",
+    "quest",
     "erc20"
   ],
   "repository": {
