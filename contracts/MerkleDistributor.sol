@@ -10,12 +10,12 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
   using SafeERC20 for IERC20;
 
-  bool public immutable hasStarted;
   address public immutable token;
   uint256 public immutable endTime;
   uint256 public immutable startTime;
   uint256 public immutable totalAmount;
   bytes32 public merkleRoot;
+  bool public hasStarted;
 
   // This is a packed array of booleans.
   mapping(address => bool) private claimedList;
@@ -42,7 +42,7 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
   }
 
   // TODO: test
-  function start onlyOwner {
+  function start() public onlyOwner {
     if (IERC20(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
     hasStarted = true;
   }
