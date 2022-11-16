@@ -14,4 +14,15 @@ interface IMerkleDistributor {
 
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(uint256 index, address account, uint256 amount);
+
+    error AlreadyClaimed();
+    error InvalidProof();
+    error EndTimeInPast();
+    error StartTimeInPast();
+    error ClaimWindowFinished();
+    error ClaimWindowNotStarted();
+    error NoWithdrawDuringClaim();
+    error TotalAmountExceedsBalance();
+    error AmountExceedsBalance();
+    error NotStarted();
 }
