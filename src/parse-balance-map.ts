@@ -12,7 +12,7 @@ interface MerkleDistributorInfo {
   tokenTotal: string
   claims: {
     [account: string]: {
-      index: number
+      index: number // this is just ignored in balance-tree.ts because we removed index
       amount: string
       proof: string[]
       flags?: {

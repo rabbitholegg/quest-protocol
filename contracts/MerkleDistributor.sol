@@ -54,7 +54,7 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     hasStarted = true;
   }
 
-  function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
+  function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
     if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
@@ -62,14 +62,14 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     if (IERC20(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
 
     // Verify the merkle proof.
-    bytes32 node = keccak256(abi.encodePacked(index, account, amount));
+    bytes32 node = keccak256(abi.encodePacked(account, amount));
     if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
     // Mark it claimed and send the token.
     _setClaimed(account);
     IERC20(token).safeTransfer(account, amount);
 
-    emit Claimed(index, account, amount);
+    emit Claimed(account, amount);
   }
 
   function withdraw() external onlyOwner {
