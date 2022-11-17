@@ -140,8 +140,8 @@ describe('Token contract', function () {
       expect(merkleRoot).to.equal(getMerkleRoot)
       const checksumAddr = ethers.utils.getAddress(addr1.address)
       const testClaim = balanceMap.claims[checksumAddr]
-      await ethers.provider.send('evm_increaseTime', [100]);
-      await hardhatDisperseToken.start();
+      await ethers.provider.send('evm_increaseTime', [100])
+      await hardhatDisperseToken.start()
       const claimTxn = await hardhatDisperseToken
         .connect(addr1)
         .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
@@ -205,8 +205,8 @@ describe('Token contract', function () {
       expect(merkleRoot).to.equal(getMerkleRoot)
       const checksumAddr = ethers.utils.getAddress(addr1.address)
       const testClaim = balanceMap.claims[checksumAddr]
-      await ethers.provider.send('evm_increaseTime', [100]);
-      await hardhatDisperseToken.start();
+      await ethers.provider.send('evm_increaseTime', [100])
+      await hardhatDisperseToken.start()
       const claimTxn = await hardhatDisperseToken
         .connect(addr1)
         .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
