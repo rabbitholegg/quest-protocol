@@ -41,7 +41,6 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     claimedList[account] = true;
   }
 
-  // TODO: test
   function start() public onlyOwner {
     if (IERC20(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
     hasStarted = true;
@@ -58,9 +57,9 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
   function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
     if (block.timestamp > endTime) revert ClaimWindowFinished();
-    if (block.timestamp < startTime) revert ClaimWindowNotStarted(); // TODO: test
+    if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
-    if (IERC20(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance(); // TODO: test
+    if (IERC20(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
 
     // Verify the merkle proof.
     bytes32 node = keccak256(abi.encodePacked(index, account, amount));

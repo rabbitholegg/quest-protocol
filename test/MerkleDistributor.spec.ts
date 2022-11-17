@@ -147,6 +147,47 @@ describe('Token contract', function () {
         .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
       const testAddrBalance = await hardhatRewardToken.functions.balanceOf(checksumAddr)
     })
+    it('Revert with error when not started', async function () {
+      const { hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress } = await loadFixture(
+        deployAndTransferRewardToDisperser
+      )
+      const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners()
+      const arr = [owner.address, addr1.address, addr2.address, addr3.address, addr4.address]
+      let dataObject: any = {}
+      arr.forEach(function (item) {
+        dataObject[item] = 10000
+      })
+      const balanceMap = parseBalanceMap(dataObject)
+      const merkleRoot = balanceMap.merkleRoot
+      await hardhatDisperseToken.setMerkleRoot(merkleRoot)
+      const getMerkleRoot = await hardhatDisperseToken.merkleRoot()
+      expect(merkleRoot).to.equal(getMerkleRoot)
+      const checksumAddr = ethers.utils.getAddress(addr1.address)
+      const testClaim = balanceMap.claims[checksumAddr]
+      await ethers.provider.send('evm_increaseTime', [100]);
+      await expect(hardhatDisperseToken.connect(addr1).claim(testClaim.index, checksumAddr, 10000, testClaim.proof)).to.be.revertedWithCustomError(hardhatDisperseToken, "NotStarted")
+    })
+    it('Valid redeemer should not be able to claim more than contract has', async function () {
+      const { hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress } = await loadFixture(
+        deployAndTransferRewardToDisperser
+      )
+      const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners()
+      const arr = [owner.address, addr1.address, addr2.address, addr3.address, addr4.address]
+      let dataObject: any = {}
+      arr.forEach(function (item) {
+        dataObject[item] = 10000
+      })
+      const balanceMap = parseBalanceMap(dataObject)
+      const merkleRoot = balanceMap.merkleRoot
+      await hardhatDisperseToken.setMerkleRoot(merkleRoot)
+      const getMerkleRoot = await hardhatDisperseToken.merkleRoot()
+      expect(merkleRoot).to.equal(getMerkleRoot)
+      const checksumAddr = ethers.utils.getAddress(addr1.address)
+      const testClaim = balanceMap.claims[checksumAddr]
+      await ethers.provider.send('evm_increaseTime', [100]);
+      await hardhatDisperseToken.start();
+      await expect(hardhatDisperseToken.connect(addr1).claim(testClaim.index, checksumAddr, 10000, testClaim.proof)).to.be.revertedWithCustomError(hardhatDisperseToken, "AmountExceedsBalance")
+    })
     it('Valid redeemer should not be be able to claim reward twice ', async function () {
       const { hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress } = await loadFixture(
         deployAndTransferRewardToDisperser
