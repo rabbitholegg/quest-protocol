@@ -18,7 +18,8 @@ describe('Token contract', function () {
     const Token = await ethers.getContractFactory('MerkleDistributor')
     const [owner, addr1, addr2] = await ethers.getSigners()
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
-    const hardhatToken = await Token.deploy('0x0000000000000000000000000000000000000000', expiryDate)
+    const startDate = Math.floor(Date.now() / 1000) + 1000
+    const hardhatToken = await Token.deploy('0x0000000000000000000000000000000000000000', expiryDate, startDate, 1000)
     await hardhatToken.deployed()
     return { Token, hardhatToken, owner, addr1, addr2 }
   }
@@ -29,7 +30,8 @@ describe('Token contract', function () {
     const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0]
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
-    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate)
+    const startDate = Math.floor(Date.now() / 1000) + 10
+    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate, startDate, 1000)
     await hardhatDisperseToken.deployed()
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
@@ -42,7 +44,8 @@ describe('Token contract', function () {
     const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0]
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 10
-    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate)
+    const startDate = Math.floor(Date.now() / 1000) + 1000
+    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate, startDate, 1000)
     await hardhatDisperseToken.deployed()
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
@@ -137,6 +140,8 @@ describe('Token contract', function () {
       expect(merkleRoot).to.equal(getMerkleRoot)
       const checksumAddr = ethers.utils.getAddress(addr1.address)
       const testClaim = balanceMap.claims[checksumAddr]
+      await ethers.provider.send('evm_increaseTime', [100]);
+      await hardhatDisperseToken.start();
       const claimTxn = await hardhatDisperseToken
         .connect(addr1)
         .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
@@ -159,6 +164,8 @@ describe('Token contract', function () {
       expect(merkleRoot).to.equal(getMerkleRoot)
       const checksumAddr = ethers.utils.getAddress(addr1.address)
       const testClaim = balanceMap.claims[checksumAddr]
+      await ethers.provider.send('evm_increaseTime', [100]);
+      await hardhatDisperseToken.start();
       const claimTxn = await hardhatDisperseToken
         .connect(addr1)
         .claim(testClaim.index, checksumAddr, 250, testClaim.proof)
