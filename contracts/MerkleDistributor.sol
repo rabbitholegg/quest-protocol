@@ -21,6 +21,7 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
   mapping(address => bool) private claimedList;
 
   function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_)  public initializer {
+    __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
     endTime = endTime_;
