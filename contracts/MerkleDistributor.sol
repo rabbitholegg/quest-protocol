@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {IERC20, SafeERC20} from "@openzeppelin/contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradable.sol";
+import {MerkleProof} from "@openzeppelin/contracts-upgradable/utils/cryptography/MerkleProofUpgradeable.sol";
+import {Ownable} from "@openzeppelin/contracts-upgradable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradable/proxy/utils/InitializableUpgradeable.sol";
 import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
 
 contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {

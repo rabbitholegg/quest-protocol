@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/wayne/.fnm/node-versions/v14.17.2/installation/bin/node /Users/wayne/Library/Caches/fnm_multishells/54280_1668455974150/bin/yarn
+  /Users/wayne/.fnm/node-versions/v14.17.2/installation/bin/node /Users/wayne/Library/Caches/fnm_multishells/20468_1668704512946/bin/yarn
 
 PATH: 
-  /Users/wayne/.gem/ruby/3.0.0/bin:/Users/wayne/.rubies/ruby-3.0.0/lib/ruby/gems/3.0.0/bin:/Users/wayne/.rubies/ruby-3.0.0/bin:/Users/wayne/.bun/bin:/Users/wayne/Library/Caches/fnm_multishells/54280_1668455974150/bin:/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/sbin/:/Users/wayne/.fig/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/wayne/.bun/bin:/Users/wayne/Library/Caches/fnm_multishells/49731_1668451526461/bin:/Users/wayne/.cargo/bin:/Users/wayne/go/bin:/Applications/Espanso.app/Contents/MacOS:/opt/homebrew/bin:/Users/wayne/.local/bin:/Users/wayne/Library/Python/3.8/bin:/Users/wayne/.foundry/bin:/Users/wayne/.foundry/bin
+  /Users/wayne/.gem/ruby/3.0.0/bin:/Users/wayne/.rubies/ruby-3.0.0/lib/ruby/gems/3.0.0/bin:/Users/wayne/.rubies/ruby-3.0.0/bin:/Users/wayne/.bun/bin:/Users/wayne/Library/Caches/fnm_multishells/20468_1668704512946/bin:/usr/local/sbin:/opt/homebrew/sbin:/opt/homebrew/sbin/:/Users/wayne/.fig/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/wayne/.bun/bin:/Users/wayne/Library/Caches/fnm_multishells/3927_1668699396206/bin:/Users/wayne/.cargo/bin:/Users/wayne/go/bin:/Applications/Espanso.app/Contents/MacOS:/opt/homebrew/bin:/Users/wayne/.local/bin:/Users/wayne/Library/Python/3.8/bin:/Users/wayne/.foundry/bin:/Users/wayne/.foundry/bin
 
 Yarn version: 
   1.22.19
@@ -14,24 +14,30 @@ Platform:
   darwin x64
 
 Trace: 
-  SyntaxError: /Users/wayne/code/rabbithole.gg/quest_merkle_distributor/package.json: Unexpected token } in JSON at position 99
-      at JSON.parse (<anonymous>)
-      at /Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:1629:59
-      at Generator.next (<anonymous>)
-      at step (/Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:310:30)
-      at /Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:321:13
+  Error: https://registry.yarnpkg.com/@openzeppelin%2fcontracts-upgradable: Not found
+      at Request.params.callback [as _callback] (/Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:66145:18)
+      at Request.self.callback (/Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:140890:22)
+      at Request.emit (events.js:375:28)
+      at Request.<anonymous> (/Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:141862:10)
+      at Request.emit (events.js:375:28)
+      at IncomingMessage.<anonymous> (/Users/wayne/.fnm/node-versions/v14.17.2/installation/lib/node_modules/yarn/lib/cli.js:141784:12)
+      at Object.onceWrapper (events.js:481:28)
+      at IncomingMessage.emit (events.js:387:35)
+      at endReadableNT (internal/streams/readable.js:1317:12)
+      at processTicksAndRejections (internal/process/task_queues.js:82:21)
 
 npm manifest: 
   {
-    "name": "@rabbitholegg/quest_merkle_distributor/",
+    "name": "quest_merkle_distributor",
     "author": {
-      "name": "RabbitHoleGG",
+      "name": "rabbitholegg"
     },
     "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "homepage": "https://rabbithole.gg",
     "keywords": [
-      "uniswap",
+      "rabbitholegg",
+      "quest",
       "erc20"
     ],
     "repository": {
@@ -47,6 +53,7 @@ npm manifest:
     "devDependencies": {
       "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
       "@openzeppelin/contracts": "4.7.0",
+      "@openzeppelin/contracts-upgradable": "4.7.0",
       "@types/chai": "^4.2.6",
       "@types/mocha": "^5.2.7",
       "axios": "^0.20.0",
