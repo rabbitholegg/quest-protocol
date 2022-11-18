@@ -49,14 +49,6 @@ describe('Token contract', function () {
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss }
   }
 
-  async function getTimeout() {
-    return new Promise((resolve) => {
-      setTimeout(function () {
-        resolve({})
-      }, 100)
-    })
-  }
-
   describe('Deployment', function () {
     it('Deployment should assign the correct contract address', async function () {
       const { hardhatToken, _owner } = await loadFixture(deployTokenFixture)
