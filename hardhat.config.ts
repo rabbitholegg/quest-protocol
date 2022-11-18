@@ -5,7 +5,7 @@ require('dotenv').config()
 require('@nomicfoundation/hardhat-chai-matchers')
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@openzeppelin/hardhat-upgrades';
+import '@openzeppelin/hardhat-upgrades'
 
 module.exports = {
   solidity: {

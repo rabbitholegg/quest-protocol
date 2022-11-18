@@ -19,7 +19,12 @@ describe('Token contract', function () {
     const [owner, addr1, addr2] = await ethers.getSigners()
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 1000
-    const hardhatToken = await upgrades.deployProxy(Token, ['0x0000000000000000000000000000000000000000', expiryDate, startDate, 1000])
+    const hardhatToken = await upgrades.deployProxy(Token, [
+      '0x0000000000000000000000000000000000000000',
+      expiryDate,
+      startDate,
+      1000,
+    ])
     return { Token, hardhatToken, owner, addr1, addr2 }
   }
 
@@ -30,7 +35,12 @@ describe('Token contract', function () {
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 10
-    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [rewardTokenAddress, expiryDate, startDate, 1000])
+    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [
+      rewardTokenAddress,
+      expiryDate,
+      startDate,
+      1000,
+    ])
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss }
@@ -43,7 +53,12 @@ describe('Token contract', function () {
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 100
     const startDate = Math.floor(Date.now() / 1000) + 1000
-    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [rewardTokenAddress, expiryDate, startDate, 1000])
+    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [
+      rewardTokenAddress,
+      expiryDate,
+      startDate,
+      1000,
+    ])
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss }
