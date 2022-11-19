@@ -7,11 +7,11 @@ async function main(tokenAddress, endTime, startTime, totalAmount) {
   const deployment = await hre.upgrades.deployProxy(
     MerkleDistributor,
     [tokenAddress, endTime, startTime, totalAmount],
-    { initializer: "initialize" }
+    { initializer: 'initialize' }
   )
 
-  await deployment.deployed();
-  console.log("deployed to:", deployment.address);
+  await deployment.deployed()
+  console.log('deployed to:', deployment.address)
 }
 
 // Replace with actual values
