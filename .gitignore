@@ -4,3 +4,4 @@ wrangler.toml
 artifacts/
 cache/
 .env
+.yarn-error.log

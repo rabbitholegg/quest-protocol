@@ -23,7 +23,9 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
-    "@openzeppelin/contracts": "4.7.0",
+    "@openzeppelin/contracts": "4.8.0",
+    "@openzeppelin/contracts-upgradeable": "4.8.0",
+    "@openzeppelin/hardhat-upgrades": "^1.21.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "axios": "^0.20.0",

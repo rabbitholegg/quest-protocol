@@ -1,26 +1,27 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {IERC20Upgradeable, SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
 
-contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
-  using SafeERC20 for IERC20;
+contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistributor {
+  using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  address public immutable token;
-  uint256 public immutable endTime;
-  uint256 public immutable startTime;
-  uint256 public immutable totalAmount;
+  address public token;
+  uint256 public endTime;
+  uint256 public startTime;
+  uint256 public totalAmount;
   bytes32 public merkleRoot;
   bool public hasStarted;
 
   // This is a packed array of booleans.
   mapping(address => bool) private claimedList;
 
-  constructor(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_) {
+  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_)  public initializer {
+    __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
     endTime = endTime_;
@@ -42,7 +43,7 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
   }
 
   function start() public onlyOwner {
-    if (IERC20(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
     hasStarted = true;
   }
 
@@ -59,21 +60,21 @@ contract MerkleDistributor is IMerkleDistributor, Ownable, Initializable {
     if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
-    if (IERC20(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
+    if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
 
     // Verify the merkle proof.
     bytes32 node = keccak256(abi.encodePacked(account, amount));
-    if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
+    if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
     // Mark it claimed and send the token.
     _setClaimed(account);
-    IERC20(token).safeTransfer(account, amount);
+    IERC20Upgradeable(token).safeTransfer(account, amount);
 
     emit Claimed(account, amount);
   }
 
   function withdraw() external onlyOwner {
     if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-    IERC20(token).safeTransfer(msg.sender, IERC20(token).balanceOf(address(this)));
+    IERC20Upgradeable(token).safeTransfer(msg.sender, IERC20Upgradeable(token).balanceOf(address(this)));
   }
 }

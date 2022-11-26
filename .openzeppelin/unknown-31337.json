@@ -1,0 +1,166 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "txHash": "0x06363b64193399ac2681492ed9fd1bd77ff2e4dcc4aba64ff8c8b221cf1c01a7"
+  },
+  "proxies": [
+    {
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "txHash": "0x03ca21ce5fd0d8e876e27858d53139a7a9559cddb1b78ac3ecaee40f881b39ad",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      "txHash": "0xc566ca50a9e1c93e1099be3700d5b83192934e5ddc4ac867678d91505d5f16c8",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      "txHash": "0x425206e68d3e1293e63290387b9d90ebd70be277162fab525a8d5ee2dfd58eee",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "c5b80b8cf694c9e620dd9c6f0259a2e758d3b0080932b0e3638da2c0025deb26": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "txHash": "0x490b662f229012f8f97f1ae6af3e10d88e8e2811b3e26a895dfa0576cead1a98",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "token",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:13"
+          },
+          {
+            "label": "endTime",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_uint256",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:14"
+          },
+          {
+            "label": "startTime",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_uint256",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:15"
+          },
+          {
+            "label": "totalAmount",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_uint256",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:16"
+          },
+          {
+            "label": "merkleRoot",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_bytes32",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:17"
+          },
+          {
+            "label": "hasStarted",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_bool",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:18"
+          },
+          {
+            "label": "claimedList",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "MerkleDistributor",
+            "src": "contracts/MerkleDistributor.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

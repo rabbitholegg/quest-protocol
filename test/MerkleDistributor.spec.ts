@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { ethers } = require('hardhat')
+const { ethers, upgrades } = require('hardhat')
 // advantage of Hardhat Network's snapshot functionality.
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 import { parseBalanceMap } from '../src/parse-balance-map'
@@ -19,8 +19,12 @@ describe('Token contract', function () {
     const [owner, addr1, addr2] = await ethers.getSigners()
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 1000
-    const hardhatToken = await Token.deploy('0x0000000000000000000000000000000000000000', expiryDate, startDate, 1000)
-    await hardhatToken.deployed()
+    const hardhatToken = await upgrades.deployProxy(Token, [
+      '0x0000000000000000000000000000000000000000',
+      expiryDate,
+      startDate,
+      1000,
+    ])
     return { Token, hardhatToken, owner, addr1, addr2 }
   }
 
@@ -31,8 +35,12 @@ describe('Token contract', function () {
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 10
-    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate, startDate, 1000)
-    await hardhatDisperseToken.deployed()
+    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [
+      rewardTokenAddress,
+      expiryDate,
+      startDate,
+      1000,
+    ])
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss }
@@ -43,26 +51,22 @@ describe('Token contract', function () {
     const rewardTokenAddress = hardhatRewardToken.address
     const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0]
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
-    const expiryDate = Math.floor(Date.now() / 1000) + 10
+    const expiryDate = Math.floor(Date.now() / 1000) + 100
     const startDate = Math.floor(Date.now() / 1000) + 1000
-    const hardhatDisperseToken = await DisperseToken.deploy(rewardTokenAddress, expiryDate, startDate, 1000)
-    await hardhatDisperseToken.deployed()
+    const hardhatDisperseToken = await upgrades.deployProxy(DisperseToken, [
+      rewardTokenAddress,
+      expiryDate,
+      startDate,
+      1000,
+    ])
     const disperseTokenAddresss = await hardhatDisperseToken.address
     await hardhatRewardToken.functions.transfer(disperseTokenAddresss, 1000)
     return { hardhatRewardToken, rewardTokenAddress, hardhatDisperseToken, disperseTokenAddresss }
   }
 
-  async function getTimeout() {
-    return new Promise((resolve) => {
-      setTimeout(function () {
-        resolve({})
-      }, 100)
-    })
-  }
-
   describe('Deployment', function () {
     it('Deployment should assign the correct contract address', async function () {
-      const { hardhatToken, owner } = await loadFixture(deployTokenFixture)
+      const { hardhatToken, _owner } = await loadFixture(deployTokenFixture)
       const tokenContractAddress = await hardhatToken.token()
       expect(tokenContractAddress).to.equal('0x0000000000000000000000000000000000000000')
     })
@@ -233,16 +237,17 @@ describe('Token contract', function () {
       await expect(hardhatDisperseToken.connect(addr2).claim(sampleAddress, 250, testClaim.proof)).to.be.reverted
     })
   })
+
   describe('Admin withdraw tokens', function () {
     it('Admin should be able to withdraw remaining tokens after redemption expiry', async function () {
       const { hardhatDisperseToken, disperseTokenAddresss, hardhatRewardToken, rewardTokenAddress } = await loadFixture(
         deployAndTransferRewardToDisperserWithExpiry
       )
       const [owner] = await ethers.getSigners()
-      await getTimeout()
       const contractBalanceBefore = await hardhatRewardToken.functions.balanceOf(disperseTokenAddresss)
+      await ethers.provider.send('evm_increaseTime', [90])
       const tx = await hardhatDisperseToken.withdraw()
-      await expect(tx).not.to.be.reverted
+      await expect(tx.wait()).not.to.be.reverted
       const adminBalanceAfter = await hardhatRewardToken.functions.balanceOf(owner.address)
       const cbString = contractBalanceBefore.toString()
       const abAfter = adminBalanceAfter.toString()
