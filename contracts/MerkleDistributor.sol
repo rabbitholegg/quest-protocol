@@ -30,6 +30,10 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     totalAmount = totalAmount_;
   }
 
+  function setToken(address token_) public onlyOwner {
+    token = token_;
+  }
+
   function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
     merkleRoot = merkleRoot_;
   }
