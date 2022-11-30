@@ -28,9 +28,8 @@ describe('Merkle Distributor contract', function () {
   }
 
   async function deployAndTransferRewardToDisperser() {
-    const { RewardToken, hardhatRewardToken } = await deployRewardTokenFixture()
+    const { hardhatRewardToken } = await deployRewardTokenFixture()
     const rewardTokenAddress = hardhatRewardToken.address
-    const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0]
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 10
@@ -46,9 +45,8 @@ describe('Merkle Distributor contract', function () {
   }
 
   async function deployAndTransferRewardToDisperserWithExpiry() {
-    const { RewardToken, hardhatRewardToken } = await deployRewardTokenFixture()
+    const { hardhatRewardToken } = await deployRewardTokenFixture()
     const rewardTokenAddress = hardhatRewardToken.address
-    const rewardTokenSymbol = (await hardhatRewardToken.functions.symbol())[0]
     const DisperseToken = await ethers.getContractFactory('MerkleDistributor')
     const expiryDate = Math.floor(Date.now() / 1000) + 100
     const startDate = Math.floor(Date.now() / 1000) + 1000
@@ -82,7 +80,7 @@ describe('Merkle Distributor contract', function () {
         '0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d'
       )
       const getMerkleRoot = await hardhatToken.merkleRoot()
-      expect(getMerkleRoot).to.equal('0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d')
+      expect(getMerkleRoot).to.equal(merkleRoot)
     })
     it('Deployment should allow only owner set an allowlist', async function () {
       const { hardhatToken, owner, addr1 } = await loadFixture(deployTokenFixture)
