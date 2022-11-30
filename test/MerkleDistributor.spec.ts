@@ -4,11 +4,10 @@ const { ethers, upgrades } = require('hardhat')
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 import { parseBalanceMap } from '../src/parse-balance-map'
 
-describe('Token contract', function () {
+describe('Merkle Distributor contract', function () {
   async function deployRewardTokenFixture() {
     const RewardToken = await ethers.getContractFactory('SampleERC20')
     const [owner, addr1, addr2] = await ethers.getSigners()
-    const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const hardhatRewardToken = await RewardToken.deploy('RewardToken', 'RTC', 1000, owner.address)
     await hardhatRewardToken.deployed()
     return { RewardToken, hardhatRewardToken, owner, addr1, addr2 }
