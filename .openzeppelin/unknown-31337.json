@@ -7,17 +7,17 @@
   "proxies": [
     {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-      "txHash": "0x03ca21ce5fd0d8e876e27858d53139a7a9559cddb1b78ac3ecaee40f881b39ad",
+      "txHash": "0xd3946d5c4e12eca5052547b23ac936d3321f6ac3fe867960fbb697ecd87f674f",
       "kind": "transparent"
     },
     {
       "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-      "txHash": "0xc566ca50a9e1c93e1099be3700d5b83192934e5ddc4ac867678d91505d5f16c8",
+      "txHash": "0x2e69ccf131bc5eee040ff4d1e27930de7b2eefa2930fc254fd0aeec36a15abd1",
       "kind": "transparent"
     },
     {
       "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-      "txHash": "0x425206e68d3e1293e63290387b9d90ebd70be277162fab525a8d5ee2dfd58eee",
+      "txHash": "0x8fed31521efeed6c1be48201a3d200706758db3496b1ca606cc7c0580728469e",
       "kind": "transparent"
     }
   ],

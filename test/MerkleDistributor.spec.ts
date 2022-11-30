@@ -76,9 +76,8 @@ describe('Merkle Distributor contract', function () {
   describe('Allowlist', function () {
     it('Deployment should set an allowlist', async function () {
       const { hardhatToken, owner } = await loadFixture(deployTokenFixture)
-      const merkleRoot = await hardhatToken.setMerkleRoot(
-        '0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d'
-      )
+      const merkleRoot = '0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d'
+      await hardhatToken.setMerkleRoot(merkleRoot)
       const getMerkleRoot = await hardhatToken.merkleRoot()
       expect(getMerkleRoot).to.equal(merkleRoot)
     })
