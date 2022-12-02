@@ -1,36 +1,13 @@
-const {expect} = require('chai')
-const {ethers, upgrades} = require('hardhat')
-// advantage of Hardhat Network's snapshot functionality.
-const {loadFixture} = require('@nomicfoundation/hardhat-network-helpers')
+import {MerkleDistributorContractType, SampleErc20Type} from "./types";
+import {expect} from 'chai'
+import {ethers, upgrades} from 'hardhat'
+import {loadFixture} from '@nomicfoundation/hardhat-network-helpers'
 import {parseBalanceMap} from '../src/parse-balance-map'
 
 describe('Merkle Distributor contract', async () => {
-    let deployedMerkleDistributorContract: {
-        token: () => Promise<string>,
-        totalAmount: () => Promise<number>,
-        owner: () => Promise<string>,
-        startTime: () => Promise<number>,
-        endTime: () => Promise<number>,
-        hasStarted: () => Promise<boolean>,
-        merkleRoot: () => Promise<void>,
-        address: string,
-        connect: (address: string) => ({
-            setMerkleRoot: (merkleRoot: string) => Promise<void>
-            start: () => Promise<void>
-            pause: () => Promise<void>
-            unPause: () => Promise<void>
-            withdraw: () => Promise<void>
-        })
-    }
+    let deployedMerkleDistributorContract: MerkleDistributorContractType
 
-    let deployedSampleErc20Contract: {
-        address: string
-        deployed: () => Promise<any>;
-        functions: {
-            transfer: (transferee: string, amount: number) => Promise<any>
-            balanceOf: (tokenAddress: string) => Promise<number>
-        }
-    }
+    let deployedSampleErc20Contract: SampleErc20Type
 
     const expiryDate = Math.floor(Date.now() / 1000) + 10000
     const startDate = Math.floor(Date.now() / 1000) + 1000
@@ -207,7 +184,7 @@ describe('Merkle Distributor contract', async () => {
             expect(beginningContractBalance.toString()).to.equal(totalRewards.toString())
             expect(beginningOwnerBalance.toString()).to.equal('0')
             await ethers.provider.send('evm_increaseTime', [10000])
-            // await deployedMerkleDistributorContract.connect(owner).withdraw()
+            await deployedMerkleDistributorContract.withdraw()
             // const endContactBalance = await deployedSampleErc20Contract.functions.balanceOf(deployedMerkleDistributorContract.address)
             // expect(endContactBalance.toString()).to.equal('0')
         })
