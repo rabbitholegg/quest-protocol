@@ -6,7 +6,6 @@ import { parseBalanceMap } from '../src/parse-balance-map'
 
 describe('Merkle Distributor contract', async () => {
   let deployedMerkleDistributorContract: MerkleDistributorContractType
-
   let deployedSampleErc20Contract: SampleErc20Type
 
   const expiryDate = Math.floor(Date.now() / 1000) + 10000
