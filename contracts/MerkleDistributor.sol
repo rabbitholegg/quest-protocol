@@ -17,7 +17,6 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
   bytes32 public merkleRoot;
   bool public hasStarted;
 
-  // This is a packed array of booleans.
   mapping(address => bool) private claimedList;
 
   function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_)  public initializer {
@@ -30,20 +29,9 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     totalAmount = totalAmount_;
   }
 
-  function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
-    merkleRoot = merkleRoot_;
-  }
-
-  function isClaimed(address account) public view returns (bool) {
-    return claimedList[account] && claimedList[account] == true;
-  }
-
-  function _setClaimed(address account) private {
-    claimedList[account] = true;
-  }
-
   function start() public onlyOwner {
-    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    // not sure this is needed -> someone could just call unPause
+    //    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
     hasStarted = true;
   }
 
@@ -55,9 +43,18 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     hasStarted = true;
   }
 
+  function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
+    merkleRoot = merkleRoot_;
+  }
+
+  function _setClaimed(address account) private {
+    claimedList[account] = true;
+  }
+
   function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
-    if (block.timestamp > endTime) revert ClaimWindowFinished();
+    // TODO - are we removing this?
+    // if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
     if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
@@ -67,13 +64,17 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
     // Mark it claimed and send the token.
-    _setClaimed(account);
     IERC20Upgradeable(token).safeTransfer(account, amount);
+    _setClaimed(account);
 
     emit Claimed(account, amount);
   }
 
-  function withdraw() external onlyOwner {
+  function isClaimed(address account) public view returns (bool) {
+    return claimedList[account] && claimedList[account] == true;
+  }
+
+  function withdraw() public onlyOwner {
     if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
     IERC20Upgradeable(token).safeTransfer(msg.sender, IERC20Upgradeable(token).balanceOf(address(this)));
   }
