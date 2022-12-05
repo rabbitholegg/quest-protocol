@@ -53,7 +53,8 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
 
   function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
-    if (block.timestamp > endTime) revert ClaimWindowFinished();
+    // TODO - are we removing this?
+    // if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
     if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
@@ -63,8 +64,8 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
     // Mark it claimed and send the token.
-    _setClaimed(account);
     IERC20Upgradeable(token).safeTransfer(account, amount);
+    _setClaimed(account);
 
     emit Claimed(account, amount);
   }
@@ -75,7 +76,6 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
 
   function withdraw() public onlyOwner {
     if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-    IERC20Upgradeable(token).safeTransfer(msg.sender, 10);
-//    IERC20Upgradeable(token).safeTransfer(msg.sender, IERC20Upgradeable(token).balanceOf(address(this)));
+    IERC20Upgradeable(token).safeTransfer(msg.sender, IERC20Upgradeable(token).balanceOf(address(this)));
   }
 }
