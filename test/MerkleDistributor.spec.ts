@@ -61,7 +61,7 @@ describe('Merkle Distributor contract', async () => {
 
         describe('setting public variables', () => {
             it('Should set the token address with correct value', async () => {
-                const rewardContractAddress = await deployedMerkleDistributorContract.token()
+                const rewardContractAddress = await deployedMerkleDistributorContract.rewardToken()
                 expect(rewardContractAddress).to.equal(deployedSampleErc20Contract.address)
             })
 
@@ -136,6 +136,28 @@ describe('Merkle Distributor contract', async () => {
             expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
             await deployedMerkleDistributorContract.connect(owner).unPause()
             expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(true)
+        })
+    })
+
+    describe('setRewardToken()', () => {
+        it('should set start correctly', async () => {
+            expect(await deployedMerkleDistributorContract.rewardToken()).to.equal(
+                deployedSampleErc20Contract.address
+            )
+            await deployedMerkleDistributorContract
+                .connect(owner)
+                .setRewardToken('0xaA5cb8B10990a51FBd8a647d61C370282C42C976')
+            expect(await deployedMerkleDistributorContract.rewardToken()).to.equal(
+                '0xaA5cb8B10990a51FBd8a647d61C370282C42C976'
+            )
+        })
+
+        it('should only allow the owner to start', async () => {
+            await expect(
+                deployedMerkleDistributorContract
+                    .connect(firstAddress)
+                    .setRewardToken('0xaA5cb8B10990a51FBd8a647d61C370282C42C976')
+            ).to.be.revertedWith('Ownable: caller is not the owner')
         })
     })
 

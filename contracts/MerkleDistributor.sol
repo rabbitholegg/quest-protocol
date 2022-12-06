@@ -10,7 +10,7 @@ import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
 contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistributor {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  address public token;
+  address public rewardToken;
   uint256 public endTime;
   uint256 public startTime;
   uint256 public totalAmount;
@@ -25,7 +25,7 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
     endTime = endTime_;
     startTime = startTime_;
-    token = token_;
+    rewardToken = token_;
     totalAmount = totalAmount_;
   }
 
@@ -47,6 +47,10 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     merkleRoot = merkleRoot_;
   }
 
+  function setRewardToken(address rewardTokenAddress_) public onlyOwner {
+    rewardToken = rewardTokenAddress_;
+  }
+
   function _setClaimed(address account) private {
     claimedList[account] = true;
   }
@@ -57,14 +61,14 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     // if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
-    if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
+    if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
 
     // Verify the merkle proof.
     bytes32 node = keccak256(abi.encodePacked(account, amount));
     if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
-    // Mark it claimed and send the token.
-    IERC20Upgradeable(token).safeTransfer(account, amount);
+    // Mark it claimed and send the rewardToken.
+    IERC20Upgradeable(rewardToken).safeTransfer(account, amount);
     _setClaimed(account);
 
     emit Claimed(account, amount);
@@ -76,6 +80,6 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
 
   function withdraw() public onlyOwner {
     if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-    IERC20Upgradeable(token).safeTransfer(msg.sender, IERC20Upgradeable(token).balanceOf(address(this)));
+    IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, IERC20Upgradeable(rewardToken).balanceOf(address(this)));
   }
 }
