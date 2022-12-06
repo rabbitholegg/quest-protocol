@@ -72,17 +72,19 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
             "ERC721URIStorage: URI query for nonexistent token"
         );
 
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64Upgradeable.encode(
-                        abi.encodePacked(
-                            '{"name": "RabbitHole Quest Receipt", "image": ', generateSVG(), ', "description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole."}'
-                        )
-                    )
-                )
-            );
+        bytes memory dataURI = abi.encodePacked(
+            '{',
+                '"name": "RabbitHole Quest Receipt #', _tokenId.toString(), '",',
+                '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
+                '"image": "', generateSVG(), '"',
+            '}'
+        );
+        return string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(dataURI)
+            )
+        );
     }
 
     function generateSVG() public pure returns(string memory){
