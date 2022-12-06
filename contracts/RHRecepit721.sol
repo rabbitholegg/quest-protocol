@@ -9,9 +9,11 @@ import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using StringsUpgradeable for uint256;
     CountersUpgradeable.Counter private _tokenIds;
 
     mapping(bytes => bool) public signatureUsed;
@@ -82,7 +84,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         return string(
             abi.encodePacked(
                 "data:application/json;base64,",
-                Base64.encode(dataURI)
+                Base64Upgradeable.encode(dataURI)
             )
         );
     }
