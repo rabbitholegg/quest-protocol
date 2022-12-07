@@ -17,27 +17,34 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
 
     mapping(uint => uint) public questIdForTokenId;
     address public royaltyRecipient;
+    address public minterAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address royaltyRecipient_) initializer public {
+    function initialize(address royaltyRecipient_, address minterAddress_) initializer public {
         __ERC721_init("RabbitHoleReceipt", "RHR");
         __ERC721URIStorage_init();
         __Ownable_init();
         royaltyRecipient = royaltyRecipient_;
+        minterAddress = minterAddress_;
     }
 
     function _mintSingleNFT(uint _questId) private {
+        _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
         _safeMint(msg.sender, newTokenID);
         questIdForTokenId[newTokenID] = _questId;
-        _tokenIds.increment();
     }
 
-    function mint(uint _count, uint _questId) onlyOwner public {
+    modifier onlyMinter() {
+        msg.sender == minterAddress;
+        _;
+    }
+
+    function mint(uint _count, uint _questId) onlyMinter public {
         for (uint i = 0; i < _count; i++) {
             _mintSingleNFT(_questId);
         }
@@ -64,7 +71,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-                '"name": "RabbitHole Quest Receipt #', _tokenId.toString(), '",',
+                '"name": "RabbitHole Quest #', questIdForTokenId[_tokenId].toString() ,' Redeemer #', _tokenId.toString(), '",',
                 '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
                 '"image": "', generateSVG(), '"',
             '}'
@@ -102,7 +109,6 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         require(_exists(tokenId), "Nonexistent token");
 
         uint256 royaltyPayment = (salePrice * 10) / 1000; // 10% royalty
-
         return (royaltyRecipient, royaltyPayment);
     }
 
