@@ -46,21 +46,18 @@ Quests are created through the `QuestFactory` contract. This is performed
 by a whitelisted account, historically the Internal Rabbithole team.
 
 The sequence of events is:
-1. Call `PartyFactory.createQuest(rewardType: [erc20|erc1155])` defined as:
+1. Call `QuestFactory.createQuest(rewardType: [erc20|erc1155])` defined as:
    ```solidity
    function createQuest(
       string rewardType,
+      address rewardAddress,
    )
    ```
-   - `authority` will be the address that can mint tokens on the created Party. In typical flow, the crowdfund contract will set this to itself.
-   - `opts` are (mostly) immutable [configuration parameters](#governance-options) for the Party, defining the Party name, symbol, and customization preset (the Party instance will also be an ERC721) along with governance parameters.
-   - `preciousTokens` and `preciousTokenIds` together define the NFTs the Party will custody and enforce extra restrictions on so they are not easily transferred out of the Party. This list cannot be changed after Party creation. Note that this list is never stored on-chain (only the hash is) and will need to be passed into the `execute()` call when executing proposals.
-   - This will deploy a new `Proxy` instance with an implementation pointing to the Party contract defined by in the `Globals` contract by the key `GLOBAL_PARTY_IMPL`.
-2. Transfer assets to the created Party, which will typically be the precious NFTs.
-3. As the `authority`, mint Governance NFTs to members of the party by calling `Party.mint()`.
-   - In typical flow, the crowdfund contract will call this when contributors burn their contribution NFTs.
-4. Optionally, call `Party.abdicate()`, as the `authority`, to revoke minting privilege once all Governance NFTs have been minted.
-5. At any step after the party creation, members with Governance NFTs can perform governance actions, though they may not be able to reach consensus if the total supply of voting power hasn't been minted/distributed yet.
+   - `rewardType` will be either an ERC-1155 or an ERC-20 token.
+   - `rewardAddress` is the address of the corresponding reward for completing the quest. This can be an ERC-1155 or ERC-20 contract address.
+2. Transfer rewards to the newly created Quest. You can transfer direct or execute the `depositFullAwardAmount` function.
+3. The Quest Factory will call the mintAndSend function for the total number of allowed recipients of Receipts.
+4. Execute the markQuestAsReady function. This will validate that the Quest is ready for public and upon reaching the effective StartDate, will be ready for use.
 
 ## UML diagrams
 
