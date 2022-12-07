@@ -1,3 +1,4 @@
+.openzeppelin/unknown-31337.json
 node_modules/
 build/
 wrangler.toml
