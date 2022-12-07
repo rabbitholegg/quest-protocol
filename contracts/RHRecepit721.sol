@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
@@ -16,7 +15,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
     using StringsUpgradeable for uint256;
     CountersUpgradeable.Counter private _tokenIds;
 
-    mapping(bytes => bool) public signatureUsed;
+    mapping(uint => uint) public questIdForTokenId;
     address public royaltyRecipient;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -31,28 +30,17 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         royaltyRecipient = royaltyRecipient_;
     }
 
-    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-        );
-        return ECDSAUpgradeable.recover(messageDigest, signature);
-    }
-
-    function _mintSingleNFT() private {
+    function _mintSingleNFT(uint _questId) private {
         uint newTokenID = _tokenIds.current();
         _safeMint(msg.sender, newTokenID);
+        questIdForTokenId[newTokenID] = _questId;
         _tokenIds.increment();
     }
 
-    function mint(uint _count, bytes32 hash, bytes memory signature) public {
-        require(recoverSigner(hash, signature) == owner(), "Address is not allowlisted");
-        require(!signatureUsed[signature], "Signature has already been used.");
-
+    function mint(uint _count, uint _questId) onlyOwner public {
         for (uint i = 0; i < _count; i++) {
-            _mintSingleNFT();
+            _mintSingleNFT(_questId);
         }
-
-        signatureUsed[signature] = true;
     }
 
     function _burn(uint256 tokenId)
