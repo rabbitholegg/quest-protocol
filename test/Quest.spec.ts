@@ -10,6 +10,7 @@ describe('Merkle Distributor contract', async () => {
     const mockAddress = '0x0000000000000000000000000000000000000000'
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 1000
+    const rewardAmount = 10
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
     const questContract = await ethers.getContractFactory('Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -29,7 +30,8 @@ describe('Merkle Distributor contract', async () => {
             expiryDate,
             startDate,
             totalRewards,
-            allowList
+            allowList,
+            rewardAmount
         ])
     }
 

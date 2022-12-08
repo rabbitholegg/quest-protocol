@@ -31,7 +31,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     }
 
 
-    function createContract(string memory rewardToken_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_) public onlyOwner returns (address clone)
+    function createContract(address rewardToken_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public onlyOwner returns (address clone)
     {
         clone = address(new BeaconProxy(address(beacon), ""));
         Quest(clone).initialize(
@@ -39,10 +39,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
             endTime_,
             startTime_,
             totalAmount_,
-            allowList_
+            allowList_,
+            rewardAmount_
         );
         Quest(clone).transferOwnership(msg.sender);
 
-//        emit QuestCreated(msg.sender, clone, _name, _symbol, _type);
+        //        emit QuestCreated(msg.sender, clone, _name, _symbol, _type);
     }
 }
