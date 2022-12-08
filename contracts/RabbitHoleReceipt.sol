@@ -15,21 +15,28 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
     using StringsUpgradeable for uint256;
     CountersUpgradeable.Counter private _tokenIds;
 
-    mapping(uint => uint) public questIdForTokenId;
+    mapping(uint => string) public questIdForTokenId;
     address public royaltyRecipient;
     address public minterAddress;
+    uint public royaltyFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address royaltyRecipient_, address minterAddress_) initializer public {
+    function initialize(address royaltyRecipient_, address minterAddress_, uint royaltyFee_) initializer public {
         __ERC721_init("RabbitHoleReceipt", "RHR");
         __ERC721URIStorage_init();
         __Ownable_init();
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
+        royaltyFee = royaltyFee_;
+    }
+
+    modifier onlyMinter() {
+        msg.sender == minterAddress;
+        _;
     }
 
     function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
@@ -40,19 +47,18 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         minterAddress = minterAddress_;
     }
 
-    function _mintSingleNFT(uint _questId) private {
+    function setRoyaltyFee(uint256 _royaltyFee) public onlyOwner {
+        royaltyFee = _royaltyFee;
+    }
+
+    function _mintSingleNFT(string memory _questId) private {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
         _safeMint(msg.sender, newTokenID);
         questIdForTokenId[newTokenID] = _questId;
     }
 
-    modifier onlyMinter() {
-        msg.sender == minterAddress;
-        _;
-    }
-
-    function mint(uint _count, uint _questId) onlyMinter public {
+    function mint(uint _count, string memory _questId) onlyMinter public {
         for (uint i = 0; i < _count; i++) {
             _mintSingleNFT(_questId);
         }
@@ -79,7 +85,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-                '"name": "RabbitHole Quest #', questIdForTokenId[_tokenId].toString() ,' Redeemer #', _tokenId.toString(), '",',
+                '"name": "RabbitHole Quest #', questIdForTokenId[_tokenId] ,' Redeemer #', _tokenId.toString(), '",',
                 '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
                 '"image": "', generateSVG(), '"',
             '}'
@@ -116,7 +122,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
     {
         require(_exists(tokenId), "Nonexistent token");
 
-        uint256 royaltyPayment = (salePrice * 10) / 1000; // 10% royalty
+        uint256 royaltyPayment = (salePrice * royaltyFee) / 1000;
         return (royaltyRecipient, royaltyPayment);
     }
 
