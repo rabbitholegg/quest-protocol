@@ -7,7 +7,3 @@ cache/
 .env
 .yarn-error.log
 .idea
-<<<<<<< HEAD
-=======
-.openzeppelin/unknown-31337.json
->>>>>>> master
