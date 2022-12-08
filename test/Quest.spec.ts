@@ -8,13 +8,13 @@ describe('Merkle Distributor contract', async () => {
     let deployedSampleErc20Contract: SampleErc20Type
     let expiryDate: number, startDate: number
     const mockAddress = '0x0000000000000000000000000000000000000000'
+    const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 1000
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
     const merkleDistributorContract = await ethers.getContractFactory('Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
 
     beforeEach(async () => {
-        await ethers.provider.send('evm_mine');
         expiryDate = Math.floor(Date.now() / 1000) + 10000
         startDate = Math.floor(Date.now() / 1000) + 1000
 
@@ -29,6 +29,7 @@ describe('Merkle Distributor contract', async () => {
             expiryDate,
             startDate,
             totalRewards,
+            allowList
         ])
     }
 
@@ -83,6 +84,12 @@ describe('Merkle Distributor contract', async () => {
             it('Should set the start time with correct value', async () => {
                 const startTime = await deployedMerkleDistributorContract.startTime()
                 expect(startTime).to.equal(startDate)
+            })
+
+
+            it('Should set the allowList with correct value', async () => {
+                const currentAllowList = await deployedMerkleDistributorContract.allowList()
+                expect(currentAllowList).to.equal(allowList)
             })
         })
 

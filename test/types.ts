@@ -15,6 +15,7 @@ export type MerkleDistributorContractType = {
   setMerkleRoot: (merkleRoot: string) => Promise<void>
   unPause: () => Promise<void>
   transfer: () => Promise<void>
+  allowList: () => Promise<string>
 }
 
 export type SampleErc20Type = {

@@ -16,10 +16,19 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
   uint256 public totalAmount;
   bytes32 public merkleRoot;
   bool public hasStarted;
+  string public allowList;
+
+  event QuestCreated(
+//    address indexed creator,
+//    address indexed contractAddress,
+//    string name,
+//    string symbol,
+//    string contractType
+  );
 
   mapping(address => bool) private claimedList;
 
-  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_)  public initializer {
+  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_)  public initializer {
     __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -27,6 +36,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
     startTime = startTime_;
     token = token_;
     totalAmount = totalAmount_;
+    allowList = allowList_;
   }
 
   function start() public onlyOwner {
@@ -53,8 +63,6 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
   function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
-    // TODO - are we removing this?
-    // if (block.timestamp > endTime) revert ClaimWindowFinished();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
     if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
