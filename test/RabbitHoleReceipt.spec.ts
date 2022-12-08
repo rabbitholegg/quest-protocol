@@ -59,11 +59,12 @@ describe('Merkle Distributor contract', async () => {
     it('returns the correct tokenIds', async () => {
       await RHReceipt.connect(minterAddress).mint(3, "abc123");
       await RHReceipt.connect(minterAddress).mint(2, "def456");
+      await RHReceipt.connect(minterAddress).mint(4, "eeeeee");
 
       let tokenIds = await RHReceipt.connect(minterAddress).getOwnedTokenIdsOfQuest("abc123");
 
-      expect(tokenIds.length).to.eq(5);
-      expect(tokenIds.map((tokenId) => tokenId.toNumber())).to.eql([1, 2, 3, 0, 0]);
+      expect(tokenIds.length).to.eq(3);
+      expect(tokenIds.map((tokenId) => tokenId.toNumber())).to.eql([1, 2, 3]);
     })
   })
 })

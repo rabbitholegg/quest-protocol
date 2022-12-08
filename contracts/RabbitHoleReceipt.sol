@@ -68,14 +68,26 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
     function getOwnedTokenIdsOfQuest(string memory _questId) external view returns (uint[] memory) {
         uint msgSenderBalance = balanceOf(msg.sender);
         uint[] memory tokens = new uint[](msgSenderBalance);
+        uint foundTokens = 0;
 
         for (uint i = 0; i < msgSenderBalance; i++) {
             uint tokenId = tokenOfOwnerByIndex(msg.sender, i);
             if( keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(_questId)) ){
                 tokens[i] = tokenId;
+                foundTokens++;
             }
         }
-        return tokens;
+
+        uint[] memory filteredTokens = new uint[](foundTokens);
+        uint filterTokensIndexTracker = 0;
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            if (tokens[i] > 0) {
+                filteredTokens[filterTokensIndexTracker] = tokens[i];
+                filterTokensIndexTracker++;
+            }
+        }
+        return filteredTokens;
     }
 
     function _burn(uint256 tokenId)
