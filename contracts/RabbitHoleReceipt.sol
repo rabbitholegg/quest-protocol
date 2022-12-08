@@ -32,6 +32,14 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         minterAddress = minterAddress_;
     }
 
+    function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
+        royaltyRecipient = royaltyRecipient_;
+    }
+
+    function setMinterAddress(address minterAddress_) public onlyOwner {
+        minterAddress = minterAddress_;
+    }
+
     function _mintSingleNFT(uint _questId) private {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
