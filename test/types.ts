@@ -1,7 +1,7 @@
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 export type MerkleDistributorContractType = {
-  token: () => Promise<string>
+  rewardToken: () => Promise<string>
   totalAmount: () => Promise<number>
   owner: () => Promise<string>
   startTime: () => Promise<number>
@@ -9,7 +9,7 @@ export type MerkleDistributorContractType = {
   hasStarted: () => Promise<boolean>
   merkleRoot: () => Promise<void>
   address: string
-  connect: (address: SignerWithAddress) => { setMerkleRoot: (merkleRoot: string) => Promise<void>; start: () => Promise<void>; pause: () => Promise<void>; unPause: () => Promise<void>; withdraw: () => Promise<void> }
+  connect: (address: SignerWithAddress) => { setMerkleRoot: (merkleRoot: string) => Promise<void>; start: () => Promise<void>; pause: () => Promise<void>; unPause: () => Promise<void>; withdraw: () => Promise<void>; setRewardToken: (address: string) => Promise<void> }
   withdraw: () => Promise<void>
   claim: (owner: string, amount: number, merkleProof: string[]) => Promise<void>
   setMerkleRoot: (merkleRoot: string) => Promise<void>
