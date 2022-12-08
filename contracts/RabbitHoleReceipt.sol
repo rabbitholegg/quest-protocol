@@ -79,9 +79,13 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         }
 
         uint[] memory filteredTokens = new uint[](foundTokens);
+        uint filterTokensIndexTracker = 0;
 
-        for (uint i = 0; i < foundTokens; i++) {
-                filteredTokens[i] = tokens[i];
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            if (tokens[i] > 0) {
+                filteredTokens[filterTokensIndexTracker] = tokens[i];
+                filterTokensIndexTracker++;
+            }
         }
 
         return filteredTokens;
