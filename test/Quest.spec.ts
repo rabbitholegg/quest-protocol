@@ -11,7 +11,7 @@ describe('Merkle Distributor contract', async () => {
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 1000
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const merkleDistributorContract = await ethers.getContractFactory('Quest')
+    const questContract = await ethers.getContractFactory('Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
 
     beforeEach(async () => {
@@ -24,7 +24,7 @@ describe('Merkle Distributor contract', async () => {
     })
 
     const deployDistributorContract = async () => {
-        deployedMerkleDistributorContract = await upgrades.deployProxy(merkleDistributorContract, [
+        deployedMerkleDistributorContract = await upgrades.deployProxy(questContract, [
             deployedSampleErc20Contract.address,
             expiryDate,
             startDate,
@@ -47,16 +47,16 @@ describe('Merkle Distributor contract', async () => {
         describe('when start time is in past', () => {
             it('Should revert', async () => {
                 expect(
-                    upgrades.deployProxy(merkleDistributorContract, [mockAddress, expiryDate, startDate - 1000, totalRewards])
-                ).to.be.revertedWithCustomError(merkleDistributorContract, 'StartTimeInPast')
+                    upgrades.deployProxy(questContract, [mockAddress, expiryDate, startDate - 1000, totalRewards])
+                ).to.be.revertedWithCustomError(questContract, 'StartTimeInPast')
             })
         })
 
         describe('when end time is in past', () => {
             it('Should revert', async () => {
                 expect(
-                    upgrades.deployProxy(merkleDistributorContract, [mockAddress, startDate - 1000, startDate, totalRewards])
-                ).to.be.revertedWithCustomError(merkleDistributorContract, 'EndTimeInPast')
+                    upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalRewards])
+                ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
             })
         })
 
@@ -230,7 +230,7 @@ describe('Merkle Distributor contract', async () => {
         it('should fail if quest has not started yet', async () => {
             expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'NotStarted'
             )
         })
@@ -240,7 +240,7 @@ describe('Merkle Distributor contract', async () => {
             await deployedMerkleDistributorContract.pause()
 
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'QuestPaused'
             )
         })
@@ -248,7 +248,7 @@ describe('Merkle Distributor contract', async () => {
         it('should fail if before start time stamp', async () => {
             await deployedMerkleDistributorContract.start()
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'ClaimWindowNotStarted'
             )
         })
@@ -259,7 +259,7 @@ describe('Merkle Distributor contract', async () => {
             await ethers.provider.send('evm_increaseTime', [10000])
             await deployedMerkleDistributorContract.withdraw()
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'AmountExceedsBalance'
             )
             await ethers.provider.send('evm_increaseTime', [-10000])
@@ -292,7 +292,7 @@ describe('Merkle Distributor contract', async () => {
             await ethers.provider.send('evm_increaseTime', [1000])
             await deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'AlreadyClaimed'
             )
             await ethers.provider.send('evm_increaseTime', [-1000])
@@ -310,7 +310,7 @@ describe('Merkle Distributor contract', async () => {
 
         it('should revert if trying to withdraw before end date', async () => {
             await expect(deployedMerkleDistributorContract.connect(owner).withdraw()).to.be.revertedWithCustomError(
-                merkleDistributorContract,
+                questContract,
                 'NoWithdrawDuringClaim'
             )
         })
