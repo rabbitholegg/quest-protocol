@@ -25,4 +25,5 @@ interface IQuest {
     error TotalAmountExceedsBalance();
     error AmountExceedsBalance();
     error NotStarted();
+    error QuestPaused();
 }

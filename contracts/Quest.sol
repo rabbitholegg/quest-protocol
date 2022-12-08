@@ -16,15 +16,8 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
   uint256 public totalAmount;
   bytes32 public merkleRoot;
   bool public hasStarted;
+  bool public isPaused;
   string public allowList;
-
-  event QuestCreated(
-//    address indexed creator,
-//    address indexed contractAddress,
-//    string name,
-//    string symbol,
-//    string contractType
-  );
 
   mapping(address => bool) private claimedList;
 
@@ -40,17 +33,20 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
   }
 
   function start() public onlyOwner {
-    // not sure this is needed -> someone could just call unPause
-    //    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    // TODO - do we want a better variable name here?
+    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    isPaused = false;
     hasStarted = true;
   }
 
   function pause() public onlyOwner {
-    hasStarted = false;
+    if (hasStarted == false) revert NotStarted();
+    isPaused = true;
   }
 
   function unPause() public onlyOwner {
-    hasStarted = true;
+    if (hasStarted == false) revert NotStarted();
+    isPaused = false;
   }
 
   function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
@@ -63,6 +59,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
   function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
+    if (isPaused == true) revert QuestPaused();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
     if (IERC20Upgradeable(token).balanceOf(address(this)) < amount) revert AmountExceedsBalance();

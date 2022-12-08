@@ -122,9 +122,9 @@ describe('Merkle Distributor contract', async () => {
         it('should set pause correctly', async () => {
             expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
             await deployedMerkleDistributorContract.connect(owner).start()
-            expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(true)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(false)
             await deployedMerkleDistributorContract.connect(owner).pause()
-            expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(true)
         })
     })
 
@@ -137,12 +137,13 @@ describe('Merkle Distributor contract', async () => {
 
         it('should set unPause correctly', async () => {
             expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(false)
             await deployedMerkleDistributorContract.connect(owner).start()
-            expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(true)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(false)
             await deployedMerkleDistributorContract.connect(owner).pause()
-            expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(false)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(true)
             await deployedMerkleDistributorContract.connect(owner).unPause()
-            expect(await deployedMerkleDistributorContract.hasStarted()).to.equal(true)
+            expect(await deployedMerkleDistributorContract.isPaused()).to.equal(false)
         })
     })
 
@@ -192,8 +193,18 @@ describe('Merkle Distributor contract', async () => {
             )
         })
 
+        it('should fail if quest is paused', async () => {
+            await deployedMerkleDistributorContract.start()
+            await deployedMerkleDistributorContract.pause()
+
+            await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
+                merkleDistributorContract,
+                'QuestPaused'
+            )
+        })
+
         it('should fail if before start time stamp', async () => {
-            await deployedMerkleDistributorContract.unPause()
+            await deployedMerkleDistributorContract.start()
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
                 merkleDistributorContract,
                 'ClaimWindowNotStarted'
@@ -202,7 +213,7 @@ describe('Merkle Distributor contract', async () => {
 
 
         it('should fail if the contract is out of rewards', async () => {
-            await deployedMerkleDistributorContract.unPause()
+            await deployedMerkleDistributorContract.start()
             await ethers.provider.send('evm_increaseTime', [10000])
             await deployedMerkleDistributorContract.withdraw()
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
@@ -213,7 +224,7 @@ describe('Merkle Distributor contract', async () => {
         })
 
         it('should let multiple claim if you have already claimed', async () => {
-            await deployedMerkleDistributorContract.unPause()
+            await deployedMerkleDistributorContract.start()
             await ethers.provider.send('evm_increaseTime', [1000])
             await deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)
 
@@ -235,7 +246,7 @@ describe('Merkle Distributor contract', async () => {
         })
 
         it('should not let you claim if you have already claimed', async () => {
-            await deployedMerkleDistributorContract.unPause()
+            await deployedMerkleDistributorContract.start()
             await ethers.provider.send('evm_increaseTime', [1000])
             await deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)
             await expect(deployedMerkleDistributorContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(

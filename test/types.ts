@@ -16,6 +16,9 @@ export type MerkleDistributorContractType = {
   unPause: () => Promise<void>
   transfer: () => Promise<void>
   allowList: () => Promise<string>
+  isPaused: () => Promise<boolean>
+  start: () => Promise<void>
+  pause: () => Promise<void>
 }
 
 export type SampleErc20Type = {
