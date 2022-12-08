@@ -34,7 +34,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
   function start() public onlyOwner {
     // TODO - do we want a better variable name here?
-    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
     isPaused = false;
     hasStarted = true;
   }
