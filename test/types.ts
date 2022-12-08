@@ -1,6 +1,6 @@
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-export type MerkleDistributorContractType = {
+export type QuestContractType = {
     rewardToken: () => Promise<string>
     totalAmount: () => Promise<number>
     owner: () => Promise<string>
