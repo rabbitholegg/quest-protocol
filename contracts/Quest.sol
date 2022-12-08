@@ -14,7 +14,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
   uint256 public endTime;
   uint256 public startTime;
   uint256 public totalAmount;
-  uint256 public rewardAmount;
+  uint256 public rewardAmountInWei;
   bytes32 public merkleRoot;
   bool public hasStarted;
   bool public isPaused;
@@ -22,7 +22,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
   mapping(address => bool) private claimedList;
 
-  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_)  public initializer {
+  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmountInWei_)  public initializer {
     __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -30,7 +30,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
     startTime = startTime_;
     rewardToken = token_;
     totalAmount = totalAmount_;
-    rewardAmount = rewardAmount_;
+    rewardAmountInWei = rewardAmountInWei_;
     allowList = allowList_;
   }
 
@@ -79,7 +79,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
     if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
     // Mark it claimed and send the rewardToken.
-    IERC20Upgradeable(rewardToken).safeTransfer(account, rewardAmount);
+    IERC20Upgradeable(rewardToken).safeTransfer(account, rewardAmountInWei);
     _setClaimed(account);
 
     emit Claimed(account, amount);

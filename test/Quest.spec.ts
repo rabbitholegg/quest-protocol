@@ -267,6 +267,18 @@ describe('Merkle Distributor contract', async () => {
             await ethers.provider.send('evm_increaseTime', [-10000])
         })
 
+        it('should only transfer the correct amount of rewards', async () => {
+            await deployedQuestContract.start()
+            await ethers.provider.send('evm_increaseTime', [1000])
+            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address)
+            expect(startingBalance.toString()).to.equal("0")
+            await deployedQuestContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)
+            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address)
+            console.log(endingBalance.toString())
+            expect(endingBalance.toString()).to.equal("10")
+            await ethers.provider.send('evm_increaseTime', [-1000])
+        })
+
         it('should let multiple claim if you have already claimed', async () => {
             await deployedQuestContract.start()
             await ethers.provider.send('evm_increaseTime', [1000])
