@@ -57,6 +57,10 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
     rewardToken = rewardTokenAddress_;
   }
 
+  function setAllowList(string memory allowList_) public onlyOwner {
+    allowList = allowList_;
+  }
+
   function _setClaimed(address account) private {
     claimedList[account] = true;
   }

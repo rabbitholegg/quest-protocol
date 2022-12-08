@@ -191,6 +191,26 @@ describe('Merkle Distributor contract', async () => {
         })
     })
 
+    describe('setAllowList()', () => {
+        it('should set start correctly', async () => {
+            expect(await deployedMerkleDistributorContract.allowList()).to.equal(allowList)
+            await deployedMerkleDistributorContract
+                .connect(owner)
+                .setAllowList('ipfs://someOtherCid')
+            expect(await deployedMerkleDistributorContract.allowList()).to.equal(
+                'ipfs://someOtherCid'
+            )
+        })
+
+        it('should only allow the owner to start', async () => {
+            await expect(
+                deployedMerkleDistributorContract
+                    .connect(firstAddress)
+                    .setAllowList('ipfs://someOtherCid')
+            ).to.be.revertedWith('Ownable: caller is not the owner')
+        })
+    })
+
     describe('claim()', async () => {
         let proof, objectOfAddressesAndRewards: any = {}, balanceMap, merkleRoot, checkSum, claim: { proof: any; index?: number; amount?: string; flags?: { [flag: string]: boolean } | undefined }
 
