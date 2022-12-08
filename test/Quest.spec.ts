@@ -10,7 +10,7 @@ describe('Merkle Distributor contract', async () => {
     const mockAddress = '0x0000000000000000000000000000000000000000'
     const totalRewards = 1000
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const merkleDistributorContract = await ethers.getContractFactory('MerkleDistributor')
+    const merkleDistributorContract = await ethers.getContractFactory('Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
 
     beforeEach(async () => {

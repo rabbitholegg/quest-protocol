@@ -5,9 +5,9 @@ import {IERC20Upgradeable, SafeERC20Upgradeable} from "@openzeppelin/contracts-u
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
+import {IQuest} from "./interfaces/IQuest.sol";
 
-contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistributor {
+contract Quest is Initializable, OwnableUpgradeable, IQuest {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   address public token;

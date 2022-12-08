@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
-describe('Merkle Distributor contract', async () => {
+describe('Sample ERC-20 contract', async () => {
   let deployedErc20: { deployed: () => Promise<any>; symbol: () => Promise<string>; totalSupply: () => Promise<number> }
 
   beforeEach(async () => {
