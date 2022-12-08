@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
@@ -10,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
-contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
+contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using StringsUpgradeable for uint256;
     CountersUpgradeable.Counter private _tokenIds;
@@ -64,11 +65,31 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         }
     }
 
+    function getOwnedTokenIdsOfQuest(string memory _questId) external view returns (uint[] memory) {
+        uint msgSenderBalance = balanceOf(msg.sender);
+        uint[] memory tokens = new uint[](msgSenderBalance);
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            uint tokenId = tokenOfOwnerByIndex(msg.sender, i);
+            if( keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(_questId)) ){
+                tokens[i] = tokenId;
+            }
+        }
+        return tokens;
+    }
+
     function _burn(uint256 tokenId)
         internal
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
     {
         super._burn(tokenId);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     function tokenURI(uint256 _tokenId)
@@ -130,7 +151,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721URIStorage
         public
         view
         virtual
-        override(ERC721Upgradeable, IERC165Upgradeable)
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, IERC165Upgradeable)
         returns (bool)
     {
         return
