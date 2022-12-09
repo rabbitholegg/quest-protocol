@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import { Contract } from 'ethers';
 import {ethers, upgrades} from 'hardhat'
 
-describe('Merkle Distributor contract', async () => {
+describe('RabbitholeReceipt Contract', async () => {
   let RHReceipt: Contract,
     contractOwner: { address: String; },
     royaltyRecipient: { address: String; },
@@ -57,11 +57,11 @@ describe('Merkle Distributor contract', async () => {
 
   describe('getOwnedTokenIdsOfQuest', () => {
     it('returns the correct tokenIds', async () => {
-      await RHReceipt.connect(minterAddress).mint(3, "abc123");
-      await RHReceipt.connect(minterAddress).mint(2, "def456");
-      await RHReceipt.connect(minterAddress).mint(4, "eeeeee");
+      await RHReceipt.mint(3, "abc123");
+      await RHReceipt.mint(2, "def456");
+      await RHReceipt.mint(4, "eeeeee");
 
-      let tokenIds = await RHReceipt.connect(minterAddress).getOwnedTokenIdsOfQuest("abc123");
+      let tokenIds = await RHReceipt.getOwnedTokenIdsOfQuest("abc123", contractOwner.address);
 
       expect(tokenIds.length).to.eq(3);
       expect(tokenIds.map((tokenId) => tokenId.toNumber())).to.eql([1, 2, 3]);

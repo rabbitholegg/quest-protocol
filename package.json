@@ -11,6 +11,13 @@
     "quest",
     "erc20"
   ],
+  "scripts": {
+    "precompile": "rimraf ./build/",
+    "compile": "npx hardhat compile",
+    "pretest": "yarn compile",
+    "test": "npx hardhat test",
+    "prepublishOnly": "yarn test"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/rabbitholegg/quest_merkle_distributor/"
@@ -39,13 +46,6 @@
     "solc": "0.6.11",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
-  },
-  "scripts": {
-    "precompile": "rimraf ./build/",
-    "compile": "npx hardhat compile",
-    "pretest": "yarn compile",
-    "test": "npx hardhat test",
-    "prepublishOnly": "yarn test"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
