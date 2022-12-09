@@ -1,5 +1,5 @@
-const { expect } = require('chai')
-const { ethers } = require('hardhat')
+import {expect} from 'chai'
+import {ethers} from 'hardhat'
 
 describe('Sample ERC-1155 contract', async () => {
     let deployedErc1155: any, owner: any
