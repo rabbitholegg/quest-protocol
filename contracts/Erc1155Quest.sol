@@ -90,9 +90,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
 
-        uint256 totalReedemableTokens = redeemableTokenCount;
-
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, totalReedemableTokens, "0x00");
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, redeemableTokenCount, "0x00");
         _setClaimed(tokens);
 
         emit Claimed(msg.sender, redeemableTokenCount);

@@ -16,7 +16,7 @@ describe('Sample ERC-1155 contract', async () => {
     describe('Deployment', () => {
         it('deploys a mock erc1155 and mints 10 rewards', async () => {
             const tokenBalance = await deployedErc1155.balanceOf(owner.address, 1)
-            expect(tokenBalance).to.equal(10)
+            expect(tokenBalance.toString()).to.equal("100")
         })
     })
 })
