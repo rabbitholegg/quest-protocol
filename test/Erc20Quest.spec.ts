@@ -1,7 +1,5 @@
-import {QuestContractType, SampleErc20Type} from './types'
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
-import {parseBalanceMap} from '../src/parse-balance-map'
 
 describe('Erc20 Quest', async () => {
     let deployedQuestContract: any

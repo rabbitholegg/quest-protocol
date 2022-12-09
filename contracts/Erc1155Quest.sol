@@ -6,42 +6,45 @@ import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IQuest} from "./interfaces/IQuest.sol";
+import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalAmount;
-    uint256 public rewardAmountInWei;
-    bytes32 public merkleRoot;
+    uint256 public rewardTokenId;
     bool public hasStarted;
     bool public isPaused;
     string public allowList;
     string public questId;
 
-    mapping(address => bool) private claimedList;
+    mapping(uint256 => bool) private claimedList;
 
     function initialize(
-        address token_, uint256 endTime_,
+        address erc20TokenAddress_, uint256 endTime_,
         uint256 startTime_, uint256 totalAmount_, string memory allowList_,
-        uint256 rewardAmountInWei_, string memory questId_)  public initializer {
+        uint256 rewardTokenId_, string memory questId_, address receiptContractAddress_) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         endTime = endTime_;
         startTime = startTime_;
-        rewardToken = token_;
+        rewardToken = erc20TokenAddress_;
         totalAmount = totalAmount_;
-        rewardAmountInWei = rewardAmountInWei_;
+        rewardTokenId = rewardTokenId_;
         allowList = allowList_;
         questId = questId_;
+        rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
     }
 
     function start() public onlyOwner {
-        // TODO - do we want a better variable name here?
-        if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount) revert TotalAmountExceedsBalance();
         isPaused = false;
         hasStarted = true;
     }
@@ -56,46 +59,50 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest {
         isPaused = false;
     }
 
-    function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
-        merkleRoot = merkleRoot_;
-    }
-
-    function setRewardToken(address rewardTokenAddress_) public onlyOwner {
-        rewardToken = rewardTokenAddress_;
-    }
-
     function setAllowList(string memory allowList_) public onlyOwner {
         allowList = allowList_;
     }
 
-    function _setClaimed(address account) private {
-        claimedList[account] = true;
+    function _setClaimed(uint256[] memory tokenIds_) private {
+        for (uint i = 0; i < tokenIds_.length; i++) {
+            claimedList[tokenIds_[i]] = true;
+        }
     }
 
-    function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
+    function claim() public virtual {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
-        if (isClaimed(account)) revert AlreadyClaimed();
-        if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount) revert AmountExceedsBalance();
 
-        // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(account, amount));
-        if (!MerkleProofUpgradeable.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
+        uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
-        // Mark it claimed and send the rewardToken.
-        IERC20Upgradeable(rewardToken).safeTransfer(account, rewardAmountInWei);
-        _setClaimed(account);
+        if (tokens.length == 0) revert NoTokensToClaim();
 
-        emit Claimed(account, amount);
+        uint256 redeemableTokenCount = 0;
+
+        for (uint i = 0; i < tokens.length; i++) {
+            if (!isClaimed(tokens[i])) {
+                redeemableTokenCount++;
+            }
+        }
+
+        if (redeemableTokenCount == 0) revert AlreadyClaimed();
+
+        uint256 totalReedemableTokens = redeemableTokenCount;
+
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, totalReedemableTokens, "0x0");
+        _setClaimed(tokens);
+
+        emit Claimed(msg.sender, redeemableTokenCount);
     }
 
-    function isClaimed(address account) public view returns (bool) {
-        return claimedList[account] && claimedList[account] == true;
+    function isClaimed(uint256 tokenId_) public view returns (bool) {
+        return claimedList[tokenId_] && claimedList[tokenId_] == true;
     }
 
     function withdraw() public onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, IERC20Upgradeable(rewardToken).balanceOf(address(this)));
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, IERC1155(rewardToken).balanceOf(address(this), rewardTokenId), "0x0");
     }
 }
