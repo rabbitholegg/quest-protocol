@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
 
-describe.only('Erc20Quest', async () => {
+describe.only('Erc1155Quest', async () => {
     let deployedQuestContract: any
     let deployedSampleErc20Contract: any
     let deployedRabbitholeReceiptContract: any
@@ -9,11 +9,11 @@ describe.only('Erc20Quest', async () => {
     const mockAddress = '0x0000000000000000000000000000000000000000'
     const questId = "asdf"
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
-    const totalRewards = 1000
-    const rewardAmount = 10
+    const totalRewards = 10
+    const rewardAmount = 1
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const questContract = await ethers.getContractFactory('Erc20Quest')
-    const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+    const questContract = await ethers.getContractFactory('Erc1155Quest')
+    const sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
     const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
 
     beforeEach(async () => {
@@ -23,6 +23,7 @@ describe.only('Erc20Quest', async () => {
         await deploySampleErc20Contract()
         await deployDistributorContract()
         await transferRewardsToDistributor()
+        expect(false).to.equal(true)
     })
 
     const deployRabbitholeReceiptContract = async () => {
@@ -47,13 +48,13 @@ describe.only('Erc20Quest', async () => {
     }
 
     const deploySampleErc20Contract = async () => {
-        deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', 1000, owner.address)
+        deployedSampleErc20Contract = await sampleERC20Contract.deploy()
         await deployedSampleErc20Contract.deployed()
     }
 
     const transferRewardsToDistributor = async () => {
         const distributorContractAddress = deployedQuestContract.address
-        await deployedSampleErc20Contract.functions.transfer(distributorContractAddress, 1000)
+        await deployedSampleErc20Contract.functions.safeTransferFrom(owner.address,distributorContractAddress, rewardAmount, totalRewards, "0x00")
     }
 
     describe('Deployment', () => {

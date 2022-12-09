@@ -8,8 +8,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IQuest} from "./interfaces/IQuest.sol";
 import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
-contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest {
+contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holder {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     RabbitHoleReceipt public rabbitholeReceiptContract;
@@ -91,7 +92,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest {
 
         uint256 totalReedemableTokens = redeemableTokenCount;
 
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, totalReedemableTokens, "0x0");
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, totalReedemableTokens, "0x00");
         _setClaimed(tokens);
 
         emit Claimed(msg.sender, redeemableTokenCount);
@@ -103,6 +104,6 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest {
 
     function withdraw() public onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, IERC1155(rewardToken).balanceOf(address(this), rewardTokenId), "0x0");
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, IERC1155(rewardToken).balanceOf(address(this), rewardTokenId), "0x00");
     }
 }
