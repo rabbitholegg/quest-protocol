@@ -65,13 +65,39 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         }
     }
 
-    function getOwnedTokenIdsOfQuest(string memory _questId) external view returns (uint[] memory) {
-        uint msgSenderBalance = balanceOf(msg.sender);
+    function getOwnedTokenIdsOfQuestLength(string memory _questId, address claimingAddress) public view returns (uint) {
+        uint msgSenderBalance = balanceOf(claimingAddress);
         uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
         uint foundTokens = 0;
 
         for (uint i = 0; i < msgSenderBalance; i++) {
-            uint tokenId = tokenOfOwnerByIndex(msg.sender, i);
+            uint tokenId = tokenOfOwnerByIndex(claimingAddress, i);
+            if( keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(_questId)) ){
+                tokenIdsForQuest[i] = tokenId;
+                foundTokens++;
+            }
+        }
+
+        uint[] memory filteredTokens = new uint[](foundTokens);
+        uint filterTokensIndexTracker = 0;
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            if (tokenIdsForQuest[i] > 0) {
+                filteredTokens[filterTokensIndexTracker] = tokenIdsForQuest[i];
+                filterTokensIndexTracker++;
+            }
+        }
+
+        return filteredTokens.length;
+    }
+
+    function getOwnedTokenIdsOfQuest(string memory _questId, address claimingAddress) public view returns (uint[] memory) {
+        uint msgSenderBalance = balanceOf(claimingAddress);
+        uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
+        uint foundTokens = 0;
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            uint tokenId = tokenOfOwnerByIndex(claimingAddress, i);
             if( keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(_questId)) ){
                 tokenIdsForQuest[i] = tokenId;
                 foundTokens++;

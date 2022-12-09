@@ -6,9 +6,13 @@ import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IQuest} from "./interfaces/IQuest.sol";
+import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
+import "hardhat/console.sol";
 
 contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
     uint256 public endTime;
@@ -25,7 +29,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     function initialize(
         address erc20TokenAddress_, uint256 endTime_,
         uint256 startTime_, uint256 totalAmount_, string memory allowList_,
-        uint256 rewardAmountInWei_, string memory questId_) public initializer {
+        uint256 rewardAmountInWei_, string memory questId_, address receiptContractAddress_) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -36,6 +40,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         rewardAmountInWei = rewardAmountInWei_;
         allowList = allowList_;
         questId = questId_;
+        rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
     }
 
     function start() public onlyOwner {
@@ -58,8 +63,10 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         allowList = allowList_;
     }
 
-    function _setClaimed(uint256 tokenId_) private {
-        claimedList[tokenId_] = true;
+    function _setClaimed(uint256[] memory tokenIds_) private {
+        for (uint i = 0; i < tokenIds_.length; i++) {
+            claimedList[tokenIds_[i]] = true;
+        }
     }
 
     function claim() public virtual {
@@ -68,18 +75,30 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < rewardAmountInWei) revert AmountExceedsBalance();
 
+        uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
-//        if (isClaimed(account)) revert AlreadyClaimed();
+        if (tokens.length == 0) revert NoTokensToClaim();
 
-        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, rewardAmountInWei);
-//        _setClaimed(account);
+        uint256 redeemableTokenCount = 0;
 
-        emit Claimed(msg.sender, rewardAmountInWei);
+        for (uint i = 0; i < tokens.length; i++) {
+            if (!isClaimed(tokens[i])) {
+                redeemableTokenCount++;
+            }
+        }
+
+        if (redeemableTokenCount == 0) revert AlreadyClaimed();
+
+        uint256 totalReedemableRewards = redeemableTokenCount * rewardAmountInWei;
+
+        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, totalReedemableRewards);
+        _setClaimed(tokens);
+
+        emit Claimed(msg.sender, totalReedemableRewards);
     }
 
-    function isClaimed(address account) public view returns (bool) {
-        return true;
-//        return claimedList[tokenId] && claimedList[account] == true;
+    function isClaimed(uint256 tokenId_) public view returns (bool) {
+        return claimedList[tokenId_] && claimedList[tokenId_] == true;
     }
 
     function withdraw() public onlyOwner {
