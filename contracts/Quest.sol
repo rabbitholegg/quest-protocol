@@ -5,9 +5,9 @@ import {IERC20Upgradeable, SafeERC20Upgradeable} from "@openzeppelin/contracts-u
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
+import {IQuest} from "./interfaces/IQuest.sol";
 
-contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistributor {
+contract Quest is Initializable, OwnableUpgradeable, IQuest {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   address public rewardToken;
@@ -16,10 +16,12 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
   uint256 public totalAmount;
   bytes32 public merkleRoot;
   bool public hasStarted;
+  bool public isPaused;
+  string public allowList;
 
   mapping(address => bool) private claimedList;
 
-  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_)  public initializer {
+  function initialize(address token_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_)  public initializer {
     __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
     if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -27,20 +29,24 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     startTime = startTime_;
     rewardToken = token_;
     totalAmount = totalAmount_;
+    allowList = allowList_;
   }
 
   function start() public onlyOwner {
-    // not sure this is needed -> someone could just call unPause
-    //    if (IERC20Upgradeable(token).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    // TODO - do we want a better variable name here?
+    if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
+    isPaused = false;
     hasStarted = true;
   }
 
   function pause() public onlyOwner {
-    hasStarted = false;
+    if (hasStarted == false) revert NotStarted();
+    isPaused = true;
   }
 
   function unPause() public onlyOwner {
-    hasStarted = true;
+    if (hasStarted == false) revert NotStarted();
+    isPaused = false;
   }
 
   function setMerkleRoot(bytes32 merkleRoot_) public onlyOwner {
@@ -51,14 +57,17 @@ contract MerkleDistributor is Initializable, OwnableUpgradeable, IMerkleDistribu
     rewardToken = rewardTokenAddress_;
   }
 
+  function setAllowList(string memory allowList_) public onlyOwner {
+    allowList = allowList_;
+  }
+
   function _setClaimed(address account) private {
     claimedList[account] = true;
   }
 
   function claim(address account, uint256 amount, bytes32[] calldata merkleProof) public virtual {
     if (hasStarted == false) revert NotStarted();
-    // TODO - are we removing this?
-    // if (block.timestamp > endTime) revert ClaimWindowFinished();
+    if (isPaused == true) revert QuestPaused();
     if (block.timestamp < startTime) revert ClaimWindowNotStarted();
     if (isClaimed(account)) revert AlreadyClaimed();
     if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < amount) revert AmountExceedsBalance();
