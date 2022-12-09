@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Quest} from "./Quest.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract QuestFactory is Initializable, OwnableUpgradeable {
-    UpgradeableBeacon public beacon;
+contract QuestFactory is Initializable,OwnableUpgradeable {
 
     event QuestCreated(
         address indexed creator,
@@ -22,28 +19,24 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(
-        address _currentQuestImplementation
-    ) public initializer {
+    function initialize() public initializer {
         __Ownable_init();
-        beacon = new UpgradeableBeacon(_currentQuestImplementation);
-        beacon.transferOwnership(msg.sender);
     }
 
 
-    function createContract(address rewardToken_, uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public onlyOwner returns (address clone)
+    function createContract(address rewardToken_,
+        uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public onlyOwner returns (address newQuest)
     {
-        clone = address(new BeaconProxy(address(beacon), ""));
-        Quest(clone).initialize(
-            rewardToken_,
+        Quest newQuest = new Quest();
+
+        newQuest.initialize(rewardToken_,
             endTime_,
             startTime_,
             totalAmount_,
             allowList_,
-            rewardAmount_
-        );
-        Quest(clone).transferOwnership(msg.sender);
+            rewardAmount_);
 
+        return address(newQuest);
         //        emit QuestCreated(msg.sender, clone, _name, _symbol, _type);
     }
 }
