@@ -1,8 +1,7 @@
 import {QuestContractType, SampleErc20Type} from './types'
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
-import {parseBalanceMap} from '../src/parse-balance-map'
-import {deploy} from "@openzeppelin/hardhat-upgrades/dist/utils";
+import {Contract} from "ethers";
 
 describe('QuestFactory', async () => {
     let deployedQuestContract: QuestContractType
@@ -21,6 +20,9 @@ describe('QuestFactory', async () => {
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
 
     beforeEach(async () => {
+        expiryDate = Math.floor(Date.now() / 1000) + 10000
+        startDate = Math.floor(Date.now() / 1000) + 1000
+
         await deploySampleErc20Contract()
         await deployDistributorContract()
         await deployFactoryContract()
@@ -38,7 +40,8 @@ describe('QuestFactory', async () => {
     }
 
     const deployFactoryContract = async () => {
-        deployedFactoryContract = await upgrades.deployProxy(questFactoryContract, [])
+        deployedFactoryContract = await questFactoryContract.deploy()
+        await deployedFactoryContract.deployed()
     }
 
     const deploySampleErc20Contract = async () => {
@@ -47,20 +50,20 @@ describe('QuestFactory', async () => {
     }
 
     describe('createQuest', () => {
-        describe('asdf', () => {
-            it('Should create a new quest', async () => {
-                const deployedNewQuest = await deployedFactoryContract.connect(owner.address).createQuest(
-                    deployedSampleErc20Contract.address,
-                    expiryDate,
-                    startDate,
-                    totalRewards,
-                    allowList,
-                    rewardAmount
-                )
-
-                expect(deployedNewQuest).to.equal("foo")
-                expect(true).to.equal(false)
-            })
+        it('should init with right owner', async () => {
+            expect(await deployedFactoryContract.owner()).to.not.equal("0x0000000000000000000000000000000000000000")
         })
+        // it('Should create a new quest', async () => {
+        //     const deployedNewQuest = await deployedFactoryContract.createQuest(
+        //         deployedSampleErc20Contract.address,
+        //         expiryDate,
+        //         startDate,
+        //         totalRewards,
+        //         allowList,
+        //         rewardAmount
+        //     )
+        //
+        //     expect(await deployedNewQuest.startTime()).to.equal(startDate)
+        // })
     })
 })

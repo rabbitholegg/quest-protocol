@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Quest} from "./Quest.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract QuestFactory is Initializable,OwnableUpgradeable {
+contract QuestFactory is Initializable, OwnableUpgradeable {
 
     event QuestCreated(
         address indexed creator,
@@ -24,8 +24,8 @@ contract QuestFactory is Initializable,OwnableUpgradeable {
     }
 
 
-    function createContract(address rewardToken_,
-        uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public onlyOwner returns (address newQuest)
+    function createQuest(address rewardToken_,
+        uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public returns (address newQuest)
     {
         Quest newQuest = new Quest();
 
