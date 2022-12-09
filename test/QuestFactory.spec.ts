@@ -35,13 +35,13 @@ describe('QuestFactory', async () => {
             startDate,
             totalRewards,
             allowList,
-            rewardAmount
+            rewardAmount,
+            'asdf'
         ])
     }
 
     const deployFactoryContract = async () => {
-        deployedFactoryContract = await questFactoryContract.deploy()
-        await deployedFactoryContract.deployed()
+        deployedFactoryContract = await upgrades.deployProxy(questFactoryContract, [])
     }
 
     const deploySampleErc20Contract = async () => {
@@ -51,19 +51,25 @@ describe('QuestFactory', async () => {
 
     describe('createQuest', () => {
         it('should init with right owner', async () => {
-            expect(await deployedFactoryContract.owner()).to.not.equal("0x0000000000000000000000000000000000000000")
+            expect(await deployedFactoryContract.owner()).to.equal(owner.address)
         })
-        // it('Should create a new quest', async () => {
-        //     const deployedNewQuest = await deployedFactoryContract.createQuest(
-        //         deployedSampleErc20Contract.address,
-        //         expiryDate,
-        //         startDate,
-        //         totalRewards,
-        //         allowList,
-        //         rewardAmount
-        //     )
-        //
-        //     expect(await deployedNewQuest.startTime()).to.equal(startDate)
-        // })
+
+        it('Should create a new quest', async () => {
+            const deployedNewQuest = await deployedFactoryContract.createQuest(
+                deployedSampleErc20Contract.address,
+                expiryDate,
+                startDate,
+                totalRewards,
+                allowList,
+                rewardAmount,
+                '1155',
+                'asdf'
+            )
+            await deployedNewQuest.wait()
+            console.log(owner.address)
+            console.log(deployedFactoryContract.address)
+            console.log(deployedNewQuest)
+            // expect(await deployedNewQuest.startTime()).to.equal(startDate)
+        })
     })
 })

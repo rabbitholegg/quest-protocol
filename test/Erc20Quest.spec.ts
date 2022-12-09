@@ -3,7 +3,7 @@ import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
 import {parseBalanceMap} from '../src/parse-balance-map'
 
-describe('Merkle Distributor contract', async () => {
+describe('Erc20 Quest', async () => {
     let deployedQuestContract: QuestContractType
     let deployedSampleErc20Contract: SampleErc20Type
     let expiryDate: number, startDate: number
@@ -12,7 +12,7 @@ describe('Merkle Distributor contract', async () => {
     const totalRewards = 1000
     const rewardAmount = 10
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const questContract = await ethers.getContractFactory('Quest')
+    const questContract = await ethers.getContractFactory('Erc20Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
 
     beforeEach(async () => {
@@ -150,50 +150,6 @@ describe('Merkle Distributor contract', async () => {
         })
     })
 
-    describe('setRewardToken()', () => {
-        it('should set start correctly', async () => {
-            expect(await deployedQuestContract.rewardToken()).to.equal(
-                deployedSampleErc20Contract.address
-            )
-            await deployedQuestContract
-                .connect(owner)
-                .setRewardToken('0xaA5cb8B10990a51FBd8a647d61C370282C42C976')
-            expect(await deployedQuestContract.rewardToken()).to.equal(
-                '0xaA5cb8B10990a51FBd8a647d61C370282C42C976'
-            )
-        })
-
-        it('should only allow the owner to start', async () => {
-            await expect(
-                deployedQuestContract
-                    .connect(firstAddress)
-                    .setRewardToken('0xaA5cb8B10990a51FBd8a647d61C370282C42C976')
-            ).to.be.revertedWith('Ownable: caller is not the owner')
-        })
-    })
-
-    describe('setMerkleTree()', () => {
-        it('should set start correctly', async () => {
-            expect(await deployedQuestContract.merkleRoot()).to.equal(
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-            )
-            await deployedQuestContract
-                .connect(owner)
-                .setMerkleRoot('0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d')
-            expect(await deployedQuestContract.merkleRoot()).to.equal(
-                '0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d'
-            )
-        })
-
-        it('should only allow the owner to start', async () => {
-            await expect(
-                deployedQuestContract
-                    .connect(firstAddress)
-                    .setMerkleRoot('0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d')
-            ).to.be.revertedWith('Ownable: caller is not the owner')
-        })
-    })
-
     describe('setAllowList()', () => {
         it('should set start correctly', async () => {
             expect(await deployedQuestContract.allowList()).to.equal(allowList)
@@ -222,12 +178,6 @@ describe('Merkle Distributor contract', async () => {
             arr.forEach((item, index) => {
                 objectOfAddressesAndRewards[item] = 250
             })
-
-            balanceMap = parseBalanceMap(objectOfAddressesAndRewards)
-            merkleRoot = balanceMap.merkleRoot
-            await deployedQuestContract.setMerkleRoot(merkleRoot)
-            checkSum = ethers.utils.getAddress(firstAddress.address)
-            claim = balanceMap.claims[checkSum]
         })
 
         it('should fail if quest has not started yet', async () => {

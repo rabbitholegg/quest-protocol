@@ -6,12 +6,12 @@ import {Quest} from "./Quest.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract QuestFactory is Initializable, OwnableUpgradeable {
+    // Todo create mapping of questId to quest contracts
+    // Todo create data structure of all quests
 
     event QuestCreated(
         address indexed creator,
         address indexed contractAddress,
-        string name,
-        string symbol,
         string contractType
     );
 
@@ -25,18 +25,23 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
 
     function createQuest(address rewardToken_,
-        uint256 endTime_, uint256 startTime_, uint256 totalAmount_, string memory allowList_, uint256 rewardAmount_) public returns (address newQuest)
+        uint256 endTime_, uint256 startTime_, uint256 totalAmount_,
+        string memory allowList_, uint256 rewardAmount_, string memory contractType,
+        string memory questId_) public onlyOwner returns (address newQuest)
     {
         Quest newQuest = new Quest();
 
-        newQuest.initialize(rewardToken_,
+        newQuest.initialize(
+            rewardToken_,
             endTime_,
             startTime_,
             totalAmount_,
             allowList_,
-            rewardAmount_);
+            rewardAmount_,
+            questId_
+        );
 
+        emit QuestCreated(msg.sender, address(newQuest), contractType);
         return address(newQuest);
-        //        emit QuestCreated(msg.sender, clone, _name, _symbol, _type);
     }
 }
