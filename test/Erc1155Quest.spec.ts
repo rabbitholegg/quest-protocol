@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
 
-describe.only('Erc1155Quest', async () => {
+describe('Erc1155Quest', async () => {
     let deployedQuestContract: any
     let deployedSampleErc20Contract: any
     let deployedRabbitholeReceiptContract: any
