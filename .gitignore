@@ -7,3 +7,4 @@ cache/
 .env
 .yarn-error.log
 .idea
+typechain-types/
