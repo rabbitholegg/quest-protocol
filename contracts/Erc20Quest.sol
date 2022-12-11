@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC20Upgradeable, SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IQuest} from "./interfaces/IQuest.sol";
-import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
-import "hardhat/console.sol";
+import {IERC20Upgradeable, SafeERC20Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
+import {MerkleProofUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol';
+import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {IQuest} from './interfaces/IQuest.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import 'hardhat/console.sol';
 
 contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -27,9 +27,15 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     mapping(uint256 => bool) private claimedList;
 
     function initialize(
-        address erc20TokenAddress_, uint256 endTime_,
-        uint256 startTime_, uint256 totalAmount_, string memory allowList_,
-        uint256 rewardAmountInWei_, string memory questId_, address receiptContractAddress_) public initializer {
+        address erc20TokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalAmount_,
+        string memory allowList_,
+        uint256 rewardAmountInWei_,
+        string memory questId_,
+        address receiptContractAddress_
+    ) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -103,6 +109,9 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
 
     function withdraw() public onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, IERC20Upgradeable(rewardToken).balanceOf(address(this)));
+        IERC20Upgradeable(rewardToken).safeTransfer(
+            msg.sender,
+            IERC20Upgradeable(rewardToken).balanceOf(address(this))
+        );
     }
 }
