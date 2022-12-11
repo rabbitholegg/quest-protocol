@@ -2,7 +2,7 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
-require('@nomicfoundation/hardhat-chai-matchers')
+import '@nomicfoundation/hardhat-chai-matchers'
 import 'hardhat-gas-reporter'
 import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-ethers'
