@@ -1,8 +1,8 @@
-const { expect } = require('chai')
-const { ethers } = require('hardhat')
+import {expect} from 'chai'
+import {ethers} from 'hardhat'
 
 describe('Sample ERC-20 contract', async () => {
-  let deployedErc20: { deployed: () => Promise<any>; symbol: () => Promise<string>; totalSupply: () => Promise<number> }
+  let deployedErc20: any
 
   beforeEach(async () => {
     const sampleErc20 = await ethers.getContractFactory('SampleERC20')

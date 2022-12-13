@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
 
-describe('Erc20Quest', async () => {
+describe('Erc1155Quest', async () => {
     let deployedQuestContract: any
     let deployedSampleErc20Contract: any
     let deployedRabbitholeReceiptContract: any
@@ -9,11 +9,11 @@ describe('Erc20Quest', async () => {
     const mockAddress = '0x0000000000000000000000000000000000000000'
     const questId = "asdf"
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
-    const totalRewards = 1000
-    const rewardAmount = 10
+    const totalRewards = 10
+    const rewardAmount = 1
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const questContract = await ethers.getContractFactory('Erc20Quest')
-    const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+    const questContract = await ethers.getContractFactory('Erc1155Quest')
+    const sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
     const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
 
     beforeEach(async () => {
@@ -47,13 +47,13 @@ describe('Erc20Quest', async () => {
     }
 
     const deploySampleErc20Contract = async () => {
-        deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', 1000, owner.address)
+        deployedSampleErc20Contract = await sampleERC20Contract.deploy()
         await deployedSampleErc20Contract.deployed()
     }
 
     const transferRewardsToDistributor = async () => {
-        const distributorContractAddress = deployedQuestContract.address
-        await deployedSampleErc20Contract.functions.transfer(distributorContractAddress, 1000)
+        const distributorContractAddress = await deployedQuestContract.address
+        await deployedSampleErc20Contract.functions.safeTransferFrom(owner.address,distributorContractAddress, rewardAmount, 100, "0x00")
     }
 
     describe('Deployment', () => {
@@ -222,7 +222,6 @@ describe('Erc20Quest', async () => {
             await deployedQuestContract.start()
             await ethers.provider.send('evm_increaseTime', [1000])
 
-            //todo add in token qcheck of length 0
             await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
                 questContract,
                 'NoTokensToClaim'
@@ -238,7 +237,7 @@ describe('Erc20Quest', async () => {
 
             await ethers.provider.send('evm_increaseTime', [1000])
 
-            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(startingBalance.toString()).to.equal("0")
 
             const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
@@ -247,8 +246,8 @@ describe('Erc20Quest', async () => {
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
             await deployedQuestContract.claim()
-            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
-            expect(endingBalance.toString()).to.equal("10")
+            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
+            expect(endingBalance.toString()).to.equal("1")
             await ethers.provider.send('evm_increaseTime', [-1000])
         })
 
@@ -258,7 +257,7 @@ describe('Erc20Quest', async () => {
 
             await ethers.provider.send('evm_increaseTime', [1000])
 
-            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(startingBalance.toString()).to.equal("0")
 
             const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
@@ -267,8 +266,8 @@ describe('Erc20Quest', async () => {
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
             await deployedQuestContract.claim()
-            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
-            expect(endingBalance.toString()).to.equal("20")
+            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
+            expect(endingBalance.toString()).to.equal("2")
             await ethers.provider.send('evm_increaseTime', [-1000])
         })
 
@@ -280,7 +279,7 @@ describe('Erc20Quest', async () => {
 
             await ethers.provider.send('evm_increaseTime', [1000])
 
-            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+            const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(startingBalance.toString()).to.equal("0")
 
             const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
@@ -289,16 +288,16 @@ describe('Erc20Quest', async () => {
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
             await deployedQuestContract.claim()
-            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
-            expect(endingBalance.toString()).to.equal("10")
+            const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
+            expect(endingBalance.toString()).to.equal("1")
 
             await deployedQuestContract.connect(firstAddress).claim()
-            const secondEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address)
-            expect(secondEndingBalance.toString()).to.equal("10")
+            const secondEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address, rewardAmount)
+            expect(secondEndingBalance.toString()).to.equal("1")
 
             await deployedQuestContract.connect(secondAddress).claim()
-            const thirdEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(secondAddress.address)
-            expect(thirdEndingBalance.toString()).to.equal("10")
+            const thirdEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(secondAddress.address, rewardAmount)
+            expect(thirdEndingBalance.toString()).to.equal("1")
 
             await ethers.provider.send('evm_increaseTime', [-1000])
         })
@@ -308,6 +307,13 @@ describe('Erc20Quest', async () => {
             await deployedQuestContract.start()
 
             await ethers.provider.send('evm_increaseTime', [1000])
+
+            const beginningContractBalance = await deployedSampleErc20Contract.functions.balanceOf(
+                deployedQuestContract.address,
+                rewardAmount
+            )
+
+            expect(beginningContractBalance.toString()).to.equal("100")
 
             await deployedQuestContract.claim()
             await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
@@ -336,15 +342,16 @@ describe('Erc20Quest', async () => {
 
         it('should transfer all rewards back to owner', async () => {
             const beginningContractBalance = await deployedSampleErc20Contract.functions.balanceOf(
-                deployedQuestContract.address
+                deployedQuestContract.address,
+                rewardAmount
             )
-            const beginningOwnerBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
-            expect(beginningContractBalance.toString()).to.equal(totalRewards.toString())
+            const beginningOwnerBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
+            expect(beginningContractBalance.toString()).to.equal("100")
             expect(beginningOwnerBalance.toString()).to.equal('0')
             await ethers.provider.send('evm_increaseTime', [10001])
             await deployedQuestContract.connect(owner).withdraw()
 
-            const endContactBalance = await deployedSampleErc20Contract.functions.balanceOf(deployedQuestContract.address)
+            const endContactBalance = await deployedSampleErc20Contract.functions.balanceOf(deployedQuestContract.address, rewardAmount)
             expect(endContactBalance.toString()).to.equal('0')
             await ethers.provider.send('evm_increaseTime', [-10001])
         })
