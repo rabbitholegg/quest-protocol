@@ -104,7 +104,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function tokenURI(uint256 _tokenId)
+    function tokenURI(uint _tokenId)
         public
         view
         virtual
@@ -120,7 +120,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
             '{',
                 '"name": "RabbitHole Quest #', questIdForTokenId[_tokenId] ,' Redeemer #', _tokenId.toString(), '",',
                 '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
-                '"image": "', generateSVG(), '"',
+                '"image": "', generateSVG(_tokenId), '"',
             '}'
         );
         return string(
@@ -131,7 +131,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         );
     }
 
-    function generateSVG() public pure returns(string memory){
+    function generateSVG(uint _tokenId) public view returns(string memory){
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
             '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
