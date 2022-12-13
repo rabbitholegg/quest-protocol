@@ -104,7 +104,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function tokenURI(uint256 _tokenId)
+    function tokenURI(uint _tokenId)
         public
         view
         virtual
@@ -120,7 +120,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
             '{',
                 '"name": "RabbitHole Quest #', questIdForTokenId[_tokenId] ,' Redeemer #', _tokenId.toString(), '",',
                 '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
-                '"image": "', generateSVG(), '"',
+                '"image": "', generateSVG(_tokenId), '"',
             '}'
         );
         return string(
@@ -131,12 +131,14 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         );
     }
 
-    function generateSVG() public pure returns(string memory){
+    function generateSVG(uint _tokenId) public view returns(string memory){
         bytes memory svg = abi.encodePacked(
-'<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000">',
-    '<rect width="100%" height="100%" fill="#000000" />',
-    '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="100" fill="#ffffff">RabbitHole</text>'
-'</svg>'
+            '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
+            '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
+            '<rect width="100%" height="100%" fill="black" />',
+            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest #',questIdForTokenId[_tokenId],'</text>',
+            '<text x="70%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest Receipt #',_tokenId,'</text>',
+            '</svg>'
         );
         return string(
             abi.encodePacked(
