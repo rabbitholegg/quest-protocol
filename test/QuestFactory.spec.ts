@@ -1,28 +1,42 @@
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
-import { SampleERC20, SampleErc1155, QuestFactory, RabbitHoleReceipt } from './../typechain-types/contracts'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { SampleERC20, SampleErc1155, QuestFactory, RabbitHoleReceipt } from '../typechain-types/contracts'
+import {
+  QuestFactory__factory,
+  RabbitHoleReceipt__factory,
+  SampleERC20__factory,
+  SampleErc1155__factory,
+} from '../typechain-types'
 
-describe('QuestFactory', async () => {
+describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
 
   let expiryDate: number, startDate: number
-  const mockAddress = '0x0000000000000000000000000000000000000000'
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
   const rewardAmount = 10
-  const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
+  let owner: SignerWithAddress
+  let firstAddress: SignerWithAddress
+  let secondAddress: SignerWithAddress
 
-  const questFactoryContract = await ethers.getContractFactory('QuestFactory')
-  const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
-  const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
-  const sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
+  let questFactoryContract: QuestFactory__factory
+  let rabbitholeReceiptContract: RabbitHoleReceipt__factory
+  let sampleERC20Contract: SampleERC20__factory
+  let sampleERC1155Contract: SampleErc1155__factory
 
   beforeEach(async () => {
+    ;[owner, firstAddress, secondAddress] = await ethers.getSigners()
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
+
+    questFactoryContract = await ethers.getContractFactory('QuestFactory')
+    rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+    sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+    sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
 
     await deploySampleErc20Contract()
     await deploySampleErc1155Conract()
