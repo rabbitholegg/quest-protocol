@@ -32,7 +32,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     function initialize(
         address erc20TokenAddress_, uint256 endTime_,
         uint256 startTime_, uint256 totalAmount_, string memory allowList_,
-        uint256 rewardTokenId_, string memory questId_, address receiptContractAddress_, address claimSignerAddress) public initializer {
+        uint256 rewardTokenId_, string memory questId_, address receiptContractAddress_, address claimSignerAddress_) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -44,6 +44,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
         allowList = allowList_;
         questId = questId_;
         rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+        claimSignerAddress = claimSignerAddress_;
     }
 
     function start() public onlyOwner {
@@ -77,11 +78,11 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     }
 
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-        );
-        return ECDSAUpgradeable.recover(messageDigest, signature);
-    }
+            bytes32 messageDigest = keccak256(
+                abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+            );
+            return ECDSAUpgradeable.recover(messageDigest, signature);
+        }
 
 
     function claim(bytes32 hash, bytes memory signature) public virtual {

@@ -1,9 +1,8 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
+import {Wallet, utils} from 'ethers'
 
-
-describe('Erc1155Quest', async () => {
-    console.log("in describe")
+describe('Erc1155Quest', () => {
     let deployedQuestContract: any
     let deployedSampleErc20Contract: any
     let deployedRabbitholeReceiptContract: any
@@ -13,30 +12,31 @@ describe('Erc1155Quest', async () => {
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 10
     const rewardAmount = 1
-    console.log("before ethers.getSigners")
-    const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    console.log("before erc1155")
-    const questContract = await ethers.getContractFactory('Erc1155Quest')
-    console.log("before contract factory")
-    const sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
-    const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
-    console.log("after contract factory")
-    // let messageHash, wallet, signature;
+    const mnemonic = "announce room limb pattern dry unit scale effort smooth jazz weasel alcohol"
+    let owner, firstAddress, secondAddress, thirdAddress, fourthAddress, questContract, sampleERC20Contract, rabbitholeReceiptContract, messageHash, wallet, signature;
 
     beforeEach(async () => {
-        console.log("start of before each")
+        const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] = await ethers.getSigners()
+        questContract = await ethers.getContractFactory('Erc1155Quest')
+        sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
+        rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+
+        owner = local_owner
+        firstAddress = local_firstAddress
+        secondAddress = local_secondAddress
+        thirdAddress = local_thirdAddress
+        fourthAddress = local_fourthAddress
+
+        wallet = Wallet.fromMnemonic(mnemonic)
+        messageHash = ethers.utils.id("hello world");
+        signature = await wallet.signMessage(utils.arrayify(messageHash))
+
         expiryDate = Math.floor(Date.now() / 1000) + 10000
         startDate = Math.floor(Date.now() / 1000) + 1000
         await deployRabbitholeReceiptContract()
         await deploySampleErc20Contract()
         await deployDistributorContract()
         await transferRewardsToDistributor()
-
-        console.log("in before each")
-
-        // messageHash = utils.solidityKeccak256(['string'], ["hello world"]);
-        // wallet = new Wallet(owner.address)
-        // signature = await wallet.signMessage(utils.arrayify(messageHash))
     })
 
     const deployRabbitholeReceiptContract = async () => {
@@ -57,7 +57,7 @@ describe('Erc1155Quest', async () => {
             rewardAmount,
             questId,
             deployedRabbitholeReceiptContract.address,
-            owner.address
+            wallet.address
         ])
     }
 
@@ -197,7 +197,6 @@ describe('Erc1155Quest', async () => {
 
     describe('claim(messageHash, signature)', async () => {
         it('should fail if quest has not started yet', async () => {
-            expect(true).to.equal(false)
             expect(await deployedQuestContract.hasStarted()).to.equal(false)
             await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
