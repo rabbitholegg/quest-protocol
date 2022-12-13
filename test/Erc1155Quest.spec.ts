@@ -1,8 +1,9 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
-import { utils, Wallet } from 'ethers';
+
 
 describe('Erc1155Quest', async () => {
+    console.log("in describe")
     let deployedQuestContract: any
     let deployedSampleErc20Contract: any
     let deployedRabbitholeReceiptContract: any
@@ -12,22 +13,30 @@ describe('Erc1155Quest', async () => {
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 10
     const rewardAmount = 1
+    console.log("before ethers.getSigners")
     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
+    console.log("before erc1155")
     const questContract = await ethers.getContractFactory('Erc1155Quest')
+    console.log("before contract factory")
     const sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
     const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
-
-    const messageHash = utils.solidityKeccak256(['string'], ["hello world"]);
-    const wallet = new Wallet(owner.address);
-    const signature = await wallet.signMessage(utils.arrayify(messageHash))
+    console.log("after contract factory")
+    // let messageHash, wallet, signature;
 
     beforeEach(async () => {
+        console.log("start of before each")
         expiryDate = Math.floor(Date.now() / 1000) + 10000
         startDate = Math.floor(Date.now() / 1000) + 1000
         await deployRabbitholeReceiptContract()
         await deploySampleErc20Contract()
         await deployDistributorContract()
         await transferRewardsToDistributor()
+
+        console.log("in before each")
+
+        // messageHash = utils.solidityKeccak256(['string'], ["hello world"]);
+        // wallet = new Wallet(owner.address)
+        // signature = await wallet.signMessage(utils.arrayify(messageHash))
     })
 
     const deployRabbitholeReceiptContract = async () => {
@@ -188,6 +197,7 @@ describe('Erc1155Quest', async () => {
 
     describe('claim(messageHash, signature)', async () => {
         it('should fail if quest has not started yet', async () => {
+            expect(true).to.equal(false)
             expect(await deployedQuestContract.hasStarted()).to.equal(false)
             await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
