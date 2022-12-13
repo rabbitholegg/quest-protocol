@@ -1,5 +1,6 @@
 import {expect} from 'chai'
 import {ethers, upgrades} from 'hardhat'
+import { utils, Wallet } from 'ethers';
 
 describe('Erc1155Quest', async () => {
     let deployedQuestContract: any
@@ -15,6 +16,10 @@ describe('Erc1155Quest', async () => {
     const questContract = await ethers.getContractFactory('Erc1155Quest')
     const sampleERC20Contract = await ethers.getContractFactory('SampleErc1155')
     const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+
+    const messageHash = utils.solidityKeccak256(['string'], ["hello world"]);
+    const wallet = new Wallet(owner.address);
+    const signature = await wallet.signMessage(utils.arrayify(messageHash))
 
     beforeEach(async () => {
         expiryDate = Math.floor(Date.now() / 1000) + 10000
@@ -42,7 +47,8 @@ describe('Erc1155Quest', async () => {
             allowList,
             rewardAmount,
             questId,
-            deployedRabbitholeReceiptContract.address
+            deployedRabbitholeReceiptContract.address,
+            owner.address
         ])
     }
 
@@ -180,10 +186,10 @@ describe('Erc1155Quest', async () => {
         })
     })
 
-    describe('claim()', async () => {
+    describe('claim(messageHash, signature)', async () => {
         it('should fail if quest has not started yet', async () => {
             expect(await deployedQuestContract.hasStarted()).to.equal(false)
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'NotStarted'
             )
@@ -193,7 +199,7 @@ describe('Erc1155Quest', async () => {
             await deployedQuestContract.start()
             await deployedQuestContract.pause()
 
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'QuestPaused'
             )
@@ -201,7 +207,7 @@ describe('Erc1155Quest', async () => {
 
         it('should fail if before start time stamp', async () => {
             await deployedQuestContract.start()
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'ClaimWindowNotStarted'
             )
@@ -211,7 +217,7 @@ describe('Erc1155Quest', async () => {
             await deployedQuestContract.start()
             await ethers.provider.send('evm_increaseTime', [10000])
             await deployedQuestContract.withdraw()
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'AmountExceedsBalance'
             )
@@ -222,7 +228,7 @@ describe('Erc1155Quest', async () => {
             await deployedQuestContract.start()
             await ethers.provider.send('evm_increaseTime', [1000])
 
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'NoTokensToClaim'
             )
@@ -245,7 +251,7 @@ describe('Erc1155Quest', async () => {
 
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
-            await deployedQuestContract.claim()
+            await deployedQuestContract.claim(messageHash, signature)
             const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(endingBalance.toString()).to.equal("1")
             await ethers.provider.send('evm_increaseTime', [-1000])
@@ -265,7 +271,7 @@ describe('Erc1155Quest', async () => {
 
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
-            await deployedQuestContract.claim()
+            await deployedQuestContract.claim(messageHash, signature)
             const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(endingBalance.toString()).to.equal("2")
             await ethers.provider.send('evm_increaseTime', [-1000])
@@ -287,15 +293,15 @@ describe('Erc1155Quest', async () => {
 
             expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
-            await deployedQuestContract.claim()
+            await deployedQuestContract.claim(messageHash, signature)
             const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address, rewardAmount)
             expect(endingBalance.toString()).to.equal("1")
 
-            await deployedQuestContract.connect(firstAddress).claim()
+            await deployedQuestContract.connect(firstAddress).claim(messageHash, signature)
             const secondEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address, rewardAmount)
             expect(secondEndingBalance.toString()).to.equal("1")
 
-            await deployedQuestContract.connect(secondAddress).claim()
+            await deployedQuestContract.connect(secondAddress).claim(messageHash, signature)
             const thirdEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(secondAddress.address, rewardAmount)
             expect(thirdEndingBalance.toString()).to.equal("1")
 
@@ -315,8 +321,8 @@ describe('Erc1155Quest', async () => {
 
             expect(beginningContractBalance.toString()).to.equal("100")
 
-            await deployedQuestContract.claim()
-            await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(
+            await deployedQuestContract.claim(messageHash, signature)
+            await expect(deployedQuestContract.claim(messageHash, signature)).to.be.revertedWithCustomError(
                 questContract,
                 'AlreadyClaimed'
             )
