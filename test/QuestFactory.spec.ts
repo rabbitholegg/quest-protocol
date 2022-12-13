@@ -66,7 +66,7 @@ describe('QuestFactory', () => {
     ])) as RabbitHoleReceipt
   }
 
-  describe('createQuest', () => {
+  describe('createQuest()', () => {
     const erc20QuestId = 'asdf'
     const erc1155QuestId = 'fdsa'
 
@@ -139,6 +139,14 @@ describe('QuestFactory', () => {
           deployedRabbitHoleReceiptContract.address
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
+    })
+  })
+
+  describe('setClaimSignerAddress()', () => {
+    it('Should update claimSignerAddress', async () => {
+      const newAddress = firstAddress.address
+      await deployedFactoryContract.setClaimSignerAddress(newAddress)
+      expect(await deployedFactoryContract.claimSignerAddress()).to.equal(newAddress)
     })
   })
 })
