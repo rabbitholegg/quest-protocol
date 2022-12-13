@@ -19,7 +19,6 @@ module.exports = {
       {
         version: '0.8.15',
         settings: {
-          viaIR: true,
           optimizer: {
             enabled: true,
             runs: 5000,
@@ -44,11 +43,11 @@ module.exports = {
     },
     mainnet: {
       url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
-      accounts: [`0x${process.env.MAINNET_PRIVATE_KEY}`],
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
     },
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_API_KEY}`,
-      accounts: [`0x${process.env.TESTNET_PRIVATE_KEY}`],
+      accounts: process.env.TESTNET_PRIVATE_KEY ? [`0x${process.env.TESTNET_PRIVATE_KEY}`] : [],
     },
   },
 }
