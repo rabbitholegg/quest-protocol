@@ -37,6 +37,7 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      chainId: 1337,
       settings: {
         debug: {
           revertStrings: 'debug',
