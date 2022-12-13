@@ -11,12 +11,20 @@ describe('Erc20Quest', async () => {
     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
     const totalRewards = 1000
     const rewardAmount = 10
-    const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
-    const questContract = await ethers.getContractFactory('Erc20Quest')
-    const sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
-    const rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+    let owner, firstAddress, secondAddress, thirdAddress, fourthAddress, questContract, sampleERC20Contract, rabbitholeReceiptContract
 
     beforeEach(async () => {
+        const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] = await ethers.getSigners()
+        questContract = await ethers.getContractFactory('Erc20Quest')
+        sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+        rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+
+        owner = local_owner
+        firstAddress = local_firstAddress
+        secondAddress = local_secondAddress
+        thirdAddress = local_thirdAddress
+        fourthAddress = local_fourthAddress
+
         expiryDate = Math.floor(Date.now() / 1000) + 10000
         startDate = Math.floor(Date.now() / 1000) + 1000
         await deployRabbitholeReceiptContract()

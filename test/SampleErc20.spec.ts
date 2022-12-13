@@ -13,7 +13,6 @@ describe('Sample ERC-20 contract', async () => {
 
   describe('Deployment', () => {
     it('deploys a mock erc20', async () => {
-      console.log()
       const tokenSymbol = await deployedErc20.symbol()
       expect(tokenSymbol).to.equal('RTC')
     })
