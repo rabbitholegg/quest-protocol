@@ -9,6 +9,8 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 contract QuestFactory is Initializable, OwnableUpgradeable {
     error QuestIdUsed();
 
+    address public claimSignerAddress;
+
     // TODO: add a numerical questId (OZ's counter)
     mapping(string => address) public questAddressForQuestId;
 
@@ -20,8 +22,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize() public initializer {
+    function initialize(address claimSignerAddress_) public initializer {
         __Ownable_init();
+        claimSignerAddress = claimSignerAddress_;
     }
 
     function createQuest(
@@ -66,7 +69,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
-                receiptContractAddress_
+                receiptContractAddress_,
+                claimSignerAddress
             );
             newQuest.transferOwnership(msg.sender);
 
@@ -76,6 +80,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         }
 
         return address(0);
+    }
+
+    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
+        claimSignerAddress = claimSignerAddress_;
     }
 
     function getQuestAddress(string memory questId_) external view returns (address) {
