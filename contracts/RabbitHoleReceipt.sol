@@ -136,7 +136,8 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
             '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
             '<rect width="100%" height="100%" fill="black" />',
-            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">',"RabbitHole Quest Receipt",'</text>',
+            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest #',questIdForTokenId[_tokenId],'</text>',
+            '<text x="70%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest Receipt #',_tokenId,'</text>',
             '</svg>'
         );
         return string(
