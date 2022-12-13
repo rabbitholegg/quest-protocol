@@ -9,6 +9,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 contract QuestFactory is Initializable, OwnableUpgradeable {
     error QuestIdUsed();
 
+    // TODO: add a numerical questId (OZ's counter)
     mapping(string => address) public questAddressForQuestId;
 
     // Todo create data structure of all quests
@@ -29,7 +30,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         uint256 startTime_,
         uint256 totalAmount_,
         string memory allowList_,
-        uint256 rewardAmount_,
+        uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
         address receiptContractAddress_
@@ -44,17 +45,40 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 startTime_,
                 totalAmount_,
                 allowList_,
-                rewardAmount_,
+                rewardAmountOrTokenId_,
                 questId_,
                 receiptContractAddress_
             );
+            newQuest.transferOwnership(msg.sender);
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
             return address(newQuest);
         }
-        // TODO: Add 1155
+
+        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+            Erc1155Quest newQuest = new Erc1155Quest();
+            newQuest.initialize(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalAmount_,
+                allowList_,
+                rewardAmountOrTokenId_,
+                questId_,
+                receiptContractAddress_
+            );
+            newQuest.transferOwnership(msg.sender);
+
+            emit QuestCreated(msg.sender, address(newQuest), contractType_);
+            questAddressForQuestId[questId_] = address(newQuest);
+            return address(newQuest);
+        }
 
         return address(0);
+    }
+
+    function getQuestAddress(string memory questId_) external view returns (address) {
+        return questAddressForQuestId[questId_];
     }
 }
