@@ -9,9 +9,10 @@ import {IQuest} from "./interfaces/IQuest.sol";
 import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
-contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holder {
+contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holder, ERC721Holder {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     RabbitHoleReceipt public rabbitholeReceiptContract;
