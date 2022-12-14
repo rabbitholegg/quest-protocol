@@ -1,4 +1,5 @@
 .openzeppelin/unknown-31337.json
+.openzeppelin/unknown-1337.json
 node_modules/
 build/
 wrangler.toml
@@ -7,3 +8,4 @@ cache/
 .env
 .yarn-error.log
 .idea
+typechain-types/

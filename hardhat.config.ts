@@ -2,12 +2,14 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
-require('@nomicfoundation/hardhat-chai-matchers')
-import "hardhat-gas-reporter"
+import '@nomicfoundation/hardhat-chai-matchers'
+import 'hardhat-gas-reporter'
+import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-ethers'
+import '@nomiclabs/hardhat-waffle'
 import '@openzeppelin/hardhat-upgrades'
-import "@openzeppelin/hardhat-defender"
-import "@nomiclabs/hardhat-etherscan"
+import '@openzeppelin/hardhat-defender'
+import '@typechain/hardhat'
 
 module.exports = {
   defender: {
@@ -35,6 +37,7 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      chainId: 1337,
       settings: {
         debug: {
           revertStrings: 'debug',
