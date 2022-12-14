@@ -4,6 +4,7 @@ pragma solidity ^0.8.15;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
 contract QuestFactory is Initializable, OwnableUpgradeable {
@@ -13,6 +14,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
     // TODO: add a numerical questId (OZ's counter)
     mapping(string => address) public questAddressForQuestId;
+
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     // Todo create data structure of all quests
 
@@ -56,6 +59,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
+
+            rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+            rabbitholeReceiptContract.mint(address(newQuest), totalAmount_, questId_);
             return address(newQuest);
         }
 
