@@ -18,14 +18,13 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
   bytes32 public merkleRoot;
   bool public hasStarted;
   bool public isPaused;
-  string public allowList;
   string public questId;
 
   mapping(address => bool) private claimedList;
 
   function initialize(
     address token_, uint256 endTime_,
-    uint256 startTime_, uint256 totalAmount_, string memory allowList_,
+    uint256 startTime_, uint256 totalAmount_,
     uint256 rewardAmountInWei_, string memory questId_)  public initializer {
     __Ownable_init();
     if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -35,7 +34,6 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
     rewardToken = token_;
     totalAmount = totalAmount_;
     rewardAmountInWei = rewardAmountInWei_;
-    allowList = allowList_;
     questId = questId_;
   }
 
@@ -62,10 +60,6 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
   function setRewardToken(address rewardTokenAddress_) public onlyOwner {
     rewardToken = rewardTokenAddress_;
-  }
-
-  function setAllowList(string memory allowList_) public onlyOwner {
-    allowList = allowList_;
   }
 
   function _setClaimed(address account) private {

@@ -8,7 +8,6 @@
 //     let deployedSampleErc20Contract: SampleErc20Type
 //     let expiryDate: number, startDate: number
 //     const mockAddress = '0x0000000000000000000000000000000000000000'
-//     const allowList = 'ipfs://someCidToAnArrayOfAddresses'
 //     const totalRewards = 1000
 //     const rewardAmount = 10
 //     const [owner, firstAddress, secondAddress, thirdAddress, fourthAddress] = await ethers.getSigners()
@@ -30,7 +29,6 @@
 //             expiryDate,
 //             startDate,
 //             totalRewards,
-//             allowList,
 //             rewardAmount,
 //             'asdf'
 //         ])
@@ -88,12 +86,7 @@
 //                 const startTime = await deployedQuestContract.startTime()
 //                 expect(startTime).to.equal(startDate)
 //             })
-//
-//
-//             it('Should set the allowList with correct value', async () => {
-//                 const currentAllowList = await deployedQuestContract.allowList()
-//                 expect(currentAllowList).to.equal(allowList)
-//             })
+
 //         })
 //
 //         it('Deployment should set the correct owner address', async () => {
@@ -190,26 +183,6 @@
 //                 deployedQuestContract
 //                     .connect(firstAddress)
 //                     .setMerkleRoot('0xdefa96435aec82d201dbd2e5f050fb4e1fef5edac90ce1e03953f916a5e1132d')
-//             ).to.be.revertedWith('Ownable: caller is not the owner')
-//         })
-//     })
-//
-//     describe('setAllowList()', () => {
-//         it('should set start correctly', async () => {
-//             expect(await deployedQuestContract.allowList()).to.equal(allowList)
-//             await deployedQuestContract
-//                 .connect(owner)
-//                 .setAllowList('ipfs://someOtherCid')
-//             expect(await deployedQuestContract.allowList()).to.equal(
-//                 'ipfs://someOtherCid'
-//             )
-//         })
-//
-//         it('should only allow the owner to start', async () => {
-//             await expect(
-//                 deployedQuestContract
-//                     .connect(firstAddress)
-//                     .setAllowList('ipfs://someOtherCid')
 //             ).to.be.revertedWith('Ownable: caller is not the owner')
 //         })
 //     })

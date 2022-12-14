@@ -21,7 +21,6 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     uint256 public rewardAmountInWei;
     bool public hasStarted;
     bool public isPaused;
-    string public allowList;
     string public questId;
 
     mapping(uint256 => bool) private claimedList;
@@ -31,7 +30,6 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-        string memory allowList_,
         uint256 rewardAmountInWei_,
         string memory questId_,
         address receiptContractAddress_
@@ -44,7 +42,6 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         rewardToken = erc20TokenAddress_;
         totalAmount = totalAmount_;
         rewardAmountInWei = rewardAmountInWei_;
-        allowList = allowList_;
         questId = questId_;
         rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
     }
@@ -63,10 +60,6 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     function unPause() public onlyOwner {
         if (hasStarted == false) revert NotStarted();
         isPaused = false;
-    }
-
-    function setAllowList(string memory allowList_) public onlyOwner {
-        allowList = allowList_;
     }
 
     function _setClaimed(uint256[] memory tokenIds_) private {

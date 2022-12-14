@@ -32,7 +32,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-        string memory allowList_,
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
@@ -47,7 +46,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 receiptContractAddress_
@@ -66,7 +64,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 receiptContractAddress_,

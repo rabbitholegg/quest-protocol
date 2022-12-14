@@ -16,7 +16,6 @@ describe('QuestFactory', () => {
   let deployedFactoryContract: QuestFactory
 
   let expiryDate: number, startDate: number
-  const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
   const rewardAmount = 10
   let owner: SignerWithAddress
@@ -29,7 +28,7 @@ describe('QuestFactory', () => {
   let sampleERC1155Contract: SampleErc1155__factory
 
   beforeEach(async () => {
-    ;[owner, firstAddress, secondAddress] = await ethers.getSigners()
+    [owner, firstAddress, secondAddress] = await ethers.getSigners()
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
 
@@ -80,7 +79,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
@@ -99,7 +97,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc1155',
         erc1155QuestId,
@@ -119,7 +116,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc20',
           erc20QuestId,
@@ -132,7 +128,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc1155',
           erc1155QuestId,

@@ -24,24 +24,22 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     uint256 public rewardTokenId;
     bool public hasStarted;
     bool public isPaused;
-    string public allowList;
     string public questId;
 
     mapping(uint256 => bool) private claimedList;
 
     function initialize(
-        address erc20TokenAddress_, uint256 endTime_,
-        uint256 startTime_, uint256 totalAmount_, string memory allowList_,
+        address erc20RewardTokenAddress_, uint256 endTime_,
+        uint256 startTime_, uint256 totalAmount_,
         uint256 rewardTokenId_, string memory questId_, address receiptContractAddress_, address claimSignerAddress_) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         endTime = endTime_;
         startTime = startTime_;
-        rewardToken = erc20TokenAddress_;
+        rewardToken = erc20RewardTokenAddress_;
         totalAmount = totalAmount_;
         rewardTokenId = rewardTokenId_;
-        allowList = allowList_;
         questId = questId_;
         rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         claimSignerAddress = claimSignerAddress_;
@@ -61,10 +59,6 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     function unPause() public onlyOwner {
         if (hasStarted == false) revert NotStarted();
         isPaused = false;
-    }
-
-    function setAllowList(string memory allowList_) public onlyOwner {
-        allowList = allowList_;
     }
 
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
