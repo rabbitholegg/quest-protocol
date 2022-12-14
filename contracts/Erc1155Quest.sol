@@ -79,12 +79,11 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     }
 
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-            bytes32 messageDigest = keccak256(
-                abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-            );
-            return ECDSAUpgradeable.recover(messageDigest, signature);
-        }
-
+        bytes32 messageDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+        );
+        return ECDSAUpgradeable.recover(messageDigest, signature);
+    }
 
     function claim(bytes32 hash, bytes memory signature) public virtual {
         if (hasStarted == false) revert NotStarted();

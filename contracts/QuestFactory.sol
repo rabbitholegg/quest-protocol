@@ -53,7 +53,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
-                receiptContractAddress_
+                receiptContractAddress_,
+                claimSignerAddress
             );
             newQuest.transferOwnership(msg.sender);
 
