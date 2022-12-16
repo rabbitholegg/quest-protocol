@@ -11,6 +11,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     error OverMaxAllowedToMint();
 
     address public claimSignerAddress;
+    address public minterAddress;
     RabbitHoleReceipt public rabbitholeReceiptContract;
 
     // TODO: add a numerical questId (OZ's counter)
@@ -26,10 +27,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_) public initializer {
+    modifier onlyMinter() {
+        msg.sender == minterAddress;
+        _;
+    }
+
+    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_, address minterAddress_) public initializer {
         __Ownable_init();
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+        minterAddress = minterAddress_;
     }
 
     function createQuest(
@@ -97,10 +104,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     }
 
     // need to set this contract as Minter on the receipt contract.
-    // also need to lock it down with a onlyMinter modifier
-    function mintReceipt(unit amount_, string memory questId_) public {
+    function mintReceipt(unit amount_, string memory questId_) onlyMinter public {
         if (totalAmountForQuestId[questId_] - amountMintedForQuestId[questId_] - amount_ < 0) revert OverMaxAllowedToMint();
         amountMintedForQuestId[questId_] += amount_;
         rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
     }
+
 }
