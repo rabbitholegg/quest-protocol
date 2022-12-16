@@ -26,8 +26,6 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
 
     mapping(uint256 => bool) private claimedList;
 
-    uint public amountMinted;
-
     function initialize(
         address erc20TokenAddress_,
         uint256 endTime_,
