@@ -97,6 +97,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     }
 
     // need to set this contract as Minter on the receipt contract.
+    // also need to lock it down with a onlyMinter modifier
     function mintReceipt(unit amount_, string memory questId_) public {
         if (totalAmountForQuestId[questId_] - amountMintedForQuestId[questId_] - amount_ < 0) revert OverMaxAllowedToMint();
         amountMintedForQuestId[questId_] += amount_;
