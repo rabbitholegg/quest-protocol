@@ -8,11 +8,15 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 
 contract QuestFactory is Initializable, OwnableUpgradeable {
     error QuestIdUsed();
+    error OverMaxAllowedToMint();
 
     address public claimSignerAddress;
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     // TODO: add a numerical questId (OZ's counter)
     mapping(string => address) public questAddressForQuestId;
+    mapping(string => uint256) public totalAmountForQuestId;
+    mapping(string => uint256) public amountMintedForQuestId;
 
     // Todo create data structure of all quests
 
@@ -22,9 +26,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(address claimSignerAddress_) public initializer {
+    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_) public initializer {
         __Ownable_init();
         claimSignerAddress = claimSignerAddress_;
+        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
     function createQuest(
@@ -56,6 +61,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
+            totalAmountForQuestId[questId_] = totalAmount_;
             return address(newQuest);
         }
 
@@ -88,5 +94,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
     function getQuestAddress(string memory questId_) external view returns (address) {
         return questAddressForQuestId[questId_];
+    }
+
+    // need to set this contract as Minter on the receipt contract.
+    function mintReceipt(unit amount_, string memory questId_) public {
+        if (totalAmountForQuestId[questId_] - amountMintedForQuestId[questId_] - amount_ < 0) revert OverMaxAllowedToMint();
+        amountMintedForQuestId[questId_] += amount_;
+        rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
     }
 }
