@@ -20,8 +20,7 @@ describe('QuestFactory', () => {
   const totalRewards = 1000
   const rewardAmount = 10
   let owner: SignerWithAddress
-  let firstAddress: SignerWithAddress
-  let secondAddress: SignerWithAddress
+  let royaltyRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
@@ -29,7 +28,7 @@ describe('QuestFactory', () => {
   let sampleERC1155Contract: SampleErc1155__factory
 
   beforeEach(async () => {
-    ;[owner, firstAddress, secondAddress] = await ethers.getSigners()
+    [owner, royaltyRecipient] = await ethers.getSigners()
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
 
@@ -40,8 +39,8 @@ describe('QuestFactory', () => {
 
     await deploySampleErc20Contract()
     await deploySampleErc1155Conract()
-    await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
+    await deployRabbitHoleReceiptContract()
   })
 
   const deployFactoryContract = async () => {
@@ -60,8 +59,8 @@ describe('QuestFactory', () => {
 
   const deployRabbitHoleReceiptContract = async () => {
     deployedRabbitHoleReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
-      firstAddress.address,
-      secondAddress.address,
+      royaltyRecipient.address,
+      deployedFactoryContract.address,
       69,
     ])) as RabbitHoleReceipt
   }
@@ -144,7 +143,7 @@ describe('QuestFactory', () => {
 
   describe('setClaimSignerAddress()', () => {
     it('Should update claimSignerAddress', async () => {
-      const newAddress = firstAddress.address
+      const newAddress = royaltyRecipient.address
       await deployedFactoryContract.setClaimSignerAddress(newAddress)
       expect(await deployedFactoryContract.claimSignerAddress()).to.equal(newAddress)
     })

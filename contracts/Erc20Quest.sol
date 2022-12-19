@@ -7,7 +7,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
-import 'hardhat/console.sol';
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -15,6 +15,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
+    address public claimSignerAddress;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalAmount;
@@ -34,7 +35,8 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         string memory allowList_,
         uint256 rewardAmountInWei_,
         string memory questId_,
-        address receiptContractAddress_
+        address receiptContractAddress_,
+        address claimSignerAddress_
     ) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -47,6 +49,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         allowList = allowList_;
         questId = questId_;
         rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+        claimSignerAddress = claimSignerAddress_;
     }
 
     function start() public onlyOwner {
@@ -69,17 +72,29 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         allowList = allowList_;
     }
 
+    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
+        claimSignerAddress = claimSignerAddress_;
+    }
+
     function _setClaimed(uint256[] memory tokenIds_) private {
         for (uint i = 0; i < tokenIds_.length; i++) {
             claimedList[tokenIds_[i]] = true;
         }
     }
 
-    function claim() public virtual {
+    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
+        bytes32 messageDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+        );
+        return ECDSAUpgradeable.recover(messageDigest, signature);
+    }
+
+    function claim(bytes32 hash, bytes memory signature) public virtual {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < rewardAmountInWei) revert AmountExceedsBalance();
+        if (recoverSigner(hash, signature) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
