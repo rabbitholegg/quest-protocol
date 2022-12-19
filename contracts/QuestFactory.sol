@@ -5,10 +5,12 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 contract QuestFactory is Initializable, OwnableUpgradeable {
     error QuestIdUsed();
     error OverMaxAllowedToMint();
+    error AddressNotSigned();
 
     address public claimSignerAddress;
     address public minterAddress;
@@ -103,9 +105,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         return questAddressForQuestId[questId_];
     }
 
+    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
+        bytes32 messageDigest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+        );
+        return ECDSAUpgradeable.recover(messageDigest, signature);
+    }
+
     // need to set this contract as Minter on the receipt contract.
-    function mintReceipt(unit amount_, string memory questId_) onlyMinter public {
+    function mintReceipt(unit amount_, string memory questId_, bytes32 hash_, bytes memory signature_) onlyMinter public {
         if (totalAmountForQuestId[questId_] - amountMintedForQuestId[questId_] - amount_ < 0) revert OverMaxAllowedToMint();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+
         amountMintedForQuestId[questId_] += amount_;
         rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
     }
