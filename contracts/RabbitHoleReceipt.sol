@@ -52,7 +52,7 @@ contract RabbitHoleReceipt is Initializable, ERC721Upgradeable, ERC721Enumerable
         royaltyFee = _royaltyFee;
     }
 
-    function _mintSingleNFT(adrdess _to, string memory _questId) private {
+    function _mintSingleNFT(address _to, string memory _questId) private {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
         _safeMint(_to, newTokenID);

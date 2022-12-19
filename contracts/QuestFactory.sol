@@ -4,6 +4,7 @@ pragma solidity ^0.8.15;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
@@ -64,7 +65,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
-                receiptContractAddress_
+                receiptContractAddress_,
+                claimSignerAddress
             );
             newQuest.transferOwnership(msg.sender);
 
