@@ -58,7 +58,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
-            rabbitholeReceiptContract.mint(address(newQuest), totalAmount_, questId_);
             return address(newQuest);
         }
 
