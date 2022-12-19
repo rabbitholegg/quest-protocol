@@ -7,10 +7,9 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
-contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest, ERC721Holder {
+contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     RabbitHoleReceipt public rabbitholeReceiptContract;
