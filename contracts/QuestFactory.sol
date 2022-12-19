@@ -41,8 +41,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     ) public onlyOwner returns (address) {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
-        RabbitHoleReceipt rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             Erc20Quest newQuest = new Erc20Quest();
             newQuest.initialize(
@@ -81,7 +79,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
-            rabbitholeReceiptContract.mint(address(newQuest), totalAmount_, questId_);
             return address(newQuest);
         }
 

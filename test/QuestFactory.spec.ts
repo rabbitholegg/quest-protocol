@@ -17,7 +17,7 @@ describe('QuestFactory', () => {
 
   let expiryDate: number, startDate: number
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
-  const totalRewards = 100 // 1000 is to much gas for tests
+  const totalRewards = 1000
   const rewardAmount = 10
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
@@ -90,7 +90,6 @@ describe('QuestFactory', () => {
       const deployedErc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
       expect(await deployedErc20Quest.startTime()).to.equal(startDate)
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
-      expect(await deployedRabbitHoleReceiptContract.balanceOf(questAddress)).to.equal(totalRewards)
     })
 
     it('Should create a new ERC1155 quest', async () => {
@@ -110,7 +109,6 @@ describe('QuestFactory', () => {
       const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
       expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
       expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
-      expect(await deployedRabbitHoleReceiptContract.balanceOf(questAddress)).to.equal(totalRewards)
     })
 
     it('Should revert if trying to use existing quest id', async () => {
