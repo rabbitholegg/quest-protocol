@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {IERC20Upgradeable, SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IQuest} from "./interfaces/IQuest.sol";
-import {RabbitHoleReceipt} from "./RabbitHoleReceipt.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import {IERC20Upgradeable, SafeERC20Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
+import {MerkleProofUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol';
+import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {IQuest} from './interfaces/IQuest.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
+import '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
+import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 
 contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holder {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -30,9 +30,16 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     mapping(uint256 => bool) private claimedList;
 
     function initialize(
-        address erc20TokenAddress_, uint256 endTime_,
-        uint256 startTime_, uint256 totalAmount_, string memory allowList_,
-        uint256 rewardTokenId_, string memory questId_, address receiptContractAddress_, address claimSignerAddress_) public initializer {
+        address erc20TokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalAmount_,
+        string memory allowList_,
+        uint256 rewardTokenId_,
+        string memory questId_,
+        address receiptContractAddress_,
+        address claimSignerAddress_
+    ) public initializer {
         __Ownable_init();
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -48,7 +55,8 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     }
 
     function start() public onlyOwner {
-        if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount) revert TotalAmountExceedsBalance();
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount)
+            revert TotalAmountExceedsBalance();
         isPaused = false;
         hasStarted = true;
     }
@@ -78,9 +86,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
     }
 
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-        );
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
         return ECDSAUpgradeable.recover(messageDigest, signature);
     }
 
@@ -89,6 +95,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount) revert AmountExceedsBalance();
+        if (keccak256(abi.encodePacked(msg.sender, address(this))) != hash) revert InvalidHash();
         if (recoverSigner(hash, signature) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
@@ -105,7 +112,7 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
 
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, redeemableTokenCount, "0x00");
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, redeemableTokenCount, '0x00');
         _setClaimed(tokens);
 
         emit Claimed(msg.sender, redeemableTokenCount);
@@ -117,6 +124,12 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
 
     function withdraw() public onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardTokenId, IERC1155(rewardToken).balanceOf(address(this), rewardTokenId), "0x00");
+        IERC1155(rewardToken).safeTransferFrom(
+            address(this),
+            msg.sender,
+            rewardTokenId,
+            IERC1155(rewardToken).balanceOf(address(this), rewardTokenId),
+            '0x00'
+        );
     }
 }
