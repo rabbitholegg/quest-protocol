@@ -7,7 +7,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 
 contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -83,9 +83,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
     }
 
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-        );
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
         return ECDSAUpgradeable.recover(messageDigest, signature);
     }
 
@@ -94,6 +92,7 @@ contract Erc20Quest is Initializable, OwnableUpgradeable, IQuest {
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < rewardAmountInWei) revert AmountExceedsBalance();
+        if (keccak256(abi.encodePacked(msg.sender, address(this))) != hash) revert InvalidHash();
         if (recoverSigner(hash, signature) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
