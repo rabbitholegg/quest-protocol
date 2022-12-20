@@ -48,8 +48,6 @@ describe('Erc20Quest', async () => {
     fourthAddress = local_fourthAddress
 
     wallet = Wallet.fromMnemonic(mnemonic)
-    messageHash = utils.id('hello world')
-    signature = await wallet.signMessage(utils.arrayify(messageHash))
 
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
@@ -57,6 +55,12 @@ describe('Erc20Quest', async () => {
     await deploySampleErc20Contract()
     await deployDistributorContract()
     await transferRewardsToDistributor()
+
+    messageHash = utils.solidityKeccak256(
+      ['address', 'address'],
+      [owner.address.toLowerCase(), deployedQuestContract.address.toLowerCase()]
+    )
+    signature = await wallet.signMessage(utils.arrayify(messageHash))
   })
 
   const deployRabbitholeReceiptContract = async () => {
@@ -284,7 +288,7 @@ describe('Erc20Quest', async () => {
 
       await ethers.provider.send('evm_increaseTime', [1000])
 
-      const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      const startingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(startingBalance.toString()).to.equal('0')
 
       const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
@@ -293,8 +297,28 @@ describe('Erc20Quest', async () => {
       expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
       await deployedQuestContract.claim(messageHash, signature)
-      const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(endingBalance.toString()).to.equal('20')
+      await ethers.provider.send('evm_increaseTime', [-1000])
+    })
+
+    it('should fail if hash and signature tries to be reused for different address', async () => {
+      await deployedRabbitholeReceiptContract.mint(owner.address, 2, questId)
+      await deployedQuestContract.start()
+
+      await ethers.provider.send('evm_increaseTime', [1000])
+
+      const startingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
+      expect(startingBalance.toString()).to.equal('0')
+
+      await deployedQuestContract.claim(messageHash, signature)
+      const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
+      expect(endingBalance.toString()).to.equal('20')
+
+      await expect(
+        deployedQuestContract.connect(firstAddress).claim(messageHash, signature)
+      ).to.be.revertedWithCustomError(questContract, 'InvalidHash')
+
       await ethers.provider.send('evm_increaseTime', [-1000])
     })
 
@@ -306,7 +330,7 @@ describe('Erc20Quest', async () => {
 
       await ethers.provider.send('evm_increaseTime', [1000])
 
-      const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      const startingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(startingBalance.toString()).to.equal('0')
 
       const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
@@ -315,15 +339,25 @@ describe('Erc20Quest', async () => {
       expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
       await deployedQuestContract.claim(messageHash, signature)
-      const endingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(endingBalance.toString()).to.equal('10')
 
-      await deployedQuestContract.connect(firstAddress).claim(messageHash, signature)
-      const secondEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(firstAddress.address)
+      const firstAddressMessageHash = utils.solidityKeccak256(
+        ['address', 'address'],
+        [firstAddress.address.toLowerCase(), deployedQuestContract.address.toLowerCase()]
+      )
+      const firstAddressSignature = await wallet.signMessage(utils.arrayify(firstAddressMessageHash))
+      await deployedQuestContract.connect(firstAddress).claim(firstAddressMessageHash, firstAddressSignature)
+      const secondEndingBalance = await deployedSampleErc20Contract.balanceOf(firstAddress.address)
       expect(secondEndingBalance.toString()).to.equal('10')
 
-      await deployedQuestContract.connect(secondAddress).claim(messageHash, signature)
-      const thirdEndingBalance = await deployedSampleErc20Contract.functions.balanceOf(secondAddress.address)
+      const secondAddressMessageHash = utils.solidityKeccak256(
+        ['address', 'address'],
+        [secondAddress.address.toLowerCase(), deployedQuestContract.address.toLowerCase()]
+      )
+      const secondAddressSignature = await wallet.signMessage(utils.arrayify(secondAddressMessageHash))
+      await deployedQuestContract.connect(secondAddress).claim(secondAddressMessageHash, secondAddressSignature)
+      const thirdEndingBalance = await deployedSampleErc20Contract.balanceOf(secondAddress.address)
       expect(thirdEndingBalance.toString()).to.equal('10')
 
       await ethers.provider.send('evm_increaseTime', [-1000])
@@ -359,16 +393,14 @@ describe('Erc20Quest', async () => {
     })
 
     it('should transfer all rewards back to owner', async () => {
-      const beginningContractBalance = await deployedSampleErc20Contract.functions.balanceOf(
-        deployedQuestContract.address
-      )
-      const beginningOwnerBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      const beginningContractBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
+      const beginningOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(beginningContractBalance.toString()).to.equal(totalRewards.toString())
       expect(beginningOwnerBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [10001])
       await deployedQuestContract.connect(owner).withdraw()
 
-      const endContactBalance = await deployedSampleErc20Contract.functions.balanceOf(deployedQuestContract.address)
+      const endContactBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
       expect(endContactBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [-10001])
     })

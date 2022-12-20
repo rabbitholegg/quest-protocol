@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0;
+
 // TODO clean this whole thing up
 // Allows anyone to claim a token if they exist in a merkle root.
 interface IQuest {
@@ -19,4 +20,5 @@ interface IQuest {
     error NotStarted();
     error QuestPaused();
     error AddressNotSigned();
+    error InvalidHash();
 }
