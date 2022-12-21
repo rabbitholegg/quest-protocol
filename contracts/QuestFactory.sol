@@ -14,15 +14,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     error AddressNotSigned();
 
     address public claimSignerAddress;
-    address public minterAddress;
-    RabbitHoleReceipt public rabbitholeReceiptContract;
 
-    // TODO: add a numerical questId (OZ's counter)
     mapping(string => address) public questAddressForQuestId;
     mapping(string => uint256) public totalAmountForQuestId;
     mapping(string => uint256) public amountMintedForQuestId;
 
-    // Todo create data structure of all quests
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
@@ -30,16 +27,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    modifier onlyMinter() {
-        msg.sender == minterAddress;
-        _;
-    }
-
-    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_, address minterAddress_) public initializer {
+    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_) public initializer {
         __Ownable_init();
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-        minterAddress = minterAddress_;
     }
 
     function createQuest(
@@ -115,7 +106,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     }
 
     // need to set this contract as Minter on the receipt contract.
-    function mintReceipt(uint amount_, string memory questId_, bytes32 hash_, bytes memory signature_) onlyMinter public {
+    function mintReceipt(uint amount_, string memory questId_, bytes32 hash_, bytes memory signature_) public {
         if (amountMintedForQuestId[questId_] + amount_ > totalAmountForQuestId[questId_]) revert OverMaxAllowedToMint();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
