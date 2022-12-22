@@ -8,7 +8,7 @@ import {
   SampleERC20__factory,
   SampleErc1155__factory,
 } from '../typechain-types'
-import {Wallet, utils} from 'ethers'
+import { Wallet, utils } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
@@ -20,7 +20,7 @@ describe('QuestFactory', () => {
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
   const rewardAmount = 10
-  const mnemonic = "announce room limb pattern dry unit scale effort smooth jazz weasel alcohol"
+  const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
 
@@ -29,17 +29,13 @@ describe('QuestFactory', () => {
   let sampleERC20Contract: SampleERC20__factory
   let sampleERC1155Contract: SampleErc1155__factory
   let wallet: Wallet
-  let messageHash: string
-  let signature: string
 
   beforeEach(async () => {
-    [owner, royaltyRecipient] = await ethers.getSigners()
+    ;[owner, royaltyRecipient] = await ethers.getSigners()
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
 
     wallet = Wallet.fromMnemonic(mnemonic)
-    messageHash = ethers.utils.id("hello world");
-    signature = await wallet.signMessage(utils.arrayify(messageHash))
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
@@ -53,7 +49,10 @@ describe('QuestFactory', () => {
   })
 
   const deployFactoryContract = async () => {
-    deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [wallet.address, deployedRabbitHoleReceiptContract.address])) as QuestFactory
+    deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
+      wallet.address,
+      deployedRabbitHoleReceiptContract.address,
+    ])) as QuestFactory
   }
 
   const deploySampleErc20Contract = async () => {
@@ -160,8 +159,12 @@ describe('QuestFactory', () => {
 
   describe('mintReceipt()', () => {
     const erc20QuestId = 'asdf'
+    let messageHash: string
+    let signature: string
 
     beforeEach(async () => {
+      messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), erc20QuestId])
+      signature = await wallet.signMessage(utils.arrayify(messageHash))
       const tx = await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -181,9 +184,25 @@ describe('QuestFactory', () => {
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
     })
 
+    it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).mintReceipt(1, erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
+    })
+
+    // FIXME: User should only be allowed to mint receipts only once
+    it.skip('Should fail if user is able to call mintReceipt multiple times', async () => {
+      await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
+
+      await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
+    })
+
     it('Should not mint a number of receipts over the max allowed', async () => {
-      await expect(deployedFactoryContract.mintReceipt(10001, erc20QuestId, messageHash, signature)).to.be.revertedWithCustomError(questFactoryContract, "OverMaxAllowedToMint");
+      await expect(
+        deployedFactoryContract.mintReceipt(10001, erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'OverMaxAllowedToMint')
     })
   })
-
 })
