@@ -84,6 +84,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             questAddressForQuestId[questId_] = address(newQuest);
+            totalAmountForQuestId[questId_] = totalAmount_;
             return address(newQuest);
         }
 
@@ -92,6 +93,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
 
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
         claimSignerAddress = claimSignerAddress_;
+    }
+
+    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
+        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
     function getQuestAddress(string memory questId_) external view returns (address) {
