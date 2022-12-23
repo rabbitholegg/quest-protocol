@@ -85,18 +85,18 @@ contract Erc1155Quest is Initializable, OwnableUpgradeable, IQuest, ERC1155Holde
         }
     }
 
-    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
-        return ECDSAUpgradeable.recover(messageDigest, signature);
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
+        return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
-    function claim(bytes32 hash, bytes memory signature) public virtual {
+    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public virtual {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         if (IERC1155(rewardToken).balanceOf(address(this), rewardTokenId) < totalAmount) revert AmountExceedsBalance();
-        if (keccak256(abi.encodePacked(msg.sender, address(this))) != hash) revert InvalidHash();
-        if (recoverSigner(hash, signature) != claimSignerAddress) revert AddressNotSigned();
+        if (keccak256(abi.encodePacked(msg.sender, questId, timestamp_)) != hash_) revert InvalidHash();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
