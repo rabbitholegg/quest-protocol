@@ -53,7 +53,7 @@ describe('QuestFactory', () => {
   })
 
   const deployFactoryContract = async () => {
-    deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [wallet.address, deployedRabbitHoleReceiptContract.address])) as QuestFactory
+    deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [wallet.address, deployedRabbitHoleReceiptContract.address, owner.address])) as QuestFactory
   }
 
   const deploySampleErc20Contract = async () => {
