@@ -190,12 +190,13 @@ describe('QuestFactory', () => {
       ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
     })
 
-    // FIXME: User should only be allowed to mint receipts only once
-    it.skip('Should fail if user is able to call mintReceipt multiple times', async () => {
+    it('Should fail if user is able to call mintReceipt multiple times', async () => {
       await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
 
-      await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      await expect(
+        deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
     })
 
