@@ -11,13 +11,13 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         super.start();
     }
 
-    function claim(bytes32 hash, bytes memory signature) public override {
+    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public override {
         if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount) revert AmountExceedsBalance();
-        super.claim(hash, signature);
+        super.claim(timestamp_, hash_, signature_);
     }
 
-    function _transferRewards(uint256 amount) internal override {
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardAmountInWeiOrTokenId, amount, '0x00');
+    function _transferRewards(uint256 amount_) internal override {
+        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardAmountInWeiOrTokenId, amount_, '0x00');
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal pure override returns (uint256) {

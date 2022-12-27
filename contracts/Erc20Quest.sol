@@ -12,13 +12,13 @@ contract Erc20Quest is Quest {
         super.start();
     }
 
-    function claim(bytes32 hash, bytes memory signature) public override {
+    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public override {
         if (IERC20Upgradeable(rewardToken).balanceOf(address(this)) < rewardAmountInWeiOrTokenId) revert AmountExceedsBalance();
-        super.claim(hash, signature);
+        super.claim(timestamp_, hash_, signature_);
     }
 
-    function _transferRewards(uint256 amount) internal override {
-        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, amount);
+    function _transferRewards(uint256 amount_) internal override {
+        IERC20Upgradeable(rewardToken).safeTransfer(msg.sender, amount_);
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal view override returns (uint256) {
