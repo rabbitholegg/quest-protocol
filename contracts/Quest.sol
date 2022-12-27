@@ -3,12 +3,11 @@ pragma solidity ^0.8.15;
 
 import {MerkleProof} from '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
-import {Initializable} from '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
-contract Quest is Initializable, Ownable, IQuest {
+contract Quest is Ownable, IQuest {
     RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
