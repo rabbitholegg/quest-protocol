@@ -87,7 +87,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
-        if (keccak256(abi.encodePacked(msg.sender, address(this), timestamp_)) != hash_) revert InvalidHash();
+        if (keccak256(abi.encodePacked(msg.sender, questId, timestamp_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
