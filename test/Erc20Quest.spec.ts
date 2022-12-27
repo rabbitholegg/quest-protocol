@@ -53,7 +53,7 @@ describe('Erc20Quest', async () => {
     startDate = Math.floor(Date.now() / 1000) + 1000
     await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
-    await deployDistributorContract()
+    await deployQuestContract()
     await transferRewardsToDistributor()
 
     messageHash = utils.solidityKeccak256(
@@ -71,8 +71,8 @@ describe('Erc20Quest', async () => {
     ])) as RabbitHoleReceipt
   }
 
-  const deployDistributorContract = async () => {
-    deployedQuestContract = (await upgrades.deployProxy(questContract, [
+  const deployQuestContract = async () => {
+    deployedQuestContract = await questContract.deploy(
       deployedSampleErc20Contract.address,
       expiryDate,
       startDate,
@@ -81,8 +81,9 @@ describe('Erc20Quest', async () => {
       rewardAmount,
       questId,
       deployedRabbitholeReceiptContract.address,
-      wallet.address,
-    ])) as Erc20Quest
+      wallet.address
+    ) as Erc20Quest
+    await deployedQuestContract.deployed()
   }
 
   const deploySampleErc20Contract = async () => {

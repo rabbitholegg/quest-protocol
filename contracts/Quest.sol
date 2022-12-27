@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {MerkleProofUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol';
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {MerkleProof} from '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import {Initializable} from '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
-import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
+import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
-contract Quest is Initializable, OwnableUpgradeable, IQuest {
+contract Quest is Initializable, Ownable, IQuest {
     RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
@@ -24,7 +24,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
     mapping(uint256 => bool) private claimedList;
 
-    function initialize(
+    constructor(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -34,8 +34,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
         string memory questId_,
         address receiptContractAddress_,
         address claimSignerAddress_
-    ) public initializer {
-        __Ownable_init();
+    ) {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         endTime = endTime_;
@@ -80,7 +79,7 @@ contract Quest is Initializable, OwnableUpgradeable, IQuest {
 
     function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
         bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
-        return ECDSAUpgradeable.recover(messageDigest, signature_);
+        return ECDSA.recover(messageDigest, signature_);
     }
 
     function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public virtual {
