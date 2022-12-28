@@ -50,8 +50,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
-            Erc20Quest newQuest = new Erc20Quest();
-            newQuest.initialize(
+            Erc20Quest newQuest = new Erc20Quest(
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -71,8 +70,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         }
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
-            Erc1155Quest newQuest = new Erc1155Quest();
-            newQuest.initialize(
+            Erc1155Quest newQuest = new Erc1155Quest(
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
