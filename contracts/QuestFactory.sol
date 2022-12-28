@@ -15,16 +15,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
     error AddressAlreadyMinted();
     error InvalidHash();
 
-    address public claimSignerAddress;
+    event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
+    // storage vars. Insert new vars at the end to keep the storage layout the same.
+    address public claimSignerAddress;
     mapping(string => address) public questAddressForQuestId;
     mapping(string => uint256) public totalAmountForQuestId;
     mapping(string => uint256) public amountMintedForQuestId;
-    mapping(string => mapping(address => bool)) public addressMintedForQuestId;
-
     RabbitHoleReceipt public rabbitholeReceiptContract;
-
-    event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
+    mapping(string => mapping(address => bool)) public addressMintedForQuestId;
 
     // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
