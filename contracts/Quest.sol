@@ -109,8 +109,6 @@ contract Quest is Ownable, IQuest {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
-        // if (keccak256(abi.encodePacked(msg.sender, questId, timestamp_)) != hash_) revert InvalidHash();
-        // if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         uint[] memory questTokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
         uint[] memory tokens = getClaimableTokenIds(questTokens);
