@@ -80,14 +80,40 @@ contract Quest is Ownable, IQuest {
         return ECDSA.recover(messageDigest, signature_);
     }
 
-    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public virtual {
+    function getClaimableTokenIds(uint[] memory _tokenIds) public view returns (uint[] memory) {
+        uint msgSenderBalance = _tokenIds.length;
+        uint[] memory tokenIdsForClaim = new uint[](msgSenderBalance);
+        uint foundTokens = 0;
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            if (rabbitholeReceiptContract.tokenIdCanClaim(_tokenIds[i])) {
+                tokenIdsForClaim[i] = _tokenIds[i];
+                foundTokens++;
+            }
+        }
+
+        uint[] memory filteredTokens = new uint[](foundTokens);
+        uint filterTokensIndexTracker = 0;
+
+        for (uint i = 0; i < msgSenderBalance; i++) {
+            if (tokenIdsForClaim[i] > 0) {
+                filteredTokens[filterTokensIndexTracker] = tokenIdsForClaim[i];
+                filterTokensIndexTracker++;
+            }
+        }
+
+        return filteredTokens;
+    }
+
+    function claim() public virtual {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
-        if (keccak256(abi.encodePacked(msg.sender, questId, timestamp_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        // if (keccak256(abi.encodePacked(msg.sender, questId, timestamp_)) != hash_) revert InvalidHash();
+        // if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
-        uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
+        uint[] memory questTokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
+        uint[] memory tokens = getClaimableTokenIds(questTokens);
 
         if (tokens.length == 0) revert NoTokensToClaim();
 

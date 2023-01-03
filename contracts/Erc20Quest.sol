@@ -17,16 +17,28 @@ contract Erc20Quest is Quest {
         string memory questId_,
         address receiptContractAddress_,
         address claimSignerAddress_
-    ) Quest(rewardTokenAddress_, endTime_, startTime_, totalAmount_, allowList_, rewardAmountInWeiOrTokenId_, questId_, receiptContractAddress_, claimSignerAddress_) {}
+    )
+        Quest(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalAmount_,
+            allowList_,
+            rewardAmountInWeiOrTokenId_,
+            questId_,
+            receiptContractAddress_,
+            claimSignerAddress_
+        )
+    {}
 
     function start() public override {
         if (IERC20(rewardToken).balanceOf(address(this)) < totalAmount) revert TotalAmountExceedsBalance();
         super.start();
     }
 
-    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public override {
+    function claim() public override {
         if (IERC20(rewardToken).balanceOf(address(this)) < rewardAmountInWeiOrTokenId) revert AmountExceedsBalance();
-        super.claim(timestamp_, hash_, signature_);
+        super.claim();
     }
 
     function _transferRewards(uint256 amount_) internal override {
