@@ -80,8 +80,7 @@ describe('Erc20Quest', async () => {
       allowList,
       rewardAmount,
       questId,
-      deployedRabbitholeReceiptContract.address,
-      wallet.address
+      deployedRabbitholeReceiptContract.address
     )) as Erc20Quest
     await deployedQuestContract.deployed()
   }

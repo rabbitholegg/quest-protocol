@@ -15,8 +15,7 @@ contract Erc20Quest is Quest {
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
-        address receiptContractAddress_,
-        address claimSignerAddress_
+        address receiptContractAddress_
     )
         Quest(
             rewardTokenAddress_,
@@ -26,8 +25,7 @@ contract Erc20Quest is Quest {
             allowList_,
             rewardAmountInWeiOrTokenId_,
             questId_,
-            receiptContractAddress_,
-            claimSignerAddress_
+            receiptContractAddress_
         )
     {}
 

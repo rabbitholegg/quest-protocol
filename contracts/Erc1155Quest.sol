@@ -14,8 +14,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
-        address receiptContractAddress_,
-        address claimSignerAddress_
+        address receiptContractAddress_
     )
         Quest(
             rewardTokenAddress_,
@@ -25,8 +24,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
             allowList_,
             rewardAmountInWeiOrTokenId_,
             questId_,
-            receiptContractAddress_,
-            claimSignerAddress_
+            receiptContractAddress_
         )
     {}
 

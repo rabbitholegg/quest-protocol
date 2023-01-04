@@ -10,7 +10,6 @@ contract Quest is Ownable, IQuest {
     RabbitHoleReceipt public rabbitholeReceiptContract;
 
     address public rewardToken;
-    address public claimSignerAddress;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalAmount;
@@ -30,8 +29,7 @@ contract Quest is Ownable, IQuest {
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
-        address receiptContractAddress_,
-        address claimSignerAddress_
+        address receiptContractAddress_
     ) {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
@@ -43,7 +41,6 @@ contract Quest is Ownable, IQuest {
         allowList = allowList_;
         questId = questId_;
         rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        claimSignerAddress = claimSignerAddress_;
     }
 
     function start() public virtual onlyOwner {
@@ -65,19 +62,10 @@ contract Quest is Ownable, IQuest {
         allowList = allowList_;
     }
 
-    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
-        claimSignerAddress = claimSignerAddress_;
-    }
-
     function _setClaimed(uint256[] memory tokenIds_) private {
         for (uint i = 0; i < tokenIds_.length; i++) {
             claimedList[tokenIds_[i]] = true;
         }
-    }
-
-    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
-        return ECDSA.recover(messageDigest, signature_);
     }
 
     function getClaimableTokenIds(uint[] memory _tokenIds) public view returns (uint[] memory) {

@@ -80,8 +80,7 @@ describe('Erc1155Quest', () => {
       allowList,
       rewardAmount,
       questId,
-      deployedRabbitholeReceiptContract.address,
-      wallet.address
+      deployedRabbitholeReceiptContract.address
     )
     await deployedQuestContract.deployed()
   }
