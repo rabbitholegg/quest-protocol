@@ -10,7 +10,7 @@ import '@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol';
-import './DateTime.sol';
+import {DateTime} from '@quant-finance/solidity-datetime/contracts/DateTime.sol';
 
 contract RabbitHoleReceipt is
     Initializable,
@@ -18,8 +18,7 @@ contract RabbitHoleReceipt is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     OwnableUpgradeable,
-    IERC2981Upgradeable,
-    DateTime
+    IERC2981Upgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using StringsUpgradeable for uint256;
@@ -105,10 +104,10 @@ contract RabbitHoleReceipt is
     }
 
     function tokenIdCanClaim(uint _tokenId) public view returns (bool) {
-        uint16 year = getYear(timestampForTokenId[_tokenId]);
-        uint8 month = getMonth(timestampForTokenId[_tokenId]);
-        uint8 day = getDay(timestampForTokenId[_tokenId]);
-        uint claimTimestamp = toTimestamp(year, month, day, 0, 0, 0) + 86400;
+        uint year = DateTime.getYear(timestampForTokenId[_tokenId]);
+        uint month = DateTime.getMonth(timestampForTokenId[_tokenId]);
+        uint day = DateTime.getDay(timestampForTokenId[_tokenId]);
+        uint claimTimestamp = DateTime.addDays(DateTime.timestampFromDateTime(year, month, day, 0, 0, 0), 1);
         return block.timestamp >= claimTimestamp;
     }
 
