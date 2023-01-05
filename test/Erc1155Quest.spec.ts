@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
-import { Wallet, utils } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import {
   Erc1155Quest__factory,
@@ -21,7 +20,6 @@ describe('Erc1155Quest', () => {
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 10
   const rewardAmount = 1
-  const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   let owner: SignerWithAddress
   let firstAddress: SignerWithAddress
   let secondAddress: SignerWithAddress
@@ -30,9 +28,6 @@ describe('Erc1155Quest', () => {
   let questContract: Erc1155Quest__factory
   let sampleERC20Contract: SampleErc1155__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
-  let messageHash: string
-  let wallet: Wallet
-  let signature: string
 
   beforeEach(async () => {
     const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] =
@@ -47,20 +42,12 @@ describe('Erc1155Quest', () => {
     thirdAddress = local_thirdAddress
     fourthAddress = local_fourthAddress
 
-    wallet = Wallet.fromMnemonic(mnemonic)
-
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
     await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
     await deployQuestContract()
     await transferRewardsToDistributor()
-
-    messageHash = utils.solidityKeccak256(
-      ['address', 'string', 'uint'],
-      [owner.address.toLowerCase(), questId, startDate]
-    )
-    signature = await wallet.signMessage(utils.arrayify(messageHash))
   })
 
   const deployRabbitholeReceiptContract = async () => {
@@ -249,6 +236,22 @@ describe('Erc1155Quest', () => {
       await ethers.provider.send('evm_increaseTime', [1000])
 
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
+      await ethers.provider.send('evm_increaseTime', [-1000])
+    })
+
+    it('should fail if trying to claim before daily time lock', async () => {
+      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
+      await deployedQuestContract.start()
+
+      await ethers.provider.send('evm_increaseTime', [1000])
+
+      const startingBalance = await deployedSampleErc1155Contract.functions.balanceOf(owner.address, rewardAmount)
+      expect(startingBalance.toString()).to.equal('0')
+
+      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
+
+      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
+
       await ethers.provider.send('evm_increaseTime', [-1000])
     })
 
