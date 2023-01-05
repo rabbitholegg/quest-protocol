@@ -6,7 +6,6 @@ import {ERC1155Holder} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155
 import {Quest} from './Quest.sol';
 
 contract Erc1155Quest is Quest, ERC1155Holder {
-
     constructor(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -15,18 +14,30 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
-        address receiptContractAddress_,
-        address claimSignerAddress_
-    ) Quest(rewardTokenAddress_, endTime_, startTime_, totalAmount_, allowList_, rewardAmountInWeiOrTokenId_, questId_, receiptContractAddress_, claimSignerAddress_) {}
+        address receiptContractAddress_
+    )
+        Quest(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalAmount_,
+            allowList_,
+            rewardAmountInWeiOrTokenId_,
+            questId_,
+            receiptContractAddress_
+        )
+    {}
 
     function start() public override {
-        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount) revert TotalAmountExceedsBalance();
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount)
+            revert TotalAmountExceedsBalance();
         super.start();
     }
 
-    function claim(uint timestamp_, bytes32 hash_, bytes memory signature_) public override {
-        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount) revert AmountExceedsBalance();
-        super.claim(timestamp_, hash_, signature_);
+    function claim() public override {
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount)
+            revert AmountExceedsBalance();
+        super.claim();
     }
 
     function _transferRewards(uint256 amount_) internal override {

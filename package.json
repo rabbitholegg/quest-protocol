@@ -17,7 +17,8 @@
     "compile": "npx hardhat compile",
     "pretest": "yarn compile",
     "test": "npx hardhat test",
-    "prepublishOnly": "yarn test"
+    "prepublishOnly": "yarn test",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,9 @@
   ],
   "engines": {
     "node": ">=10"
+  },
+  "lint-staged": {
+    "*.{js,ts,sol}": "prettier --write"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
@@ -45,8 +49,11 @@
     "commander": "^6.1.0",
     "ethereumjs-util": "^7.0.4",
     "hardhat-gas-reporter": "^1.0.9",
+    "husky": ">=6",
+    "lint-staged": ">=10",
     "mocha": "^6.2.2",
-    "prettier": "^2.0.5",
+    "prettier": "^2.8.1",
+    "prettier-plugin-solidity": "^1.1.1",
     "rimraf": "^3.0.0",
     "solc": "0.6.11",
     "ts-node": "^8.5.4",
