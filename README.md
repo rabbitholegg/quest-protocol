@@ -70,6 +70,6 @@ B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
 
 ## How to Upgrade
 1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and replace the network with `mainnet` if you are upgrading on mainnet.
-1. 1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's usually because the contract wasn't deployed by the time verification ran. You can run verification again with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the output of the upgrade script.
+    1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's usually because the contract wasn't deployed by the time verification ran. You can run verification again with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the output of the upgrade script.
 1. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of the upgrade script)
 1. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
