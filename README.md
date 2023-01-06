@@ -26,11 +26,11 @@ The main contracts involved in this phase are:
 
 - `Quest Factory` ([code](../contracts/quests/QuestFactory.sol))
   - Creates new proxified `Quest` instances of an 1155 reward Quest or erc20 reward Quest.
-- `ERC20 Quest` 
+- `ERC20 Quest`
   - The governance contract that also custodies the Receipt NFTs and Rewards. This is also the ERC-721 contract for the Governance NFTs.
-- `ProposalExecutionEngine` 
+- `ProposalExecutionEngine`
   - An upgradable logic (and some state) contract for executing each proposal type from the context of the `Party`.
-- `TokenDistributor` 
+- `TokenDistributor`
   - Escrow contract for distributing deposited ETH and ERC20 tokens to members of parties.
 
 // Put In diagram here
@@ -66,3 +66,10 @@ A[Quest Deployer] --> B{Choose Reward}
 B -- ERC-20 Reward--> C(ERC-20 Reward Quest)
 B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
 ```
+
+
+## How to Upgrade
+1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and replace the network with `mainnet` if you are upgrading on mainnet.
+1. 1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's usually because the contract wasn't deployed by the time verification ran. You can run verification again with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the output of the upgrade script.
+1. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of the upgrade script)
+1. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
