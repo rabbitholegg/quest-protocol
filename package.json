@@ -18,7 +18,8 @@
     "pretest": "yarn compile",
     "test": "npx hardhat test",
     "prepublishOnly": "yarn test",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test:coverage": "npx hardhat coverage"
   },
   "repository": {
     "type": "git",
