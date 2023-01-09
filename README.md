@@ -26,7 +26,7 @@ Quest Protocol makes it easy to attach a token reward to any on-chain action. It
 ---
 ## Documentation
 
-For more information on entire all docs of the Quest Protocol, see the documentation [here](./docs/).
+For more information on all docs related to the Quest Protocol, see the documentation directory [here](./docs/).
 
 - [Overview](./docs/overview.md)
 - [Quest Claim](./docs/quest-claim.md)
