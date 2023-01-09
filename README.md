@@ -11,6 +11,7 @@ Individuals that complete the `Quest` action are given the abliity to mint a `Re
 can use the `Receipt` to claim the `Reward` in the future and any other potential usages.
 
 ---
+
 ## Table of Contents
 
 - [Quest Protocol](https://github.com/rabbitholegg/quest-protocol#quest-protocol)
@@ -20,6 +21,7 @@ can use the `Receipt` to claim the `Reward` in the future and any other potentia
     - [Deployments](https://github.com/rabbitholegg/quest-protocol#deployments)
     - [Install](https://github.com/rabbitholegg/quest-protocol#install)
     - [Testing](https://github.com/rabbitholegg/quest-protocol#testing)
+    - [Upgrading](https://github.com/rabbitholegg/quest-protocol#upgrading)
     - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
     - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
     - [License](https://github.com/PartyDAO/party-protocol#license)
@@ -115,14 +117,17 @@ The sequence of events is:
    effective StartDate, will be ready for use.
 
 ---
+
 ## Testing
 
 ### Run all tests:
+
 ```bash
 yarn test
 ```
 
 ### Run test coverage report:
+
 ```bash
 yarn test:coverage
 ```
@@ -174,7 +179,10 @@ B -- ERC-20 Reward--> C(ERC-20 Reward Quest)
 B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
 ```
 
-## How to Upgrade
+## Upgrading
+
+The Quest Factory is an upgradable contract. Overtime as the space evolves there will be more than just ERC-20 or
+ERC-1155 rewards and we want to be non limiting in our compatibility.
 
 1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
    replace the network with `mainnet` if you are upgrading on mainnet.
@@ -182,6 +190,6 @@ B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
        usually because the contract wasn't deployed by the time verification ran. You can run verification again
        with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the
        output of the upgrade script.
-1. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
+2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
    the upgrade script)
-1. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
+3. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
