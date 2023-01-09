@@ -24,7 +24,16 @@ can use the `Receipt` to claim the `Reward` in the future and any other potentia
     - [Upgrading](https://github.com/rabbitholegg/quest-protocol#upgrading)
     - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
     - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
-    - [License](https://github.com/PartyDAO/party-protocol#license)
+    - [License](https://github.com/PartyDAO/quest-protocol#license)
+
+---
+## Documentation
+
+For more information on entire all docs of the Quest Protocol, see the documentation [here](./docs/).
+
+- [Overview](./docs/overview.md)
+- [Quest Claim](./docs/quest-claim.md)
+- [Quest Create](./docs/quest-create.md)
 
 ---
 
@@ -70,6 +79,13 @@ The main contracts involved in this phase are:
     - Escrow contract for distributing deposited ETH and ERC20 tokens to members of parties.
 
 // Put In diagram here
+---
+
+## Install
+
+### Run all tests:
+
+
 
 ---
 
@@ -86,14 +102,22 @@ yarn test
 ```bash
 yarn test:coverage
 ```
-
 ---
 
-## Audits
+## Upgrading
 
-The following auditors reviewed the protocol. You can see reports in `/audits` directory:
+The Quest Factory is an upgradable contract. Overtime as the space evolves there will be more than just ERC-20 or
+ERC-1155 rewards and we want to be non limiting in our compatibility.
 
-- Code4rena TBD (report [here](/audits/))
+1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
+   replace the network with `mainnet` if you are upgrading on mainnet.
+    1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's
+       usually because the contract wasn't deployed by the time verification ran. You can run verification again
+       with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the
+       output of the upgrade script.
+2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
+   the upgrade script)
+3. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
 
 ---
 
@@ -111,3 +135,19 @@ ERC-1155 rewards and we want to be non limiting in our compatibility.
 2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
    the upgrade script)
 3. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
+
+---
+
+## Audits
+
+The following auditors reviewed the protocol. You can see reports in `/audits` directory:
+
+- Code4rena TBD (report [here](/audits/))
+
+---
+## Bug Bounty
+TBD
+
+---
+## License
+TBD
