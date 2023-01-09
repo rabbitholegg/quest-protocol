@@ -5,7 +5,7 @@
 
 ## Overview
 
-Quest Protocol makes it easy to attach a token reward to any on-chain action. It's currently used to create quests on RabbitHole.
+Quests Protocol is a protocol to distribute token rewards for completing on-chain tasks.
 
 ---
 
