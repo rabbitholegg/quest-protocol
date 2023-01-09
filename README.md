@@ -115,6 +115,19 @@ The sequence of events is:
    effective StartDate, will be ready for use.
 
 ---
+## Testing
+
+### Run all tests:
+```bash
+yarn test
+```
+
+### Run test coverage report:
+```bash
+yarn test:coverage
+```
+
+---
 
 ## Quest Redemption
 
