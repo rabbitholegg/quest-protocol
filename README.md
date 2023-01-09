@@ -65,15 +65,14 @@ test/ # TS tests
 
 The main contracts involved in this phase are:
 
-- `Quest Factory` ([code](../contracts/quests/QuestFactory.sol))
-    - Creates new proxified `Quest` instances of an 1155 reward Quest or erc20 reward Quest.
-- `ERC20 Quest`
-    - The governance contract that also custodies the Receipt NFTs and Rewards. This is also the ERC-721 contract for
-      the Governance NFTs.
-- `ProposalExecutionEngine`
-    - An upgradable logic (and some state) contract for executing each proposal type from the context of the `Party`.
-- `TokenDistributor`
-    - Escrow contract for distributing deposited ETH and ERC20 tokens to members of parties.
+- `Quest Factory` ([code](./contracts/QuestFactory.sol))
+    - Creates new `Quest` instances of an ERC-1155 reward Quest or ERC-20 reward Quest.
+- `RabbitHole Receipt` ([code](./contracts/RabbitHoleReceipt.sol))
+    - TBD
+- `ERC-20 Quest` ([code](./contracts/Erc20Quest.sol))
+    - TBD
+- `ERC-1155 Quest` ([code](./contracts/Erc1155Quest.sol))
+    - TBD
 
 // Put In diagram here
 
