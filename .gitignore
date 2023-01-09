@@ -10,4 +10,5 @@ cache/
 .idea
 typechain-types/
 
+coverage
 coverage/
