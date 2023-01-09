@@ -83,8 +83,11 @@ The main contracts involved in this phase are:
 
 ## Install
 
-### Run all tests:
+### Install dependencies
 
+```bash
+yarn
+```
 
 
 ---
@@ -102,6 +105,7 @@ yarn test
 ```bash
 yarn test:coverage
 ```
+
 ---
 
 ## Upgrading
