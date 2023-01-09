@@ -3,13 +3,9 @@
 [![Tests](https://github.com/rabbitholegg/quest-protocol/workflows/Tests/badge.svg)](https://github.com/rabbitholegg/quest-protocol/actions?query=workflow%3ATests)
 [![Lint](https://github.com/rabbitholegg/quest-protocol/workflows/Lint/badge.svg)](https://github.com/rabbitholegg/quest-protocol/actions?query=workflow%3ALint)
 
-[//]: # (TODO - update with @Brian)
-Once a protocol decides to run a quest, it creates a new `Quest` that will distribute a finite number of `Receipts` that
-can
-ultimately can be claimed for a `Reward`. `Receipts` are ERC-721 NFTs that are transferable but only claimable once
-per `Quest`.
-Individuals that complete the `Quest` action are given the ability to mint a `Receipt` to their wallet. They then
-can use the `Receipt` to claim the `Reward` in the future and any other potential usages.
+## Overview
+
+Quest Protocol makes it easy to attach a token reward to any on-chain action. It's currently used to create quests on RabbitHole.
 
 ---
 
@@ -80,6 +76,7 @@ The main contracts involved in this phase are:
     - Escrow contract for distributing deposited ETH and ERC20 tokens to members of parties.
 
 // Put In diagram here
+
 ---
 
 ## Install
