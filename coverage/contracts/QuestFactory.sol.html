@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/QuestFactory.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> QuestFactory.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">90.48% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>19/21</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">63.64% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>14/22</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">75% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>6/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">90.32% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>28/31</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-yes">27×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.15;
+&nbsp;
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {Erc20Quest} from './Erc20Quest.sol';
+import {Erc1155Quest} from './Erc1155Quest.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
+&nbsp;
+contract QuestFactory is Initializable, OwnableUpgradeable {
+    error QuestIdUsed();
+    error OverMaxAllowedToMint();
+    error AddressNotSigned();
+    error AddressAlreadyMinted();
+    error InvalidHash();
+&nbsp;
+    event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
+&nbsp;
+    // storage vars. Insert new vars at the end to keep the storage layout the same.
+    address public claimSignerAddress;
+    mapping(string =&gt; address) public questAddressForQuestId;
+    mapping(string =&gt; uint256) public totalAmountForQuestId;
+    mapping(string =&gt; uint256) public amountMintedForQuestId;
+    RabbitHoleReceipt public rabbitholeReceiptContract;
+    mapping(string =&gt; mapping(address =&gt; bool)) public addressMintedForQuestId;
+&nbsp;
+    // always be initialized
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+&nbsp;
+    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_) public <span class="missing-if-branch" title="else path not taken" >E</span>initializer {
+        __Ownable_init();
+        claimSignerAddress = claimSignerAddress_;
+        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+    }
+&nbsp;
+    function createQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalAmount_,
+        string memory allowList_,
+        uint256 rewardAmountOrTokenId_,
+        string memory contractType_,
+        string memory questId_,
+        address receiptContractAddress_
+    ) public <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner returns (address) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
+&nbsp;
+        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
+            Erc20Quest newQuest = new Erc20Quest(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalAmount_,
+                allowList_,
+                rewardAmountOrTokenId_,
+                questId_,
+                receiptContractAddress_
+            );
+            newQuest.transferOwnership(msg.sender);
+&nbsp;
+            emit QuestCreated(msg.sender, address(newQuest), contractType_);
+            questAddressForQuestId[questId_] = address(newQuest);
+            totalAmountForQuestId[questId_] = totalAmount_;
+            return address(newQuest);
+        }
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+            Erc1155Quest newQuest = new Erc1155Quest(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalAmount_,
+                allowList_,
+                rewardAmountOrTokenId_,
+                questId_,
+                receiptContractAddress_
+            );
+            newQuest.transferOwnership(msg.sender);
+&nbsp;
+            emit QuestCreated(msg.sender, address(newQuest), contractType_);
+            questAddressForQuestId[questId_] = address(newQuest);
+            totalAmountForQuestId[questId_] = totalAmount_;
+            return address(newQuest);
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return address(0);</span>
+    }
+&nbsp;
+    function setClaimSignerAddress(address claimSignerAddress_) public <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        claimSignerAddress = claimSignerAddress_;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {</span>
+        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function getQuestAddress(string memory questId_) external view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return questAddressForQuestId[questId_];</span>
+    }
+&nbsp;
+    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
+        return ECDSAUpgradeable.recover(messageDigest, signature);
+    }
+&nbsp;
+    // need to set this contract as Minter on the receipt contract.
+    function mintReceipt(uint amount_, string memory questId_, bytes32 hash_, bytes memory signature_) public {
+        if (amountMintedForQuestId[questId_] + amount_ &gt; totalAmountForQuestId[questId_]) revert OverMaxAllowedToMint();
+        if (addressMintedForQuestId[questId_][msg.sender] == true) revert AddressAlreadyMinted();
+        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+&nbsp;
+        amountMintedForQuestId[questId_] += amount_;
+        addressMintedForQuestId[questId_][msg.sender] = true;
+        rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 06 2023 11:29:14 GMT-0500 (Eastern Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
