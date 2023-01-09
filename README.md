@@ -129,6 +129,14 @@ yarn test:coverage
 
 ---
 
+## Audits
+
+The following auditors reviewed the protocol. You can see reports in `/audits` directory:
+
+- Code4rena TBD (report [here](/audits/))
+
+---
+
 ## Quest Redemption
 
 Quests are created through the `QuestFactory` contract. This is performed
