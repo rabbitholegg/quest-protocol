@@ -1,7 +1,7 @@
 # Quest Creation
 
 Quests are created through the `QuestFactory` contract. This is performed
-by a whitelisted account, historically the Internal Rabbithole team.
+by a whitelisted account, historically the Internal RabbitHole team.
 
 The sequence of events is:
 

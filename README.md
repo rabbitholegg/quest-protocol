@@ -6,9 +6,9 @@
 [//]: # (TODO - update with @Brian)
 Once a protocol decides to run a quest, it creates a new `Quest` that will distribute a finite number of `Receipts` that
 can
-ultimately can be claimed for a `Reward`. `Receipts` are ERC-721 NFTs that are transferrable but only claimable once
+ultimately can be claimed for a `Reward`. `Receipts` are ERC-721 NFTs that are transferable but only claimable once
 per `Quest`.
-Individuals that complete the `Quest` action are given the abliity to mint a `Receipt` to their wallet. They then
+Individuals that complete the `Quest` action are given the ability to mint a `Receipt` to their wallet. They then
 can use the `Receipt` to claim the `Reward` in the future and any other potential usages.
 
 ---
@@ -116,8 +116,8 @@ yarn test:coverage
 
 ## Upgrading
 
-The Quest Factory is an upgradable contract. Overtime as the space evolves there will be more than just ERC-20 or
-ERC-1155 rewards and we want to be non limiting in our compatibility.
+The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or
+ERC-1155 rewards and we want to be non-limiting in our compatibility.
 
 1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
    replace the network with `mainnet` if you are upgrading on mainnet.
@@ -133,8 +133,8 @@ ERC-1155 rewards and we want to be non limiting in our compatibility.
 
 ## Upgrading
 
-The Quest Factory is an upgradable contract. Overtime as the space evolves there will be more than just ERC-20 or
-ERC-1155 rewards and we want to be non limiting in our compatibility.
+The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or
+ERC-1155 rewards and we want to be non-limiting in our compatibility.
 
 1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
    replace the network with `mainnet` if you are upgrading on mainnet.
