@@ -89,6 +89,10 @@ The main contracts involved in this phase are:
 yarn
 ```
 
+### Compile Contracts
+```bash
+yarn compile
+```
 
 ---
 
