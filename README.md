@@ -11,6 +11,30 @@ Individuals that complete the `Quest` action are given the abliity to mint a `Re
 can use the `Receipt` to claim the `Reward` in the future and any other potential usages.
 
 ---
+## Table of Contents
+
+- [Quest Protocol](https://github.com/rabbitholegg/quest-protocol#quest-protocol)
+    - [Table of Contents](https://github.com/rabbitholegg/quest-protocol#table-of-contents)
+    - [Documentation](https://github.com/rabbitholegg/quest-protocol#documentation)
+    - [Layout](https://github.com/rabbitholegg/quest-protocol#layout)
+    - [Deployments](https://github.com/rabbitholegg/quest-protocol#deployments)
+    - [Install](https://github.com/rabbitholegg/quest-protocol#install)
+    - [Testing](https://github.com/rabbitholegg/quest-protocol#testing)
+    - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
+    - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
+    - [License](https://github.com/PartyDAO/party-protocol#license)
+
+---
+
+## Layout
+
+```
+docs/ # Start here
+├── overview.md
+├── quest-creation.md
+└── quest-claim.md
+test/ # TS tests
+```
 
 ## Key Concepts
 
@@ -24,13 +48,28 @@ can use the `Receipt` to claim the `Reward` in the future and any other potentia
   manages the claim lifecyle
   for receipts and rewards. This can either be an ERC-1155 or ERC-20 reward.
 - **Claim Reward**: An (ungoverned) mechanism by which parties can claim `reward` tokens held by the Quest to
-  themselves, these are claimable with an unclaimed `Receipt`. 
+  themselves, these are claimable with an unclaimed `Receipt`.
 - **Quest Deployer**: Predefined accounts that have autonomous power to creates `Quests`. Conventionally defined as
   Rabbithole, but will open up over time.
 - **Proxies**: All `Quest` instances are deployed as simple [`Quest`](../contracts/utils/Proxy.sol) contracts that
   forward calls to a `Quest` implementation contract.
 - **ProposalExecutionEngine**: An upgradable contract the `Quest` contract delegatecalls into that implements the logic
   for executing specific proposal types.
+
+---
+
+## Deployments
+
+|Chain           |Quest Factory Contract|
+|----------------|----------------------|
+|Ethereum        |0x0                   |
+|Goerli          |0x0                   |
+|Polygon Mainnet |0x0                   |
+|Polygon Testnet |0x0                   |
+|Optimism        |0x0                   |
+|Optimism Testnet|0x0                   |
+|Arbitrum        |0x0                   |
+|Arbitrum Testnet|0x0                   |
 
 ---
 
@@ -114,9 +153,14 @@ B -- ERC-20 Reward--> C(ERC-20 Reward Quest)
 B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
 ```
 
-
 ## How to Upgrade
-1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and replace the network with `mainnet` if you are upgrading on mainnet.
-    1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's usually because the contract wasn't deployed by the time verification ran. You can run verification again with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the output of the upgrade script.
-1. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of the upgrade script)
+
+1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
+   replace the network with `mainnet` if you are upgrading on mainnet.
+    1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's
+       usually because the contract wasn't deployed by the time verification ran. You can run verification again
+       with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the
+       output of the upgrade script.
+1. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
+   the upgrade script)
 1. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
