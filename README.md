@@ -38,26 +38,6 @@ docs/ # Start here
 test/ # TS tests
 ```
 
-## Key Concepts
-
-- **Receipts**: An NFT (ERC-721) representing a receipt from completing an action defined in the `Quest`. These are
-  originally minted to a participants EOA address and the amount of available Receipts are defined by the `Quest`
-  contract. Receipts track ability to see if there is a reward to claim.
-- **Rewards**: A set of ERC-20 or ERC-1155 tokens custodied by the `Quest` contract, these are acquired in the Quest
-  creation phase from the factory. These are originally transferred to the `Quest` contract on Quest Creation and
-  transferred out during the claim Reward process.
-- **Quest**: The quest contract itself, which custodies the Rewards, defines the available Receipts, and ultimately
-  manages the claim lifecyle
-  for receipts and rewards. This can either be an ERC-1155 or ERC-20 reward.
-- **Claim Reward**: An (ungoverned) mechanism by which parties can claim `reward` tokens held by the Quest to
-  themselves, these are claimable with an unclaimed `Receipt`.
-- **Quest Deployer**: Predefined accounts that have autonomous power to creates `Quests`. Conventionally defined as
-  Rabbithole, but will open up over time.
-- **Proxies**: All `Quest` instances are deployed as simple [`Quest`](../contracts/utils/Proxy.sol) contracts that
-  forward calls to a `Quest` implementation contract.
-- **ProposalExecutionEngine**: An upgradable contract the `Quest` contract delegatecalls into that implements the logic
-  for executing specific proposal types.
-
 ---
 
 ## Deployments
@@ -93,31 +73,6 @@ The main contracts involved in this phase are:
 
 ---
 
-## Quest Creation
-
-Quests are created through the `QuestFactory` contract. This is performed
-by a whitelisted account, historically the Internal Rabbithole team.
-
-The sequence of events is:
-
-1. Call `QuestFactory.createQuest(rewardType: [erc20|erc1155])` defined as:
-   ```solidity
-   function createQuest(
-      string rewardType,
-      address rewardAddress,
-   )
-   ```
-    - `rewardType` will be either an ERC-1155 or an ERC-20 token.
-    - `rewardAddress` is the address of the corresponding reward for completing the quest. This can be an ERC-1155 or
-      ERC-20 contract address.
-2. Transfer rewards to the newly created Quest. You can transfer direct or execute the `depositFullAwardAmount`
-   function.
-3. The Quest Factory will call the mintAndSend function for the total number of allowed recipients of Receipts.
-4. Execute the markQuestAsReady function. This will validate that the Quest is ready for public and upon reaching the
-   effective StartDate, will be ready for use.
-
----
-
 ## Testing
 
 ### Run all tests:
@@ -141,43 +96,6 @@ The following auditors reviewed the protocol. You can see reports in `/audits` d
 - Code4rena TBD (report [here](/audits/))
 
 ---
-
-## Quest Redemption
-
-Quests are created through the `QuestFactory` contract. This is performed
-by a whitelisted account, historically the Internal Rabbithole team.
-
-The sequence of events is:
-
-1. Call `QuestFactory.createQuest(rewardType: [erc20|erc1155])` defined as:
-   ```solidity
-   function createQuest(
-      string rewardType,
-      address rewardAddress,
-   )
-   ```
-    - `rewardType` will be either an ERC-1155 or an ERC-20 token.
-    - `rewardAddress` is the address of the corresponding reward for completing the quest. This can be an ERC-1155 or
-      ERC-20 contract address.
-2. Transfer rewards to the newly created Quest. You can transfer direct or execute the `depositFullAwardAmount`
-   function.
-3. The Quest Factory will call the mintAndSend function for the total number of allowed recipients of Receipts.
-4. Execute the markQuestAsReady function. This will validate that the Quest is ready for public and upon reaching the
-   effective StartDate, will be ready for use.
-
----
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence
-diagram:
-
-```mermaid
-graph LR
-A[Quest Deployer] --> B{Choose Reward}
-B -- ERC-20 Reward--> C(ERC-20 Reward Quest)
-B -- ERC-1155 Reward--> D(ERC-1155 Reward Quest)
-```
 
 ## Upgrading
 
