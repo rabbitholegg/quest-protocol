@@ -1,7 +1,6 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
-const { AdminClient } = require("defender-admin-client");
 
 async function main() {
   hre.run("compile");

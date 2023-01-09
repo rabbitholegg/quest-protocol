@@ -9,3 +9,5 @@ cache/
 .yarn-error.log
 .idea
 typechain-types/
+
+coverage/
