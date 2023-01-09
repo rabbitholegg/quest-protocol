@@ -3,6 +3,7 @@
 [![Tests](https://github.com/rabbitholegg/quest-protocol/workflows/Tests/badge.svg)](https://github.com/rabbitholegg/quest-protocol/actions?query=workflow%3ATests)
 [![Lint](https://github.com/rabbitholegg/quest-protocol/workflows/Lint/badge.svg)](https://github.com/rabbitholegg/quest-protocol/actions?query=workflow%3ALint)
 
+[//]: # (TODO - update with @Brian)
 Once a protocol decides to run a quest, it creates a new `Quest` that will distribute a finite number of `Receipts` that
 can
 ultimately can be claimed for a `Reward`. `Receipts` are ERC-721 NFTs that are transferrable but only claimable once
