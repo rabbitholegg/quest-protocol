@@ -139,4 +139,7 @@ TBD
 
 ---
 ## License
-TBD
+The primary license for the Quest Protocol is the GNU General Public License 3.0 (GPL-3.0), see [LICENSE](./LICENSE).
+
+Several interface/dependencies files from other sources maintain their original license (as indicated in their SPDX header).
+All files in test/ remain unlicensed (as indicated in their SPDX header).
