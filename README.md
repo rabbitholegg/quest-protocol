@@ -7,6 +7,8 @@
 
 Quests Protocol is a protocol to distribute token rewards for completing on-chain tasks.
 
+![img.png](img.png)
+
 ---
 
 ## Table of Contents
