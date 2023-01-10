@@ -37,13 +37,52 @@ For more information on all docs related to the Quest Protocol, see the document
 ---
 
 ## Layout
+Generated with:
+```bash
+tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typechain-types -I cache -I img.png
+```
 
 ```
-docs/ # Start here
-├── overview.md
-├── quest-creation.md
-└── quest-claim.md
-test/ # TS tests
+├── LICENSE
+├── README.md
+├── audits
+├── contracts
+│   ├── Erc1155Quest.sol
+│   ├── Erc20Quest.sol
+│   ├── Quest.sol
+│   ├── QuestFactory.sol
+│   ├── RabbitHoleReceipt.sol
+│   ├── SampleERC20.sol
+│   ├── SampleErc1155.sol
+│   ├── interfaces
+│   │   └── IQuest.sol
+│   └── test
+│       └── TestERC20.sol
+├── coverage.json
+├── docs
+│   ├── overview.md
+│   ├── quest-claim.md
+│   └── quest-create.md
+├── hardhat.config.ts
+├── node_modules  [488 entries exceeds filelimit, not opening dir]
+├── package.json
+├── scripts
+│   ├── deployQuestFactory.js
+│   ├── deployRabbitHoleReceipt.js
+│   ├── upgradeQuestFactory.js
+│   └── upgradeRabbitHoleReceipt.js
+├── test
+│   ├── Erc1155Quest.spec.ts
+│   ├── Erc20Quest.spec.ts
+│   ├── Quest.spec.ts
+│   ├── QuestFactory.spec.ts
+│   ├── RabbitHoleReceipt.spec.ts
+│   ├── SampleErc1155.spec.ts
+│   ├── SampleErc20.spec.ts
+│   └── types.ts
+├── tsconfig.json
+├── waffle.json
+└── yarn.lock
 ```
 
 ---
