@@ -59,6 +59,8 @@ contract Erc20Quest is Quest {
     }
 
     function withdrawFee() public onlyOwner {
-        IERC20(rewardToken).safeTransfer(msg.sender, (totalRedeemers * totalAmount * questFee / 1000));
+        IERC20(rewardToken).safeTransfer(msg.sender, (totalRedeemers * rewardAmountInWeiOrTokenId * questFee / 10_000));
     }
 }
+
+

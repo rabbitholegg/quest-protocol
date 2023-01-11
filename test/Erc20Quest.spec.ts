@@ -362,4 +362,39 @@ describe('Erc20Quest', async () => {
       await ethers.provider.send('evm_increaseTime', [-10001])
     })
   })
+
+  describe('withDrawFee()', async () => {
+    it('should only allow the owner to withdraw', async () => {
+      await expect(deployedQuestContract.connect(firstAddress).withdrawFee()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it.only('should transfer all rewards back to owner', async () => {
+      const beginningContractBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
+      const beginningOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
+
+      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
+      await deployedQuestContract.start()
+
+      await ethers.provider.send('evm_increaseTime', [86400])
+
+      const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
+      expect(startingBalance.toString()).to.equal('0')
+
+      await deployedQuestContract.claim()
+
+      expect(beginningContractBalance.toString()).to.equal(totalRewardsPlusFee.toString())
+      expect(beginningOwnerBalance.toString()).to.equal('0')
+      await ethers.provider.send('evm_increaseTime', [10001])
+
+      await deployedQuestContract.connect(owner).withdrawFee()
+
+      const endContactBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
+      expect(endContactBalance.toString()).to.equal('1188')
+      const endOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
+      expect(endOwnerBalance.toString()).to.equal('12')
+      await ethers.provider.send('evm_increaseTime', [-10001])
+    })
+  })
 })
