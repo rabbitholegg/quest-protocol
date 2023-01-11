@@ -68,38 +68,12 @@ contract Quest is Ownable, IQuest {
         }
     }
 
-    function getClaimableTokenIds(uint[] memory _tokenIds) public view returns (uint[] memory) {
-        uint msgSenderBalance = _tokenIds.length;
-        uint[] memory tokenIdsForClaim = new uint[](msgSenderBalance);
-        uint foundTokens = 0;
-
-        for (uint i = 0; i < msgSenderBalance; i++) {
-            if (rabbitholeReceiptContract.tokenIdCanClaim(_tokenIds[i])) {
-                tokenIdsForClaim[i] = _tokenIds[i];
-                foundTokens++;
-            }
-        }
-
-        uint[] memory filteredTokens = new uint[](foundTokens);
-        uint filterTokensIndexTracker = 0;
-
-        for (uint i = 0; i < msgSenderBalance; i++) {
-            if (tokenIdsForClaim[i] > 0) {
-                filteredTokens[filterTokensIndexTracker] = tokenIdsForClaim[i];
-                filterTokensIndexTracker++;
-            }
-        }
-
-        return filteredTokens;
-    }
-
     function claim() public virtual {
         if (hasStarted == false) revert NotStarted();
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
 
-        uint[] memory questTokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
-        uint[] memory tokens = getClaimableTokenIds(questTokens);
+        uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
 
