@@ -40,7 +40,7 @@ contract Erc20Quest is Quest {
     }
 
     function claim() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < rewardAmountInWeiOrTokenId) revert AmountExceedsBalance();
+        if (IERC20(rewardToken).balanceOf(address(this)) < (rewardAmountInWeiOrTokenId * questFee / 10_000) ) revert AmountExceedsBalance();
         totalRedeemers++;
         super.claim();
     }

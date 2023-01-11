@@ -370,7 +370,7 @@ describe('Erc20Quest', async () => {
       )
     })
 
-    it.only('should transfer all rewards back to owner', async () => {
+    it('should transfer protocol fees back to owner', async () => {
       const beginningContractBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
       const beginningOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
 
@@ -395,6 +395,7 @@ describe('Erc20Quest', async () => {
       const endOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
       expect(endOwnerBalance.toString()).to.equal('12')
       await ethers.provider.send('evm_increaseTime', [-10001])
+      await ethers.provider.send('evm_increaseTime', [-86400])
     })
   })
 })
