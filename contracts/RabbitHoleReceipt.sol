@@ -107,7 +107,9 @@ contract RabbitHoleReceipt is
         uint year = DateTime.getYear(timestampForTokenId[_tokenId]);
         uint month = DateTime.getMonth(timestampForTokenId[_tokenId]);
         uint day = DateTime.getDay(timestampForTokenId[_tokenId]);
-        uint claimTimestamp = DateTime.addDays(DateTime.timestampFromDateTime(year, month, day, 0, 0, 0), 1);
+        uint hour = DateTime.getHour(timestampForTokenId[_tokenId]);
+        uint minute = DateTime.getMinute(timestampForTokenId[_tokenId]);
+        uint claimTimestamp = DateTime.addMinutes(DateTime.timestampFromDateTime(year, month, day, hour, minute, 0), 1);
         return block.timestamp >= claimTimestamp;
     }
 
