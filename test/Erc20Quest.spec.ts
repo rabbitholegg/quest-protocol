@@ -109,7 +109,7 @@ describe('Erc20Quest', async () => {
 
       it('Should set the total reward amount with correct value', async () => {
         const totalAmount = await deployedQuestContract.totalAmount()
-        expect(totalAmount).to.equal(totalAmount)
+        expect(totalAmount).to.equal(totalRewards)
       })
 
       it('Should set has started with correct value', async () => {
