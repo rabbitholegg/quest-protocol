@@ -10,7 +10,6 @@ import '@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol';
-import {DateTime} from '@quant-finance/solidity-datetime/contracts/DateTime.sol';
 
 contract RabbitHoleReceipt is
     Initializable,
@@ -101,14 +100,6 @@ contract RabbitHoleReceipt is
             }
         }
         return filteredTokens;
-    }
-
-    function tokenIdCanClaim(uint _tokenId) public view returns (bool) {
-        uint year = DateTime.getYear(timestampForTokenId[_tokenId]);
-        uint month = DateTime.getMonth(timestampForTokenId[_tokenId]);
-        uint day = DateTime.getDay(timestampForTokenId[_tokenId]);
-        uint claimTimestamp = DateTime.addDays(DateTime.timestampFromDateTime(year, month, day, 0, 0, 0), 1);
-        return block.timestamp >= claimTimestamp;
     }
 
     function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {

@@ -239,22 +239,6 @@ describe('Erc1155Quest', () => {
       await ethers.provider.send('evm_increaseTime', [-1000])
     })
 
-    it('should fail if trying to claim before daily time lock', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
-      await deployedQuestContract.start()
-
-      await ethers.provider.send('evm_increaseTime', [1000])
-
-      const startingBalance = await deployedSampleErc1155Contract.functions.balanceOf(owner.address, rewardAmount)
-      expect(startingBalance.toString()).to.equal('0')
-
-      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
-
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
-
-      await ethers.provider.send('evm_increaseTime', [-1000])
-    })
-
     it('should only transfer the correct amount of rewards', async () => {
       await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
       await deployedQuestContract.start()
