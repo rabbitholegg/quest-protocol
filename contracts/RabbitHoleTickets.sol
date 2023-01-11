@@ -13,7 +13,6 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
     using StringsUpgradeable for uint256;
 
     // storage
-    mapping(uint => string) public questIdForTokenId;
     address public royaltyRecipient;
     address public minterAddress;
     uint public royaltyFee;
@@ -49,28 +48,18 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         minterAddress = minterAddress_;
     }
 
-    function mint(string memory _questId, address to, uint256 id, uint256 amount, bytes memory data)
+    function mint(address to, uint256 id, uint256 amount, bytes memory data)
         public
         onlyMinter
     {
-        setIdForQuestId(_questId, id);
         _mint(to, id, amount, data);
     }
 
-    function mintBatch(string[] memory questIds, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
         public
         onlyMinter
     {
-        for(uint i = 0; i < ids.length; i++) {
-          setIdForQuestId(questIds[i], ids[i]);
-        }
         _mintBatch(to, ids, amounts, data);
-    }
-
-    function setIdForQuestId(string memory _questId, uint256 id) internal {
-        if(bytes(questIdForTokenId[id]).length == 0) {
-            questIdForTokenId[id] = _questId;
-        }
     }
 
     function uri(
@@ -79,8 +68,6 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "RabbitHole Tickets #',
-            questIdForTokenId[_tokenId],
-            ' Redeemer #',
             _tokenId.toString(),
             '",',
             '"description": "A reward for completing quests within RabbitHole, with unk(no)wn utility",',
@@ -98,10 +85,7 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
             '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
             '<rect width="100%" height="100%" fill="black" />',
             '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Tickets #',
-            questIdForTokenId[_tokenId],
-            '</text>',
-            '<text x="70%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Tickets Receipt #',
-            _tokenId,
+            _tokenId.toString(),
             '</text>',
             '</svg>'
         );
