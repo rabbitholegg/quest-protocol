@@ -44,7 +44,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
-        address receiptContractAddress_
+        address receiptContractAddress_,
+        uint256 questFee_
     ) public onlyOwner returns (address) {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
@@ -57,7 +58,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable {
                 allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
-                receiptContractAddress_
+                receiptContractAddress_,
+                questFee_
             );
             newQuest.transferOwnership(msg.sender);
 

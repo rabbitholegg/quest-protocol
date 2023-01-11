@@ -16,16 +16,16 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         string memory questId_,
         address receiptContractAddress_
     )
-        Quest(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalAmount_,
-            allowList_,
-            rewardAmountInWeiOrTokenId_,
-            questId_,
-            receiptContractAddress_
-        )
+    Quest(
+        rewardTokenAddress_,
+        endTime_,
+        startTime_,
+        totalAmount_,
+        allowList_,
+        rewardAmountInWeiOrTokenId_,
+        questId_,
+        receiptContractAddress_
+    )
     {}
 
     function start() public override {

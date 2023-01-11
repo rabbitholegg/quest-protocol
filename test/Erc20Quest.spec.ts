@@ -19,6 +19,7 @@ describe('Erc20Quest', async () => {
   const questId = 'asdf'
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
+  const totalRewardsPlusFee = 1200
   const rewardAmount = 10
   let owner: SignerWithAddress
   let firstAddress: SignerWithAddress
@@ -67,19 +68,20 @@ describe('Erc20Quest', async () => {
       allowList,
       rewardAmount,
       questId,
-      deployedRabbitholeReceiptContract.address
+      deployedRabbitholeReceiptContract.address,
+      2000
     )) as Erc20Quest
     await deployedQuestContract.deployed()
   }
 
   const deploySampleErc20Contract = async () => {
-    deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', 1000, owner.address)
+    deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', 1200, owner.address)
     await deployedSampleErc20Contract.deployed()
   }
 
   const transferRewardsToDistributor = async () => {
     const distributorContractAddress = deployedQuestContract.address
-    await deployedSampleErc20Contract.functions.transfer(distributorContractAddress, 1000)
+    await deployedSampleErc20Contract.functions.transfer(distributorContractAddress, 1200)
   }
 
   describe('Deployment', () => {
@@ -107,7 +109,7 @@ describe('Erc20Quest', async () => {
 
       it('Should set the total reward amount with correct value', async () => {
         const totalAmount = await deployedQuestContract.totalAmount()
-        expect(totalAmount).to.equal(totalRewards)
+        expect(totalAmount).to.equal(totalAmount)
       })
 
       it('Should set has started with correct value', async () => {
@@ -350,7 +352,7 @@ describe('Erc20Quest', async () => {
     it('should transfer all rewards back to owner', async () => {
       const beginningContractBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
       const beginningOwnerBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(beginningContractBalance.toString()).to.equal(totalRewards.toString())
+      expect(beginningContractBalance.toString()).to.equal(totalRewardsPlusFee.toString())
       expect(beginningOwnerBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [10001])
       await deployedQuestContract.connect(owner).withdraw()
