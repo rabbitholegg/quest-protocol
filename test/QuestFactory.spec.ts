@@ -120,8 +120,19 @@ describe('QuestFactory', () => {
     })
 
     it('Should revert if trying to use existing quest id', async () => {
-      expect(
-        await deployedFactoryContract.createQuest(
+      await deployedFactoryContract.createQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        allowList,
+        rewardAmount,
+        'erc20',
+        erc20QuestId,
+        deployedRabbitHoleReceiptContract.address);
+
+      await expect(
+        deployedFactoryContract.createQuest(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
@@ -133,19 +144,22 @@ describe('QuestFactory', () => {
           deployedRabbitHoleReceiptContract.address
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
-      expect(
-        await deployedFactoryContract.createQuest(
+    })
+
+    it('Should revert if msg.sender does not have correct role', async () => {
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).createQuest(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
           totalRewards,
           allowList,
           rewardAmount,
-          'erc1155',
-          erc1155QuestId,
+          'erc20',
+          erc20QuestId,
           deployedRabbitHoleReceiptContract.address
         )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
+      ).to.be.revertedWithCustomError(questFactoryContract, 'InavlidRoleToCreateQuest')
     })
   })
 
