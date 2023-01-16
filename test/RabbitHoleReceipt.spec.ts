@@ -4,6 +4,7 @@ import {ethers, upgrades} from 'hardhat'
 
 describe('RabbitholeReceipt Contract', async () => {
   let RHReceipt: Contract,
+    deployedReceiptRenderer: Contract,
     contractOwner: { address: String; },
     royaltyRecipient: { address: String; },
     minterAddress: { address: String; },
@@ -12,8 +13,13 @@ describe('RabbitholeReceipt Contract', async () => {
   beforeEach(async () => {
     [contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners();
     const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
+    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+
+    deployedReceiptRenderer = await ReceiptRenderer.deploy()
+    await deployedReceiptRenderer.deployed()
 
     RHReceipt = await upgrades.deployProxy(RabbitHoleReceipt, [
+      deployedReceiptRenderer.address,
       royaltyRecipient.address,
       minterAddress.address,
       10
