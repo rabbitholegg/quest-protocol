@@ -159,7 +159,7 @@ describe('QuestFactory', () => {
           erc20QuestId,
           deployedRabbitHoleReceiptContract.address
         )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'InavlidRoleToCreateQuest')
+      ).to.be.revertedWith(`AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`)
     })
   })
 

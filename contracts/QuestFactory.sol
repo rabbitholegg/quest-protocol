@@ -51,9 +51,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory contractType_,
         string memory questId_,
         address receiptContractAddress_
-    ) public returns (address) {
-        if (!hasRole(CREATE_QUEST_ROLE, msg.sender)) revert InavlidRoleToCreateQuest();
-
+    ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
