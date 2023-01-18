@@ -15,7 +15,7 @@ describe('QuestFactory', () => {
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
-
+  const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
@@ -52,6 +52,7 @@ describe('QuestFactory', () => {
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
+      protocolFeeAddress,
     ])) as QuestFactory
   }
 

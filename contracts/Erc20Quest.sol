@@ -8,6 +8,7 @@ contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
     uint256 public questFee;
     uint256 public totalRedeemers;
+    address public protocolFeeRecipient;
 
     constructor(
         address rewardTokenAddress_,
@@ -18,7 +19,8 @@ contract Erc20Quest is Quest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
-        uint256 questFee_
+        uint256 questFee_,
+        address protocolFeeRecipient_
     )
     Quest(
         rewardTokenAddress_,
@@ -32,6 +34,7 @@ contract Erc20Quest is Quest {
     ) {
         questFee = questFee_;
         totalRedeemers = 0;
+        protocolFeeRecipient = protocolFeeRecipient_;
     }
 
     function start() public override {
@@ -40,7 +43,7 @@ contract Erc20Quest is Quest {
     }
 
     function claim() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < (rewardAmountInWeiOrTokenId * questFee / 10_000) ) revert AmountExceedsBalance();
+        if (IERC20(rewardToken).balanceOf(address(this)) < (rewardAmountInWeiOrTokenId * questFee / 10_000)) revert AmountExceedsBalance();
         totalRedeemers++;
         super.claim();
     }
@@ -60,8 +63,8 @@ contract Erc20Quest is Quest {
         IERC20(rewardToken).safeTransfer(msg.sender, IERC20(rewardToken).balanceOf(address(this)));
     }
 
-    function withdrawFee() public onlyOwner {
-        IERC20(rewardToken).safeTransfer(msg.sender, (totalRedeemers * rewardAmountInWeiOrTokenId * questFee / 10_000));
+    function withdrawFee() public {
+        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, (totalRedeemers * rewardAmountInWeiOrTokenId * questFee / 10_000));
     }
 }
 
