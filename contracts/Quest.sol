@@ -108,7 +108,7 @@ contract Quest is Ownable, IQuest {
         return claimedList[tokenId_] && claimedList[tokenId_] == true;
     }
 
-    function withdraw() public virtual onlyOwner {
+    function withdrawRemainingTokens() public virtual onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
     }
 }

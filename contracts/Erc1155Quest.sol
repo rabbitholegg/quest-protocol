@@ -48,7 +48,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         return redeemableTokenCount_;
     }
 
-    function withdraw() public override onlyOwner {
+    function withdrawRemainingTokens() public override onlyOwner {
         super.withdraw();
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
