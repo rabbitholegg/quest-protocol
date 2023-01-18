@@ -187,6 +187,14 @@ describe('QuestFactory', () => {
     })
   })
 
+  describe('setProtocolFeeRecipient()', () => {
+    it('Should update protocolFeeRecipient', async () => {
+      const newAddress = royaltyRecipient.address
+      await deployedFactoryContract.setProtocolFeeRecipient(newAddress)
+      expect(await deployedFactoryContract.protocolFeeRecipient()).to.equal(newAddress)
+    })
+  })
+
   describe('mintReceipt()', () => {
     const erc20QuestId = 'asdf'
     let messageHash: string
