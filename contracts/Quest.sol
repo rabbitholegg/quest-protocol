@@ -7,9 +7,9 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
 contract Quest is Ownable, IQuest {
-    RabbitHoleReceipt public rabbitholeReceiptContract;
-
+    RabbitHoleReceipt public rabbitHoleReceiptContract;
     address public rewardToken;
+    address public factoryContractAddress;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalAmount;
@@ -18,6 +18,9 @@ contract Quest is Ownable, IQuest {
     bool public isPaused;
     string public allowList;
     string public questId;
+    uint256 public receiptRedeemers;
+    uint256 public rewardRedeemers;
+
 
     mapping(uint256 => bool) private claimedList;
 
@@ -40,7 +43,9 @@ contract Quest is Ownable, IQuest {
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         allowList = allowList_;
         questId = questId_;
-        rabbitholeReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+        rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+        receiptRedeemers = 0;
+        rewardRedeemers = 0;
     }
 
     function start() public virtual onlyOwner {
@@ -73,7 +78,7 @@ contract Quest is Ownable, IQuest {
         if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
 
-        uint[] memory tokens = rabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
+        uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
 
