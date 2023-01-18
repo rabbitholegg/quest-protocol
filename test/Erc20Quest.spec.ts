@@ -52,7 +52,12 @@ describe('Erc20Quest', async () => {
   })
 
   const deployRabbitholeReceiptContract = async () => {
+    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
+    await deployedReceiptRenderer.deployed()
+
     deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
+      deployedReceiptRenderer.address,
       owner.address,
       owner.address,
       10,
@@ -233,22 +238,6 @@ describe('Erc20Quest', async () => {
 
       //todo add in token qcheck of length 0
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
-      await ethers.provider.send('evm_increaseTime', [-1000])
-    })
-
-    it('should fail if trying to claim before daily time lock', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
-      await deployedQuestContract.start()
-
-      await ethers.provider.send('evm_increaseTime', [1000])
-
-      const startingBalance = await deployedSampleErc20Contract.functions.balanceOf(owner.address)
-      expect(startingBalance.toString()).to.equal('0')
-
-      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
-
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
-
       await ethers.provider.send('evm_increaseTime', [-1000])
     })
 

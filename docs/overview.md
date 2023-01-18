@@ -1,5 +1,11 @@
 # Overview
 
+Once a protocol decides to run a quest, it creates a new `Quest` that will declare a finite number of `Receipts` that
+can ultimately be claimed for a `Reward`. `Receipts` are ERC-721 NFTs that are transferable but only claimable once
+per `Quest`.
+Individuals that complete the `Quest` action are given the ability to mint a `Receipt` to their wallet. They then
+can use the `Receipt` to claim the `Reward` in the future and any other potential usages.
+
 ---
 
 ## Key Concepts

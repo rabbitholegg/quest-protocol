@@ -937,11 +937,6 @@
     proper-lockfile "^4.1.1"
     solidity-ast "^0.4.15"
 
-"@quant-finance/solidity-datetime@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@quant-finance/solidity-datetime/-/solidity-datetime-2.2.0.tgz#50f2d00a571d8cc2d962257b40b70fc44450dcaa"
-  integrity sha512-iO0EnqPKTzGCgQOkI9lerpJc0XKUhMNurSjHcA7p7nlP2K2z3U4kk9OC9eQkZUrdBtltft+kIibiDdIOYWuQMg==
-
 "@scure/base@~1.1.0":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.1.tgz#ebb651ee52ff84f420097055f4bf46cfba403938"

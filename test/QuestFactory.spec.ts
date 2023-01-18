@@ -66,7 +66,12 @@ describe('QuestFactory', () => {
   }
 
   const deployRabbitHoleReceiptContract = async () => {
+    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
+    await deployedReceiptRenderer.deployed()
+
     deployedRabbitHoleReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
+      deployedReceiptRenderer.address,
       royaltyRecipient.address,
       owner.address,
       69,
@@ -122,8 +127,20 @@ describe('QuestFactory', () => {
     })
 
     it('Should revert if trying to use existing quest id', async () => {
-      expect(
-        await deployedFactoryContract.createQuest(
+      await deployedFactoryContract.createQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        allowList,
+        rewardAmount,
+        'erc20',
+        erc20QuestId,
+        deployedRabbitHoleReceiptContract.address
+      )
+
+      await expect(
+        deployedFactoryContract.createQuest(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
@@ -136,20 +153,27 @@ describe('QuestFactory', () => {
           2000
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
-      expect(
-        await deployedFactoryContract.createQuest(
-          deployedSampleErc20Contract.address,
-          expiryDate,
-          startDate,
-          totalRewards,
-          allowList,
-          rewardAmount,
-          'erc1155',
-          erc1155QuestId,
-          deployedRabbitHoleReceiptContract.address,
-          2000
-        )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
+    })
+
+    it('Should revert if msg.sender does not have correct role', async () => {
+      await expect(
+        deployedFactoryContract
+          .connect(royaltyRecipient)
+          .createQuest(
+            deployedSampleErc20Contract.address,
+            expiryDate,
+            startDate,
+            totalRewards,
+            allowList,
+            rewardAmount,
+            'erc20',
+            erc20QuestId,
+            deployedRabbitHoleReceiptContract.address,
+            2000
+          )
+      ).to.be.revertedWith(
+        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`
+      )
     })
   })
 

@@ -4,19 +4,19 @@ const { ethers } = require('hardhat')
 
 async function main() {
   const royaltyRecipient = '0x482c973675b3E3f84A23Dc03430aCfF293952e74'
-  const minterAddress = '0x482c973675b3E3f84A23Dc03430aCfF293952e74' // TODO: change this to the factory address
+  const minterAddress = '0x482c973675b3E3f84A23Dc03430aCfF293952e74' // TODO: change this to the server minter address
   const royaltyPercentage = 10;
 
-  const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
-  const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+  const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')
+  const TicketRenderer = await ethers.getContractFactory('TicketRenderer')
 
-  const receiptRenderer = await ReceiptRenderer.deploy()
-  await receiptRenderer.deployed()
-  console.log('receiptRenderer deployed to:', receiptRenderer.address)
+  const ticketRenderer = await TicketRenderer.deploy()
+  await ticketRenderer.deployed();
+  console.log('ticketRenderer deployed to:', ticketRenderer.address)
 
   const deployment = await hre.upgrades.deployProxy(
-    RabbitHoleReceipt,
-    [receiptRenderer.address, royaltyRecipient, minterAddress, royaltyPercentage],
+    RabbitHoleTickets,
+    [ticketRenderer.address, royaltyRecipient, minterAddress, royaltyPercentage],
     { initializer: 'initialize' }
   )
 
@@ -29,8 +29,8 @@ async function main() {
 
   console.log("verifying implementation: ", proxyImplAddress);
   await hre.run("verify:verify", { address: proxyImplAddress });
-  console.log("verifying receiptRenderer: ", receiptRenderer.address);
-  await hre.run("verify:verify", { address: receiptRenderer.address }
+  console.log("verifying TicketRenderer: ", ticketRenderer.address);
+  await hre.run("verify:verify", { address: ticketRenderer.address });
 }
 
 main()
