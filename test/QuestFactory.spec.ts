@@ -66,7 +66,12 @@ describe('QuestFactory', () => {
   }
 
   const deployRabbitHoleReceiptContract = async () => {
+    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
+    await deployedReceiptRenderer.deployed()
+
     deployedRabbitHoleReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
+      deployedReceiptRenderer.address,
       royaltyRecipient.address,
       owner.address,
       69,

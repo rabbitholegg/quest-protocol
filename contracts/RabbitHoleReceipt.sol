@@ -6,10 +6,9 @@ import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import '@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol';
+import './ReceiptRenderer.sol';
 
 contract RabbitHoleReceipt is
     Initializable,
@@ -20,32 +19,38 @@ contract RabbitHoleReceipt is
     IERC2981Upgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using StringsUpgradeable for uint256;
     CountersUpgradeable.Counter private _tokenIds;
 
+    // storage vars
     mapping(uint => string) public questIdForTokenId;
     address public royaltyRecipient;
     address public minterAddress;
     uint public royaltyFee;
     mapping(uint => uint) public timestampForTokenId;
+    ReceiptRenderer public ReceiptRendererContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address royaltyRecipient_, address minterAddress_, uint royaltyFee_) public initializer {
+    function initialize(address receiptRenderer_, address royaltyRecipient_, address minterAddress_, uint royaltyFee_) public initializer {
         __ERC721_init('RabbitHoleReceipt', 'RHR');
         __ERC721URIStorage_init();
         __Ownable_init();
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;
+        ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
     modifier onlyMinter() {
         msg.sender == minterAddress;
         _;
+    }
+
+    function setReceiptRenderer(address receiptRenderer_) public onlyOwner {
+        ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
     function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
@@ -119,37 +124,7 @@ contract RabbitHoleReceipt is
         uint _tokenId
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
         require(_exists(_tokenId), 'ERC721URIStorage: URI query for nonexistent token');
-
-        bytes memory dataURI = abi.encodePacked(
-            '{',
-            '"name": "RabbitHole Quest #',
-            questIdForTokenId[_tokenId],
-            ' Redeemer #',
-            _tokenId.toString(),
-            '",',
-            '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
-            '"image": "',
-            generateSVG(_tokenId),
-            '"',
-            '}'
-        );
-        return string(abi.encodePacked('data:application/json;base64,', Base64Upgradeable.encode(dataURI)));
-    }
-
-    function generateSVG(uint _tokenId) public view returns (string memory) {
-        bytes memory svg = abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
-            '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
-            '<rect width="100%" height="100%" fill="black" />',
-            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest #',
-            questIdForTokenId[_tokenId],
-            '</text>',
-            '<text x="70%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest Receipt #',
-            _tokenId,
-            '</text>',
-            '</svg>'
-        );
-        return string(abi.encodePacked('data:image/svg+xml;base64,', Base64Upgradeable.encode(svg)));
+        return ReceiptRendererContract.generateTokenURI(_tokenId, questIdForTokenId[_tokenId]);
     }
 
     function royaltyInfo(
