@@ -54,7 +54,7 @@ contract Erc20Quest is Quest {
     }
 
     function withdrawRemainingTokens() public override onlyOwner {
-        super.withdraw();
+        super.withdrawRemainingTokens();
 
 
         IERC20(rewardToken).safeTransfer(msg.sender, IERC20(rewardToken).balanceOf(address(this)));

@@ -136,7 +136,8 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc20',
         erc20QuestId,
-        deployedRabbitHoleReceiptContract.address
+        deployedRabbitHoleReceiptContract.address,
+        2000
       )
 
       await expect(

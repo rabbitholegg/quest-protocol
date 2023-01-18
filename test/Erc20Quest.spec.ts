@@ -227,7 +227,7 @@ describe('Erc20Quest', async () => {
     it('should fail if the contract is out of rewards', async () => {
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [10000])
-      await deployedQuestContract.withdraw()
+      await deployedQuestContract.withdrawRemainingTokens()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'AmountExceedsBalance')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
@@ -324,15 +324,15 @@ describe('Erc20Quest', async () => {
     })
   })
 
-  describe('withDraw()', async () => {
-    it('should only allow the owner to withdraw', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdraw()).to.be.revertedWith(
+  describe('withdrawRemainingTokens()', async () => {
+    it('should only allow the owner to withdrawRemainingTokens', async () => {
+      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
 
-    it('should revert if trying to withdraw before end date', async () => {
-      await expect(deployedQuestContract.connect(owner).withdraw()).to.be.revertedWithCustomError(
+    it('should revert if trying to withdrawRemainingTokens before end date', async () => {
+      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens()).to.be.revertedWithCustomError(
         questContract,
         'NoWithdrawDuringClaim'
       )
@@ -344,7 +344,7 @@ describe('Erc20Quest', async () => {
       expect(beginningContractBalance.toString()).to.equal(totalRewardsPlusFee.toString())
       expect(beginningOwnerBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [10001])
-      await deployedQuestContract.connect(owner).withdraw()
+      await deployedQuestContract.connect(owner).withdrawRemainingTokens()
 
       const endContactBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
       expect(endContactBalance.toString()).to.equal('0')

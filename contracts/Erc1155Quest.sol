@@ -49,7 +49,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     }
 
     function withdrawRemainingTokens() public override onlyOwner {
-        super.withdraw();
+        super.withdrawRemainingTokens();
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
             msg.sender,
