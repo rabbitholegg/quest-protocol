@@ -10,7 +10,7 @@ import '@nomiclabs/hardhat-waffle'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 import '@typechain/hardhat'
-import "solidity-coverage"
+import 'solidity-coverage'
 
 module.exports = {
   defender: {
@@ -26,6 +26,7 @@ module.exports = {
             enabled: true,
             runs: 5000,
           },
+          viaIR: true,
         },
       },
     ],
