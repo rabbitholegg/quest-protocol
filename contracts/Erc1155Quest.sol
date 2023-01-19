@@ -16,16 +16,16 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         string memory questId_,
         address receiptContractAddress_
     )
-        Quest(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalAmount_,
-            allowList_,
-            rewardAmountInWeiOrTokenId_,
-            questId_,
-            receiptContractAddress_
-        )
+    Quest(
+        rewardTokenAddress_,
+        endTime_,
+        startTime_,
+        totalAmount_,
+        allowList_,
+        rewardAmountInWeiOrTokenId_,
+        questId_,
+        receiptContractAddress_
+    )
     {}
 
     function start() public override {
@@ -48,8 +48,8 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         return redeemableTokenCount_;
     }
 
-    function withdraw() public override onlyOwner {
-        super.withdraw();
+    function withdrawRemainingTokens() public override onlyOwner {
+        super.withdrawRemainingTokens();
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
             msg.sender,

@@ -15,7 +15,7 @@ describe('QuestFactory', () => {
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
-
+  const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
@@ -52,6 +52,7 @@ describe('QuestFactory', () => {
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
+      protocolFeeAddress,
     ])) as QuestFactory
   }
 
@@ -95,7 +96,8 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId
+        erc20QuestId,
+        2000
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.questAddressForQuestId(erc20QuestId)
@@ -113,7 +115,8 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc1155',
-        erc1155QuestId
+        erc1155QuestId,
+        2000
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.questAddressForQuestId(erc1155QuestId)
@@ -131,7 +134,8 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId
+        erc20QuestId,
+        2000
       )
 
       await expect(
@@ -143,7 +147,8 @@ describe('QuestFactory', () => {
           allowList,
           rewardAmount,
           'erc20',
-          erc20QuestId
+          erc20QuestId,
+          2000
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
@@ -160,7 +165,8 @@ describe('QuestFactory', () => {
             allowList,
             rewardAmount,
             'erc20',
-            erc20QuestId
+            erc20QuestId,
+            2000
           )
       ).to.be.revertedWith(
         `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`
@@ -173,6 +179,14 @@ describe('QuestFactory', () => {
       const newAddress = royaltyRecipient.address
       await deployedFactoryContract.setClaimSignerAddress(newAddress)
       expect(await deployedFactoryContract.claimSignerAddress()).to.equal(newAddress)
+    })
+  })
+
+  describe('setProtocolFeeRecipient()', () => {
+    it('Should update protocolFeeRecipient', async () => {
+      const newAddress = royaltyRecipient.address
+      await deployedFactoryContract.setProtocolFeeRecipient(newAddress)
+      expect(await deployedFactoryContract.protocolFeeRecipient()).to.equal(newAddress)
     })
   })
 
@@ -192,7 +206,8 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId
+        erc20QuestId,
+        2000
       )
       await tx.wait()
     })

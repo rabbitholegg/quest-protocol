@@ -23,6 +23,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     address public claimSignerAddress;
+    address public protocolFeeRecipient;
     mapping(string => address) public questAddressForQuestId;
     mapping(string => uint256) public totalAmountForQuestId;
     mapping(string => uint256) public amountMintedForQuestId;
@@ -33,12 +34,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_) public initializer {
+    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_, address protocolFeeRecipient_) public initializer {
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole();
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+        protocolFeeRecipient = protocolFeeRecipient_;
     }
 
     function createQuest(
@@ -49,20 +51,24 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory allowList_,
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
-        string memory questId_
+        string memory questId_,
+        uint256 questFee_
     ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             Erc20Quest newQuest = new Erc20Quest(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalAmount_,
-                allowList_,
-                rewardAmountOrTokenId_,
-                questId_,
-                address(rabbitholeReceiptContract)
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalAmount_,
+            allowList_,
+            rewardAmountOrTokenId_,
+            questId_,
+            address(rabbitholeReceiptContract),
+            questFee_,
+            protocolFeeRecipient,
+            address(this)
             );
             newQuest.transferOwnership(msg.sender);
 
@@ -109,6 +115,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
         claimSignerAddress = claimSignerAddress_;
+    }
+
+    function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
+        protocolFeeRecipient = protocolFeeRecipient_;
     }
 
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {

@@ -19,6 +19,7 @@ interface IQuest {
     error AmountExceedsBalance();
     error NotStarted();
     error QuestPaused();
+    error QuestEnded();
     error AddressNotSigned();
     error InvalidHash();
 }
