@@ -97,7 +97,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc20',
         erc20QuestId,
-        deployedRabbitHoleReceiptContract.address,
         2000
       )
       await tx.wait()
@@ -117,7 +116,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc1155',
         erc1155QuestId,
-        deployedRabbitHoleReceiptContract.address,
         2000
       )
       await tx.wait()
@@ -137,7 +135,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc20',
         erc20QuestId,
-        deployedRabbitHoleReceiptContract.address,
         2000
       )
 
@@ -151,7 +148,6 @@ describe('QuestFactory', () => {
           rewardAmount,
           'erc20',
           erc20QuestId,
-          deployedRabbitHoleReceiptContract.address,
           2000
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
@@ -170,7 +166,6 @@ describe('QuestFactory', () => {
             rewardAmount,
             'erc20',
             erc20QuestId,
-            deployedRabbitHoleReceiptContract.address,
             2000
           )
       ).to.be.revertedWith(
@@ -212,7 +207,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc20',
         erc20QuestId,
-        deployedRabbitHoleReceiptContract.address,
         2000
       )
       await tx.wait()

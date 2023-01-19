@@ -33,6 +33,7 @@ For more information on all docs related to the Quest Protocol, see the document
 - [Overview](./docs/overview.md)
 - [Quest Claim](./docs/quest-claim.md)
 - [Quest Create](./docs/quest-create.md)
+- [Audit Endpoints](./docs/audit-endpoints.md)
 
 ---
 

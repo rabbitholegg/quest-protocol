@@ -19,7 +19,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
-    bytes32 public constant CREATE_QUEST_ROLE = keccak256("CREATE_QUEST_ROLE");
+    bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     address public claimSignerAddress;
@@ -52,24 +52,23 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
-        address receiptContractAddress_,
         uint256 questFee_
     ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             Erc20Quest newQuest = new Erc20Quest(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalAmount_,
-                allowList_,
-                rewardAmountOrTokenId_,
-                questId_,
-                receiptContractAddress_,
-                questFee_,
-                protocolFeeRecipient,
-                address(this)
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalAmount_,
+            allowList_,
+            rewardAmountOrTokenId_,
+            questId_,
+            address(rabbitholeReceiptContract),
+            questFee_,
+            protocolFeeRecipient,
+            address(this)
             );
             newQuest.transferOwnership(msg.sender);
 
@@ -88,7 +87,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
-                receiptContractAddress_
+                address(rabbitholeReceiptContract)
             );
             newQuest.transferOwnership(msg.sender);
 
