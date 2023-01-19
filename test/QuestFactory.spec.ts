@@ -17,7 +17,6 @@ describe('QuestFactory', () => {
   let deployedFactoryContract: QuestFactory
   const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
-  const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
@@ -31,11 +30,13 @@ describe('QuestFactory', () => {
   let wallet: Wallet
 
   beforeEach(async () => {
-    ;[owner, royaltyRecipient] = await ethers.getSigners()
+    const [localOwner, localRoyaltyRecipient] = await ethers.getSigners()
     expiryDate = Math.floor(Date.now() / 1000) + 10000
     startDate = Math.floor(Date.now() / 1000) + 1000
 
     wallet = Wallet.fromMnemonic(mnemonic)
+    owner = localOwner
+    royaltyRecipient = localRoyaltyRecipient
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
@@ -93,7 +94,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
@@ -112,7 +112,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc1155',
         erc1155QuestId,
@@ -127,17 +126,20 @@ describe('QuestFactory', () => {
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
       await deployedFactoryContract.grantCreateQuestRole(royaltyRecipient.address)
-      await expect(deployedFactoryContract.connect(royaltyRecipient).createQuest(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        allowList,
-        rewardAmount,
-        'erc1155',
-        erc1155QuestId,
-        2000
-      )).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
+      await expect(
+        deployedFactoryContract
+          .connect(royaltyRecipient)
+          .createQuest(
+            deployedSampleErc20Contract.address,
+            expiryDate,
+            startDate,
+            totalRewards,
+            rewardAmount,
+            'erc1155',
+            erc1155QuestId,
+            2000
+          )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
     })
 
     it('Should revert if trying to use existing quest id', async () => {
@@ -146,7 +148,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
@@ -159,7 +160,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc20',
           erc20QuestId,
@@ -177,7 +177,6 @@ describe('QuestFactory', () => {
             expiryDate,
             startDate,
             totalRewards,
-            allowList,
             rewardAmount,
             'erc20',
             erc20QuestId,
@@ -218,7 +217,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
