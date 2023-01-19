@@ -95,8 +95,7 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        deployedRabbitHoleReceiptContract.address
+        erc20QuestId
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.questAddressForQuestId(erc20QuestId)
@@ -114,8 +113,7 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc1155',
-        erc1155QuestId,
-        deployedRabbitHoleReceiptContract.address
+        erc1155QuestId
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.questAddressForQuestId(erc1155QuestId)
@@ -133,8 +131,8 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        deployedRabbitHoleReceiptContract.address);
+        erc20QuestId
+      )
 
       await expect(
         deployedFactoryContract.createQuest(
@@ -145,26 +143,28 @@ describe('QuestFactory', () => {
           allowList,
           rewardAmount,
           'erc20',
-          erc20QuestId,
-          deployedRabbitHoleReceiptContract.address
+          erc20QuestId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
 
     it('Should revert if msg.sender does not have correct role', async () => {
       await expect(
-        deployedFactoryContract.connect(royaltyRecipient).createQuest(
-          deployedSampleErc20Contract.address,
-          expiryDate,
-          startDate,
-          totalRewards,
-          allowList,
-          rewardAmount,
-          'erc20',
-          erc20QuestId,
-          deployedRabbitHoleReceiptContract.address
-        )
-      ).to.be.revertedWith(`AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`)
+        deployedFactoryContract
+          .connect(royaltyRecipient)
+          .createQuest(
+            deployedSampleErc20Contract.address,
+            expiryDate,
+            startDate,
+            totalRewards,
+            allowList,
+            rewardAmount,
+            'erc20',
+            erc20QuestId
+          )
+      ).to.be.revertedWith(
+        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`
+      )
     })
   })
 
@@ -192,8 +192,7 @@ describe('QuestFactory', () => {
         allowList,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        deployedRabbitHoleReceiptContract.address
+        erc20QuestId
       )
       await tx.wait()
     })
