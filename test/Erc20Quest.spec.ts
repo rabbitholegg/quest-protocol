@@ -18,6 +18,7 @@ describe('Erc20Quest', async () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
   let expiryDate: number, startDate: number
+  const mockAddress = '0x0000000000000000000000000000000000000000'
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const questId = 'asdf'
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
