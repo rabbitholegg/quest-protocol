@@ -125,6 +125,21 @@ describe('QuestFactory', () => {
       expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
     })
 
+    it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
+      await deployedFactoryContract.grantCreateQuestRole(royaltyRecipient.address)
+      await expect(deployedFactoryContract.connect(royaltyRecipient).createQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        allowList,
+        rewardAmount,
+        'erc1155',
+        erc1155QuestId,
+        2000
+      )).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
+    })
+
     it('Should revert if trying to use existing quest id', async () => {
       await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
