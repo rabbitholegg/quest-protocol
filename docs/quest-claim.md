@@ -31,4 +31,4 @@ The sequence of events is:
 2. Transfer rewards to the newly created Quest. You can just transfer in rewards directly.
 3. The Quest Factory will keep track of receipts for a given user and quest. There is a finite amount of particpants allowed which is calculated by taking the totalRewards / rewardAmountOrTokenId if it's an ERC-20. If it's an ERC-1155 this will be totalRewards / 1 (since each is given 1 1155)
 4. Execute the start function. This will validate that the Quest is ready for public and upon reaching the
-   effective StartDate, will be ready for use. We may change the name to this as it's misleading before we go live.
+   effective StartDate, will be ready for use. We may change the name to this as it's misleading before we go live. If a quest is not marked as started before the startDate all claims should revert.
