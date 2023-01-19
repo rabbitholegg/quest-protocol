@@ -3,20 +3,21 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  hre.run("compile");
-  const address = "0x91b2091145EF4082b4a0Cf27d08f84B19b60E1c6"; // goerli
+  hre.run('compile')
+  // const address = "0x91b2091145EF4082b4a0Cf27d08f84B19b60E1c6"; // goerli old QuestFactory
+  const address = '0x32c2231d0977422db6eA5aA19d31d210d6512CF8' // goerli
   const contract = await ethers.getContractFactory('QuestFactory')
 
-  const implAddress = await upgrades.erc1967.getImplementationAddress(address);
-  console.log("Old implementation address:", implAddress);
+  const implAddress = await upgrades.erc1967.getImplementationAddress(address)
+  console.log('Old implementation address:', implAddress)
 
-  const proposal = await hre.defender.proposeUpgrade(address, contract);
-  console.log("Upgrade proposal created at:", proposal.url);
+  const proposal = await hre.defender.proposeUpgrade(address, contract)
+  console.log('Upgrade proposal created at:', proposal.url)
 
-  const newImplAddress = proposal.metadata.newImplementationAddress;
-  console.log("verifying new implementation: ", newImplAddress);
-  await hre.run("verify:verify", {address: newImplAddress});
-};
+  const newImplAddress = proposal.metadata.newImplementationAddress
+  console.log('verifying new implementation: ', newImplAddress)
+  await hre.run('verify:verify', { address: newImplAddress })
+}
 
 main()
   // eslint-disable-next-line no-process-exit
