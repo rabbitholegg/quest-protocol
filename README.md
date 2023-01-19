@@ -119,6 +119,22 @@ The main contracts involved in this phase are:
 // Put In diagram here
 
 ---
+## Patterns
+
+The contracts use two main patterns.
+
+### Factory Pattern
+More reading [here](https://www.tutorialspoint.com/design_pattern/factory_pattern.htm)
+![image](https://user-images.githubusercontent.com/14314818/213348232-4bc57639-d281-41e7-a0c3-c3886d8e0be9.png)
+
+### Dependency Injection
+More reading [here](https://www.freecodecamp.org/news/a-quick-intro-to-dependency-injection-what-it-is-and-when-to-use-it-7578c84fa88f/)
+![image](https://user-images.githubusercontent.com/14314818/213348583-fc0a94ec-cc3f-4730-90d2-5503d027c7b8.png)
+
+### Factory Creation Pattern
+More reading [here](https://dev.to/jamiescript/design-patterns-in-solidity-1i28#factory)
+
+---
 
 ## Install
 
