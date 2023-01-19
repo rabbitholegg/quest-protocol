@@ -17,7 +17,6 @@ contract Erc20Quest is Quest {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-        string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
@@ -25,16 +24,16 @@ contract Erc20Quest is Quest {
         address protocolFeeRecipient_,
         address factoryContractAddress_
     )
-    Quest(
-        rewardTokenAddress_,
-        endTime_,
-        startTime_,
-        totalAmount_,
-        allowList_,
-        rewardAmountInWeiOrTokenId_,
-        questId_,
-        receiptContractAddress_
-    ) {
+        Quest(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalAmount_,
+            rewardAmountInWeiOrTokenId_,
+            questId_,
+            receiptContractAddress_
+        )
+    {
         questFee = questFee_;
         totalRedeemers = rewardAmountInWeiOrTokenId / totalAmount;
         protocolFeeRecipient = protocolFeeRecipient_;
@@ -43,7 +42,8 @@ contract Erc20Quest is Quest {
     }
 
     function start() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < (totalAmount + (totalAmount * questFee / 10_000))) revert TotalAmountExceedsBalance();
+        if (IERC20(rewardToken).balanceOf(address(this)) < (totalAmount + ((totalAmount * questFee) / 10_000)))
+            revert TotalAmountExceedsBalance();
         super.start();
     }
 
@@ -54,11 +54,12 @@ contract Erc20Quest is Quest {
         if (block.timestamp > endTime) revert QuestEnded();
 
         questFactoryContract.mintReceipt(amount_, questId_, hash_, signature_);
-        receiptRedeemers ++;
+        receiptRedeemers++;
     }
 
     function claim() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < (rewardAmountInWeiOrTokenId * questFee / 10_000)) revert AmountExceedsBalance();
+        if (IERC20(rewardToken).balanceOf(address(this)) < ((rewardAmountInWeiOrTokenId * questFee) / 10_000))
+            revert AmountExceedsBalance();
         super.claim();
         rewardRedeemers++;
     }
@@ -79,8 +80,9 @@ contract Erc20Quest is Quest {
     }
 
     function withdrawFee() public {
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, (receiptRedeemers * rewardAmountInWeiOrTokenId * questFee / 10_000));
+        IERC20(rewardToken).safeTransfer(
+            protocolFeeRecipient,
+            ((receiptRedeemers * rewardAmountInWeiOrTokenId * questFee) / 10_000)
+        );
     }
 }
-
-

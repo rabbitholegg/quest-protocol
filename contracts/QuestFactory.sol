@@ -53,7 +53,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-        string memory allowList_,
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
@@ -67,7 +66,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract),
@@ -91,7 +89,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract)
