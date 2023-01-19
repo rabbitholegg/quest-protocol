@@ -125,6 +125,7 @@ The contracts use two main patterns.
 
 ### Factory Pattern
 More reading [here](https://www.tutorialspoint.com/design_pattern/factory_pattern.htm)
+
 ![image](https://user-images.githubusercontent.com/14314818/213348232-4bc57639-d281-41e7-a0c3-c3886d8e0be9.png)
 
 ### Dependency Injection
