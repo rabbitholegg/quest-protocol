@@ -30,6 +30,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(string => mapping(address => bool)) public addressMintedForQuestId;
     address public protocolFeeRecipient;
+    mapping(string => uint256) public numberMintedForQuestId;
 
     // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -150,6 +151,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         amountMintedForQuestId[questId_] += amount_;
         addressMintedForQuestId[questId_][msg.sender] = true;
+        numberMintedForQuestId[questId_]++;
         rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
     }
 }

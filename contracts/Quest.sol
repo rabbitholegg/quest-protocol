@@ -12,15 +12,13 @@ contract Quest is Ownable, IQuest {
     address public factoryContractAddress;
     uint256 public endTime;
     uint256 public startTime;
-    uint256 public totalAmount;
+    uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
     bool public hasStarted;
     bool public isPaused;
     string public allowList;
     string public questId;
-    uint256 public receiptRedeemers;
-    uint256 public rewardRedeemers;
-
+    uint256 public reedemedTokens;
 
     mapping(uint256 => bool) private claimedList;
 
@@ -28,7 +26,7 @@ contract Quest is Ownable, IQuest {
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
-        uint256 totalAmount_,
+        uint256 totalParticipants_,
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
@@ -39,13 +37,12 @@ contract Quest is Ownable, IQuest {
         endTime = endTime_;
         startTime = startTime_;
         rewardToken = rewardTokenAddress_;
-        totalAmount = totalAmount_;
+        totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         allowList = allowList_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        receiptRedeemers = 0;
-        rewardRedeemers = 0;
+        reedemedTokens = 0;
     }
 
     function start() public virtual onlyOwner {
@@ -73,10 +70,14 @@ contract Quest is Ownable, IQuest {
         }
     }
 
-    function claim() public virtual {
+    modifier onlyStarted() {
         if (hasStarted == false) revert NotStarted();
-        if (isPaused == true) revert QuestPaused();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
+        _;
+    }
+
+    function claim() public virtual onlyStarted returns (uint256) {
+        if (isPaused == true) revert QuestPaused();
 
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
@@ -99,6 +100,8 @@ contract Quest is Ownable, IQuest {
         _transferRewards(totalReedemableRewards);
 
         emit Claimed(msg.sender, totalReedemableRewards);
+
+        return redeemableTokenCount;
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal virtual returns (uint256) {
@@ -113,7 +116,7 @@ contract Quest is Ownable, IQuest {
         return claimedList[tokenId_] && claimedList[tokenId_] == true;
     }
 
-    function withdrawRemainingTokens() public virtual onlyOwner {
+    function withdrawRemainingTokens(address to_) public virtual onlyOwner {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
     }
 }
