@@ -16,6 +16,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     error AddressAlreadyMinted();
     error InvalidHash();
     error InavlidRoleToCreateQuest();
+    error OnlyOwnerCanCreate1155Quest();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
@@ -83,6 +84,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
+
             Erc1155Quest newQuest = new Erc1155Quest(
                 rewardTokenAddress_,
                 endTime_,
