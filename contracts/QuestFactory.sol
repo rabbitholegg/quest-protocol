@@ -23,18 +23,22 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     address public claimSignerAddress;
-    address public protocolFeeRecipient;
     mapping(string => address) public questAddressForQuestId;
     mapping(string => uint256) public totalAmountForQuestId;
     mapping(string => uint256) public amountMintedForQuestId;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(string => mapping(address => bool)) public addressMintedForQuestId;
+    address public protocolFeeRecipient;
 
     // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(address claimSignerAddress_, address rabbitholeReceiptContract_, address protocolFeeRecipient_) public initializer {
+    function initialize(
+        address claimSignerAddress_,
+        address rabbitholeReceiptContract_,
+        address protocolFeeRecipient_
+    ) public initializer {
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole();
@@ -58,17 +62,17 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             Erc20Quest newQuest = new Erc20Quest(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalAmount_,
-            allowList_,
-            rewardAmountOrTokenId_,
-            questId_,
-            address(rabbitholeReceiptContract),
-            questFee_,
-            protocolFeeRecipient,
-            address(this)
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalAmount_,
+                allowList_,
+                rewardAmountOrTokenId_,
+                questId_,
+                address(rabbitholeReceiptContract),
+                questFee_,
+                protocolFeeRecipient,
+                address(this)
             );
             newQuest.transferOwnership(msg.sender);
 
