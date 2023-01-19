@@ -110,13 +110,11 @@ The main contracts involved in this phase are:
 - `Quest Factory` ([code](./contracts/QuestFactory.sol))
     - Creates new `Quest` instances of an ERC-1155 reward Quest or ERC-20 reward Quest.
 - `RabbitHole Receipt` ([code](./contracts/RabbitHoleReceipt.sol))
-    - TBD
+    - An ERC-721 contract that acts as a proof of on-chain activity. Claimed via usage of ECDSA sig/hash
 - `ERC-20 Quest` ([code](./contracts/Erc20Quest.sol))
-    - TBD
+    - A Quest in which the reward is an ERC-20 token
 - `ERC-1155 Quest` ([code](./contracts/Erc1155Quest.sol))
-    - TBD
-
-// Put In diagram here
+    - A Quest in which the reward is an ERC-1155 token
 
 ---
 ## Patterns
