@@ -9,13 +9,15 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 
+/// @title QuestFactory
+/// @author RabbitHole.gg
+/// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable {
     error QuestIdUsed();
     error OverMaxAllowedToMint();
     error AddressNotSigned();
     error AddressAlreadyMinted();
     error InvalidHash();
-    error InavlidRoleToCreateQuest();
     error OnlyOwnerCanCreate1155Quest();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
@@ -52,6 +54,17 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
+    /// @dev Create either an erc20 or erc1155 quest
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalAmount_ The total amount of rewards the quest will have
+    /// @param allowList_ Depricated
+    /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
+    /// @param contractType_ The type of quest, either erc20 or erc1155
+    /// @param questId_ The id of the quest
+    /// @param questFee_ The fee for the quest
+    /// @return address the quest contract address
     function createQuest(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -111,41 +124,54 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return address(0);
     }
 
+    /// @dev grant the create quest role to an account
+    /// @param account_ The account to grant the create quest role to
     function grantCreateQuestRole(address account_) public {
         _grantRole(CREATE_QUEST_ROLE, account_);
     }
 
+    /// @dev revoke the create quest role from an account
+    /// @param account_ The account to revoke the create quest role from
     function revokeCreateQuestRole(address account_) public {
         _revokeRole(CREATE_QUEST_ROLE, account_);
     }
 
+    /// @dev grant the default admin role and the create quest role to the owner
     function grantDefaultAdminAndCreateQuestRole() public onlyOwner {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(CREATE_QUEST_ROLE, msg.sender);
     }
 
+    /// @dev set the claim signer address
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
         claimSignerAddress = claimSignerAddress_;
     }
 
+    /// @dev set the protocol fee recipient
     function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
+    /// @dev set the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
+    /// @dev return the number of minted receipts for a quest
     function getNumberMinted(string memory questId_) external view returns (uint) {
         return quests[questId_].numberMinted;
     }
 
+    /// @dev recover the signer from a hash and signature
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
         bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
         return ECDSAUpgradeable.recover(messageDigest, signature);
     }
 
-    // This contract must be set as Minter on the receipt contract.
+    /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the message
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
         if (quests[questId_].numberMinted + 1 > quests[questId_].totalAmount) revert OverMaxAllowedToMint();
         if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
