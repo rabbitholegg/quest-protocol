@@ -147,16 +147,19 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev set the claim signer address
+    /// @param claimSignerAddress_ The address of the claim signer
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
         claimSignerAddress = claimSignerAddress_;
     }
 
     /// @dev set the protocol fee recipient
+    /// @param protocolFeeRecipient_ The address of the protocol fee recipient
     function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
     /// @dev set the rabbithole receipt contract
+    /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
@@ -182,7 +185,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the message
+    /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
         if (quests[questId_].numberMinted + 1 > quests[questId_].totalAmount) revert OverMaxAllowedToMint();
         if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
