@@ -23,9 +23,9 @@ describe('Erc20Quest', async () => {
   const questId = 'asdf'
   const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalParticipants = 300
-  const totalRewardsPlusFee = 120000
   const rewardAmount = 1000
   const questFee = 2000
+  const totalRewardsPlusFee = totalParticipants * rewardAmount + (totalParticipants * rewardAmount * questFee / 10_000)
   let owner: SignerWithAddress
   let firstAddress: SignerWithAddress
   let secondAddress: SignerWithAddress
@@ -287,7 +287,7 @@ describe('Erc20Quest', async () => {
       expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
       await deployedQuestContract.claim()
-      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(1000)
+      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(rewardAmount)
       await ethers.provider.send('evm_increaseTime', [-86400])
     })
 
@@ -329,15 +329,15 @@ describe('Erc20Quest', async () => {
 
       await deployedQuestContract.claim()
       const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(endingBalance).to.equal(1000)
+      expect(endingBalance).to.equal(rewardAmount)
 
       await deployedQuestContract.connect(firstAddress).claim()
       const secondEndingBalance = await deployedSampleErc20Contract.balanceOf(firstAddress.address)
-      expect(secondEndingBalance).to.equal(1000)
+      expect(secondEndingBalance).to.equal(rewardAmount)
 
       await deployedQuestContract.connect(secondAddress).claim()
       const thirdEndingBalance = await deployedSampleErc20Contract.balanceOf(secondAddress.address)
-      expect(thirdEndingBalance).to.equal(1000)
+      expect(thirdEndingBalance).to.equal(rewardAmount)
 
       await ethers.provider.send('evm_increaseTime', [-86400])
     })

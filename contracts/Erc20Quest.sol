@@ -8,7 +8,6 @@ import {QuestFactory} from './QuestFactory.sol';
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
     uint256 public questFee;
-    uint256 public totalRedeemers;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
 
@@ -36,7 +35,6 @@ contract Erc20Quest is Quest {
         receiptContractAddress_
     ) {
         questFee = questFee_;
-        totalRedeemers = totalParticipants / rewardAmountInWeiOrTokenId_;
         protocolFeeRecipient = protocolFeeRecipient_;
         questFactoryContract = QuestFactory(factoryContractAddress_);
         factoryContractAddress = factoryContractAddress_;
