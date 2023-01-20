@@ -87,7 +87,28 @@ describe('QuestFactory', () => {
       expect(await deployedFactoryContract.owner()).to.equal(owner.address)
     })
 
+    it('Should revert if reward address is not on the reward allowlist', async () => {
+      const rewardAddress = deployedSampleErc20Contract.address
+      expect(await deployedFactoryContract.rewardAllowlist(rewardAddress)).to.equal(false)
+
+      await expect(
+        deployedFactoryContract.createQuest(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          allowList,
+          rewardAmount,
+          'erc20',
+          erc20QuestId,
+          2000
+        )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
+    })
+
     it('Should create a new ERC20 quest', async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+
       const tx = await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -127,20 +148,49 @@ describe('QuestFactory', () => {
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
       await deployedFactoryContract.grantCreateQuestRole(royaltyRecipient.address)
-      await expect(deployedFactoryContract.connect(royaltyRecipient).createQuest(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        allowList,
-        rewardAmount,
-        'erc1155',
-        erc1155QuestId,
-        2000
-      )).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
+      await expect(
+        deployedFactoryContract
+          .connect(royaltyRecipient)
+          .createQuest(
+            deployedSampleErc20Contract.address,
+            expiryDate,
+            startDate,
+            totalRewards,
+            allowList,
+            rewardAmount,
+            'erc1155',
+            erc1155QuestId,
+            2000
+          )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
+    })
+
+    it('Should revert if reward address is removed from allowlist', async () => {
+      const rewardAddress = deployedSampleErc20Contract.address
+
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, false)
+
+      expect(await deployedFactoryContract.rewardAllowlist(rewardAddress)).to.equal(false)
+
+      await expect(
+        deployedFactoryContract.createQuest(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          allowList,
+          rewardAmount,
+          'erc20',
+          erc20QuestId,
+          2000
+        )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
 
     it('Should revert if trying to use existing quest id', async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+
       await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -213,7 +263,8 @@ describe('QuestFactory', () => {
     beforeEach(async () => {
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), erc20QuestId])
       signature = await wallet.signMessage(utils.arrayify(messageHash))
-      const tx = await deployedFactoryContract.createQuest(
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
         startDate,
@@ -224,7 +275,6 @@ describe('QuestFactory', () => {
         erc20QuestId,
         2000
       )
-      await tx.wait()
     })
 
     it('Should mint a receipt', async () => {
