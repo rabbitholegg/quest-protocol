@@ -21,4 +21,4 @@ can use the `Receipt` to claim the `Reward` in the future and any other potentia
 - **Claim Reward**: An (ungoverned) mechanism by which parties can claim `reward` tokens held by the Quest to
   themselves, these are claimable with an unclaimed `Receipt`.
 - **Quest Deployer**: Predefined accounts that have autonomous power to creates `Quests`. Conventionally defined as
-  Rabbithole, but will open up over time.
+  RabbitHole, but will open up over time.
