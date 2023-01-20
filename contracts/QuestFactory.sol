@@ -56,7 +56,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
-    /// @dev Create either an erc20 or erc1155 quest
+    /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
