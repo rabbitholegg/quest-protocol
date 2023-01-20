@@ -65,18 +65,12 @@ contract RabbitHoleReceipt is
         royaltyFee = _royaltyFee;
     }
 
-    function _mintSingleNFT(address _to, string memory _questId) private {
+    function mint(address _to, string memory _questId) public onlyMinter {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
         _safeMint(_to, newTokenID);
         questIdForTokenId[newTokenID] = _questId;
         timestampForTokenId[newTokenID] = block.timestamp;
-    }
-
-    function mint(address _to, uint _count, string memory _questId) public onlyMinter {
-        for (uint i = 0; i < _count; i++) {
-            _mintSingleNFT(_to, _questId);
-        }
     }
 
     function getOwnedTokenIdsOfQuest(

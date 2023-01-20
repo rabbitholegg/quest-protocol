@@ -100,7 +100,7 @@ describe('QuestFactory', () => {
         2000
       )
       await tx.wait()
-      const questAddress = await deployedFactoryContract.questAddressForQuestId(erc20QuestId)
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
       const deployedErc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
       expect(await deployedErc20Quest.startTime()).to.equal(startDate)
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
@@ -119,7 +119,7 @@ describe('QuestFactory', () => {
         2000
       )
       await tx.wait()
-      const questAddress = await deployedFactoryContract.questAddressForQuestId(erc1155QuestId)
+      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
       const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
       expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
       expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
@@ -228,30 +228,24 @@ describe('QuestFactory', () => {
     })
 
     it('Should mint a receipt', async () => {
-      await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      await deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
     })
 
     it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
       await expect(
-        deployedFactoryContract.connect(royaltyRecipient).mintReceipt(1, erc20QuestId, messageHash, signature)
+        deployedFactoryContract.connect(royaltyRecipient).mintReceipt(erc20QuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
     })
 
     it('Should fail if user is able to call mintReceipt multiple times', async () => {
-      await deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+      await deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
 
       await expect(
-        deployedFactoryContract.mintReceipt(1, erc20QuestId, messageHash, signature)
+        deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
-    })
-
-    it('Should not mint a number of receipts over the max allowed', async () => {
-      await expect(
-        deployedFactoryContract.mintReceipt(10001, erc20QuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'OverMaxAllowedToMint')
     })
   })
 })

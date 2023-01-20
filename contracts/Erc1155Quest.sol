@@ -10,7 +10,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
-        uint256 totalAmount_,
+        uint256 totalParticipants_,
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
@@ -20,7 +20,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         rewardTokenAddress_,
         endTime_,
         startTime_,
-        totalAmount_,
+        totalParticipants_,
         allowList_,
         rewardAmountInWeiOrTokenId_,
         questId_,
@@ -29,15 +29,9 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     {}
 
     function start() public override {
-        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount)
+        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalParticipants)
             revert TotalAmountExceedsBalance();
         super.start();
-    }
-
-    function claim() public override {
-        if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalAmount)
-            revert AmountExceedsBalance();
-        super.claim();
     }
 
     function _transferRewards(uint256 amount_) internal override {
@@ -48,11 +42,11 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         return redeemableTokenCount_;
     }
 
-    function withdrawRemainingTokens() public override onlyOwner {
-        super.withdrawRemainingTokens();
+    function withdrawRemainingTokens(address to_) public override onlyOwner {
+        super.withdrawRemainingTokens(to_);
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
-            msg.sender,
+            to_,
             rewardAmountInWeiOrTokenId,
             IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId),
             '0x00'

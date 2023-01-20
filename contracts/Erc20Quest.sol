@@ -8,7 +8,6 @@ import {QuestFactory} from './QuestFactory.sol';
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
     uint256 public questFee;
-    uint256 public totalRedeemers;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
 
@@ -16,7 +15,7 @@ contract Erc20Quest is Quest {
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
-        uint256 totalAmount_,
+        uint256 totalParticipants_,
         string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
@@ -29,38 +28,29 @@ contract Erc20Quest is Quest {
         rewardTokenAddress_,
         endTime_,
         startTime_,
-        totalAmount_,
+        totalParticipants_,
         allowList_,
         rewardAmountInWeiOrTokenId_,
         questId_,
         receiptContractAddress_
     ) {
         questFee = questFee_;
-        totalRedeemers = rewardAmountInWeiOrTokenId / totalAmount;
         protocolFeeRecipient = protocolFeeRecipient_;
         questFactoryContract = QuestFactory(factoryContractAddress_);
         factoryContractAddress = factoryContractAddress_;
     }
 
+    function maxTotalRewards() public view returns (uint256) {
+        return totalParticipants * rewardAmountInWeiOrTokenId;
+    }
+
+    function maxProtocolReward() public view returns (uint256) {
+        return maxTotalRewards() * questFee / 10_000;
+    }
+
     function start() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < (totalAmount + (totalAmount * questFee / 10_000))) revert TotalAmountExceedsBalance();
+        if (IERC20(rewardToken).balanceOf(address(this)) < maxTotalRewards() + maxProtocolReward()) revert TotalAmountExceedsBalance();
         super.start();
-    }
-
-    function mintReceipt(uint amount_, string memory questId_, bytes32 hash_, bytes memory signature_) public {
-        if (hasStarted == false) revert NotStarted();
-        if (isPaused == true) revert QuestPaused();
-        if (block.timestamp < startTime) revert NotStarted();
-        if (block.timestamp > endTime) revert QuestEnded();
-
-        questFactoryContract.mintReceipt(amount_, questId_, hash_, signature_);
-        receiptRedeemers ++;
-    }
-
-    function claim() public override {
-        if (IERC20(rewardToken).balanceOf(address(this)) < (rewardAmountInWeiOrTokenId * questFee / 10_000)) revert AmountExceedsBalance();
-        super.claim();
-        rewardRedeemers++;
     }
 
     function _transferRewards(uint256 amount_) internal override {
@@ -71,15 +61,24 @@ contract Erc20Quest is Quest {
         return redeemableTokenCount_ * rewardAmountInWeiOrTokenId;
     }
 
-    function withdrawRemainingTokens() public override onlyOwner {
-        super.withdrawRemainingTokens();
+    function withdrawRemainingTokens(address to_) public override onlyOwner {
+        super.withdrawRemainingTokens(to_);
 
-        uint256 nonClaimableTokens = (totalRedeemers - receiptRedeemers) * rewardAmountInWeiOrTokenId;
-        IERC20(rewardToken).safeTransfer(msg.sender, nonClaimableTokens);
+        uint unclaimedTokens = (receiptRedeemers() - reedemedTokens) * rewardAmountInWeiOrTokenId;
+        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
+        IERC20(rewardToken).safeTransfer(to_, nonClaimableTokens);
     }
 
-    function withdrawFee() public {
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, (receiptRedeemers * rewardAmountInWeiOrTokenId * questFee / 10_000));
+    function receiptRedeemers() public view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
+    }
+
+    function protocolFee() public view returns (uint256) {
+        return receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee / 10_000;
+    }
+
+    function withdrawFee() public onlyStarted {
+        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }
 
