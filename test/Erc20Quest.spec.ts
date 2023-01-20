@@ -25,7 +25,7 @@ describe('Erc20Quest', async () => {
   const totalParticipants = 300
   const rewardAmount = 1000
   const questFee = 2000
-  const totalRewardsPlusFee = totalParticipants * rewardAmount + (totalParticipants * rewardAmount * questFee / 10_000)
+  const totalRewardsPlusFee = totalParticipants * rewardAmount + (totalParticipants * rewardAmount * questFee) / 10_000
   let owner: SignerWithAddress
   let firstAddress: SignerWithAddress
   let secondAddress: SignerWithAddress
@@ -66,7 +66,8 @@ describe('Erc20Quest', async () => {
 
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))
-    const tx = await deployedFactoryContract.createQuest(
+    await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+    await deployedFactoryContract.createQuest(
       deployedSampleErc20Contract.address,
       expiryDate,
       startDate,
@@ -77,7 +78,6 @@ describe('Erc20Quest', async () => {
       questId,
       questFee
     )
-    await tx.wait()
   })
 
   const deployFactoryContract = async () => {
@@ -119,7 +119,12 @@ describe('Erc20Quest', async () => {
   }
 
   const deploySampleErc20Contract = async () => {
-    deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', totalRewardsPlusFee * 100, owner.address)
+    deployedSampleErc20Contract = await sampleERC20Contract.deploy(
+      'RewardToken',
+      'RTC',
+      totalRewardsPlusFee * 100,
+      owner.address
+    )
     await deployedSampleErc20Contract.deployed()
   }
 
@@ -326,20 +331,21 @@ describe('Erc20Quest', async () => {
 
   describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdrawRemainingTokens', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(
+        deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('should revert if trying to withdrawRemainingTokens before end date', async () => {
-      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)).to.be.revertedWithCustomError(
-        questContract,
-        'NoWithdrawDuringClaim'
-      )
+      await expect(
+        deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWithCustomError(questContract, 'NoWithdrawDuringClaim')
     })
 
     it('if zero receiptRedeemers and reedemedTokens transfer all rewards back to owner', async () => {
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(totalRewardsPlusFee * 100)
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(
+        totalRewardsPlusFee * 100
+      )
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(0)
       await ethers.provider.send('evm_increaseTime', [100001])
       await deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
@@ -347,7 +353,7 @@ describe('Erc20Quest', async () => {
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(0)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(totalRewardsPlusFee * 100)
       await ethers.provider.send('evm_increaseTime', [-100001])
-  })
+    })
 
     it('should transfer non-claimable rewards back to owner', async () => {
       await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
@@ -359,7 +365,9 @@ describe('Erc20Quest', async () => {
       await deployedQuestContract.withdrawRemainingTokens(owner.address)
 
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(200)
-      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal((totalRewardsPlusFee * 100) - (1 * 1000) - 200)
+      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
+        totalRewardsPlusFee * 100 - 1 * 1000 - 200
+      )
       await ethers.provider.send('evm_increaseTime', [-100001])
       await ethers.provider.send('evm_increaseTime', [-86400])
     })
@@ -381,7 +389,9 @@ describe('Erc20Quest', async () => {
       await ethers.provider.send('evm_increaseTime', [100001])
       await deployedQuestContract.withdrawFee()
 
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal((totalRewardsPlusFee * 100) - (1 * 1000) - 200)
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(
+        totalRewardsPlusFee * 100 - 1 * 1000 - 200
+      )
       expect(await deployedQuestContract.receiptRedeemers()).to.equal(1)
       expect(await deployedQuestContract.protocolFee()).to.equal(200) // 1 * 1000 * (2000 / 10000) = 200
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeAddress)).to.equal(200)

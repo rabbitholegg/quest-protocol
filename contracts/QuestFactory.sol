@@ -17,6 +17,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     error InvalidHash();
     error InavlidRoleToCreateQuest();
     error OnlyOwnerCanCreate1155Quest();
+    error RewardNotAllowed();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
@@ -34,6 +35,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public protocolFeeRecipient;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
+    mapping(address => bool) public rewardAllowlist;
 
     // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -66,6 +68,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
+            if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+
             Erc20Quest newQuest = new Erc20Quest(
                 rewardTokenAddress_,
                 endTime_,
@@ -134,6 +138,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+    }
+
+    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyOwner {
+        rewardAllowlist[rewardAddress_] = allowed_;
     }
 
     function getNumberMinted(string memory questId_) external view returns (uint) {
