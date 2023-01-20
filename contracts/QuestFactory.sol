@@ -22,15 +22,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
 
+    struct Quest {
+        mapping(address => bool) addressMinted;
+        address questAddress;
+        uint totalAmount;
+        uint numberMinted;
+    }
+
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     address public claimSignerAddress;
-    mapping(string => address) public questAddressForQuestId;
-    mapping(string => uint256) public totalAmountForQuestId;
-    mapping(string => uint256) public amountMintedForQuestId;
-    RabbitHoleReceipt public rabbitholeReceiptContract;
-    mapping(string => mapping(address => bool)) public addressMintedForQuestId;
     address public protocolFeeRecipient;
-    mapping(string => uint256) public numberMintedForQuestId;
+    mapping(string => Quest) public quests;
+    RabbitHoleReceipt public rabbitholeReceiptContract;
 
     // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -60,7 +63,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory questId_,
         uint256 questFee_
     ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
-        if (questAddressForQuestId[questId_] != address(0)) revert QuestIdUsed();
+        if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             Erc20Quest newQuest = new Erc20Quest(
@@ -79,8 +82,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             newQuest.transferOwnership(msg.sender);
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
-            questAddressForQuestId[questId_] = address(newQuest);
-            totalAmountForQuestId[questId_] = totalAmount_;
+            quests[questId_].questAddress = address(newQuest);
+            quests[questId_].totalAmount = totalAmount_;
             return address(newQuest);
         }
 
@@ -100,8 +103,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             newQuest.transferOwnership(msg.sender);
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
-            questAddressForQuestId[questId_] = address(newQuest);
-            totalAmountForQuestId[questId_] = totalAmount_;
+            quests[questId_].questAddress = address(newQuest);
+            quests[questId_].totalAmount = totalAmount_;
             return address(newQuest);
         }
 
@@ -133,8 +136,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
-    function getQuestAddress(string memory questId_) external view returns (address) {
-        return questAddressForQuestId[questId_];
+    function getNumberMinted(string memory questId_) external view returns (uint) {
+        return quests[questId_].numberMinted;
     }
 
     function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
@@ -143,15 +146,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     // This contract must be set as Minter on the receipt contract.
-    function mintReceipt(uint amount_, string memory questId_, bytes32 hash_, bytes memory signature_) public {
-        if (amountMintedForQuestId[questId_] + amount_ > totalAmountForQuestId[questId_]) revert OverMaxAllowedToMint();
-        if (addressMintedForQuestId[questId_][msg.sender] == true) revert AddressAlreadyMinted();
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
+        if (quests[questId_].numberMinted + 1 > quests[questId_].totalAmount) revert OverMaxAllowedToMint();
+        if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
-        amountMintedForQuestId[questId_] += amount_;
-        addressMintedForQuestId[questId_][msg.sender] = true;
-        numberMintedForQuestId[questId_]++;
-        rabbitholeReceiptContract.mint(msg.sender, amount_, questId_);
+        quests[questId_].addressMinted[msg.sender] = true;
+        quests[questId_].numberMinted++;
+        rabbitholeReceiptContract.mint(msg.sender, questId_);
     }
 }

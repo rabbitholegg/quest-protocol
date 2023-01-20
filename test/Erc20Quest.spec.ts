@@ -274,7 +274,7 @@ describe('Erc20Quest', async () => {
     })
 
     it('should only transfer the correct amount of rewards', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
+      await deployedRabbitholeReceiptContract.mint(owner.address, questId)
       await deployedQuestContract.start()
 
       await ethers.provider.send('evm_increaseTime', [86400])
@@ -292,7 +292,8 @@ describe('Erc20Quest', async () => {
     })
 
     it('should let you claim mulitiple rewards if you have multiple tokens', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 2, questId)
+      await deployedRabbitholeReceiptContract.mint(owner.address, questId)
+      await deployedRabbitholeReceiptContract.mint(owner.address, questId)
       await deployedQuestContract.start()
 
       await ethers.provider.send('evm_increaseTime', [86400])
@@ -311,39 +312,8 @@ describe('Erc20Quest', async () => {
       await ethers.provider.send('evm_increaseTime', [-86400])
     })
 
-    it('should let multiple claim if you have already claimed', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 3, questId)
-      await deployedRabbitholeReceiptContract.transferFrom(owner.address, firstAddress.address, 2)
-      await deployedRabbitholeReceiptContract.transferFrom(owner.address, secondAddress.address, 3)
-      await deployedQuestContract.start()
-
-      await ethers.provider.send('evm_increaseTime', [86400])
-
-      const startingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(startingBalance).to.equal(0)
-
-      const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
-      expect(totalTokens.length).to.equal(1)
-
-      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
-
-      await deployedQuestContract.claim()
-      const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(endingBalance).to.equal(rewardAmount)
-
-      await deployedQuestContract.connect(firstAddress).claim()
-      const secondEndingBalance = await deployedSampleErc20Contract.balanceOf(firstAddress.address)
-      expect(secondEndingBalance).to.equal(rewardAmount)
-
-      await deployedQuestContract.connect(secondAddress).claim()
-      const thirdEndingBalance = await deployedSampleErc20Contract.balanceOf(secondAddress.address)
-      expect(thirdEndingBalance).to.equal(rewardAmount)
-
-      await ethers.provider.send('evm_increaseTime', [-86400])
-    })
-
     it('should not let you claim if you have already claimed', async () => {
-      await deployedRabbitholeReceiptContract.mint(owner.address, 1, questId)
+      await deployedRabbitholeReceiptContract.mint(owner.address, questId)
       await deployedQuestContract.start()
 
       await ethers.provider.send('evm_increaseTime', [86400])
@@ -380,7 +350,7 @@ describe('Erc20Quest', async () => {
   })
 
     it('should transfer non-claimable rewards back to owner', async () => {
-      await deployedFactoryContract.connect(firstAddress).mintReceipt(1, questId, messageHash, signature)
+      await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [86400])
       await deployedQuestContract.connect(firstAddress).claim()
@@ -399,19 +369,19 @@ describe('Erc20Quest', async () => {
     it('should transfer protocol fees back to owner', async () => {
       const beginningContractBalance = await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)
 
-      await deployedFactoryContract.connect(firstAddress).mintReceipt(25, questId, messageHash, signature)
+      await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [86400])
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeAddress)).to.equal(0)
 
       await deployedQuestContract.connect(firstAddress).claim()
-      expect(await deployedSampleErc20Contract.balanceOf(firstAddress.address)).to.equal(25 * 1000)
+      expect(await deployedSampleErc20Contract.balanceOf(firstAddress.address)).to.equal(1 * 1000)
       expect(beginningContractBalance).to.equal(totalRewardsPlusFee * 100)
 
       await ethers.provider.send('evm_increaseTime', [100001])
       await deployedQuestContract.withdrawFee()
 
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal((totalRewardsPlusFee * 100) - (25 * 1000) - 200)
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal((totalRewardsPlusFee * 100) - (1 * 1000) - 200)
       expect(await deployedQuestContract.receiptRedeemers()).to.equal(1)
       expect(await deployedQuestContract.protocolFee()).to.equal(200) // 1 * 1000 * (2000 / 10000) = 200
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeAddress)).to.equal(200)

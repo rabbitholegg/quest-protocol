@@ -77,7 +77,7 @@ contract Erc20Quest is Quest {
     }
 
     function receiptRedeemers() public view returns (uint256) {
-        return questFactoryContract.numberMintedForQuestId(questId);
+        return questFactoryContract.getNumberMinted(questId);
     }
 
     function protocolFee() public view returns (uint256) {
