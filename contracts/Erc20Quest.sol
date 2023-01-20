@@ -42,16 +42,12 @@ contract Erc20Quest is Quest {
         factoryContractAddress = factoryContractAddress_;
     }
 
-    function questFeePercentage() public view returns (uint256) {
-        return questFee / 10_000;
-    }
-
     function maxTotalRewards() public view returns (uint256) {
         return totalParticipants * rewardAmountInWeiOrTokenId;
     }
 
     function maxProtocolReward() public view returns (uint256) {
-        return maxTotalRewards() * questFeePercentage();
+        return maxTotalRewards() * questFee / 10_000;
     }
 
     function start() public override {
@@ -87,7 +83,7 @@ contract Erc20Quest is Quest {
     }
 
     function protocolFee() public view returns (uint256) {
-        return receiptRedeemers() * rewardAmountInWeiOrTokenId * 2000 / 10000;
+        return receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee / 10_000;
     }
 
     function withdrawFee() public onlyStarted {
