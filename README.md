@@ -23,7 +23,7 @@ Quests Protocol is a protocol to distribute token rewards for completing on-chai
     - [Upgrading](https://github.com/rabbitholegg/quest-protocol#upgrading)
     - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
     - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
-    - [License](https://github.com/PartyDAO/quest-protocol#license)
+    - [License](https://github.com/rabbitholegg/quest-protocol/#license)
 
 ---
 ## Documentation
