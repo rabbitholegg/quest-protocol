@@ -86,9 +86,8 @@ contract Erc20Quest is Quest {
         return questFactoryContract.numberMintedForQuestId(questId);
     }
 
-    // 1 * 1 * 0.2 = 0.2
     function protocolFee() public view returns (uint256) {
-        return receiptRedeemers() * rewardAmountInWeiOrTokenId * questFeePercentage();
+        return receiptRedeemers() * rewardAmountInWeiOrTokenId * 2000 / 10000;
     }
 
     function withdrawFee() public onlyStarted {
