@@ -23,7 +23,7 @@ Quests Protocol is a protocol to distribute token rewards for completing on-chai
     - [Upgrading](https://github.com/rabbitholegg/quest-protocol#upgrading)
     - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
     - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
-    - [License](https://github.com/PartyDAO/quest-protocol#license)
+    - [License](https://github.com/rabbitholegg/quest-protocol/#license)
 
 ---
 ## Documentation
@@ -90,16 +90,16 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 
 ## Deployments
 
-|Chain           |Quest Factory Contract|
-|----------------|----------------------|
-|Ethereum        |0x0                   |
-|Goerli          |0x0                   |
-|Polygon Mainnet |0x0                   |
-|Polygon Testnet |0x0                   |
-|Optimism        |0x0                   |
-|Optimism Testnet|0x0                   |
-|Arbitrum        |0x0                   |
-|Arbitrum Testnet|0x0                   |
+|Chain           |Quest Factory Contract                    |
+|----------------|------------------------------------------|
+|Ethereum        |0x0                                       |
+|Goerli          |0x32c2231d0977422db6eA5aA19d31d210d6512CF8|
+|Polygon Mainnet |0x0                                       |
+|Polygon Testnet |0x0                                       |
+|Optimism        |0x0                                       |
+|Optimism Testnet|0x0                                       |
+|Arbitrum        |0x0                                       |
+|Arbitrum Testnet|0x0                                       |
 
 ---
 
