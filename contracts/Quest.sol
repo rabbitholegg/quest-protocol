@@ -76,7 +76,7 @@ contract Quest is Ownable, IQuest {
         _;
     }
 
-    function claim() public virtual onlyStarted returns (uint256) {
+    function claim() public virtual onlyStarted {
         if (isPaused == true) revert QuestPaused();
 
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
@@ -84,7 +84,6 @@ contract Quest is Ownable, IQuest {
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-
         for (uint i = 0; i < tokens.length; i++) {
             if (!isClaimed(tokens[i])) {
                 redeemableTokenCount++;
@@ -94,14 +93,11 @@ contract Quest is Ownable, IQuest {
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
 
         uint256 totalReedemableRewards = _calculateRewards(redeemableTokenCount);
-
         _setClaimed(tokens);
-
         _transferRewards(totalReedemableRewards);
+        reedemedTokens += redeemableTokenCount;
 
         emit Claimed(msg.sender, totalReedemableRewards);
-
-        return redeemableTokenCount;
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal virtual returns (uint256) {

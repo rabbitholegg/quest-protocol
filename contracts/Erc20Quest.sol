@@ -53,13 +53,6 @@ contract Erc20Quest is Quest {
         super.start();
     }
 
-    function claim() public override returns (uint256) {
-        uint redeemableTokenCount = super.claim();
-        reedemedTokens += redeemableTokenCount;
-
-        return redeemableTokenCount; // not used
-    }
-
     function _transferRewards(uint256 amount_) internal override {
         IERC20(rewardToken).safeTransfer(msg.sender, amount_);
     }

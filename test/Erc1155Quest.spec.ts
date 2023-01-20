@@ -234,7 +234,7 @@ describe('Erc1155Quest', () => {
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [10000])
       await deployedQuestContract.withdrawRemainingTokens(owner.address)
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'AmountExceedsBalance')
+      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
 
