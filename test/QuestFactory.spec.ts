@@ -264,7 +264,7 @@ describe('QuestFactory', () => {
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), erc20QuestId])
       signature = await wallet.signMessage(utils.arrayify(messageHash))
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-      const createQuestTx = await deployedFactoryContract.createQuest(
+      await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
         startDate,
@@ -275,7 +275,6 @@ describe('QuestFactory', () => {
         erc20QuestId,
         2000
       )
-      await createQuestTx.wait()
     })
 
     it('Should mint a receipt', async () => {
