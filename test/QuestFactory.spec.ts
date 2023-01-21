@@ -87,6 +87,22 @@ describe('QuestFactory', () => {
       expect(await deployedFactoryContract.owner()).to.equal(owner.address)
     })
 
+    it('should revert if incorrect quest contract type', async () => {
+      await expect(
+        deployedFactoryContract.createQuest(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          allowList,
+          rewardAmount,
+          'some-incorrect-contract-type',
+          erc20QuestId,
+          2000
+        )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestTypeInvalid')
+    })
+
     it('Should revert if reward address is not on the reward allowlist', async () => {
       const rewardAddress = deployedSampleErc20Contract.address
       expect(await deployedFactoryContract.rewardAllowlist(rewardAddress)).to.equal(false)
