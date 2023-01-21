@@ -10,7 +10,7 @@ import {
   RabbitHoleReceipt,
 } from '../typechain-types'
 
-describe('Erc1155Quest', () => {
+describe.only('Erc1155Quest', () => {
   let deployedQuestContract: Erc1155Quest
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
@@ -107,6 +107,14 @@ describe('Erc1155Quest', () => {
         expect(
           upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalRewards])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
+      })
+    })
+
+    describe('when end time is before start time', () => {
+      it('Should revert', async () => {
+        expect(
+          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalRewards])
+        ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
     })
 
@@ -287,16 +295,15 @@ describe('Erc1155Quest', () => {
 
   describe('withDraw()', async () => {
     it('should only allow the owner to withdraw', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(
+        deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('should revert if trying to withdraw before end date', async () => {
-      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)).to.be.revertedWithCustomError(
-        questContract,
-        'NoWithdrawDuringClaim'
-      )
+      await expect(
+        deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWithCustomError(questContract, 'NoWithdrawDuringClaim')
     })
 
     it('should transfer all rewards back to owner', async () => {

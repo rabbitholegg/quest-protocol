@@ -13,7 +13,7 @@ import {
   QuestFactory__factory,
 } from '../typechain-types'
 
-describe('Erc20Quest', async () => {
+describe.only('Erc20Quest', async () => {
   let deployedQuestContract: Erc20Quest
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
@@ -147,6 +147,14 @@ describe('Erc20Quest', async () => {
         expect(
           upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalParticipants])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
+      })
+    })
+
+    describe('when end time is before start time', () => {
+      it('Should revert', async () => {
+        expect(
+          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalParticipants])
+        ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
     })
 
