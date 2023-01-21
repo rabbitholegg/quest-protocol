@@ -10,7 +10,7 @@ import {
   RabbitHoleReceipt,
 } from '../typechain-types'
 
-describe.only('Erc1155Quest', () => {
+describe('Erc1155Quest', () => {
   let deployedQuestContract: Erc1155Quest
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
