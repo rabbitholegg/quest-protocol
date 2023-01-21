@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.5.0;
+pragma solidity ^0.8.15;
 
 // TODO clean this whole thing up
 // Allows anyone to claim a token if they exist in a merkle root.
