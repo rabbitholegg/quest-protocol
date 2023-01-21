@@ -43,32 +43,26 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         royaltyRecipient = royaltyRecipient_;
     }
 
-    function setRoyaltyFee(uint256 _royaltyFee) public onlyOwner {
-        royaltyFee = _royaltyFee;
+    function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
+        royaltyFee = royaltyFee_;
     }
 
     function setMinterAddress(address minterAddress_) public onlyOwner {
         minterAddress = minterAddress_;
     }
 
-    function mint(address to, uint256 id, uint256 amount, bytes memory data)
-        public
-        onlyMinter
-    {
+    function mint(address to, uint256 id, uint256 amount, bytes memory data) public onlyMinter {
         _mint(to, id, amount, data);
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        public
-        onlyMinter
-    {
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public onlyMinter {
         _mintBatch(to, ids, amounts, data);
     }
 
     function uri(
-        uint _tokenId
+        uint tokenId_
     ) public view virtual override(ERC1155Upgradeable) returns (string memory) {
-        return TicketRendererContract.generateTokenURI(_tokenId);
+        return TicketRendererContract.generateTokenURI(tokenId_);
     }
 
     function royaltyInfo(
