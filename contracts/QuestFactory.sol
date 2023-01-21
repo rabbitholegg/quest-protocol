@@ -3,6 +3,7 @@ pragma solidity ^0.8.15;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {Erc20Quest} from './Erc20Quest.sol';
+import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
@@ -12,19 +13,7 @@ import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol'
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable {
-    error QuestIdUsed();
-    error OverMaxAllowedToMint();
-    error AddressNotSigned();
-    error AddressAlreadyMinted();
-    error InvalidHash();
-    error OnlyOwnerCanCreate1155Quest();
-    error RewardNotAllowed();
-    error QuestTypeInvalid();
-    error AddressZeroNotAllowed();
-
-    event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
-
+contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
 
     struct Quest {

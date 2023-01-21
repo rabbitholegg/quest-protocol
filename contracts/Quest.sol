@@ -72,7 +72,7 @@ contract Quest is Ownable, IQuest {
         _;
     }
 
-    modifier onlyQuestActive() {
+    modifier onlyQuestActive()  {
         if (!hasStarted) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
