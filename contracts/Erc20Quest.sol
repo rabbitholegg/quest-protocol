@@ -21,8 +21,7 @@ contract Erc20Quest is Quest {
         string memory questId_,
         address receiptContractAddress_,
         uint256 questFee_,
-        address protocolFeeRecipient_,
-        address factoryContractAddress_
+        address protocolFeeRecipient_
     )
     Quest(
         rewardTokenAddress_,
@@ -36,8 +35,7 @@ contract Erc20Quest is Quest {
     ) {
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFactoryContract = QuestFactory(factoryContractAddress_);
-        factoryContractAddress = factoryContractAddress_;
+        questFactoryContract = QuestFactory(msg.sender);
     }
 
     function maxTotalRewards() public view returns (uint256) {

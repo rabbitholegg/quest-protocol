@@ -97,8 +97,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questId_,
                 address(rabbitholeReceiptContract),
                 questFee_,
-                protocolFeeRecipient,
-                address(this)
+                protocolFeeRecipient
             );
             newQuest.transferOwnership(msg.sender);
 

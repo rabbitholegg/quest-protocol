@@ -9,7 +9,6 @@ import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 contract Quest is Ownable, IQuest {
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     address public rewardToken;
-    address public factoryContractAddress;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalParticipants;
