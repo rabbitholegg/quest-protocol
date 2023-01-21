@@ -109,7 +109,7 @@ contract Quest is Ownable, IQuest {
     }
 
     function isClaimed(uint256 tokenId_) public view returns (bool) {
-        return claimedList[tokenId_] && claimedList[tokenId_] == true;
+        return claimedList[tokenId_] == true;
     }
 
     function withdrawRemainingTokens(address to_) public virtual onlyOwner {
