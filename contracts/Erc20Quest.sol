@@ -62,7 +62,7 @@ contract Erc20Quest is Quest {
     function withdrawRemainingTokens(address to_) public override onlyOwner {
         super.withdrawRemainingTokens(to_);
 
-        uint unclaimedTokens = (receiptRedeemers() - reedemedTokens) * rewardAmountInWeiOrTokenId;
+        uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
         uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
         IERC20(rewardToken).safeTransfer(to_, nonClaimableTokens);
     }
@@ -75,7 +75,7 @@ contract Erc20Quest is Quest {
         return receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee / 10_000;
     }
 
-    function withdrawFee() public onlyStarted {
+    function withdrawFee() public onlyQuestActive {
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }

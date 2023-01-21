@@ -17,7 +17,7 @@ contract Quest is Ownable, IQuest {
     bool public isPaused;
     string public allowList;
     string public questId;
-    uint256 public reedemedTokens;
+    uint256 public redeemedTokens;
 
     mapping(uint256 => bool) private claimedList;
 
@@ -41,7 +41,7 @@ contract Quest is Ownable, IQuest {
         allowList = allowList_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        reedemedTokens = 0;
+        redeemedTokens = 0;
     }
 
     function start() public virtual onlyOwner {
@@ -49,13 +49,11 @@ contract Quest is Ownable, IQuest {
         hasStarted = true;
     }
 
-    function pause() public onlyOwner {
-        if (hasStarted == false) revert NotStarted();
+    function pause() public onlyOwner onlyStarted {
         isPaused = true;
     }
 
-    function unPause() public onlyOwner {
-        if (hasStarted == false) revert NotStarted();
+    function unPause() public onlyOwner onlyStarted {
         isPaused = false;
     }
 
@@ -70,13 +68,18 @@ contract Quest is Ownable, IQuest {
     }
 
     modifier onlyStarted() {
-        if (hasStarted == false) revert NotStarted();
+        if (!hasStarted) revert NotStarted();
+        _;
+    }
+
+    modifier onlyQuestActive() {
+        if (!hasStarted) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
 
-    function claim() public virtual onlyStarted {
-        if (isPaused == true) revert QuestPaused();
+    function claim() public virtual onlyQuestActive {
+        if (isPaused) revert QuestPaused();
 
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
@@ -94,17 +97,17 @@ contract Quest is Ownable, IQuest {
         uint256 totalReedemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
         _transferRewards(totalReedemableRewards);
-        reedemedTokens += redeemableTokenCount;
+        redeemedTokens += redeemableTokenCount;
 
         emit Claimed(msg.sender, totalReedemableRewards);
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal virtual returns (uint256) {
-        // override this function to calculate rewards
+        revert MustImplementInChild();
     }
 
     function _transferRewards(uint256 amount_) internal virtual {
-        // override this function to transfer rewards
+        revert MustImplementInChild();
     }
 
     function isClaimed(uint256 tokenId_) public view returns (bool) {
