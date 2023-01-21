@@ -113,6 +113,6 @@ contract Quest is Ownable, IQuest {
     }
 
     function withdrawRemainingTokens(address to_) public virtual onlyOwner {
-        if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
+        if (block.timestamp <= endTime) revert NoWithdrawDuringClaim();
     }
 }
