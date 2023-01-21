@@ -8,7 +8,7 @@ import {
   SampleERC20__factory,
   SampleErc1155__factory,
 } from '../typechain-types'
-import { Wallet, utils } from 'ethers'
+import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
@@ -78,6 +78,18 @@ describe('QuestFactory', () => {
       69,
     ])) as RabbitHoleReceipt
   }
+
+  describe('Deployment', () => {
+    it('Should revert if trying to deploy with protocolFeeRecipient set to zero address', async () => {
+      await expect(
+        upgrades.deployProxy(questFactoryContract, [
+          wallet.address,
+          deployedRabbitHoleReceiptContract.address,
+          constants.AddressZero,
+        ])
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
+    })
+  })
 
   describe('createQuest()', () => {
     const erc20QuestId = 'asdf'
@@ -268,6 +280,12 @@ describe('QuestFactory', () => {
       const newAddress = royaltyRecipient.address
       await deployedFactoryContract.setProtocolFeeRecipient(newAddress)
       expect(await deployedFactoryContract.protocolFeeRecipient()).to.equal(newAddress)
+    })
+
+    it('Should revert if setting protocolFeeRecipient to zero address', async () => {
+      await expect(
+        deployedFactoryContract.setProtocolFeeRecipient(constants.AddressZero)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
     })
   })
 
