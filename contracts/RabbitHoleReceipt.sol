@@ -34,7 +34,12 @@ contract RabbitHoleReceipt is
         _disableInitializers();
     }
 
-    function initialize(address receiptRenderer_, address royaltyRecipient_, address minterAddress_, uint royaltyFee_) public initializer {
+    function initialize(
+        address receiptRenderer_,
+        address royaltyRecipient_,
+        address minterAddress_,
+        uint royaltyFee_
+    ) public initializer {
         __ERC721_init('RabbitHoleReceipt', 'RHR');
         __ERC721URIStorage_init();
         __Ownable_init();
@@ -127,7 +132,7 @@ contract RabbitHoleReceipt is
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         require(_exists(tokenId), 'Nonexistent token');
 
-        uint256 royaltyPayment = (salePrice * royaltyFee) / 1000;
+        uint256 royaltyPayment = (salePrice * royaltyFee) / 1_000;
         return (royaltyRecipient, royaltyPayment);
     }
 

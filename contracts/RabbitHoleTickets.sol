@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import './TicketRenderer.sol';
 
-contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradeable, ERC1155BurnableUpgradeable, IERC2981Upgradeable {
+contract RabbitHoleTickets is
+    Initializable,
+    ERC1155Upgradeable,
+    OwnableUpgradeable,
+    ERC1155BurnableUpgradeable,
+    IERC2981Upgradeable
+{
     // storage
     address public royaltyRecipient;
     address public minterAddress;
@@ -20,8 +26,13 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         _disableInitializers();
     }
 
-    function initialize(address ticketRenderer_, address royaltyRecipient_, address minterAddress_, uint royaltyFee_) initializer public {
-        __ERC1155_init("");
+    function initialize(
+        address ticketRenderer_,
+        address royaltyRecipient_,
+        address minterAddress_,
+        uint royaltyFee_
+    ) public initializer {
+        __ERC1155_init('');
         __Ownable_init();
         __ERC1155Burnable_init();
         royaltyRecipient = royaltyRecipient_;
@@ -51,23 +62,20 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         minterAddress = minterAddress_;
     }
 
-    function mint(address to, uint256 id, uint256 amount, bytes memory data)
-        public
-        onlyMinter
-    {
+    function mint(address to, uint256 id, uint256 amount, bytes memory data) public onlyMinter {
         _mint(to, id, amount, data);
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        public
-        onlyMinter
-    {
+    function mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public onlyMinter {
         _mintBatch(to, ids, amounts, data);
     }
 
-    function uri(
-        uint _tokenId
-    ) public view virtual override(ERC1155Upgradeable) returns (string memory) {
+    function uri(uint _tokenId) public view virtual override(ERC1155Upgradeable) returns (string memory) {
         return TicketRendererContract.generateTokenURI(_tokenId);
     }
 
@@ -75,7 +83,7 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
         uint256 tokenId,
         uint256 salePrice
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        uint256 royaltyPayment = (salePrice * royaltyFee) / 1000;
+        uint256 royaltyPayment = (salePrice * royaltyFee) / 1_000;
         return (royaltyRecipient, royaltyPayment);
     }
 
