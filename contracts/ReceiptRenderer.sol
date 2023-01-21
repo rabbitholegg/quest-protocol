@@ -4,9 +4,16 @@ pragma solidity ^0.8.15;
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
+/// @title ReceiptRenderer
+/// @author RabbitHole.gg
+/// @dev This contract is used to render on-chain data for RabbitHole Receipts (ERC-721 standard)
 contract ReceiptRenderer {
     using Strings for uint256;
 
+    /// @dev generates the tokenURI for a given ERC-721 token ID
+    /// @param _tokenId The token id to generate the URI for
+    /// @param _questId The questId tied to the tokenId
+    /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
         uint _tokenId,
         string memory _questId
@@ -27,6 +34,10 @@ contract ReceiptRenderer {
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
+    /// @dev generates the on-chain SVG for an ERC-721 token ID
+    /// @param _tokenId The token id to generate the svg for
+    /// @param _questId The questId tied to the tokenId
+    /// @return encoded JSON for an SVG image
     function generateSVG(uint _tokenId, string memory _questId) public pure returns (string memory) {
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
