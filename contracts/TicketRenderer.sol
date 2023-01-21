@@ -4,9 +4,15 @@ pragma solidity ^0.8.15;
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
+/// @title TicketRenderer
+/// @author RabbitHole.gg
+/// @dev This contract is used to render on-chain data for RabbitHole tickets (aka an 1155 Reward)
 contract TicketRenderer {
     using Strings for uint256;
 
+    /// @dev generates the tokenURI for a given 1155 token ID
+    /// @param _tokenId The token id to generate the URI for
+    /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
         uint _tokenId
     ) public pure returns (string memory) {
@@ -24,6 +30,9 @@ contract TicketRenderer {
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
+    /// @dev generates the on-chain SVG for an 1155 token ID
+    /// @param _tokenId The token id to generate the svg for
+    /// @return encoded JSON for an SVG image
     function generateSVG(uint _tokenId) public pure returns (string memory) {
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
