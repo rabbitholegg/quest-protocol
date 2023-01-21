@@ -61,13 +61,12 @@ describe('Erc20Quest', async () => {
     await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
     await deployFactoryContract()
-    await deployQuestContract()
-    await transferRewardsToDistributor()
+    // await deployQuestContract()
 
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))
     await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-    await deployedFactoryContract.createQuest(
+    const createQuestTx = await deployedFactoryContract.createQuest(
       deployedSampleErc20Contract.address,
       expiryDate,
       startDate,
@@ -78,6 +77,14 @@ describe('Erc20Quest', async () => {
       questId,
       questFee
     )
+
+    const waitedTx = await createQuestTx.wait()
+
+    const event = waitedTx?.events?.find((event) => event.event === 'QuestCreated')
+    const [_from, contractAddress, type] = event?.args
+
+    deployedQuestContract = await questContract.attach(contractAddress)
+    await transferRewardsToDistributor()
   })
 
   const deployFactoryContract = async () => {
@@ -112,8 +119,7 @@ describe('Erc20Quest', async () => {
       questId,
       deployedRabbitholeReceiptContract.address,
       questFee,
-      protocolFeeAddress,
-      deployedFactoryContract.address
+      protocolFeeAddress
     )) as Erc20Quest
     await deployedQuestContract.deployed()
   }

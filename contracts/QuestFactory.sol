@@ -93,8 +93,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questId_,
                 address(rabbitholeReceiptContract),
                 questFee_,
-                protocolFeeRecipient,
-                address(this)
+                protocolFeeRecipient
             );
             newQuest.transferOwnership(msg.sender);
 
@@ -180,9 +179,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
-        return ECDSAUpgradeable.recover(messageDigest, signature);
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
+        return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
