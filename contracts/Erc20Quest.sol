@@ -7,9 +7,9 @@ import {QuestFactory} from './QuestFactory.sol';
 
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
-    uint256 public questFee;
-    address public protocolFeeRecipient;
-    QuestFactory public questFactoryContract;
+    uint256 public immutable questFee;
+    address public immutable protocolFeeRecipient;
+    QuestFactory public immutable questFactoryContract;
 
     constructor(
         address rewardTokenAddress_,
