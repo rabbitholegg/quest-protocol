@@ -20,6 +20,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     error InvalidHash();
     error OnlyOwnerCanCreate1155Quest();
     error RewardNotAllowed();
+    error QuestTypeInvalid();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
@@ -125,7 +126,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             return address(newQuest);
         }
 
-        return address(0);
+        revert QuestTypeInvalid();
     }
 
     /// @dev grant the create quest role to an account
@@ -180,9 +181,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash, bytes memory signature) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash));
-        return ECDSAUpgradeable.recover(messageDigest, signature);
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
+        return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
