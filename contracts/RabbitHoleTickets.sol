@@ -66,7 +66,7 @@ contract RabbitHoleTickets is Initializable, ERC1155Upgradeable, OwnableUpgradea
     }
 
     function royaltyInfo(
-        uint256 tokenId,
+        uint256 tokenId_,
         uint256 salePrice
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         uint256 royaltyPayment = (salePrice * royaltyFee) / 1000;
