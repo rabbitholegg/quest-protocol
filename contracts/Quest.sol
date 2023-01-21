@@ -15,7 +15,6 @@ contract Quest is Ownable, IQuest {
     uint256 public immutable rewardAmountInWeiOrTokenId;
     bool public hasStarted;
     bool public isPaused;
-    string public allowList;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -26,7 +25,6 @@ contract Quest is Ownable, IQuest {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
@@ -38,7 +36,6 @@ contract Quest is Ownable, IQuest {
         rewardToken = rewardTokenAddress_;
         totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
-        allowList = allowList_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         redeemedTokens = 0;
@@ -55,10 +52,6 @@ contract Quest is Ownable, IQuest {
 
     function unPause() public onlyOwner onlyStarted {
         isPaused = false;
-    }
-
-    function setAllowList(string memory allowList_) public onlyOwner {
-        allowList = allowList_;
     }
 
     function _setClaimed(uint256[] memory tokenIds_) private {

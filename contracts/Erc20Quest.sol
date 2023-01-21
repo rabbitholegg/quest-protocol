@@ -16,7 +16,6 @@ contract Erc20Quest is Quest {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
@@ -28,7 +27,6 @@ contract Erc20Quest is Quest {
         endTime_,
         startTime_,
         totalParticipants_,
-        allowList_,
         rewardAmountInWeiOrTokenId_,
         questId_,
         receiptContractAddress_

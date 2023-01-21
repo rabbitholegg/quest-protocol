@@ -15,7 +15,7 @@ import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol'
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
-
+    // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
         address questAddress;
@@ -23,14 +23,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint numberMinted;
     }
 
-    // storage vars. Insert new vars at the end to keep the storage layout the same.
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
 
-    // always be initialized
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -39,14 +37,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rabbitholeReceiptContract_,
         address protocolFeeRecipient_
     ) public initializer {
-        if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-
         __Ownable_init();
         __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole();
+        grantDefaultAdminAndCreateQuestRole(msg.sender);
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-        protocolFeeRecipient = protocolFeeRecipient_;
+        setProtocolFeeRecipient(protocolFeeRecipient_);
     }
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
@@ -54,7 +50,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalAmount_ The total amount of rewards the quest will have
-    /// @param allowList_ Depricated
     /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
     /// @param contractType_ The type of quest, either erc20 or erc1155
     /// @param questId_ The id of the quest
@@ -65,7 +60,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-        string memory allowList_,
+
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_,
@@ -81,7 +76,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract),
@@ -104,7 +98,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 endTime_,
                 startTime_,
                 totalAmount_,
-                allowList_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract)
@@ -121,21 +114,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev grant the create quest role to an account
-    /// @param account_ The account to grant the create quest role to
-    function grantCreateQuestRole(address account_) public {
-        _grantRole(CREATE_QUEST_ROLE, account_);
-    }
-
-    /// @dev revoke the create quest role from an account
-    /// @param account_ The account to revoke the create quest role from
-    function revokeCreateQuestRole(address account_) public {
-        _revokeRole(CREATE_QUEST_ROLE, account_);
+    /// @param account_ The account to grant or revoke the create quest role to
+    /// @param canCreateQuest_ Boolean to grant or revoke the create quest role. True grants access
+    function changeCreateQuestRole(address account_, bool canCreateQuest_) public onlyOwner {
+        if (canCreateQuest_) {
+            _grantRole(CREATE_QUEST_ROLE, account_);
+        } else {
+            _revokeRole(CREATE_QUEST_ROLE, account_);
+        }
     }
 
     /// @dev grant the default admin role and the create quest role to the owner
-    function grantDefaultAdminAndCreateQuestRole() public onlyOwner {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(CREATE_QUEST_ROLE, msg.sender);
+    function grantDefaultAdminAndCreateQuestRole(address account_) internal {
+        _grantRole(DEFAULT_ADMIN_ROLE, account_);
+        _grantRole(CREATE_QUEST_ROLE, account_);
     }
 
     /// @dev set the claim signer address

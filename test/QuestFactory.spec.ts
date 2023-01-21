@@ -17,7 +17,6 @@ describe('QuestFactory', () => {
   let deployedFactoryContract: QuestFactory
   const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
-  const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
@@ -106,7 +105,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'some-incorrect-contract-type',
           erc20QuestId,
@@ -125,7 +123,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc20',
           erc20QuestId,
@@ -142,7 +139,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
@@ -161,7 +157,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc1155',
         erc1155QuestId,
@@ -175,7 +170,7 @@ describe('QuestFactory', () => {
     })
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
-      await deployedFactoryContract.grantCreateQuestRole(royaltyRecipient.address)
+      await deployedFactoryContract.changeCreateQuestRole(royaltyRecipient.address, true)
       await expect(
         deployedFactoryContract
           .connect(royaltyRecipient)
@@ -184,7 +179,6 @@ describe('QuestFactory', () => {
             expiryDate,
             startDate,
             totalRewards,
-            allowList,
             rewardAmount,
             'erc1155',
             erc1155QuestId,
@@ -207,7 +201,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc20',
           erc20QuestId,
@@ -224,7 +217,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
@@ -237,7 +229,6 @@ describe('QuestFactory', () => {
           expiryDate,
           startDate,
           totalRewards,
-          allowList,
           rewardAmount,
           'erc20',
           erc20QuestId,
@@ -255,7 +246,6 @@ describe('QuestFactory', () => {
             expiryDate,
             startDate,
             totalRewards,
-            allowList,
             rewardAmount,
             'erc20',
             erc20QuestId,
@@ -303,7 +293,6 @@ describe('QuestFactory', () => {
         expiryDate,
         startDate,
         totalRewards,
-        allowList,
         rewardAmount,
         'erc20',
         erc20QuestId,
