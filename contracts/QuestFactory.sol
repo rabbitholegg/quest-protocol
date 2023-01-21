@@ -20,6 +20,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     error InvalidHash();
     error OnlyOwnerCanCreate1155Quest();
     error RewardNotAllowed();
+    error QuestTypeInvalid();
+    error AddressZeroNotAllowed();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 
@@ -48,6 +50,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rabbitholeReceiptContract_,
         address protocolFeeRecipient_
     ) public initializer {
+        if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
+
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole();
@@ -124,7 +128,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             return address(newQuest);
         }
 
-        return address(0);
+        revert QuestTypeInvalid();
     }
 
     /// @dev grant the create quest role to an account
@@ -154,6 +158,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set the protocol fee recipient
     /// @param protocolFeeRecipient_ The address of the protocol fee recipient
     function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
+        if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 

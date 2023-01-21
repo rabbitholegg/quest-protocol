@@ -8,7 +8,7 @@ import {
   SampleERC20__factory,
   SampleErc1155__factory,
 } from '../typechain-types'
-import { Wallet, utils } from 'ethers'
+import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
@@ -79,12 +79,40 @@ describe('QuestFactory', () => {
     ])) as RabbitHoleReceipt
   }
 
+  describe('Deployment', () => {
+    it('Should revert if trying to deploy with protocolFeeRecipient set to zero address', async () => {
+      await expect(
+        upgrades.deployProxy(questFactoryContract, [
+          wallet.address,
+          deployedRabbitHoleReceiptContract.address,
+          constants.AddressZero,
+        ])
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
+    })
+  })
+
   describe('createQuest()', () => {
     const erc20QuestId = 'asdf'
     const erc1155QuestId = 'fdsa'
 
     it('should init with right owner', async () => {
       expect(await deployedFactoryContract.owner()).to.equal(owner.address)
+    })
+
+    it('should revert if incorrect quest contract type', async () => {
+      await expect(
+        deployedFactoryContract.createQuest(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          allowList,
+          rewardAmount,
+          'some-incorrect-contract-type',
+          erc20QuestId,
+          2000
+        )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestTypeInvalid')
     })
 
     it('Should revert if reward address is not on the reward allowlist', async () => {
@@ -252,6 +280,12 @@ describe('QuestFactory', () => {
       const newAddress = royaltyRecipient.address
       await deployedFactoryContract.setProtocolFeeRecipient(newAddress)
       expect(await deployedFactoryContract.protocolFeeRecipient()).to.equal(newAddress)
+    })
+
+    it('Should revert if setting protocolFeeRecipient to zero address', async () => {
+      await expect(
+        deployedFactoryContract.setProtocolFeeRecipient(constants.AddressZero)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
     })
   })
 
