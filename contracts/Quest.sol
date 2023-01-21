@@ -67,6 +67,11 @@ contract Quest is Ownable, IQuest {
         }
     }
 
+    modifier onlyAdminWithdrawAfterEnd() {
+        if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
+        _;
+    }
+
     modifier onlyStarted() {
         if (!hasStarted) revert NotStarted();
         _;
@@ -94,12 +99,12 @@ contract Quest is Ownable, IQuest {
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
 
-        uint256 totalReedemableRewards = _calculateRewards(redeemableTokenCount);
+        uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
-        _transferRewards(totalReedemableRewards);
+        _transferRewards(totalRedeemableRewards);
         redeemedTokens += redeemableTokenCount;
 
-        emit Claimed(msg.sender, totalReedemableRewards);
+        emit Claimed(msg.sender, totalRedeemableRewards);
     }
 
     function _calculateRewards(uint256 redeemableTokenCount_) internal virtual returns (uint256) {
@@ -114,7 +119,5 @@ contract Quest is Ownable, IQuest {
         return claimedList[tokenId_] == true;
     }
 
-    function withdrawRemainingTokens(address to_) public virtual onlyOwner {
-        if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-    }
+    function withdrawRemainingTokens(address to_) public virtual onlyOwner onlyAdminWithdrawAfterEnd {}
 }
