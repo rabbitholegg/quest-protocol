@@ -61,7 +61,6 @@ describe('Erc20Quest', async () => {
     await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
     await deployFactoryContract()
-    // await deployQuestContract()
 
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))
@@ -106,22 +105,6 @@ describe('Erc20Quest', async () => {
       owner.address,
       10,
     ])) as RabbitHoleReceipt
-  }
-
-  const deployQuestContract = async () => {
-    deployedQuestContract = (await questContract.deploy(
-      deployedSampleErc20Contract.address,
-      expiryDate,
-      startDate,
-      totalParticipants,
-      allowList,
-      rewardAmount,
-      questId,
-      deployedRabbitholeReceiptContract.address,
-      questFee,
-      protocolFeeAddress
-    )) as Erc20Quest
-    await deployedQuestContract.deployed()
   }
 
   const deploySampleErc20Contract = async () => {
