@@ -9,17 +9,12 @@ interface IQuest {
 
     error AlreadyClaimed();
     error NoTokensToClaim();
-    error InvalidProof();
     error EndTimeInPast();
     error StartTimeInPast();
-    error ClaimWindowFinished();
     error ClaimWindowNotStarted();
     error NoWithdrawDuringClaim();
     error TotalAmountExceedsBalance();
     error AmountExceedsBalance();
     error NotStarted();
     error QuestPaused();
-    error QuestEnded();
-    error AddressNotSigned();
-    error InvalidHash();
 }
