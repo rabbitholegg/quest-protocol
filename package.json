@@ -3,7 +3,7 @@
   "author": {
     "name": "rabbitholegg"
   },
-  "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
+  "description": "📦 A protocol that distributes a reward for on-chain action",
   "version": "1.0.0",
   "homepage": "https://rabbithole.gg",
   "keywords": [
