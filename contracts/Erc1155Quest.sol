@@ -11,7 +11,6 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
@@ -21,12 +20,10 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         endTime_,
         startTime_,
         totalParticipants_,
-        allowList_,
         rewardAmountInWeiOrTokenId_,
         questId_,
         receiptContractAddress_
-    )
-    {}
+    ){}
 
     function start() public override {
         if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalParticipants)

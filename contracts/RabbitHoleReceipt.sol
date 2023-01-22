@@ -66,20 +66,20 @@ contract RabbitHoleReceipt is
         minterAddress = minterAddress_;
     }
 
-    function setRoyaltyFee(uint256 _royaltyFee) public onlyOwner {
-        royaltyFee = _royaltyFee;
+    function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
+        royaltyFee = royaltyFee_;
     }
 
-    function mint(address _to, string memory _questId) public onlyMinter {
+    function mint(address to_, string memory questId_) public onlyMinter {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
-        _safeMint(_to, newTokenID);
-        questIdForTokenId[newTokenID] = _questId;
+        _safeMint(to_, newTokenID);
+        questIdForTokenId[newTokenID] = questId_;
         timestampForTokenId[newTokenID] = block.timestamp;
     }
 
     function getOwnedTokenIdsOfQuest(
-        string memory _questId,
+        string memory questId_,
         address claimingAddress
     ) public view returns (uint[] memory) {
         uint msgSenderBalance = balanceOf(claimingAddress);
@@ -88,7 +88,7 @@ contract RabbitHoleReceipt is
 
         for (uint i = 0; i < msgSenderBalance; i++) {
             uint tokenId = tokenOfOwnerByIndex(claimingAddress, i);
-            if (keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(_questId))) {
+            if (keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(questId_))) {
                 tokenIdsForQuest[i] = tokenId;
                 foundTokens++;
             }
@@ -120,10 +120,10 @@ contract RabbitHoleReceipt is
     }
 
     function tokenURI(
-        uint _tokenId
+        uint tokenId_
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
-        require(_exists(_tokenId), 'ERC721URIStorage: URI query for nonexistent token');
-        return ReceiptRendererContract.generateTokenURI(_tokenId, questIdForTokenId[_tokenId]);
+        require(_exists(tokenId_), 'ERC721URIStorage: URI query for nonexistent token');
+        return ReceiptRendererContract.generateTokenURI(tokenId_, questIdForTokenId[tokenId_]);
     }
 
     function royaltyInfo(

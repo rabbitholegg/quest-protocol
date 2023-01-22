@@ -54,8 +54,8 @@ contract RabbitHoleTickets is
         royaltyRecipient = royaltyRecipient_;
     }
 
-    function setRoyaltyFee(uint256 _royaltyFee) public onlyOwner {
-        royaltyFee = _royaltyFee;
+    function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
+        royaltyFee = royaltyFee_;
     }
 
     function setMinterAddress(address minterAddress_) public onlyOwner {
@@ -75,12 +75,12 @@ contract RabbitHoleTickets is
         _mintBatch(to, ids, amounts, data);
     }
 
-    function uri(uint _tokenId) public view virtual override(ERC1155Upgradeable) returns (string memory) {
-        return TicketRendererContract.generateTokenURI(_tokenId);
+    function uri(uint tokenId_) public view virtual override(ERC1155Upgradeable) returns (string memory) {
+        return TicketRendererContract.generateTokenURI(tokenId_);
     }
 
     function royaltyInfo(
-        uint256 tokenId,
+        uint256 tokenId_,
         uint256 salePrice
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         uint256 royaltyPayment = (salePrice * royaltyFee) / 1_000;

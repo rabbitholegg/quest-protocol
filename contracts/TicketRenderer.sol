@@ -11,19 +11,19 @@ contract TicketRenderer {
     using Strings for uint256;
 
     /// @dev generates the tokenURI for a given 1155 token ID
-    /// @param _tokenId The token id to generate the URI for
+    /// @param tokenId_ The token id to generate the URI for
     /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
-        uint _tokenId
+        uint tokenId_
     ) public pure returns (string memory) {
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "RabbitHole Tickets #',
-            _tokenId.toString(),
+            tokenId_.toString(),
             '",',
             '"description": "A reward for completing quests within RabbitHole, with unk(no)wn utility",',
             '"image": "',
-            generateSVG(_tokenId),
+            generateSVG(tokenId_),
             '"',
             '}'
         );
@@ -31,15 +31,15 @@ contract TicketRenderer {
     }
 
     /// @dev generates the on-chain SVG for an 1155 token ID
-    /// @param _tokenId The token id to generate the svg for
+    /// @param tokenId_ The token id to generate the svg for
     /// @return encoded JSON for an SVG image
-    function generateSVG(uint _tokenId) public pure returns (string memory) {
+    function generateSVG(uint tokenId_) public pure returns (string memory) {
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
             '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
             '<rect width="100%" height="100%" fill="black" />',
             '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Tickets #',
-            _tokenId.toString(),
+            tokenId_.toString(),
             '</text>',
             '</svg>'
         );

@@ -17,7 +17,6 @@ describe('Erc1155Quest', () => {
   let expiryDate: number, startDate: number
   const mockAddress = '0x0000000000000000000000000000000000000000'
   const questId = 'asdf'
-  const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalRewards = 10
   const rewardAmount = 1
   let owner: SignerWithAddress
@@ -69,7 +68,6 @@ describe('Erc1155Quest', () => {
       expiryDate,
       startDate,
       totalRewards,
-      allowList,
       rewardAmount,
       questId,
       deployedRabbitholeReceiptContract.address
@@ -135,11 +133,6 @@ describe('Erc1155Quest', () => {
         const startTime = await deployedQuestContract.startTime()
         expect(startTime).to.equal(startDate)
       })
-
-      it('Should set the allowList with correct value', async () => {
-        const currentAllowList = await deployedQuestContract.allowList()
-        expect(currentAllowList).to.equal(allowList)
-      })
     })
 
     it('Deployment should set the correct owner address', async () => {
@@ -193,20 +186,6 @@ describe('Erc1155Quest', () => {
       expect(await deployedQuestContract.isPaused()).to.equal(true)
       await deployedQuestContract.connect(owner).unPause()
       expect(await deployedQuestContract.isPaused()).to.equal(false)
-    })
-  })
-
-  describe('setAllowList()', () => {
-    it('should set start correctly', async () => {
-      expect(await deployedQuestContract.allowList()).to.equal(allowList)
-      await deployedQuestContract.connect(owner).setAllowList('ipfs://someOtherCid')
-      expect(await deployedQuestContract.allowList()).to.equal('ipfs://someOtherCid')
-    })
-
-    it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).setAllowList('ipfs://someOtherCid')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
     })
   })
 
@@ -287,16 +266,15 @@ describe('Erc1155Quest', () => {
 
   describe('withDraw()', async () => {
     it('should only allow the owner to withdraw', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(
+        deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('should revert if trying to withdraw before end date', async () => {
-      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)).to.be.revertedWithCustomError(
-        questContract,
-        'NoWithdrawDuringClaim'
-      )
+      await expect(
+        deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
+      ).to.be.revertedWithCustomError(questContract, 'NoWithdrawDuringClaim')
     })
 
     it('should transfer all rewards back to owner', async () => {

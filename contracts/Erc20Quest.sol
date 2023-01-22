@@ -7,16 +7,15 @@ import {QuestFactory} from './QuestFactory.sol';
 
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
-    uint256 public questFee;
-    address public protocolFeeRecipient;
-    QuestFactory public questFactoryContract;
+    uint256 public immutable questFee;
+    address public immutable protocolFeeRecipient;
+    QuestFactory public immutable questFactoryContract;
 
     constructor(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        string memory allowList_,
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
@@ -28,7 +27,6 @@ contract Erc20Quest is Quest {
         endTime_,
         startTime_,
         totalParticipants_,
-        allowList_,
         rewardAmountInWeiOrTokenId_,
         questId_,
         receiptContractAddress_
@@ -62,7 +60,7 @@ contract Erc20Quest is Quest {
     function withdrawRemainingTokens(address to_) public override onlyOwner {
         super.withdrawRemainingTokens(to_);
 
-        uint unclaimedTokens = (receiptRedeemers() - reedemedTokens) * rewardAmountInWeiOrTokenId;
+        uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
         uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
         IERC20(rewardToken).safeTransfer(to_, nonClaimableTokens);
     }
@@ -75,7 +73,7 @@ contract Erc20Quest is Quest {
         return receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee / 10_000;
     }
 
-    function withdrawFee() public onlyStarted {
+    function withdrawFee() public onlyQuestActive {
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }

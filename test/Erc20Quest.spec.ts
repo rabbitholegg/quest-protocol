@@ -21,7 +21,6 @@ describe('Erc20Quest', async () => {
   const mockAddress = '0x0000000000000000000000000000000000000000'
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const questId = 'asdf'
-  const allowList = 'ipfs://someCidToAnArrayOfAddresses'
   const totalParticipants = 300
   const rewardAmount = 1000
   const questFee = 2000
@@ -70,7 +69,6 @@ describe('Erc20Quest', async () => {
       expiryDate,
       startDate,
       totalParticipants,
-      allowList,
       rewardAmount,
       'erc20',
       questId,
@@ -164,11 +162,6 @@ describe('Erc20Quest', async () => {
         const startTime = await deployedQuestContract.startTime()
         expect(startTime).to.equal(startDate)
       })
-
-      it('Should set the allowList with correct value', async () => {
-        const currentAllowList = await deployedQuestContract.allowList()
-        expect(currentAllowList).to.equal(allowList)
-      })
     })
 
     it('Deployment should set the correct owner address', async () => {
@@ -222,20 +215,6 @@ describe('Erc20Quest', async () => {
       expect(await deployedQuestContract.isPaused()).to.equal(true)
       await deployedQuestContract.connect(owner).unPause()
       expect(await deployedQuestContract.isPaused()).to.equal(false)
-    })
-  })
-
-  describe('setAllowList()', () => {
-    it('should set start correctly', async () => {
-      expect(await deployedQuestContract.allowList()).to.equal(allowList)
-      await deployedQuestContract.connect(owner).setAllowList('ipfs://someOtherCid')
-      expect(await deployedQuestContract.allowList()).to.equal('ipfs://someOtherCid')
-    })
-
-    it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).setAllowList('ipfs://someOtherCid')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
     })
   })
 
