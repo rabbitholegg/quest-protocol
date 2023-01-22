@@ -36,7 +36,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         super.start();
     }
 
-    /// @dev Checks the balance to ensure that it has enough for all of the participants. Only able to be called by owner
+    /// @dev Transfers the reward token `rewardAmountInWeiOrTokenId` to the msg.sender
     /// @param amount_ The amount of reward tokens to transfer
     function _transferRewards(uint256 amount_) internal override {
         IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardAmountInWeiOrTokenId, amount_, '0x00');

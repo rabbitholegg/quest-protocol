@@ -81,10 +81,9 @@ describe('Erc1155Quest', () => {
   }
 
   const transferRewardsToDistributor = async () => {
-    const distributorContractAddress = await deployedQuestContract.address
     await deployedSampleErc1155Contract.safeTransferFrom(
       owner.address,
-      distributorContractAddress,
+      deployedQuestContract.address,
       rewardAmount,
       100,
       '0x00'
@@ -231,8 +230,7 @@ describe('Erc1155Quest', () => {
 
       await ethers.provider.send('evm_increaseTime', [86400])
 
-      const startingBalance = await deployedSampleErc1155Contract.balanceOf(owner.address, rewardAmount)
-      expect(startingBalance.toString()).to.equal('0')
+      expect(await deployedSampleErc1155Contract.balanceOf(owner.address, rewardAmount)).to.equal(0)
 
       const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
       expect(totalTokens.length).to.equal(1)
@@ -240,8 +238,7 @@ describe('Erc1155Quest', () => {
       expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
 
       await deployedQuestContract.claim()
-      const endingBalance = await deployedSampleErc1155Contract.balanceOf(owner.address, rewardAmount)
-      expect(endingBalance.toString()).to.equal('1')
+      expect(await deployedSampleErc1155Contract.balanceOf(owner.address, rewardAmount)).to.equal(1)
       await ethers.provider.send('evm_increaseTime', [-86400])
     })
 
@@ -264,7 +261,7 @@ describe('Erc1155Quest', () => {
     })
   })
 
-  describe('withDraw()', async () => {
+  describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdraw', async () => {
       await expect(
         deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
