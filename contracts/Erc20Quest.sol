@@ -52,7 +52,7 @@ contract Erc20Quest is Quest {
         return (maxTotalRewards() * questFee) / 10_000;
     }
 
-    /// @notice Starts the quest
+    /// @notice Starts the quest by marking it ready to start at the contract level
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function start() public override {
         if (IERC20(rewardToken).balanceOf(address(this)) < maxTotalRewards() + maxProtocolReward())
@@ -67,7 +67,7 @@ contract Erc20Quest is Quest {
     }
 
     /// @notice Internal function that calculates the reward amount
-    /// @dev It is possible for users to have multiple receipts
+    /// @dev It is possible for users to have multiple receipts (if they buy others on secondary markets)
     /// @param redeemableTokenCount_ The amount of tokens that can be redeemed
     /// @return The total amount of rewards that can be claimed by a user
     function _calculateRewards(uint256 redeemableTokenCount_) internal view override returns (uint256) {
@@ -75,7 +75,7 @@ contract Erc20Quest is Quest {
     }
 
     /// @notice Function that allows the owner to withdraw the remaining tokens in the contract
-    /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn)
+    /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
     /// @param to_ The address to send the remaining tokens to
     function withdrawRemainingTokens(address to_) public override onlyOwner {
         super.withdrawRemainingTokens(to_);
@@ -97,8 +97,8 @@ contract Erc20Quest is Quest {
     }
 
     /// @notice Sends the protocol fee to the protocolFeeRecipient
-    /// @dev Only callable when the quest is active and started
-    function withdrawFee() public onlyQuestActive {
+    /// @dev Only callable when the quest is ended
+    function withdrawFee() public onlyAdminWithdrawAfterEnd {
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }
