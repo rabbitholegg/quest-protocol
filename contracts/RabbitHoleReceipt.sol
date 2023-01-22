@@ -73,9 +73,9 @@ contract RabbitHoleReceipt is
     function mint(address to_, string memory questId_) public onlyMinter {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
-        _safeMint(to_, newTokenID);
         questIdForTokenId[newTokenID] = questId_;
         timestampForTokenId[newTokenID] = block.timestamp;
+        _safeMint(to_, newTokenID);
     }
 
     function getOwnedTokenIdsOfQuest(

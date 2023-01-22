@@ -82,11 +82,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questFee_,
                 protocolFeeRecipient
             );
-            newQuest.transferOwnership(msg.sender);
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalAmount = totalAmount_;
+            newQuest.transferOwnership(msg.sender);
             return address(newQuest);
         }
 
@@ -102,11 +102,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questId_,
                 address(rabbitholeReceiptContract)
             );
-            newQuest.transferOwnership(msg.sender);
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalAmount = totalAmount_;
+            newQuest.transferOwnership(msg.sender);
             return address(newQuest);
         }
 
