@@ -125,6 +125,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev grant the default admin role and the create quest role to the owner
+    /// @param account_ The account to grant admin and create quest roles
     function grantDefaultAdminAndCreateQuestRole(address account_) internal {
         _grantRole(DEFAULT_ADMIN_ROLE, account_);
         _grantRole(CREATE_QUEST_ROLE, account_);
