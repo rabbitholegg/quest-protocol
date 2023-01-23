@@ -190,6 +190,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         quests[questId_].addressMinted[msg.sender] = true;
         quests[questId_].numberMinted++;
+        emit ReceiptMinted(msg.sender, questId_);
         rabbitholeReceiptContract.mint(msg.sender, questId_);
     }
 }
