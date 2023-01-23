@@ -18,6 +18,9 @@ contract RabbitHoleReceipt is
     OwnableUpgradeable,
     IERC2981Upgradeable
 {
+    event RoyaltyFeeSet(uint256 indexed royaltyFee);
+    event MinterAddressSet(address indexed minterAddress);
+
     using CountersUpgradeable for CountersUpgradeable.Counter;
     CountersUpgradeable.Counter private _tokenIds;
 
@@ -70,12 +73,14 @@ contract RabbitHoleReceipt is
     /// @param minterAddress_ the address of the minter
     function setMinterAddress(address minterAddress_) public onlyOwner {
         minterAddress = minterAddress_;
+        emit MinterAddressSet(minterAddress_);
     }
 
     /// @dev set the royalty fee
     /// @param royaltyFee_ the royalty fee
     function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
         royaltyFee = royaltyFee_;
+        emit RoyaltyFeeSet(royaltyFee_);
     }
 
     /// @dev mint a receipt

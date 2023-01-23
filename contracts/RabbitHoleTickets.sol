@@ -15,6 +15,9 @@ contract RabbitHoleTickets is
     ERC1155BurnableUpgradeable,
     IERC2981Upgradeable
 {
+    event RoyaltyFeeSet(uint256 indexed royaltyFee);
+    event MinterAddressSet(address indexed minterAddress);
+
     // storage
     address public royaltyRecipient;
     address public minterAddress;
@@ -62,12 +65,14 @@ contract RabbitHoleTickets is
     /// @param royaltyFee_ the royalty fee
     function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
         royaltyFee = royaltyFee_;
+        emit RoyaltyFeeSet(royaltyFee_);
     }
 
     /// @dev set the minter address
     /// @param minterAddress_ the address of the minter
     function setMinterAddress(address minterAddress_) public onlyOwner {
         minterAddress = minterAddress_;
+        emit MinterAddressSet(minterAddress_);
     }
 
     /// @dev mint a single ticket, only callable by the allowed minter
