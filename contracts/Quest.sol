@@ -6,6 +6,9 @@ import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
+/// @title Quest
+/// @author RabbitHole.gg
+/// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
 contract Quest is Ownable, IQuest {
     RabbitHoleReceipt public immutable rabbitHoleReceiptContract;
     address public immutable rewardToken;
@@ -41,41 +44,54 @@ contract Quest is Ownable, IQuest {
         redeemedTokens = 0;
     }
 
+    /// @notice Starts the Quest
+    /// @dev Only the owner of the Quest can call this function
     function start() public virtual onlyOwner {
         isPaused = false;
         hasStarted = true;
     }
 
+    /// @notice Pauses the Quest
+    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function pause() public onlyOwner onlyStarted {
         isPaused = true;
     }
 
+    /// @notice Unpauses the Quest
+    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function unPause() public onlyOwner onlyStarted {
         isPaused = false;
     }
 
+    /// @notice Marks token ids as claimed
+    /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
         for (uint i = 0; i < tokenIds_.length; i++) {
             claimedList[tokenIds_[i]] = true;
         }
     }
 
+    /// @notice Prevents reward withdrawal until the Quest has ended
     modifier onlyAdminWithdrawAfterEnd() {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
         _;
     }
 
+    /// @notice Checks if the Quest has started at the function level
     modifier onlyStarted() {
         if (!hasStarted) revert NotStarted();
         _;
     }
 
-    modifier onlyQuestActive()  {
+    /// @notice Checks if quest has started both at the function level and at the start time
+    modifier onlyQuestActive() {
         if (!hasStarted) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
 
+    /// @notice Allows user to claim the rewards entitled to them
+    /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
     function claim() public virtual onlyQuestActive {
         if (isPaused) revert QuestPaused();
 
@@ -100,17 +116,25 @@ contract Quest is Ownable, IQuest {
         emit Claimed(msg.sender, totalRedeemableRewards);
     }
 
+    /// @notice Calculate the amount of rewards
+    /// @dev This function must be implemented in the child contracts
     function _calculateRewards(uint256 redeemableTokenCount_) internal virtual returns (uint256) {
         revert MustImplementInChild();
     }
 
+    /// @notice Transfer the rewards to the user
+    /// @dev This function must be implemented in the child contracts
+    /// @param amount_ The amount of rewards to transfer
     function _transferRewards(uint256 amount_) internal virtual {
         revert MustImplementInChild();
     }
 
+    /// @notice Checks if a Receipt token id has been used to claim a reward
+    /// @param tokenId_ The token id to check
     function isClaimed(uint256 tokenId_) public view returns (bool) {
         return claimedList[tokenId_] == true;
     }
 
+    /// @notice Allows the owner of the Quest to withdraw any remaining rewards after the Quest has ended
     function withdrawRemainingTokens(address to_) public virtual onlyOwner onlyAdminWithdrawAfterEnd {}
 }
