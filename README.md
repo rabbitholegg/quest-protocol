@@ -30,10 +30,10 @@ Quests Protocol is a protocol to distribute token rewards for completing on-chai
 
 For more information on all docs related to the Quest Protocol, see the documentation directory [here](./docs/).
 
-- [Overview](https://github.com/rabbitholegg/quest-protocol/docs/overview.md)
-- [Quest Claim](https://github.com/rabbitholegg/quest-protocol/docs/quest-claim.md)
-- [Quest Create](https://github.com/rabbitholegg/quest-protocol/docs/quest-create.md)
-- [Audit Endpoints](https://github.com/rabbitholegg/quest-protocol/docs/audit-endpoints.md)
+- [Overview](https://github.com/rabbitholegg/quest-protocol/tree/main/docs/overview.md)
+- [Quest Claim](https://github.com/rabbitholegg/quest-protocol/tree/main/docs/quest-claim.md)
+- [Quest Create](https://github.com/rabbitholegg/quest-protocol/tree/main/docs/quest-create.md)
+- [Audit Endpoints](https://github.com/rabbitholegg/quest-protocol/tree/main/docs/audit-endpoints.md)
 
 ---
 
@@ -107,13 +107,13 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 
 The main contracts involved in this phase are:
 
-- `Quest Factory` ([code](./contracts/QuestFactory.sol))
+- `Quest Factory` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/QuestFactory.sol))
     - Creates new `Quest` instances of an ERC-1155 reward Quest or ERC-20 reward Quest.
-- `RabbitHole Receipt` ([code](./contracts/RabbitHoleReceipt.sol))
+- `RabbitHole Receipt` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/RabbitHoleReceipt.sol))
     - An ERC-721 contract that acts as a proof of on-chain activity. Claimed via usage of ECDSA sig/hash
-- `ERC-20 Quest` ([code](./contracts/Erc20Quest.sol))
+- `ERC-20 Quest` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/Erc20Quest.sol))
     - A Quest in which the reward is an ERC-20 token
-- `ERC-1155 Quest` ([code](./contracts/Erc1155Quest.sol))
+- `ERC-1155 Quest` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/Erc1155Quest.sol))
     - A Quest in which the reward is an ERC-1155 token
 
 ---
@@ -188,7 +188,7 @@ ERC-1155 rewards and we want to be non-limiting in our compatibility.
 
 The following auditors reviewed the protocol. You can see reports in `/audits` directory:
 
-- Code4rena TBD (report [here](/audits/))
+- Code4rena TBD (report [here](https://github.com/rabbitholegg/quest-protocol/tree/main/audits/))
 
 ---
 ## Bug Bounty
