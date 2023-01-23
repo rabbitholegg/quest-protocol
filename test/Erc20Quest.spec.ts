@@ -71,8 +71,7 @@ describe('Erc20Quest', async () => {
       totalParticipants,
       rewardAmount,
       'erc20',
-      questId,
-      questFee
+      questId
     )
 
     const waitedTx = await createQuestTx.wait()
