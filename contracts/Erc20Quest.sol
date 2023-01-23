@@ -53,7 +53,7 @@ contract Erc20Quest is Quest {
         return (maxTotalRewards() * questFee) / 10_000;
     }
 
-    /// @notice Starts the quest by marking it ready to start at the contract level
+    /// @notice Starts the quest by marking it ready to start at the contract level. Marking a quest ready to start does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function start() public override {
         if (IERC20(rewardToken).balanceOf(address(this)) < maxTotalRewards() + maxProtocolReward())
