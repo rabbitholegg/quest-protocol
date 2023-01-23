@@ -14,6 +14,9 @@ import '@typechain/hardhat'
 import 'solidity-coverage'
 
 const config: HardhatUserConfig = {
+  gasReporter: {
+    gasPrice: 100,
+  },
   defender: {
     apiKey: process.env.DEFENDER_TEAM_API_KEY,
     apiSecret: process.env.DEFENDER_TEAM_API_SECRET_KEY,
