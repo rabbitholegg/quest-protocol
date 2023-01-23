@@ -11,6 +11,7 @@ interface IQuest {
     error NoTokensToClaim();
     error EndTimeInPast();
     error StartTimeInPast();
+    error EndTimeLessThanOrEqualToStartTime();
     error ClaimWindowNotStarted();
     error NoWithdrawDuringClaim();
     error TotalAmountExceedsBalance();

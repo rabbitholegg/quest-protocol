@@ -34,6 +34,7 @@ contract Quest is Ownable, IQuest {
     ) {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
+        if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
         endTime = endTime_;
         startTime = startTime_;
         rewardToken = rewardTokenAddress_;

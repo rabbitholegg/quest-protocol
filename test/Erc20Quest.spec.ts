@@ -136,6 +136,14 @@ describe('Erc20Quest', async () => {
       })
     })
 
+    describe('when end time is before start time', () => {
+      it('Should revert', async () => {
+        expect(
+          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalParticipants])
+        ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
+      })
+    })
+
     describe('setting public variables', () => {
       it('Should set the token address with correct value', async () => {
         const rewardContractAddress = await deployedQuestContract.rewardToken()
