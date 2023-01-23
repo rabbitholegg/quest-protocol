@@ -23,7 +23,7 @@ describe('Erc20Quest', async () => {
   const questId = 'asdf'
   const totalParticipants = 300
   const rewardAmount = 1000
-  const questFee = 2000
+  const questFee = 2000 // 20%
   const totalRewardsPlusFee = totalParticipants * rewardAmount + (totalParticipants * rewardAmount * questFee) / 10_000
   let owner: SignerWithAddress
   let firstAddress: SignerWithAddress
