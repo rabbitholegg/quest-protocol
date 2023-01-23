@@ -21,7 +21,7 @@ contract RabbitHoleReceipt is
     using CountersUpgradeable for CountersUpgradeable.Counter;
     CountersUpgradeable.Counter private _tokenIds;
 
-    // storage vars
+    // storage
     mapping(uint => string) public questIdForTokenId;
     address public royaltyRecipient;
     address public minterAddress;
@@ -54,22 +54,33 @@ contract RabbitHoleReceipt is
         _;
     }
 
+    /// @dev set the receipt renderer contract
+    /// @param receiptRenderer_ the address of the receipt renderer contract
     function setReceiptRenderer(address receiptRenderer_) public onlyOwner {
         ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
+    /// @dev set the royalty recipient
+    /// @param royaltyRecipient_ the address of the royalty recipient
     function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
         royaltyRecipient = royaltyRecipient_;
     }
 
+    /// @dev set the minter address
+    /// @param minterAddress_ the address of the minter
     function setMinterAddress(address minterAddress_) public onlyOwner {
         minterAddress = minterAddress_;
     }
 
+    /// @dev set the royalty fee
+    /// @param royaltyFee_ the royalty fee
     function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
         royaltyFee = royaltyFee_;
     }
 
+    /// @dev mint a receipt
+    /// @param to_ the address to mint to
+    /// @param questId_ the quest id
     function mint(address to_, string memory questId_) public onlyMinter {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
@@ -78,16 +89,19 @@ contract RabbitHoleReceipt is
         _safeMint(to_, newTokenID);
     }
 
+    /// @dev get the token ids for a quest owned by an address
+    /// @param questId_ the quest id
+    /// @param claimingAddress_ the address claiming to own the tokens
     function getOwnedTokenIdsOfQuest(
         string memory questId_,
-        address claimingAddress
+        address claimingAddress_
     ) public view returns (uint[] memory) {
-        uint msgSenderBalance = balanceOf(claimingAddress);
+        uint msgSenderBalance = balanceOf(claimingAddress_);
         uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
         uint foundTokens = 0;
 
         for (uint i = 0; i < msgSenderBalance; i++) {
-            uint tokenId = tokenOfOwnerByIndex(claimingAddress, i);
+            uint tokenId = tokenOfOwnerByIndex(claimingAddress_, i);
             if (keccak256(bytes(questIdForTokenId[tokenId])) == keccak256(bytes(questId_))) {
                 tokenIdsForQuest[i] = tokenId;
                 foundTokens++;
@@ -106,19 +120,27 @@ contract RabbitHoleReceipt is
         return filteredTokens;
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
-        super._burn(tokenId);
+    /// @dev burn a receipt
+    /// @param tokenId_ the token id
+    function _burn(uint256 tokenId_) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+        super._burn(tokenId_);
     }
 
+    /// @dev before token transfer hook, called before any token transfer
+    /// @param from_ the address from
+    /// @param to_ the address to
+    /// @param tokenId_ the token id
+    /// @param batchSize_ the batch size
     function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
+        address from_,
+        address to_,
+        uint256 tokenId_,
+        uint256 batchSize_
     ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+        super._beforeTokenTransfer(from_, to_, tokenId_, batchSize_);
     }
 
+    /// @dev return the token uri, this delegates to the receipt renderer contract
     function tokenURI(
         uint tokenId_
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
@@ -126,19 +148,24 @@ contract RabbitHoleReceipt is
         return ReceiptRendererContract.generateTokenURI(tokenId_, questIdForTokenId[tokenId_]);
     }
 
+    /// @dev See {IERC165-royaltyInfo}
+    /// @param tokenId_ the token id
+    /// @param salePrice_ the sale price
     function royaltyInfo(
-        uint256 tokenId,
-        uint256 salePrice
+        uint256 tokenId_,
+        uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        require(_exists(tokenId), 'Nonexistent token');
+        require(_exists(tokenId_), 'Nonexistent token');
 
-        uint256 royaltyPayment = (salePrice * royaltyFee) / 1_000;
+        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 1_000;
         return (royaltyRecipient, royaltyPayment);
     }
 
+    /// @dev returns true if the supplied interface id is supported
+    /// @param interfaceId_ the interface id
     function supportsInterface(
-        bytes4 interfaceId
+        bytes4 interfaceId_
     ) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, IERC165Upgradeable) returns (bool) {
-        return interfaceId == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }

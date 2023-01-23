@@ -71,8 +71,7 @@ describe('Erc20Quest', async () => {
       totalParticipants,
       rewardAmount,
       'erc20',
-      questId,
-      questFee
+      questId
     )
 
     const waitedTx = await createQuestTx.wait()
@@ -134,6 +133,14 @@ describe('Erc20Quest', async () => {
         expect(
           upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalParticipants])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
+      })
+    })
+
+    describe('when end time is before start time', () => {
+      it('Should revert', async () => {
+        expect(
+          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalParticipants])
+        ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
     })
 
