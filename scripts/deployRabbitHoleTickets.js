@@ -3,8 +3,8 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const royaltyRecipient = '0x482c973675b3E3f84A23Dc03430aCfF293952e74'
-  const minterAddress = '0x482c973675b3E3f84A23Dc03430aCfF293952e74' // TODO: change this to the server minter address
+  const royaltyRecipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
+  const minterAddress = '0x37A4a767269B5D1651E544Cd2f56BDfeADC37B05' // goerli factory address
   const royaltyPercentage = 10;
 
   const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')

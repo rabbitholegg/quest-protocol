@@ -162,7 +162,7 @@ contract RabbitHoleReceipt is
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         require(_exists(tokenId_), 'Nonexistent token');
 
-        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 1_000;
+        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
         return (royaltyRecipient, royaltyPayment);
     }
 

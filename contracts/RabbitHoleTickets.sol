@@ -110,7 +110,7 @@ contract RabbitHoleTickets is
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 1_000;
+        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
         return (royaltyRecipient, royaltyPayment);
     }
 
