@@ -2,6 +2,7 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
+import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
 import 'hardhat-gas-reporter'
 import '@nomiclabs/hardhat-etherscan'
@@ -10,9 +11,9 @@ import '@nomiclabs/hardhat-waffle'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 import '@typechain/hardhat'
-import "solidity-coverage"
+import 'solidity-coverage'
 
-module.exports = {
+const config: HardhatUserConfig = {
   defender: {
     apiKey: process.env.DEFENDER_TEAM_API_KEY,
     apiSecret: process.env.DEFENDER_TEAM_API_SECRET_KEY,
@@ -55,3 +56,5 @@ module.exports = {
     },
   },
 }
+
+export default config
