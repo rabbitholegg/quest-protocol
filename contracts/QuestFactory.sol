@@ -19,7 +19,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     struct Quest {
         mapping(address => bool) addressMinted;
         address questAddress;
-        uint totalAmount;
+        uint totalParticipants;
         uint numberMinted;
     }
 
@@ -51,7 +51,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
-    /// @param totalAmount_ The total amount of rewards the quest will have
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
     /// @param contractType_ The type of quest, either erc20 or erc1155
     /// @param questId_ The id of the quest
@@ -60,7 +60,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
-        uint256 totalAmount_,
+        uint256 totalParticipants_,
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_
@@ -74,7 +74,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
-                totalAmount_,
+                totalParticipants_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract),
@@ -84,7 +84,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalAmount = totalAmount_;
+            quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
             return address(newQuest);
         }
@@ -96,7 +96,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
-                totalAmount_,
+                totalParticipants_,
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract)
@@ -104,7 +104,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
             emit QuestCreated(msg.sender, address(newQuest), contractType_);
             quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalAmount = totalAmount_;
+            quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
             return address(newQuest);
         }
@@ -183,7 +183,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
-        if (quests[questId_].numberMinted + 1 > quests[questId_].totalAmount) revert OverMaxAllowedToMint();
+        if (quests[questId_].numberMinted + 1 > quests[questId_].totalParticipants) revert OverMaxAllowedToMint();
         if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
