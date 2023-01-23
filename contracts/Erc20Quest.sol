@@ -46,7 +46,8 @@ contract Erc20Quest is Quest {
         return totalParticipants * rewardAmountInWeiOrTokenId;
     }
 
-    /// @dev Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
+    /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
+    /// @dev The 10_000 comes from Basis Points: https://www.investopedia.com/terms/b/basispoint.asp
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() public view returns (uint256) {
         return (maxTotalRewards() * questFee) / 10_000;
