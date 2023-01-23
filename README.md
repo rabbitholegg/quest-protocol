@@ -30,10 +30,10 @@ Quests Protocol is a protocol to distribute token rewards for completing on-chai
 
 For more information on all docs related to the Quest Protocol, see the documentation directory [here](./docs/).
 
-- [Overview](./docs/overview.md)
-- [Quest Claim](./docs/quest-claim.md)
-- [Quest Create](./docs/quest-create.md)
-- [Audit Endpoints](./docs/audit-endpoints.md)
+- [Overview](https://github.com/rabbitholegg/quest-protocol/docs/overview.md)
+- [Quest Claim](https://github.com/rabbitholegg/quest-protocol/docs/quest-claim.md)
+- [Quest Create](https://github.com/rabbitholegg/quest-protocol/docs/quest-create.md)
+- [Audit Endpoints](https://github.com/rabbitholegg/quest-protocol/docs/audit-endpoints.md)
 
 ---
 
