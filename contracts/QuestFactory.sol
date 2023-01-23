@@ -82,7 +82,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 protocolFeeRecipient
             );
 
-            emit QuestCreated(msg.sender, address(newQuest), contractType_);
+            emit QuestCreated(msg.sender, address(newQuest), questId_, contractType_, rewardTokenAddress_, endTime_, startTime_, totalParticipants_, rewardAmountOrTokenId_);
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
@@ -102,7 +102,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 address(rabbitholeReceiptContract)
             );
 
-            emit QuestCreated(msg.sender, address(newQuest), contractType_);
+            emit QuestCreated(msg.sender, address(newQuest), questId_, contractType_, rewardTokenAddress_, endTime_, startTime_, totalParticipants_, rewardAmountOrTokenId_);
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
@@ -190,6 +190,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         quests[questId_].addressMinted[msg.sender] = true;
         quests[questId_].numberMinted++;
+        emit ReceiptMinted(msg.sender, questId_);
         rabbitholeReceiptContract.mint(msg.sender, questId_);
     }
 }
