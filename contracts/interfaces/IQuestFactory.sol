@@ -11,6 +11,7 @@ interface IQuestFactory {
     error RewardNotAllowed();
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
+    error QuestFeeTooHigh();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string contractType);
 }

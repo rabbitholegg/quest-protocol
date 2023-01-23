@@ -28,6 +28,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
+    uint public questFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -43,6 +44,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
+        setQuestFee(2_000);
     }
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
@@ -53,18 +55,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
     /// @param contractType_ The type of quest, either erc20 or erc1155
     /// @param questId_ The id of the quest
-    /// @param questFee_ The fee for the quest
     /// @return address the quest contract address
     function createQuest(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalAmount_,
-
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
-        string memory questId_,
-        uint256 questFee_
+        string memory questId_
     ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
@@ -79,7 +78,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 rewardAmountOrTokenId_,
                 questId_,
                 address(rabbitholeReceiptContract),
-                questFee_,
+                questFee,
                 protocolFeeRecipient
             );
 
@@ -155,6 +154,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param allowed_ Whether the contract address is allowed or not
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyOwner {
         rewardAllowlist[rewardAddress_] = allowed_;
+    }
+
+    /// @dev set the quest fee
+    /// @notice the quest fee should be in Basis Point units: https://www.investopedia.com/terms/b/basispoint.asp
+    /// @param questFee_ The quest fee value
+    function setQuestFee(uint256 questFee_) public onlyOwner {
+        if (questFee_ > 10_000) revert QuestFeeTooHigh();
+        questFee = questFee_;
     }
 
     /// @dev return the number of minted receipts for a quest

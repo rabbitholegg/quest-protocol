@@ -107,8 +107,7 @@ describe('QuestFactory', () => {
           totalRewards,
           rewardAmount,
           'some-incorrect-contract-type',
-          erc20QuestId,
-          2000
+          erc20QuestId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestTypeInvalid')
     })
@@ -125,8 +124,7 @@ describe('QuestFactory', () => {
           totalRewards,
           rewardAmount,
           'erc20',
-          erc20QuestId,
-          2000
+          erc20QuestId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
@@ -141,8 +139,7 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        2000
+        erc20QuestId
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
@@ -159,8 +156,7 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc1155',
-        erc1155QuestId,
-        2000
+        erc1155QuestId
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
@@ -181,8 +177,7 @@ describe('QuestFactory', () => {
             totalRewards,
             rewardAmount,
             'erc1155',
-            erc1155QuestId,
-            2000
+            erc1155QuestId
           )
       ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
     })
@@ -203,8 +198,7 @@ describe('QuestFactory', () => {
           totalRewards,
           rewardAmount,
           'erc20',
-          erc20QuestId,
-          2000
+          erc20QuestId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
@@ -219,8 +213,7 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        2000
+        erc20QuestId
       )
 
       await expect(
@@ -231,8 +224,7 @@ describe('QuestFactory', () => {
           totalRewards,
           rewardAmount,
           'erc20',
-          erc20QuestId,
-          2000
+          erc20QuestId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
@@ -248,8 +240,7 @@ describe('QuestFactory', () => {
             totalRewards,
             rewardAmount,
             'erc20',
-            erc20QuestId,
-            2000
+            erc20QuestId
           )
       ).to.be.revertedWith(
         `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`
@@ -279,6 +270,22 @@ describe('QuestFactory', () => {
     })
   })
 
+  describe('setQuestFee()', () => {
+    it('Should update questFee', async () => {
+      const newQuestFee = 2500
+      await deployedFactoryContract.setQuestFee(newQuestFee)
+      expect(await deployedFactoryContract.questFee()).to.equal(newQuestFee)
+    })
+
+    it('Should revert if setting questFee beyond 10k basis points', async () => {
+      const newQuestFee = 10001
+      await expect(deployedFactoryContract.setQuestFee(newQuestFee)).to.be.revertedWithCustomError(
+        questFactoryContract,
+        'QuestFeeTooHigh'
+      )
+    })
+  })
+
   describe('mintReceipt()', () => {
     const erc20QuestId = 'asdf'
     let messageHash: string
@@ -295,8 +302,7 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc20',
-        erc20QuestId,
-        2000
+        erc20QuestId
       )
     })
 
