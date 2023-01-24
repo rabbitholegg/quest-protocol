@@ -56,6 +56,7 @@ describe('Collections', () => {
 
   afterEach(async () => {
     await ethers.provider.send('evm_increaseTime', [-1000])
+    console.log('testin')
   })
 
   const createErc20Quest = async () => {
