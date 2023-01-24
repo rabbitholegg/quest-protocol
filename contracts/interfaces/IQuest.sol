@@ -19,4 +19,8 @@ interface IQuest {
     error NotStarted();
     error QuestPaused();
     error MustImplementInChild();
+
+    function isClaimed(uint256 tokenId_) external view returns (bool);
+    function getRewardAmount() external view returns (uint256);
+    function getRewardToken() external view returns (address);
 }

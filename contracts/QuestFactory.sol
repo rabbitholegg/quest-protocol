@@ -170,6 +170,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return quests[questId_].numberMinted;
     }
 
+    /// @dev return data in the quest struct for a questId
+    /// @param questId_ The id of the quest
+    function questInfo(string memory questId_) external view returns (address, uint, uint) {
+        return (
+            quests[questId_].questAddress,
+            quests[questId_].totalParticipants,
+            quests[questId_].numberMinted
+        );
+    }
+
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash

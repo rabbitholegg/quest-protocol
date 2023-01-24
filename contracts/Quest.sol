@@ -136,6 +136,14 @@ contract Quest is Ownable, IQuest {
         return claimedList[tokenId_] == true;
     }
 
+    function getRewardAmount() public view returns (uint256) {
+        return rewardAmountInWeiOrTokenId;
+    }
+
+    function getRewardToken() public view returns (address) {
+        return rewardToken;
+    }
+
     /// @notice Allows the owner of the Quest to withdraw any remaining rewards after the Quest has ended
     function withdrawRemainingTokens(address to_) public virtual onlyOwner onlyAdminWithdrawAfterEnd {}
 }
