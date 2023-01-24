@@ -14,8 +14,14 @@ describe('ReceiptRenderer Contract', async () => {
   })
 
   describe('generateTokenURI', () => {
+    const tokenId = 100
+    const questId = "questid123"
+    const totalParticipants = 500
+    const claimed = true
+    const rewardAmount = 1000
+    const rewardAddress = "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0"
     it('has the correct metadata', async () => {
-      let base64encoded = await deployedReceiptRenderer.generateTokenURI(100, "questid123", 500, true, 1000, "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0");
+      let base64encoded = await deployedReceiptRenderer.generateTokenURI(tokenId, questId, totalParticipants, claimed, rewardAmount, rewardAddress);
 
       let buff = Buffer.from(base64encoded.replace("data:application/json;base64,", ""), 'base64');
       let metadata = buff.toString('ascii');
@@ -29,27 +35,27 @@ describe('ReceiptRenderer Contract', async () => {
         [
           {
             "trait_type": "Quest ID",
-            "value": "questid123"
+            "value": questId.toString()
           },
           {
             "trait_type": "Token ID",
-            "value": "100"
+            "value": tokenId.toString()
           },
           {
             "trait_type": "Total Participants",
-            "value": "500"
+            "value": totalParticipants.toString()
           },
           {
             "trait_type": "Claimed",
-            "value": "true"
+            "value": claimed.toString()
           },
           {
             "trait_type": "Reward Amount",
-            "value": "1000"
+            "value": rewardAmount.toString()
           },
           {
             "trait_type": "Reward Address",
-            "value": "0xc4a68e2c152bca2fe5e8d26ffb8aa44bce1b56b0"
+            "value": rewardAddress.toString().toLowerCase()
           }
         ]
       }
