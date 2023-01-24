@@ -42,7 +42,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     ) public initializer {
         __Ownable_init();
         __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole(msg.sender);
+        grantAllRoles(msg.sender);
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
@@ -148,9 +148,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
     }
 
+    /// @dev grant the role access role to an account
+    /// @param account_ The account to grant or revoke the role access role to
+    /// @param canAccessRole_ Boolean to grant or revoke the role access role. True grants access
+    function changeRoleAccessRole(address account_, bool canAccessRole_) public onlyRole(ROLE_ACCESS) {
+        if (canAccessRole_) {
+            _grantRole(ROLE_ACCESS, account_);
+        } else {
+            _revokeRole(ROLE_ACCESS, account_);
+        }
+    }
+
     /// @dev grant the default admin, create quest, and role access roles to the owner
     /// @param account_ The account to grant admin and create quest roles
-    function grantDefaultAdminAndCreateQuestRole(address account_) internal {
+    function grantAllRoles(address account_) internal {
         _grantRole(DEFAULT_ADMIN_ROLE, account_);
         _grantRole(CREATE_QUEST_ROLE, account_);
         _grantRole(ROLE_ACCESS, account_);
