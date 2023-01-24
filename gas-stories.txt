@@ -1,0 +1,38 @@
+Erc1155Quest
+=========================================================
+Quest
+···························
+startQuest
+     32,000 Start ERC1155 quest
+
+Erc20Quest
+=========================================================
+Claim
+···························
+claim
+    126,600 1st claim
+
+Quest
+···························
+startQuest
+     32,400 Start ERC20 quest
+
+QuestFactory
+=========================================================
+Mint Receipt
+···························
+mintReceipt
+    288,100 1st mint
+    276,600 2st mint
+
+Quest
+···························
+createQuest
+  1,341,200 Create ERC1155 quest
+  1,483,600 Create ERC20 quest
+
+RewardAllowlist
+···························
+setRewardAllowlistAddress
+     53,700 Set the reward allowlist
+
