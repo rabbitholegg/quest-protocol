@@ -151,7 +151,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev grant the role access role to an account
     /// @param account_ The account to grant or revoke the role access role to
     /// @param canAccessRole_ Boolean to grant or revoke the role access role. True grants access
-    function changeRoleAccessRole(address account_, bool canAccessRole_) public onlyRole(ROLE_ACCESS) {
+    function changeRoleAccessRole(address account_, bool canAccessRole_) public onlyOwner {
         if (canAccessRole_) {
             _grantRole(ROLE_ACCESS, account_);
         } else {
