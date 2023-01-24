@@ -242,6 +242,12 @@ yarn test
 yarn test:coverage
 ```
 
+### Run gas test:
+
+```bash
+yarn test:gas-stories
+```
+
 ---
 
 ## Upgrading
