@@ -10,7 +10,7 @@ import {
 } from '../typechain-types'
 import { Wallet, utils, constants } from 'ethers'
 
-describe.only('QuestFactory', () => {
+describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
