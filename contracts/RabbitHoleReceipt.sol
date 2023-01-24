@@ -9,6 +9,8 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import './ReceiptRenderer.sol';
+import './interfaces/IQuestFactory.sol';
+import './interfaces/IQuest.sol';
 
 contract RabbitHoleReceipt is
     Initializable,
@@ -31,6 +33,7 @@ contract RabbitHoleReceipt is
     uint public royaltyFee;
     mapping(uint => uint) public timestampForTokenId;
     ReceiptRenderer public ReceiptRendererContract;
+    IQuestFactory public QuestFactoryContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -67,6 +70,12 @@ contract RabbitHoleReceipt is
     /// @param royaltyRecipient_ the address of the royalty recipient
     function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
         royaltyRecipient = royaltyRecipient_;
+    }
+
+    /// @dev set the quest factory contract
+    /// @param questFactory_ the address of the quest factory contract
+    function setQuestFactory(address questFactory_) public onlyOwner {
+        QuestFactoryContract = IQuestFactory(questFactory_);
     }
 
     /// @dev set the minter address
@@ -150,7 +159,17 @@ contract RabbitHoleReceipt is
         uint tokenId_
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
         require(_exists(tokenId_), 'ERC721URIStorage: URI query for nonexistent token');
-        return ReceiptRendererContract.generateTokenURI(tokenId_, questIdForTokenId[tokenId_]);
+        require(QuestFactoryContract != IQuestFactory(address(0)), 'QuestFactory not set');
+
+        string memory questId = questIdForTokenId[tokenId_];
+        (address questAddress, uint totalParticipants, ) = QuestFactoryContract.questInfo(questId);
+        IQuest questContract = IQuest(questAddress);
+
+        bool claimed = questContract.isClaimed(tokenId_);
+        uint rewardAmount = questContract.getRewardAmount();
+        address rewardAddress = questContract.getRewardToken();
+
+        return ReceiptRendererContract.generateTokenURI(tokenId_, questId, totalParticipants, claimed, rewardAmount, rewardAddress);
     }
 
     /// @dev See {IERC165-royaltyInfo}
