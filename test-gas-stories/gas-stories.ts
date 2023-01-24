@@ -4,10 +4,6 @@ const provider: providers.JsonRpcProvider = ethers.provider
 import gasConfig from '../hardhat.config'
 import chalk from 'chalk'
 import { writeFileSync } from 'fs'
-import { deployAll } from '../test/helpers/deploy'
-import { snapshotEach } from '../test/helpers/snapshot'
-import { Erc20Quest } from '../typechain-types'
-
 /*
  CircleCI supported chalk styles https://app.circleci.com/pipelines/github/f8n/fnd-contracts/4069/workflows/2c043508-065a-47cd-bc58-4a303f3a1be7/jobs/22047
   - blue
@@ -38,60 +34,6 @@ let records: {
   notes?: string
 }[] = []
 let resultsLog = ''
-
-snapshotEach(async function () {
-  const [deployer, claimAddressSigner, rando1, rando2] = await ethers.getSigners()
-  const contracts = await deployAll(deployer, claimAddressSigner)
-  this.contracts = contracts
-
-  const expiryDate = Math.floor(Date.now() / 1000) + 10000
-  const startDate = Math.floor(Date.now() / 1000) + 1000
-  const totalParticipants = 1000
-  const rewardAmount = 10
-  await contracts.questFactory.setRewardAllowlistAddress(contracts.sampleErc20.address, true)
-  await contracts.questFactory
-    .connect(deployer)
-    .createQuest(
-      contracts.sampleErc20.address,
-      expiryDate,
-      startDate,
-      totalParticipants,
-      rewardAmount,
-      'erc20',
-      'quest-id',
-      2000
-    )
-
-  const quest = await contracts.questFactory.connect(deployer).quests('quest-id')
-  const erc20QuestAddress = await quest.questAddress
-  const erc20Quest = (await ethers.getContractAt('Erc20Quest', erc20QuestAddress)) as Erc20Quest
-  const val = (await erc20Quest.maxTotalRewards()).add(await erc20Quest.maxProtocolReward())
-  await contracts.sampleErc20.transfer(erc20QuestAddress, val)
-  await erc20Quest.start()
-  console.log((await contracts.questFactory.quests('quest-id')).totalAmount)
-  console.log((await contracts.questFactory.quests('quest-id')).numberMinted)
-
-  // await contracts.collection.connect(creator).mint(testIpfsPath[0])
-  // await contracts.collection.connect(creator).mint(testIpfsPath[1])
-  // const sharesBefore = [
-  //   { recipient: creator.address, percentInBasisPoints: 5000 },
-  //   { recipient: deployer.address, percentInBasisPoints: 5000 },
-  // ]
-  // const callData = contracts.percentSplitFactory.interface.encodeFunctionData('createSplit', [sharesBefore])
-  // await contracts.collection
-  //   .connect(creator)
-  //   .mintWithCreatorPaymentFactory(testIpfsPath[2], contracts.percentSplitFactory.address, callData)
-
-  // // Warm up the market
-  // const tx = await contracts.nftCollectionFactoryV2.connect(rando).createNFTCollection('name', 'symbol', 69)
-  // const testCol = await getNFTCollection(tx, rando)
-  // await testCol.connect(rando).mintAndApprove(testIpfsPath[0], mockMarket.address)
-  // await testCol.connect(rando).mint(testIpfsPath[1])
-  // await contracts.feth.connect(rando).deposit({ value: ONE_ETH.mul(100) })
-
-  // // Avoid inconsistent results due to an unexpected change in hour
-  // await increaseTimeToNextHour()
-})
 
 export async function story(
   contract: 'QuestFactory' | 'Erc20Quest' | 'Erc1155Quest' | 'RabbitHoleReceipt' | 'ReceiptRenderer',

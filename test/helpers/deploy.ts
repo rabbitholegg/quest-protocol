@@ -19,8 +19,6 @@ import {
 
 export type TestContracts = {
   questFactory: QuestFactory
-  // erc20Quest: Erc20Quest,
-  // erc1155Quest: Erc1155Quest,
   rabbitHoleReceipt: RabbitHoleReceipt
   receiptRenderer: ReceiptRenderer
 
@@ -33,9 +31,6 @@ export async function deployAll(
   deployer: SignerWithAddress,
   claimAddressSigner: SignerWithAddress
 ): Promise<TestContracts> {
-  if (!deployer) {
-    ;[deployer] = await ethers.getSigners()
-  }
   // upgrades.silenceWarnings()
   const receiptRenderer = await deployReceiptRenderer({ deployer })
   const rabbitHoleReceipt = await deployRabbitHoleReceipt({ deployer, receiptRendererAddress: receiptRenderer.address })
