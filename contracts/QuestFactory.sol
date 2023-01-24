@@ -14,6 +14,7 @@ import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol'
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+    bytes32 public constant ROLE_ACCESS = keccak256('ROLE_ACCESS');
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -139,7 +140,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev grant the create quest role to an account
     /// @param account_ The account to grant or revoke the create quest role to
     /// @param canCreateQuest_ Boolean to grant or revoke the create quest role. True grants access
-    function changeCreateQuestRole(address account_, bool canCreateQuest_) public onlyOwner {
+    function changeCreateQuestRole(address account_, bool canCreateQuest_) public onlyRole(ROLE_ACCESS) {
         if (canCreateQuest_) {
             _grantRole(CREATE_QUEST_ROLE, account_);
         } else {
@@ -147,11 +148,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
     }
 
-    /// @dev grant the default admin role and the create quest role to the owner
+    /// @dev grant the default admin, create quest, and role access roles to the owner
     /// @param account_ The account to grant admin and create quest roles
     function grantDefaultAdminAndCreateQuestRole(address account_) internal {
         _grantRole(DEFAULT_ADMIN_ROLE, account_);
         _grantRole(CREATE_QUEST_ROLE, account_);
+        _grantRole(ROLE_ACCESS, account_);
     }
 
     /// @dev set the claim signer address
