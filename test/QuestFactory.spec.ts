@@ -132,6 +132,8 @@ describe('QuestFactory', () => {
     it('Should create a new ERC20 quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
 
+      expect(await deployedFactoryContract.questIdCount()).to.equal(1)
+
       const tx = await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -146,9 +148,11 @@ describe('QuestFactory', () => {
       const deployedErc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
       expect(await deployedErc20Quest.startTime()).to.equal(startDate)
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
+      expect(await deployedFactoryContract.questIdCount()).to.equal(2)
     })
 
     it('Should create a new ERC1155 quest', async () => {
+      expect(await deployedFactoryContract.questIdCount()).to.equal(1)
       const tx = await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -163,6 +167,7 @@ describe('QuestFactory', () => {
       const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
       expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
       expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
+      expect(await deployedFactoryContract.questIdCount()).to.equal(2)
     })
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
