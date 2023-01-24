@@ -53,34 +53,97 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 │   ├── Quest.sol
 │   ├── QuestFactory.sol
 │   ├── RabbitHoleReceipt.sol
+│   ├── RabbitHoleTickets.sol
+│   ├── ReceiptRenderer.sol
 │   ├── SampleERC20.sol
 │   ├── SampleErc1155.sol
+│   ├── TicketRenderer.sol
 │   ├── interfaces
-│   │   └── IQuest.sol
+│   │   ├── IQuest.sol
+│   │   └── IQuestFactory.sol
 │   └── test
 │       └── TestERC20.sol
+├── coverage
+│   ├── base.css
+│   ├── contracts
+│   │   ├── Erc1155Quest.sol.html
+│   │   ├── Erc20Quest.sol.html
+│   │   ├── Quest.sol.html
+│   │   ├── QuestFactory.sol.html
+│   │   ├── RabbitHoleReceipt.sol.html
+│   │   ├── RabbitHoleTickets.sol.html
+│   │   ├── ReceiptRenderer.sol.html
+│   │   ├── SampleERC20.sol.html
+│   │   ├── SampleErc1155.sol.html
+│   │   ├── TicketRenderer.sol.html
+│   │   ├── index.html
+│   │   ├── interfaces
+│   │   │   ├── IQuest.sol.html
+│   │   │   ├── IQuestFactory.sol.html
+│   │   │   └── index.html
+│   │   └── test
+│   │       ├── TestERC20.sol.html
+│   │       └── index.html
+│   ├── coverage-final.json
+│   ├── index.html
+│   ├── lcov-report
+│   │   ├── base.css
+│   │   ├── contracts
+│   │   │   ├── Erc1155Quest.sol.html
+│   │   │   ├── Erc20Quest.sol.html
+│   │   │   ├── Quest.sol.html
+│   │   │   ├── QuestFactory.sol.html
+│   │   │   ├── RabbitHoleReceipt.sol.html
+│   │   │   ├── RabbitHoleTickets.sol.html
+│   │   │   ├── ReceiptRenderer.sol.html
+│   │   │   ├── SampleERC20.sol.html
+│   │   │   ├── SampleErc1155.sol.html
+│   │   │   ├── TicketRenderer.sol.html
+│   │   │   ├── index.html
+│   │   │   ├── interfaces
+│   │   │   │   ├── IQuest.sol.html
+│   │   │   │   ├── IQuestFactory.sol.html
+│   │   │   │   └── index.html
+│   │   │   └── test
+│   │   │       ├── TestERC20.sol.html
+│   │   │       └── index.html
+│   │   ├── index.html
+│   │   ├── prettify.css
+│   │   ├── prettify.js
+│   │   ├── sort-arrow-sprite.png
+│   │   └── sorter.js
+│   ├── lcov.info
+│   ├── prettify.css
+│   ├── prettify.js
+│   ├── sort-arrow-sprite.png
+│   └── sorter.js
 ├── coverage.json
 ├── docs
+│   ├── audit-endpoints.md
 │   ├── overview.md
 │   ├── quest-claim.md
 │   └── quest-create.md
 ├── hardhat.config.ts
-├── node_modules  [488 entries exceeds filelimit, not opening dir]
+├── node_modules  [492 entries exceeds filelimit, not opening dir]
 ├── package.json
 ├── scripts
 │   ├── deployQuestFactory.js
 │   ├── deployRabbitHoleReceipt.js
+│   ├── deployRabbitHoleTickets.js
 │   ├── upgradeQuestFactory.js
-│   └── upgradeRabbitHoleReceipt.js
+│   ├── upgradeRabbitHoleReceipt.js
+│   └── upgradeRabbitHoleTickets.js
 ├── test
 │   ├── Erc1155Quest.spec.ts
 │   ├── Erc20Quest.spec.ts
 │   ├── Quest.spec.ts
 │   ├── QuestFactory.spec.ts
 │   ├── RabbitHoleReceipt.spec.ts
+│   ├── RabbitHoleTickets.spec.ts
 │   ├── SampleErc1155.spec.ts
 │   ├── SampleErc20.spec.ts
 │   └── types.ts
+├── test-gas-stories
 ├── tsconfig.json
 ├── waffle.json
 └── yarn.lock
