@@ -41,7 +41,6 @@ contract RabbitHoleReceipt is
     }
 
     function initialize(
-        address questFactory_,
         address receiptRenderer_,
         address royaltyRecipient_,
         address minterAddress_,
@@ -54,7 +53,6 @@ contract RabbitHoleReceipt is
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;
         ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
-        QuestFactoryContract = IQuestFactory(questFactory_);
     }
 
     modifier onlyMinter() {
@@ -72,6 +70,12 @@ contract RabbitHoleReceipt is
     /// @param royaltyRecipient_ the address of the royalty recipient
     function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
         royaltyRecipient = royaltyRecipient_;
+    }
+
+    /// @dev set the quest factory contract
+    /// @param questFactory_ the address of the quest factory contract
+    function setQuestFactory(address questFactory_) public onlyOwner {
+        QuestFactoryContract = IQuestFactory(questFactory_);
     }
 
     /// @dev set the minter address
@@ -155,6 +159,7 @@ contract RabbitHoleReceipt is
         uint tokenId_
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
         require(_exists(tokenId_), 'ERC721URIStorage: URI query for nonexistent token');
+        require(QuestFactoryContract != IQuestFactory(address(0)), 'QuestFactory not set');
 
         string memory questId = questIdForTokenId[tokenId_];
         (address questAddress, uint totalParticipants, ) = QuestFactoryContract.questInfo(questId);

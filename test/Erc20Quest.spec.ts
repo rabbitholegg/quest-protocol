@@ -58,8 +58,9 @@ describe('Erc20Quest', async () => {
     expiryDate = Math.floor(Date.now() / 1000) + 100000
     startDate = Math.floor(Date.now() / 1000) + 1000
     await deployRabbitholeReceiptContract()
-    await deploySampleErc20Contract()
     await deployFactoryContract()
+    await deployedRabbitholeReceiptContract.setQuestFactory(deployedFactoryContract.address)
+    await deploySampleErc20Contract()
 
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))

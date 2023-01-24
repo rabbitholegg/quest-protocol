@@ -13,65 +13,84 @@ contract ReceiptRenderer {
     /// @dev generates the tokenURI for a given ERC-721 token ID
     /// @param tokenId_ The token id to generate the URI for
     /// @param questId_ The questId tied to the tokenId
-    /// @param totalParticipants The total number of participants in the quest
-    /// @param claimed Whether or not the token has been claimed
-    /// @param rewardAmount The amount of reward tokens that the user is eligible for
-    /// @param rewardAddress The address of the reward token
+    /// @param totalParticipants_ The total number of participants in the quest
+    /// @param claimed_ Whether or not the token has been claimed
+    /// @param rewardAmount_ The amount of reward tokens that the user is eligible for
+    /// @param rewardAddress_ The address of the reward token
     /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
         uint tokenId_,
         string memory questId_,
-        uint totalParticipants,
-        bool claimed,
-        uint rewardAmount,
-        address rewardAddress
+        uint totalParticipants_,
+        bool claimed_,
+        uint rewardAmount_,
+        address rewardAddress_
     ) public view virtual returns (string memory) {
+        bytes memory dataURI = generateDataURI(
+            tokenId_,
+            questId_,
+            totalParticipants_,
+            claimed_,
+            rewardAmount_,
+            rewardAddress_
+        );
+        return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
+    }
+
+    function generateDataURI(
+        uint tokenId_,
+        string memory questId_,
+        uint totalParticipants_,
+        bool claimed_,
+        uint rewardAmount_,
+        address rewardAddress_
+    ) public view virtual returns (bytes memory) {
+        bytes memory attributes = abi.encodePacked(
+            '[',
+            generateAttribute('Quest ID', questId_),
+            ',',
+            generateAttribute('Token ID', tokenId_.toString()),
+            ',',
+            generateAttribute('Total Participants', totalParticipants_.toString()),
+            ',',
+            generateAttribute('Claimed', claimed_ ? 'true' : 'false'),
+            ',',
+            generateAttribute('Reward Amount', rewardAmount_.toString()),
+            ',',
+            generateAttribute('Reward Address', Strings.toHexString(uint160(rewardAddress_), 20)),
+            ']'
+        );
         bytes memory dataURI = abi.encodePacked(
             '{',
-            '"name": "RabbitHole Quest #',
-            questId_,
-            ' Redeemer #',
+            '"name": "RabbitHole.gg Receipt #',
             tokenId_.toString(),
             '",',
-            '"description": "This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.",',
-            '"attributes": [',
-            '{',
-            '"trait_type": "Quest ID",',
-            '"value": "',
-            questId_,
-            '"',
-            '},',
-            '{',
-            '"trait_type": "Total Participants",',
-            '"value": "',
-            totalParticipants.toString(),
-            '"',
-            '},',
-            '{',
-            '"trait_type": "Claimed",',
-            '"value": "',
-            claimed ? 'true' : 'false',
-            '"',
-            '},',
-            '{',
-            '"trait_type": "Reward Amount",',
-            '"value": "',
-            rewardAmount.toString(),
-            '"',
-            '},',
-            '{',
-            '"trait_type": "Reward Address",',
-            '"value": "',
-            rewardAddress.toString(),
-            '"',
-            '}',
-            '],',
+            '"description": "RabbitHole.gg Receipts are used to claim rewards from completed quests.",',
             '"image": "',
             generateSVG(tokenId_, questId_),
+            '",',
+            '"attributes": ',
+            attributes,
+            '}'
+        );
+        return dataURI;
+    }
+
+    /// @dev generates an attribute object for an ERC-721 token
+    /// @param key The key for the attribute
+    /// @param value The value for the attribute
+    function generateAttribute(string memory key, string memory value) public pure returns (string memory) {
+        bytes memory attribute = abi.encodePacked(
+            '{',
+            '"trait_type": "',
+            key,
+            '",',
+            '"value": "',
+            value,
             '"',
             '}'
         );
-        return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
+        return string(attribute);
     }
 
     /// @dev generates the on-chain SVG for an ERC-721 token ID
