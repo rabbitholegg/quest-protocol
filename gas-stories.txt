@@ -1,9 +1,15 @@
 Erc1155Quest
 =========================================================
-Quest
+Start
 ···························
 startQuest
      32,000 Start ERC1155 quest
+     32,000 Start ERC1155 quest
+
+Withdraw
+···························
+withdrawRemainingRewards
+     38,100 Withdraw remaining rewards from ERC1155 quest
 
 Erc20Quest
 =========================================================
@@ -12,10 +18,19 @@ Claim
 claim
     126,600 1st claim
 
-Quest
+Start
 ···························
 startQuest
      32,400 Start ERC20 quest
+     32,400 Start ERC20 quest
+
+Withdraw
+···························
+withdrawFee
+     48,300 Withdraw fee from ERC20 quest
+
+withdrawRemainingRewards
+     58,000 Withdraw remaining rewards from ERC20 quest
 
 QuestFactory
 =========================================================
@@ -29,10 +44,13 @@ Quest
 ···························
 createQuest
   1,341,200 Create ERC1155 quest
+  1,341,200 Create ERC1155 quest
+  1,483,600 Create ERC20 quest
   1,483,600 Create ERC20 quest
 
 RewardAllowlist
 ···························
 setRewardAllowlistAddress
+     53,700 Set the reward allowlist
      53,700 Set the reward allowlist
 

@@ -54,6 +54,10 @@ describe('Collections', () => {
     await startErc1155Quest()
   })
 
+  afterEach(async () => {
+    await ethers.provider.send('evm_increaseTime', [-1000])
+  })
+
   const createErc20Quest = async () => {
     const totalParticipants = 1000
     const rewardAmount = 10
@@ -95,7 +99,7 @@ describe('Collections', () => {
     const val = (await erc20Quest.maxTotalRewards()).add(await erc20Quest.maxProtocolReward())
     await contracts.sampleErc20.transfer(erc20QuestAddress, val)
     tx = await erc20Quest.start()
-    await story('Erc20Quest', 'Quest', 'startQuest', 'Start ERC20 quest', tx)
+    await story('Erc20Quest', 'Start', 'startQuest', 'Start ERC20 quest', tx)
   }
 
   const startErc1155Quest = async () => {
@@ -104,7 +108,7 @@ describe('Collections', () => {
     erc1155Quest = (await ethers.getContractFactory('Erc1155Quest')).attach(erc1155QuestAddress) as Erc1155Quest
     await contracts.sampleErc1155.safeTransferFrom(owner.address, erc1155QuestAddress, 1, 10, '0x')
     tx = await erc1155Quest.start()
-    await story('Erc1155Quest', 'Quest', 'startQuest', 'Start ERC1155 quest', tx)
+    await story('Erc1155Quest', 'Start', 'startQuest', 'Start ERC1155 quest', tx)
   }
 
   it('Mint Receipt and Claim Rewards', async () => {
@@ -119,5 +123,26 @@ describe('Collections', () => {
     const signature2 = await claimAddressSigner.signMessage(utils.arrayify(hash2))
     tx = await questFactory.connect(firstAddress).mintReceipt(questId2, hash2, signature2)
     await story('QuestFactory', 'Mint Receipt', 'mintReceipt', '2st mint', tx)
+  })
+
+  it('Withdraw Remaining Rewards', async () => {
+    await ethers.provider.send('evm_increaseTime', [10000])
+
+    tx = await erc20Quest.withdrawRemainingTokens(owner.address)
+    await story('Erc20Quest', 'Withdraw', 'withdrawRemainingRewards', 'Withdraw remaining rewards from ERC20 quest', tx)
+
+    tx = await erc1155Quest.withdrawRemainingTokens(owner.address)
+    await story(
+      'Erc1155Quest',
+      'Withdraw',
+      'withdrawRemainingRewards',
+      'Withdraw remaining rewards from ERC1155 quest',
+      tx
+    )
+
+    tx = await erc20Quest.withdrawFee()
+    await story('Erc20Quest', 'Withdraw', 'withdrawFee', 'Withdraw fee from ERC20 quest', tx)
+
+    await ethers.provider.send('evm_increaseTime', [-10000])
   })
 })
