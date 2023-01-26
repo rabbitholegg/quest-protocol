@@ -42,7 +42,6 @@ contract Quest is Ownable, IQuest {
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        redeemedTokens = 0;
     }
 
     /// @notice Starts the Quest
