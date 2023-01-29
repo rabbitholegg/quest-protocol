@@ -276,7 +276,7 @@ The following auditors reviewed the protocol. You can see reports in `/audits` d
 ---
 ## Bug Bounty
 
-All contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
+Once all audits are wrapped up, all contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
 
 The rubric we use to determine bug bounties is as follows:
 
