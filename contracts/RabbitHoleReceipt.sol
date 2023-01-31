@@ -5,7 +5,6 @@ import '@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import './ReceiptRenderer.sol';
@@ -13,7 +12,6 @@ import './interfaces/IQuestFactory.sol';
 import './interfaces/IQuest.sol';
 
 contract RabbitHoleReceipt is
-    Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
@@ -34,26 +32,6 @@ contract RabbitHoleReceipt is
     mapping(uint => uint) public timestampForTokenId;
     ReceiptRenderer public ReceiptRendererContract;
     IQuestFactory public QuestFactoryContract;
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(
-        address receiptRenderer_,
-        address royaltyRecipient_,
-        address minterAddress_,
-        uint royaltyFee_
-    ) public initializer {
-        __ERC721_init('RabbitHoleReceipt', 'RHR');
-        __ERC721URIStorage_init();
-        __Ownable_init();
-        royaltyRecipient = royaltyRecipient_;
-        minterAddress = minterAddress_;
-        royaltyFee = royaltyFee_;
-        ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
-    }
 
     modifier onlyMinter() {
         msg.sender == minterAddress;

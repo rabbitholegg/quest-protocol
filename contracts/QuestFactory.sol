@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {Erc20Quest} from './Erc20Quest.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
@@ -13,8 +12,9 @@ import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol'
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
+
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
@@ -30,24 +30,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
     uint public questIdCount;
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
-
-    function initialize(
-        address claimSignerAddress_,
-        address rabbitholeReceiptContract_,
-        address protocolFeeRecipient_
-    ) public initializer {
-        __Ownable_init();
-        __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole(msg.sender);
-        claimSignerAddress = claimSignerAddress_;
-        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-        setProtocolFeeRecipient(protocolFeeRecipient_);
-        setQuestFee(2_000);
-        questIdCount = 1;
-    }
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token

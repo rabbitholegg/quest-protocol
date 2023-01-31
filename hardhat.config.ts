@@ -12,6 +12,7 @@ import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 import '@typechain/hardhat'
 import 'solidity-coverage'
+import '@chugsplash/plugins'
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -26,6 +27,11 @@ const config: HardhatUserConfig = {
       {
         version: '0.8.15',
         settings: {
+          outputSelection: {
+            '*': {
+              '*': ['storageLayout'],
+            },
+          },
           optimizer: {
             enabled: true,
             runs: 5000,
