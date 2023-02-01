@@ -51,11 +51,15 @@ describe('Erc1155Quest', () => {
 
   const deployRabbitholeReceiptContract = async () => {
     const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+    const ReceiptSVGRenderer = await ethers.getContractFactory('ReceiptSVGRenderer')
     const deployedReceiptRenderer = await ReceiptRenderer.deploy()
     await deployedReceiptRenderer.deployed()
+    const deployedSVGReceiptRenderer = await ReceiptSVGRenderer.deploy()
+    await deployedSVGReceiptRenderer.deployed()
 
     deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
       deployedReceiptRenderer.address,
+      deployedSVGReceiptRenderer.address,
       owner.address,
       owner.address,
       10,

@@ -34,6 +34,7 @@ contract RabbitHoleReceipt is
     mapping(uint => uint) public timestampForTokenId;
     ReceiptRenderer public ReceiptRendererContract;
     IQuestFactory public QuestFactoryContract;
+    address public receiptSVGRenderer;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -42,6 +43,7 @@ contract RabbitHoleReceipt is
 
     function initialize(
         address receiptRenderer_,
+        address receiptSVGRenderer_,
         address royaltyRecipient_,
         address minterAddress_,
         uint royaltyFee_
@@ -53,11 +55,18 @@ contract RabbitHoleReceipt is
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;
         ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
+        receiptSVGRenderer = receiptSVGRenderer_;
     }
 
     modifier onlyMinter() {
         msg.sender == minterAddress;
         _;
+    }
+
+    /// @dev set the receipt svg renderer contract
+    /// @param receiptSVGRenderer_ the address of the receipt svg renderer contract
+    function setReceiptSVGRenderer(address receiptSVGRenderer_) public onlyOwner {
+        receiptSVGRenderer = receiptSVGRenderer_;
     }
 
     /// @dev set the receipt renderer contract
@@ -169,7 +178,7 @@ contract RabbitHoleReceipt is
         uint rewardAmount = questContract.getRewardAmount();
         address rewardAddress = questContract.getRewardToken();
 
-        return ReceiptRendererContract.generateTokenURI(tokenId_, questId, totalParticipants, claimed, rewardAmount, rewardAddress);
+        return ReceiptRendererContract.generateTokenURI(tokenId_, questId, totalParticipants, claimed, rewardAmount, rewardAddress, receiptSVGRenderer);
     }
 
     /// @dev See {IERC165-royaltyInfo}

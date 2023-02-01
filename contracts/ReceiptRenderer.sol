@@ -3,6 +3,7 @@ pragma solidity ^0.8.15;
 
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
+import './ReceiptSVGRenderer.sol';
 
 /// @title ReceiptRenderer
 /// @author RabbitHole.gg
@@ -17,6 +18,7 @@ contract ReceiptRenderer {
     /// @param claimed_ Whether or not the token has been claimed
     /// @param rewardAmount_ The amount of reward tokens that the user is eligible for
     /// @param rewardAddress_ The address of the reward token
+    /// @param svgRendererAddress_ The address of the SVG renderer contract
     /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
         uint tokenId_,
@@ -24,7 +26,8 @@ contract ReceiptRenderer {
         uint totalParticipants_,
         bool claimed_,
         uint rewardAmount_,
-        address rewardAddress_
+        address rewardAddress_,
+        address svgRendererAddress_
     ) public view virtual returns (string memory) {
         bytes memory dataURI = generateDataURI(
             tokenId_,
@@ -32,7 +35,8 @@ contract ReceiptRenderer {
             totalParticipants_,
             claimed_,
             rewardAmount_,
-            rewardAddress_
+            rewardAddress_,
+            svgRendererAddress_
         );
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
@@ -43,7 +47,8 @@ contract ReceiptRenderer {
         uint totalParticipants_,
         bool claimed_,
         uint rewardAmount_,
-        address rewardAddress_
+        address rewardAddress_,
+        address svgRendererAddress_
     ) public view virtual returns (bytes memory) {
         bytes memory attributes = abi.encodePacked(
             '[',
@@ -67,7 +72,7 @@ contract ReceiptRenderer {
             '",',
             '"description": "RabbitHole.gg Receipts are used to claim rewards from completed quests.",',
             '"image": "',
-            generateSVG(tokenId_, questId_),
+            ReceiptSVGRenderer(svgRendererAddress_).generateSVG(claimed_, questId_, rewardAmount_, rewardAddress_),
             '",',
             '"attributes": ',
             attributes,
@@ -91,25 +96,5 @@ contract ReceiptRenderer {
             '}'
         );
         return string(attribute);
-    }
-
-    /// @dev generates the on-chain SVG for an ERC-721 token ID
-    /// @param tokenId_ The token id to generate the svg for
-    /// @param questId_ The questId tied to the tokenId
-    /// @return encoded JSON for an SVG image
-    function generateSVG(uint tokenId_, string memory questId_) public pure returns (string memory) {
-        bytes memory svg = abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
-            '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
-            '<rect width="100%" height="100%" fill="black" />',
-            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest #',
-            questId_,
-            '</text>',
-            '<text x="70%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">RabbitHole Quest Receipt #',
-            tokenId_,
-            '</text>',
-            '</svg>'
-        );
-        return string(abi.encodePacked('data:image/svg+xml;base64,', Base64.encode(svg)));
     }
 }
