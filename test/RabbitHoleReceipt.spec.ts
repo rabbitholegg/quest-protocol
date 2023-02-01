@@ -15,16 +15,12 @@ describe('RabbitholeReceipt Contract', async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
     const questFactory = await ethers.getContractFactory('QuestFactory')
     const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
-
     const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
-    const ReceiptSVGRenderer = await ethers.getContractFactory('ReceiptSVGRenderer')
-    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
+
+    deployedReceiptRenderer = await ReceiptRenderer.deploy()
     await deployedReceiptRenderer.deployed()
-    const deployedSVGReceiptRenderer = await ReceiptSVGRenderer.deploy()
-    await deployedSVGReceiptRenderer.deployed()
 
     RHReceipt = await upgrades.deployProxy(RabbitHoleReceipt, [
-      deployedSVGReceiptRenderer.address,
       deployedReceiptRenderer.address,
       royaltyRecipient.address,
       minterAddress.address,
