@@ -4,8 +4,6 @@ pragma solidity ^0.8.15;
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-// import console log
-import 'hardhat/console.sol';
 
 /// @title ReceiptRenderer
 /// @author RabbitHole.gg
