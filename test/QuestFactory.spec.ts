@@ -1,8 +1,11 @@
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { SampleERC20, SampleErc1155, QuestFactory, RabbitHoleReceipt } from '../typechain-types/contracts'
 import {
+  SampleERC20,
+  SampleErc1155,
+  QuestFactory,
+  RabbitHoleReceipt,
   QuestFactory__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
@@ -171,7 +174,8 @@ describe('QuestFactory', () => {
     })
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
-      await deployedFactoryContract.changeCreateQuestRole(royaltyRecipient.address, true)
+      const createQuestRole = await deployedFactoryContract.CREATE_QUEST_ROLE()
+      await deployedFactoryContract.grantRole(createQuestRole, royaltyRecipient.address)
       await expect(
         deployedFactoryContract
           .connect(royaltyRecipient)
