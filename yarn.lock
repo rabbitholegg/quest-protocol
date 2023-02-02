@@ -65,6 +65,11 @@
   resolved "https://registry.yarnpkg.com/@chugsplash/contracts/-/contracts-0.4.2.tgz#a3a65c4a3151f59f35554789cde3f5c22eb50256"
   integrity sha512-CELcn+P+cg9x4xLD8pHjUEUc8b0qGW07wMTUiQ82Irxu8UIJf0fwd3mvGOKNat/8ZFg/Vy8dWajlq/R0sumTKQ==
 
+"@chugsplash/contracts@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@chugsplash/contracts/-/contracts-0.4.3.tgz#a4a68b75a8bf00b31b83f641b5ec9b5c0ccd2ddf"
+  integrity sha512-/jfe9gRhCWx/CXLOKOIanKDKjXsQ/Mh4FpRy3IRrMCofQYudzwRqmBRwxrltcZ6xno7Z8BTTJFQBhZZrvWQ2Gw==
+
 "@chugsplash/core@^0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.0.tgz#2b448d754ad3023f6047548b7eca502814919398"
@@ -72,6 +77,58 @@
   dependencies:
     "@amplitude/node" "^1.10.2"
     "@chugsplash/contracts" "^0.4.2"
+    "@eth-optimism/common-ts" "^0.6.7"
+    "@eth-optimism/contracts-bedrock" "^0.8.0"
+    "@eth-optimism/core-utils" "^0.9.1"
+    "@ethersproject/abstract-provider" "^5.7.0"
+    "@openzeppelin/upgrades-core" "^1.20.6"
+    core-js "^3.27.1"
+    ethers "^5.6.9"
+    fs "^0.0.1-security"
+    handlebars "^4.7.7"
+    hardhat "^2.10.0"
+    hardhat-deploy "^0.11.18"
+    insight "^0.11.1"
+    ipfs-http-client "56.0.3"
+    ipfs-only-hash "^4.0.0"
+    merkletreejs "^0.2.18"
+    ora "^5.4.1"
+    semver "^7.3.8"
+    yesno "^0.4.0"
+
+"@chugsplash/core@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.1.tgz#b64335545aefd56e01ee3adc0066d072885e18c4"
+  integrity sha512-7aqf8Fwx5AwmZ39tqr61BWIz9cmf3CWe4vzRuUv73iMWpDfzxWrxCEWyZALdz2QymjwRQ2cx1hmK6tEAipnEKw==
+  dependencies:
+    "@amplitude/node" "^1.10.2"
+    "@chugsplash/contracts" "^0.4.3"
+    "@eth-optimism/common-ts" "^0.6.7"
+    "@eth-optimism/contracts-bedrock" "^0.8.0"
+    "@eth-optimism/core-utils" "^0.9.1"
+    "@ethersproject/abstract-provider" "^5.7.0"
+    "@openzeppelin/upgrades-core" "^1.20.6"
+    core-js "^3.27.1"
+    ethers "^5.6.9"
+    fs "^0.0.1-security"
+    handlebars "^4.7.7"
+    hardhat "^2.10.0"
+    hardhat-deploy "^0.11.18"
+    insight "^0.11.1"
+    ipfs-http-client "56.0.3"
+    ipfs-only-hash "^4.0.0"
+    merkletreejs "^0.2.18"
+    ora "^5.4.1"
+    semver "^7.3.8"
+    yesno "^0.4.0"
+
+"@chugsplash/core@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.2.tgz#38c6850377fbac19b2e9970f48ba45c5062e1c98"
+  integrity sha512-Gsq4CmRIFbXpcYyTcBu551nvCcp3+0EOkbe02aTfFH9c9jAanTePD3/UNvvixk4R3WLYGW/7XTLjG3Skli8Aww==
+  dependencies:
+    "@amplitude/node" "^1.10.2"
+    "@chugsplash/contracts" "^0.4.3"
     "@eth-optimism/common-ts" "^0.6.7"
     "@eth-optimism/contracts-bedrock" "^0.8.0"
     "@eth-optimism/core-utils" "^0.9.1"
@@ -101,13 +158,13 @@
     "@nomiclabs/hardhat-etherscan" "^3.1.3"
     hardhat "^2.10.0"
 
-"@chugsplash/plugins@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@chugsplash/plugins/-/plugins-0.10.0.tgz#8af2c2b1e6f483776512733684379638bc14ba22"
-  integrity sha512-E1xNyCkN97HNF67QDUcpuzI0P7ylgkUyXno9teFv5tPccMfJt/vkg8o523SXAjahgKGEaCoXdB3C6QFnWG3EjA==
+"@chugsplash/plugins@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@chugsplash/plugins/-/plugins-0.10.1.tgz#7f81daa7410ea88350c6493e2f1d1513cbce9e38"
+  integrity sha512-w0fnsNGOkkm46Gw9dIUJTzyLXt6xL4D8ovrNrRxKPrRYQWDkYUcObD13hbQb7j2N5WKKH2MMwwn/0W7hysZXyg==
   dependencies:
-    "@chugsplash/contracts" "^0.4.2"
-    "@chugsplash/core" "^0.5.0"
+    "@chugsplash/contracts" "^0.4.3"
+    "@chugsplash/core" "^0.5.1"
     "@chugsplash/executor" "^0.5.3"
     "@eth-optimism/core-utils" "^0.9.1"
     "@ethereumjs/common" "^3.0.1"
