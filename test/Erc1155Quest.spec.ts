@@ -231,7 +231,6 @@ describe('Erc1155Quest', () => {
       await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
 
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
-      await ethers.provider.send('evm_increaseTime', [-expiryDate + 100])
     })
 
     it('should only transfer the correct amount of rewards', async () => {
@@ -249,7 +248,6 @@ describe('Erc1155Quest', () => {
 
       await deployedQuestContract.claim()
       expect(await deployedSampleErc1155Contract.balanceOf(owner.address, rewardAmount)).to.equal(1)
-      await ethers.provider.send('evm_increaseTime', [-expiryDate + 100])
     })
 
     it('should not let you claim if you have already claimed', async () => {
@@ -267,7 +265,6 @@ describe('Erc1155Quest', () => {
 
       await deployedQuestContract.claim()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'AlreadyClaimed')
-      await ethers.provider.send('evm_increaseTime', [-expiryDate + 100])
     })
   })
 
@@ -300,7 +297,6 @@ describe('Erc1155Quest', () => {
         rewardAmount
       )
       expect(endContactBalance.toString()).to.equal('0')
-      await ethers.provider.send('evm_increaseTime', [-expiryDate + 100])
     })
   })
 })
