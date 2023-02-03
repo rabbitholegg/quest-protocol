@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import {
   SampleERC20,
   SampleErc1155,
@@ -34,8 +35,9 @@ describe('QuestFactory', () => {
 
   beforeEach(async () => {
     ;[owner, royaltyRecipient] = await ethers.getSigners()
-    expiryDate = Math.floor(Date.now() / 1000) + 10000
-    startDate = Math.floor(Date.now() / 1000) + 1000
+    const latestTime = await time.latest()
+    expiryDate = latestTime + 1000
+    startDate = latestTime + 10
 
     wallet = Wallet.fromMnemonic(mnemonic)
 
