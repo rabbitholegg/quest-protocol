@@ -29,7 +29,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
-    uint public questIdCount;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -46,7 +45,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
         setQuestFee(2_000);
-        questIdCount = 1;
     }
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
@@ -98,7 +96,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
-            ++questIdCount;
             return address(newQuest);
         }
 
@@ -129,7 +126,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
-            ++questIdCount;
             return address(newQuest);
         }
 
