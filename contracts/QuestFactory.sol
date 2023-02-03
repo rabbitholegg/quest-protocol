@@ -29,7 +29,6 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
-    uint public questIdCount;
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
@@ -80,7 +79,6 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
-            ++questIdCount;
             return address(newQuest);
         }
 
@@ -111,7 +109,6 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
             newQuest.transferOwnership(msg.sender);
-            ++questIdCount;
             return address(newQuest);
         }
 

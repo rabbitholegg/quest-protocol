@@ -44,7 +44,6 @@
         },
         "rabbitholeReceiptContract": "{{RabbitHoleReceipt}}",
         "protocolFeeRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
-        "questIdCount": 1,
         "questFee": 2000,
         "claimSignerAddress": "0x0000000000000000000000000000000000000000",
         "quests": {},
