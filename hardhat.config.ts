@@ -43,6 +43,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 1337,
+      forking: {
+        url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
+        blockNumber: 14787640,
+      },
       settings: {
         debug: {
           revertStrings: 'debug',
