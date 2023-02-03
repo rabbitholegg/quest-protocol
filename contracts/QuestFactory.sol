@@ -118,17 +118,6 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
         revert QuestTypeInvalid();
     }
 
-    /// @dev grant the create quest role to an account
-    /// @param account_ The account to grant or revoke the create quest role to
-    /// @param canCreateQuest_ Boolean to grant or revoke the create quest role. True grants access
-    function changeCreateQuestRole(address account_, bool canCreateQuest_) public onlyOwner {
-        if (canCreateQuest_) {
-            _grantRole(CREATE_QUEST_ROLE, account_);
-        } else {
-            _revokeRole(CREATE_QUEST_ROLE, account_);
-        }
-    }
-
     /// @dev grant the default admin role and the create quest role to the owner
     /// @param account_ The account to grant admin and create quest roles
     function grantDefaultAdminAndCreateQuestRole(address account_) internal {
@@ -179,11 +168,15 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
     function questInfo(string memory questId_) external view returns (address, uint, uint) {
-        return (
-            quests[questId_].questAddress,
-            quests[questId_].totalParticipants,
-            quests[questId_].numberMinted
-        );
+        return (quests[questId_].questAddress, quests[questId_].totalParticipants, quests[questId_].numberMinted);
+    }
+
+    /// @dev return status of whether an address has minted a receipt for a quest
+    /// @param questId_ The id of the quest
+    /// @param address_ The address to check
+    /// @return Minted status
+    function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
+        return quests[questId_].addressMinted[address_];
     }
 
     /// @dev recover the signer from a hash and signature
