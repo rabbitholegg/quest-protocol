@@ -15,7 +15,24 @@
         "royaltyRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
         "minterAddress": "0x37A4a767269B5D1651E544Cd2f56BDfeADC37B05",
         "royaltyFee": 100,
-        "ReceiptRendererContract": "{{ReceiptRenderer}}"
+        "ReceiptRendererContract": "{{ReceiptRenderer}}",
+        "_tokenIds": 0,
+        "questIdForTokenId": {},
+        "timestampForTokenId": {},
+        "QuestFactoryContract": "0x0000000000000000000000000000000000000000",
+        "_initialized": 1,
+        "_initializing": false,
+        "__gap": 0,
+        "_allTokens": [],
+        "_owners": {},
+        "_balances": {},
+        "_tokenApprovals": {},
+        "_operatorApprovals": {},
+        "_tokenURIs": {},
+        "_ownedTokens": {},
+        "_ownedTokensIndex": {},
+        "_allTokensIndex": {},
+        "Counter": {"_value": 0}
       }
     },
     "QuestFactory": {
