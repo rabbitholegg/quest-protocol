@@ -10,11 +10,11 @@ import {QuestFactory} from './QuestFactory.sol';
 /// @notice This contract is used to create a quest that rewards ERC20 tokens.
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
-    uint256 public immutable questFee;
-    address public immutable protocolFeeRecipient;
-    QuestFactory public immutable questFactoryContract;
+    uint256 public questFee;
+    address public protocolFeeRecipient;
+    QuestFactory public questFactoryContract;
 
-    constructor(
+    function initialize(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -24,8 +24,8 @@ contract Erc20Quest is Quest {
         address receiptContractAddress_,
         uint256 questFee_,
         address protocolFeeRecipient_
-    )
-        Quest(
+    ) public initializer {
+        super.questInit(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -33,8 +33,7 @@ contract Erc20Quest is Quest {
             rewardAmountInWeiOrTokenId_,
             questId_,
             receiptContractAddress_
-        )
-    {
+        );
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
         questFactoryContract = QuestFactory(msg.sender);
