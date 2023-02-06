@@ -89,9 +89,7 @@ describe('Erc20Quest', async () => {
     const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
     const erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
     const deployedErc20Quest = await erc20QuestContract.deploy()
-    await deployedErc20Quest.deployed()
     const deployedErc1155Quest = await erc1155QuestContract.deploy()
-    await deployedErc1155Quest.deployed()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,

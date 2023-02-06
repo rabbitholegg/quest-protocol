@@ -62,7 +62,6 @@ describe('QuestFactory', () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
     await deployedErc20Quest.deployed()
     deployedErc1155Quest = await erc1155QuestContract.deploy()
-    await deployedErc1155Quest.deployed()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,

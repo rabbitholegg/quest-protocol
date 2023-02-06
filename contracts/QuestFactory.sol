@@ -26,8 +26,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     address public claimSignerAddress;
     address public protocolFeeRecipient;
-    address public Erc20QuestAddress;
-    address public Erc1155QuestAddress;
+    address public erc20QuestAddress;
+    address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
@@ -50,8 +50,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
         setQuestFee(2_000);
-        Erc20QuestAddress = erc20QuestAddress_;
-        Erc1155QuestAddress = erc1155QuestAddress_;
+        erc20QuestAddress = erc20QuestAddress_;
+        erc1155QuestAddress = erc1155QuestAddress_;
     }
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
@@ -77,7 +77,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
-            address newQuest = Clones.clone(Erc20QuestAddress);
+            address newQuest = Clones.clone(erc20QuestAddress);
             Erc20Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
@@ -110,7 +110,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
             if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
 
-            address newQuest = Clones.clone(Erc1155QuestAddress);
+            address newQuest = Clones.clone(erc1155QuestAddress);
             Erc1155Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
