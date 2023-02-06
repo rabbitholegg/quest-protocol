@@ -24,26 +24,6 @@ contract RabbitHoleTickets is
     uint public royaltyFee;
     TicketRenderer public TicketRendererContract;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(
-        address ticketRenderer_,
-        address royaltyRecipient_,
-        address minterAddress_,
-        uint royaltyFee_
-    ) public initializer {
-        __ERC1155_init('');
-        __Ownable_init();
-        __ERC1155Burnable_init();
-        royaltyRecipient = royaltyRecipient_;
-        minterAddress = minterAddress_;
-        royaltyFee = royaltyFee_;
-        TicketRendererContract = TicketRenderer(ticketRenderer_);
-    }
-
     modifier onlyMinter() {
         msg.sender == minterAddress;
         _;

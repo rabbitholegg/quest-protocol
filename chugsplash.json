@@ -6,6 +6,9 @@
     "ReceiptRenderer": {
       "contract": "ReceiptRenderer"
     },
+    "TicketRenderer": {
+      "contract": "TicketRenderer"
+    },
     "RabbitHoleReceipt": {
       "contract": "RabbitHoleReceipt",
       "variables": {
@@ -13,7 +16,7 @@
         "_name": "RabbitHoleReceipt",
         "_symbol": "RHR",
         "royaltyRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
-        "minterAddress": "0x37A4a767269B5D1651E544Cd2f56BDfeADC37B05",
+        "minterAddress": "0x0000000000000000000000000000000000000000",
         "royaltyFee": 100,
         "ReceiptRendererContract": "{{ReceiptRenderer}}",
         "_tokenIds": 0,
@@ -51,6 +54,22 @@
         "_initialized": 1,
         "_initializing": false,
         "__gap": []
+      }
+    },
+    "RabbitHoleTickets": {
+      "contract": "RabbitHoleTickets",
+      "variables": {
+        "_owner": "0xE662f9575634dbbca894B756d1A19A851c824f00",
+        "royaltyRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
+        "minterAddress": "0x0000000000000000000000000000000000000000",
+        "royaltyFee": 100,
+        "TicketRendererContract": "{{TicketRenderer}}",
+        "_initialized": 1,
+        "_initializing": false,
+        "__gap": [],
+        "_balances": {},
+        "_operatorApprovals": {},
+        "_uri": ""
       }
     }
   }

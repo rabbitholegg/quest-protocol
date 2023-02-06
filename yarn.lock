@@ -60,50 +60,19 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@chugsplash/contracts@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@chugsplash/contracts/-/contracts-0.4.2.tgz#a3a65c4a3151f59f35554789cde3f5c22eb50256"
-  integrity sha512-CELcn+P+cg9x4xLD8pHjUEUc8b0qGW07wMTUiQ82Irxu8UIJf0fwd3mvGOKNat/8ZFg/Vy8dWajlq/R0sumTKQ==
-
 "@chugsplash/contracts@^0.4.3":
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/@chugsplash/contracts/-/contracts-0.4.3.tgz#a4a68b75a8bf00b31b83f641b5ec9b5c0ccd2ddf"
   integrity sha512-/jfe9gRhCWx/CXLOKOIanKDKjXsQ/Mh4FpRy3IRrMCofQYudzwRqmBRwxrltcZ6xno7Z8BTTJFQBhZZrvWQ2Gw==
 
-"@chugsplash/core@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.0.tgz#2b448d754ad3023f6047548b7eca502814919398"
-  integrity sha512-XkNf2e5V24qNSesvItMsMF5zFbAeVJoBPJ/zyTqIzZaQhokV2ZXQduKe2aPXd1N9uzZNH0LHqzBPATnIrVP7jg==
-  dependencies:
-    "@amplitude/node" "^1.10.2"
-    "@chugsplash/contracts" "^0.4.2"
-    "@eth-optimism/common-ts" "^0.6.7"
-    "@eth-optimism/contracts-bedrock" "^0.8.0"
-    "@eth-optimism/core-utils" "^0.9.1"
-    "@ethersproject/abstract-provider" "^5.7.0"
-    "@openzeppelin/upgrades-core" "^1.20.6"
-    core-js "^3.27.1"
-    ethers "^5.6.9"
-    fs "^0.0.1-security"
-    handlebars "^4.7.7"
-    hardhat "^2.10.0"
-    hardhat-deploy "^0.11.18"
-    insight "^0.11.1"
-    ipfs-http-client "56.0.3"
-    ipfs-only-hash "^4.0.0"
-    merkletreejs "^0.2.18"
-    ora "^5.4.1"
-    semver "^7.3.8"
-    yesno "^0.4.0"
-
-"@chugsplash/core@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.3.tgz#57f80e8df8e6f65fd0547cea2fadd20e87653adf"
-  integrity sha512-uP1ica5naK0koQoRJvTnLLmZz60cCgMrTbKmvGU9r3aA5wZ8vsHTuXGiBDdySBCWUN4mTM7YBZd4jvWtD9bVlA==
+"@chugsplash/core@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@chugsplash/core/-/core-0.5.5.tgz#7ad8c3d5298eb61098cb4c8077440e928a28ab54"
+  integrity sha512-On958BU1xNr+ovlePdBMGqxTilqnEJsSbwFaKktHl62nIFnm1VdNSUAP577NDBqViPUeTKf9Aju4NxtVyOnVgA==
   dependencies:
     "@amplitude/node" "^1.10.2"
     "@chugsplash/contracts" "^0.4.3"
-    "@eth-optimism/common-ts" "^0.6.7"
+    "@eth-optimism/common-ts" "^0.7.1"
     "@eth-optimism/contracts-bedrock" "^0.8.0"
     "@eth-optimism/core-utils" "^0.9.1"
     "@ethersproject/abstract-provider" "^5.7.0"
@@ -122,24 +91,24 @@
     semver "^7.3.8"
     yesno "^0.4.0"
 
-"@chugsplash/executor@^0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@chugsplash/executor/-/executor-0.5.4.tgz#46f44169f6836d14e09d106d65edb06c2c126063"
-  integrity sha512-2Zlp7rk0vtITm1VHpbU/Tm2lSwkts/P1RuNQIfXZiFTtAVIAGeAXuOMWnQ9bsnC6pK38eUSb/qOS8GmqnShlBg==
+"@chugsplash/executor@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@chugsplash/executor/-/executor-0.5.5.tgz#c35bbb6427f0d8c7b0e7620cdc3f20058bf90f92"
+  integrity sha512-QRYNJXhJYSrH+k6tVXRsZp8BZ5jfAK2hbncCs9G2Mn0Y0IEqMEzr8nzA9iR7IhKT1p5eseDp/35pYTOcI80wUQ==
   dependencies:
     "@amplitude/node" "^1.10.2"
-    "@chugsplash/core" "^0.5.0"
+    "@chugsplash/core" "^0.5.5"
     "@nomiclabs/hardhat-etherscan" "^3.1.3"
     hardhat "^2.10.0"
 
-"@chugsplash/plugins@^0.10.4":
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/@chugsplash/plugins/-/plugins-0.10.4.tgz#a166dffcb7a2c279592a6e31267d31670b738c3c"
-  integrity sha512-Ni5MGn3vQ5X0wwmyvN9tpWYB6DH9Ufmm0SNC19monkrlHqYdSIw9xujOHyGl7sOGYVrlRGSdn4S7i2NWd1dXKg==
+"@chugsplash/plugins@^0.10.6":
+  version "0.10.6"
+  resolved "https://registry.yarnpkg.com/@chugsplash/plugins/-/plugins-0.10.6.tgz#d5745384a1f9f23d26e2e75edec33cb39288c7a9"
+  integrity sha512-ICeVt1300UYXFenByymIbXSSHI9JSQEJIZj5a/hC1S1lYPzDaP4ZgQ8QZl30yxoVYzdCAgcZgoNsoz5V/eBpgA==
   dependencies:
     "@chugsplash/contracts" "^0.4.3"
-    "@chugsplash/core" "^0.5.3"
-    "@chugsplash/executor" "^0.5.4"
+    "@chugsplash/core" "^0.5.5"
+    "@chugsplash/executor" "^0.5.5"
     "@eth-optimism/core-utils" "^0.9.1"
     "@ethereumjs/common" "^3.0.1"
     "@ethereumjs/vm" "^6.2.0"
@@ -153,10 +122,10 @@
     semver "^7.3.7"
     yesno "^0.4.0"
 
-"@eth-optimism/common-ts@^0.6.7":
-  version "0.6.8"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/common-ts/-/common-ts-0.6.8.tgz#33e462c9c205ecd8993443ea2598154e5dacb579"
-  integrity sha512-NXS7bM+LrM7e3UYtyLNRUQU8rjyBpWuNZYyBnzSP2/MF3DuxCK0vm3UKtcuo93OnKlBcF2fSoqZs8bLJYClz4w==
+"@eth-optimism/common-ts@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/common-ts/-/common-ts-0.7.1.tgz#42dd78051e7c45d40f133598c9d43bb0c02ce9b1"
+  integrity sha512-SNaOhoj9lYutcmGpJQJJfZiZii54eoiSB1kM8XVmbIwyhgaTkmuB8IhHOiDbzGB3QXUtbGZjDJmi6LruKkN/CA==
   dependencies:
     "@eth-optimism/core-utils" "0.12.0"
     "@sentry/node" "^6.3.1"
