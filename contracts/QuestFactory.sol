@@ -43,10 +43,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address erc20QuestAddress_,
         address erc1155QuestAddress_
     ) public initializer {
+        if(claimSignerAddress_ == address(0) || rabbitholeReceiptContract_ == address(0) || protocolFeeRecipient_ == address(0) || erc20QuestAddress_ == address(0) || erc1155QuestAddress_ == address(0)) revert AddressZeroNotAllowed();
+
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole(msg.sender);
-        if(claimSignerAddress_ == address(0) || rabbitholeReceiptContract_ == address(0) || protocolFeeRecipient_ == address(0) || erc20QuestAddress_ == address(0) || erc1155QuestAddress_ == address(0)) revert InvalidAddress();
         claimSignerAddress = claimSignerAddress_;
         rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
