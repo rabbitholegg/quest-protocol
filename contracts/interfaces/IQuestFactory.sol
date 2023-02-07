@@ -12,6 +12,7 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
     error QuestFeeTooHigh();
+    error InvalidAddress();
 
     event QuestCreated(address indexed creator, address indexed contractAddress, string indexed questId, string contractType, address rewardTokenAddress, uint256 endTime, uint256 startTime, uint256 totalParticipants, uint256 rewardAmountOrTokenId);
     event ReceiptMinted(address indexed recipient, string indexed questId);
