@@ -3,12 +3,6 @@
     "projectName": "RabbitHole Quest Protocol"
   },
   "contracts": {
-    "ReceiptRenderer": {
-      "contract": "ReceiptRenderer"
-    },
-    "TicketRenderer": {
-      "contract": "TicketRenderer"
-    },
     "RabbitHoleReceipt": {
       "contract": "RabbitHoleReceipt",
       "variables": {
