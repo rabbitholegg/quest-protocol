@@ -78,6 +78,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
             address newQuest = Clones.clone(erc20QuestAddress);
+
+            emit QuestCreated(
+                msg.sender,
+                address(newQuest),
+                questId_,
+                contractType_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmountOrTokenId_
+            );
+            quests[questId_].questAddress = address(newQuest);
+            quests[questId_].totalParticipants = totalParticipants_;
+
             Erc20Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
@@ -89,6 +104,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questFee,
                 protocolFeeRecipient
             );
+            Erc20Quest(newQuest).transferOwnership(msg.sender);
+            return newQuest;
+        }
+
+        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
+
+            address newQuest = Clones.clone(erc1155QuestAddress);
 
             emit QuestCreated(
                 msg.sender,
@@ -103,14 +126,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             );
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
-            Erc20Quest(newQuest).transferOwnership(msg.sender);
-            return newQuest;
-        }
 
-        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
-            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
-
-            address newQuest = Clones.clone(erc1155QuestAddress);
             Erc1155Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
@@ -120,20 +136,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questId_,
                 address(rabbitholeReceiptContract)
             );
-
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                contractType_,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_
-            );
-            quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalParticipants = totalParticipants_;
             Erc1155Quest(newQuest).transferOwnership(msg.sender);
             return newQuest;
         }
