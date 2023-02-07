@@ -143,6 +143,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         revert QuestTypeInvalid();
     }
 
+    /// @dev set erc20QuestAddress
+    /// @param erc20QuestAddress_ The address of the erc20 quest
+    function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
+        erc20QuestAddress = erc20QuestAddress_;
+    }
+
+    /// @dev set erc1155QuestAddress
+    /// @param erc1155QuestAddress_ The address of the erc1155 quest
+    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+        erc1155QuestAddress = erc1155QuestAddress_;
+    }
+
     /// @dev grant the default admin role and the create quest role to the owner
     /// @param account_ The account to grant admin and create quest roles
     function grantDefaultAdminAndCreateQuestRole(address account_) internal {
