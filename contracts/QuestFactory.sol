@@ -2,8 +2,9 @@
 pragma solidity ^0.8.15;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import {Erc20Quest} from './Erc20Quest.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
+import {Quest as QuestContract} from './Quest.sol';
+import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
@@ -240,6 +241,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
         if (quests[questId_].numberMinted + 1 > quests[questId_].totalParticipants) revert OverMaxAllowedToMint();
         if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
+        if (!QuestContract(quests[questId_].questAddress).hasStarted()) revert QuestNotStarted();
+        if (block.timestamp < QuestContract(quests[questId_].questAddress).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestContract(quests[questId_].questAddress).endTime()) revert QuestEnded();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
