@@ -124,8 +124,7 @@ describe('Erc20Quest', async () => {
   }
 
   const transferRewardsToDistributor = async () => {
-    const distributorContractAddress = deployedQuestContract.address
-    await deployedSampleErc20Contract.functions.transfer(distributorContractAddress, totalRewardsPlusFee * 100)
+    await deployedSampleErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee * 100)
   }
 
   describe('Deployment', () => {
