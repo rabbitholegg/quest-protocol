@@ -334,7 +334,7 @@ describe('Erc20Quest', async () => {
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(totalRewardsPlusFee * 100)
     })
 
-    it('should transfer non-claimable rewards back to owner', async () => {
+    it('should transfer correct amount non-claimable rewards to address', async () => {
       await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
 
       await deployedFactoryContract.mintReceipt(questId, messageHash, signature)
@@ -342,12 +342,14 @@ describe('Erc20Quest', async () => {
       await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
       await deployedQuestContract.connect(owner).claim()
       await ethers.provider.send('evm_increaseTime', [expiryDate + 1000])
-      await deployedQuestContract.withdrawRemainingTokens(owner.address)
+      await deployedQuestContract.withdrawRemainingTokens(firstAddress.address)
 
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(200)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
-        // totalRewardsPlusFee * 100 - 1 * 1000 - 200
-        totalRewardsPlusFee * 100 - 200
+        1 * 1000
+      )
+      expect(await deployedSampleErc20Contract.balanceOf(firstAddress.address)).to.equal(
+        totalRewardsPlusFee * 100 - 1 * 1000 - 200
       )
     })
   })
