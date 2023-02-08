@@ -42,7 +42,6 @@ describe('Erc20Quest', async () => {
   let signature: string
 
   beforeEach(async () => {
-    const latestTime = await time.latest()
     const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] =
       await ethers.getSigners()
     questContract = await ethers.getContractFactory('Erc20Quest')
@@ -57,8 +56,9 @@ describe('Erc20Quest', async () => {
     thirdAddress = local_thirdAddress
     fourthAddress = local_fourthAddress
 
+    const latestTime = await time.latest()
     expiryDate = latestTime + 1000
-    startDate = latestTime + 10
+    startDate = latestTime + 100
     await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
     await deployFactoryContract()
@@ -86,10 +86,17 @@ describe('Erc20Quest', async () => {
   })
 
   const deployFactoryContract = async () => {
+    const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
+    const erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
+    const deployedErc20Quest = await erc20QuestContract.deploy()
+    const deployedErc1155Quest = await erc1155QuestContract.deploy()
+
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitholeReceiptContract.address,
       protocolFeeAddress,
+      deployedErc20Quest.address,
+      deployedErc1155Quest.address,
     ])) as QuestFactory
   }
 

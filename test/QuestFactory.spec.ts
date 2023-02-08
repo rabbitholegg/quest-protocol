@@ -19,6 +19,8 @@ describe('QuestFactory', () => {
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
+  let deployedErc20Quest
+  let deployedErc1155Quest
   const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
   const totalRewards = 1000
@@ -28,6 +30,8 @@ describe('QuestFactory', () => {
   let royaltyRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
+  let erc20QuestContract
+  let erc1155QuestContract
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
   let sampleERC1155Contract: SampleErc1155__factory
@@ -42,6 +46,8 @@ describe('QuestFactory', () => {
     wallet = Wallet.fromMnemonic(mnemonic)
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
+    erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
+    erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
     sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
@@ -53,10 +59,16 @@ describe('QuestFactory', () => {
   })
 
   const deployFactoryContract = async () => {
+    deployedErc20Quest = await erc20QuestContract.deploy()
+    await deployedErc20Quest.deployed()
+    deployedErc1155Quest = await erc1155QuestContract.deploy()
+
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
       protocolFeeAddress,
+      deployedErc20Quest.address,
+      deployedErc1155Quest.address
     ])) as QuestFactory
   }
 
@@ -90,6 +102,8 @@ describe('QuestFactory', () => {
           wallet.address,
           deployedRabbitHoleReceiptContract.address,
           constants.AddressZero,
+          deployedErc20Quest.address,
+          deployedErc1155Quest.address
         ])
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
     })

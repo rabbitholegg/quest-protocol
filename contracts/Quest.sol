@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
-import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
@@ -9,13 +9,13 @@ import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
-contract Quest is Ownable, IQuest {
-    RabbitHoleReceipt public immutable rabbitHoleReceiptContract;
-    address public immutable rewardToken;
-    uint256 public immutable endTime;
-    uint256 public immutable startTime;
-    uint256 public immutable totalParticipants;
-    uint256 public immutable rewardAmountInWeiOrTokenId;
+contract Quest is OwnableUpgradeable, IQuest {
+    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    address public rewardToken;
+    uint256 public endTime;
+    uint256 public startTime;
+    uint256 public totalParticipants;
+    uint256 public rewardAmountInWeiOrTokenId;
     bool public hasStarted;
     bool public isPaused;
     string public questId;
@@ -23,7 +23,7 @@ contract Quest is Ownable, IQuest {
 
     mapping(uint256 => bool) private claimedList;
 
-    constructor(
+    function questInit(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -31,7 +31,7 @@ contract Quest is Ownable, IQuest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    ) {
+    ) internal onlyInitializing {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -43,6 +43,7 @@ contract Quest is Ownable, IQuest {
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         redeemedTokens = 0;
+        __Ownable_init();
     }
 
     /// @notice Starts the Quest

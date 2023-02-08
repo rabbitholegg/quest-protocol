@@ -65,7 +65,9 @@ describe('Erc1155Quest', () => {
   }
 
   const deployQuestContract = async () => {
-    deployedQuestContract = await questContract.deploy(
+    deployedQuestContract = await questContract.deploy()
+    await deployedQuestContract.deployed()
+    await deployedQuestContract.initialize(
       deployedSampleErc1155Contract.address,
       expiryDate,
       startDate,
@@ -74,7 +76,6 @@ describe('Erc1155Quest', () => {
       questId,
       deployedRabbitholeReceiptContract.address
     )
-    await deployedQuestContract.deployed()
   }
 
   const deploySampleErc20Contract = async () => {

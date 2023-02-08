@@ -10,7 +10,12 @@ import {Quest} from './Quest.sol';
 /// @dev This contract is used to create quests with a reward token that implements the ERC1155 standard
 contract Erc1155Quest is Quest, ERC1155Holder {
 
-    constructor(
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -18,16 +23,17 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    )
-    Quest(
-        rewardTokenAddress_,
-        endTime_,
-        startTime_,
-        totalParticipants_,
-        rewardAmountInWeiOrTokenId_,
-        questId_,
-        receiptContractAddress_
-    ){}
+    ) public initializer {
+        super.questInit(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmountInWeiOrTokenId_,
+            questId_,
+            receiptContractAddress_
+        );
+    }
 
     /// @dev Checks the balance to ensure that it has enough for all of the participants. Only able to be called by owner
     function start() public override {
