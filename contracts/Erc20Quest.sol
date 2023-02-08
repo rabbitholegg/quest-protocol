@@ -14,6 +14,11 @@ contract Erc20Quest is Quest {
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address rewardTokenAddress_,
         uint256 endTime_,

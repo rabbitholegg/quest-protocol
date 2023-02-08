@@ -10,6 +10,11 @@ import {Quest} from './Quest.sol';
 /// @dev This contract is used to create quests with a reward token that implements the ERC1155 standard
 contract Erc1155Quest is Quest, ERC1155Holder {
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address rewardTokenAddress_,
         uint256 endTime_,
