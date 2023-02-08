@@ -14,7 +14,7 @@ import {
   QuestFactory__factory,
 } from '../typechain-types'
 
-describe.only('Erc20Quest', async () => {
+describe('Erc20Quest', async () => {
   let deployedQuestContract: Erc20Quest
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
