@@ -56,7 +56,7 @@ contract RabbitHoleReceipt is
     }
 
     modifier onlyMinter() {
-        msg.sender == minterAddress;
+        require(msg.sender == minterAddress, "Only minter");
         _;
     }
 
