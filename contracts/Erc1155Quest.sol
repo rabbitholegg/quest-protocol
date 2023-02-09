@@ -9,7 +9,6 @@ import {Quest} from './Quest.sol';
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests with a reward token that implements the ERC1155 standard
 contract Erc1155Quest is Quest, ERC1155Holder {
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -56,12 +55,11 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     }
 
     /// @dev Withdraws the remaining tokens from the contract. Only able to be called by owner
-    /// @param to_ The address to send the remaining tokens to
-    function withdrawRemainingTokens(address to_) public override onlyOwner {
-        super.withdrawRemainingTokens(to_);
+    function withdrawRemainingTokens() public override onlyOwner onlyWithdrawAfterEnd {
+        super.withdrawRemainingTokens();
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
-            to_,
+            owner(),
             rewardAmountInWeiOrTokenId,
             IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId),
             '0x00'

@@ -11,6 +11,7 @@ import {QuestFactory} from './QuestFactory.sol';
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
     uint256 public questFee;
+    bool public hasWithdrawn;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
 
@@ -40,8 +41,14 @@ contract Erc20Quest is Quest {
             receiptContractAddress_
         );
         questFee = questFee_;
+        hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
         questFactoryContract = QuestFactory(msg.sender);
+    }
+
+    modifier onlyProtocolFeeRecipientOrOwner() {
+        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), 'Not protocol fee recipient or owner');
+        _;
     }
 
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
@@ -79,15 +86,18 @@ contract Erc20Quest is Quest {
         return redeemableTokenCount_ * rewardAmountInWeiOrTokenId;
     }
 
-    /// @notice Function that allows the owner to withdraw the remaining tokens in the contract
+    /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
-    /// @param to_ The address to send the remaining tokens to
-    function withdrawRemainingTokens(address to_) public override onlyOwner {
-        super.withdrawRemainingTokens(to_);
+    function withdrawRemainingTokens() public override onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
+        require(!hasWithdrawn, 'Already withdrawn');
+        super.withdrawRemainingTokens();
 
         uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
         uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
-        IERC20(rewardToken).safeTransfer(to_, nonClaimableTokens);
+        hasWithdrawn = true;
+
+        IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
+        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 
     /// @notice Call the QuestFactory contract to get the amount of receipts that have been minted
@@ -99,11 +109,5 @@ contract Erc20Quest is Quest {
     /// @notice Function that calculates the protocol fee
     function protocolFee() public view returns (uint256) {
         return (receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee) / 10_000;
-    }
-
-    /// @notice Sends the protocol fee to the protocolFeeRecipient
-    /// @dev Only callable when the quest is ended
-    function withdrawFee() public onlyAdminWithdrawAfterEnd {
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }
