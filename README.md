@@ -251,7 +251,7 @@ yarn test:gas-stories
 ---
 
 ## Deploying
-We use chugsplash to deploy our proxy contracts. Some notes.
+We use chugsplash to deploy our proxy contracts.
 
 ### Deploying Quest Factory
 explanation of the the `_roles` key:
@@ -262,6 +262,17 @@ make sure to change `claimSignerAddress`, `erc20QuestAddress` and `erc1155QuestA
 
 ### Deploying RabbitHole Receipt
 make sure to change the `minterAddress` to the QuestFactory address, and `ReceiptRendererContract`, `QuestFactoryContract` after deploy.
+
+---
+
+## Deployed Addresses
+### Goerli
+
+ │ 'RabbitHoleReceipt' │ '0x5fa55346fc7979FC521115C4Cf37AECc35B36Ec6' │
+ │   'QuestFactory'    │ '0x5B421516995D47c6082708614eC1E6a52C6F8EcD' │
+ │ 'RabbitHoleTickets' │ '0x70dd3F5f2356fdAeaE5aE517e0fB862b1Ce2F29C' │
+
+---
 
 ## Upgrading
 
