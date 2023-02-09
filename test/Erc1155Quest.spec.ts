@@ -257,7 +257,7 @@ describe('Erc1155Quest', () => {
     it('should fail if the contract is out of rewards', async () => {
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [10000])
-      await deployedQuestContract.withdrawRemainingTokens(owner.address)
+      await deployedQuestContract.withdrawRemainingTokens()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
@@ -306,15 +306,16 @@ describe('Erc1155Quest', () => {
 
   describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdraw', async () => {
-      await expect(
-        deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('should revert if trying to withdraw before end date', async () => {
-      await expect(
-        deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
-      ).to.be.revertedWithCustomError(questContract, 'NoWithdrawDuringClaim')
+      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens()).to.be.revertedWithCustomError(
+        questContract,
+        'NoWithdrawDuringClaim'
+      )
     })
 
     it('should transfer all rewards back to owner', async () => {
@@ -326,7 +327,7 @@ describe('Erc1155Quest', () => {
       expect(beginningContractBalance.toString()).to.equal('100')
       expect(beginningOwnerBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
-      await deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
+      await deployedQuestContract.connect(owner).withdrawRemainingTokens()
 
       const endContactBalance = await deployedSampleErc1155Contract.balanceOf(
         deployedQuestContract.address,
