@@ -78,6 +78,7 @@ describe('QuestFactory', () => {
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
+    await deployedRabbitHoleTicketsContract.setMinterAddress(deployedFactoryContract.address)
   }
 
   const deploySampleErc20Contract = async () => {
