@@ -1,3 +1,4 @@
+import { Result } from '@ethersproject/abi'
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -76,7 +77,7 @@ describe('Erc1155Quest', () => {
     const waitedTx = await createQuestTx.wait()
 
     const event = waitedTx?.events?.find((event) => event.event === 'QuestCreated')
-    const [_from, contractAddress, _type] = event?.args
+    const [_from, contractAddress, _type] = event?.args as Result
 
     deployedQuestContract = questContract.attach(contractAddress)
     await transferRewardsToDistributor()
