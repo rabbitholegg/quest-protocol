@@ -44,6 +44,11 @@ contract Erc20Quest is Quest {
         questFactoryContract = QuestFactory(msg.sender);
     }
 
+    modifier onlyProtocolFeeRecipientOrOwner() {
+        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), 'Not protocol fee recipient or owner');
+        _;
+    }
+
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
     /// @return The maximum amount of rewards that can be claimed by all users
     function maxTotalRewards() public view returns (uint256) {
@@ -79,15 +84,15 @@ contract Erc20Quest is Quest {
         return redeemableTokenCount_ * rewardAmountInWeiOrTokenId;
     }
 
-    /// @notice Function that allows the owner to withdraw the remaining tokens in the contract
+    /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
-    /// @param to_ The address to send the remaining tokens to
-    function withdrawRemainingTokens(address to_) public override onlyOwner {
-        super.withdrawRemainingTokens(to_);
+    function withdrawRemainingTokens() public override onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
+        super.withdrawRemainingTokens();
 
-        uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
-        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
-        IERC20(rewardToken).safeTransfer(to_, nonClaimableTokens);
+        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
+
+        uint balance = IERC20(rewardToken).balanceOf(address(this));
+        IERC20(rewardToken).safeTransfer(owner(), balance);
     }
 
     /// @notice Call the QuestFactory contract to get the amount of receipts that have been minted
@@ -99,11 +104,5 @@ contract Erc20Quest is Quest {
     /// @notice Function that calculates the protocol fee
     function protocolFee() public view returns (uint256) {
         return (receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee) / 10_000;
-    }
-
-    /// @notice Sends the protocol fee to the protocolFeeRecipient
-    /// @dev Only callable when the quest is ended
-    function withdrawFee() public onlyAdminWithdrawAfterEnd {
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 }

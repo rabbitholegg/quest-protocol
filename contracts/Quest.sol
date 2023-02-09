@@ -74,7 +74,7 @@ contract Quest is OwnableUpgradeable, IQuest {
     }
 
     /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyAdminWithdrawAfterEnd() {
+    modifier onlyWithdrawAfterEnd() {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
         _;
     }
@@ -148,5 +148,5 @@ contract Quest is OwnableUpgradeable, IQuest {
     }
 
     /// @notice Allows the owner of the Quest to withdraw any remaining rewards after the Quest has ended
-    function withdrawRemainingTokens(address to_) public virtual onlyOwner onlyAdminWithdrawAfterEnd {}
+    function withdrawRemainingTokens() public virtual onlyWithdrawAfterEnd {}
 }
