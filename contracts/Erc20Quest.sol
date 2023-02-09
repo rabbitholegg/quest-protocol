@@ -89,10 +89,11 @@ contract Erc20Quest is Quest {
     function withdrawRemainingTokens() public override onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         super.withdrawRemainingTokens();
 
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
+        uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
+        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
+        IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
 
-        uint balance = IERC20(rewardToken).balanceOf(address(this));
-        IERC20(rewardToken).safeTransfer(owner(), balance);
+        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 
     /// @notice Call the QuestFactory contract to get the amount of receipts that have been minted

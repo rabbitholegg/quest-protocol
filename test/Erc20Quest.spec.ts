@@ -380,7 +380,6 @@ describe.only('Erc20Quest', async () => {
       await deployedFactoryContract.connect(secondAddress).mintReceipt(questId, secondMessageHash, secondSignature)
       await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
       await deployedQuestContract.connect(firstAddress).claim()
-      await deployedQuestContract.connect(secondAddress).claim()
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
 
       await ethers.provider.send('evm_increaseTime', [expiryDate + 1000])
@@ -392,7 +391,7 @@ describe.only('Erc20Quest', async () => {
       const protocolFee = (await deployedQuestContract.protocolFee()).toNumber()
       expect(protocolFee).to.equal(400) // 2 * 1000 * (2000 / 10000) = 400
 
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(0)
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
         totalRewardsPlusFee - receiptRedeemers * rewardAmount - protocolFee
       )
