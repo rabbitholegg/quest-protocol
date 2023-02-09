@@ -1,12 +1,13 @@
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   SampleERC20,
   SampleErc1155,
   QuestFactory,
   RabbitHoleReceipt,
+  RabbitHoleTickets,
   QuestFactory__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
@@ -18,6 +19,7 @@ describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
+  let deployedRabbitHoleTicketsContract: RabbitHoleTickets
   let deployedFactoryContract: QuestFactory
   let deployedErc20Quest
   let deployedErc1155Quest
@@ -32,6 +34,7 @@ describe('QuestFactory', () => {
   let questFactoryContract: QuestFactory__factory
   let erc20QuestContract
   let erc1155QuestContract
+  let rabbitHoleTicketsContract: RabbitholeTickets__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
   let sampleERC1155Contract: SampleErc1155__factory
@@ -49,12 +52,14 @@ describe('QuestFactory', () => {
     erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
     erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
+    rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
     sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
 
     await deploySampleErc20Contract()
     await deploySampleErc1155Conract()
     await deployRabbitHoleReceiptContract()
+    await deployRabbitHoleTicketsContract()
     await deployFactoryContract()
   })
 
@@ -66,9 +71,10 @@ describe('QuestFactory', () => {
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
+      deployedRabbitHoleTicketsContract.address,
       protocolFeeAddress,
       deployedErc20Quest.address,
-      deployedErc1155Quest.address
+      deployedErc1155Quest.address,
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
@@ -97,15 +103,29 @@ describe('QuestFactory', () => {
     ])) as RabbitHoleReceipt
   }
 
+  const deployRabbitHoleTicketsContract = async () => {
+    const TicketRenderer = await ethers.getContractFactory('TicketRenderer')
+    const deployedTicketRenderer = await TicketRenderer.deploy()
+    await deployedTicketRenderer.deployed()
+
+    deployedRabbitHoleTicketsContract = (await upgrades.deployProxy(rabbitHoleTicketsContract, [
+      deployedTicketRenderer.address,
+      royaltyRecipient.address,
+      owner.address,
+      10,
+    ])) as RabbitHoleTickets
+  }
+
   describe('Deployment', () => {
     it('Should revert if trying to deploy with protocolFeeRecipient set to zero address', async () => {
       await expect(
         upgrades.deployProxy(questFactoryContract, [
           wallet.address,
           deployedRabbitHoleReceiptContract.address,
+          deployedRabbitHoleTicketsContract.address,
           constants.AddressZero,
           deployedErc20Quest.address,
-          deployedErc1155Quest.address
+          deployedErc1155Quest.address,
         ])
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
     })
@@ -184,6 +204,25 @@ describe('QuestFactory', () => {
       const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
       expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
       expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
+    })
+
+    it('Should create a new ERC1155 quest with RabbitHoleTickets', async () => {
+      await deployedFactoryContract.createQuest(
+        deployedRabbitHoleTicketsContract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        'erc1155',
+        erc1155QuestId
+      )
+      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
+      const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
+      expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
+      expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
+
+      const ticketBalance = await deployedRabbitHoleTicketsContract.balanceOf(questAddress, rewardAmount)
+      expect(ticketBalance).to.equal(totalRewards)
     })
 
     it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {

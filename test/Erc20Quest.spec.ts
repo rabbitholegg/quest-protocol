@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Wallet, utils } from 'ethers'
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Erc20Quest__factory,
   RabbitHoleReceipt__factory,
@@ -88,12 +88,15 @@ describe('Erc20Quest', async () => {
   const deployFactoryContract = async () => {
     const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
     const erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
+    const rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     const deployedErc20Quest = await erc20QuestContract.deploy()
     const deployedErc1155Quest = await erc1155QuestContract.deploy()
+    const deployedRabbitHoleTickets = await rabbitHoleTicketsContract.deploy()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitholeReceiptContract.address,
+      deployedRabbitHoleTickets.address,
       protocolFeeAddress,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,

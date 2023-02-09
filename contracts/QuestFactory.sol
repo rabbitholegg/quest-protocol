@@ -6,6 +6,7 @@ import {Erc20Quest} from './Erc20Quest.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
@@ -30,6 +31,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitHoleReceiptContract;
+    RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
 
@@ -39,6 +41,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function initialize(
         address claimSignerAddress_,
         address rabbitHoleReceiptContract_,
+        address rabbitHoleTicketsContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address erc1155QuestAddress_
@@ -48,6 +51,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         grantDefaultAdminAndCreateQuestRole(msg.sender);
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
+        rabbitHoleTicketsContract = RabbitHoleTickets(rabbitHoleTicketsContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
         setQuestFee(2_000);
         erc20QuestAddress = erc20QuestAddress_;
@@ -137,6 +141,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 address(rabbitHoleReceiptContract)
             );
             Erc1155Quest(newQuest).transferOwnership(msg.sender);
+
+            if (address(rewardTokenAddress_) == address(rabbitHoleTicketsContract)) {
+                rabbitHoleTicketsContract.mint(newQuest, rewardAmountOrTokenId_, totalParticipants_, '0x00');
+            }
+
             return newQuest;
         }
 
