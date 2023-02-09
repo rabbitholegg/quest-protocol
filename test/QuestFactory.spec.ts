@@ -41,7 +41,7 @@ describe('QuestFactory', () => {
     ;[owner, royaltyRecipient] = await ethers.getSigners()
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
-    startDate = latestTime + 10
+    startDate = latestTime + 100
 
     wallet = Wallet.fromMnemonic(mnemonic)
 
@@ -70,6 +70,8 @@ describe('QuestFactory', () => {
       deployedErc20Quest.address,
       deployedErc1155Quest.address
     ])) as QuestFactory
+
+    await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
   }
 
   const deploySampleErc20Contract = async () => {

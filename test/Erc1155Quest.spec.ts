@@ -79,8 +79,6 @@ describe('Erc1155Quest', () => {
     const [_from, contractAddress, _type] = event?.args
 
     deployedQuestContract = questContract.attach(contractAddress)
-    console.log("deployed quest contract", deployedQuestContract.address)
-
     await transferRewardsToDistributor()
   })
 

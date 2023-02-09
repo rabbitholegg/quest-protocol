@@ -39,6 +39,12 @@ describe('RabbitholeTickets Contract', async () => {
 
       expect(await RHTickets.balanceOf(firstAddress.address, 1)).to.eq(5);
     })
+
+    it('reverts if not called by minter', async () => {
+      await expect(RHTickets.connect(firstAddress).mint(firstAddress.address, 1, 5, '0x')).to.be.revertedWith(
+        'Only minter'
+      )
+    })
   })
 
   describe('mintBatch', () => {
