@@ -43,6 +43,8 @@
         "protocolFeeRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
         "questFee": 2000,
         "claimSignerAddress": "0x0000000000000000000000000000000000000000",
+        "erc20QuestAddress": "0x0000000000000000000000000000000000000000",
+        "erc1155QuestAddress": "0x0000000000000000000000000000000000000000",
         "quests": {},
         "rewardAllowlist": {},
         "_initialized": 1,

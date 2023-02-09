@@ -25,7 +25,7 @@ contract RabbitHoleTickets is
     TicketRenderer public TicketRendererContract;
 
     modifier onlyMinter() {
-        msg.sender == minterAddress;
+        require(msg.sender == minterAddress, "Only minter");
         _;
     }
 

@@ -8,6 +8,7 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import "@openzeppelin/contracts/proxy/Clones.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -25,6 +26,8 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
 
     address public claimSignerAddress;
     address public protocolFeeRecipient;
+    address public erc20QuestAddress;
+    address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
@@ -53,7 +56,23 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
-            Erc20Quest newQuest = new Erc20Quest(
+            address newQuest = Clones.clone(erc20QuestAddress);
+
+            emit QuestCreated(
+                msg.sender,
+                address(newQuest),
+                questId_,
+                contractType_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmountOrTokenId_
+            );
+            quests[questId_].questAddress = address(newQuest);
+            quests[questId_].totalParticipants = totalParticipants_;
+
+            Erc20Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -64,6 +83,14 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
                 questFee,
                 protocolFeeRecipient
             );
+            Erc20Quest(newQuest).transferOwnership(msg.sender);
+            return newQuest;
+        }
+
+        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
+
+            address newQuest = Clones.clone(erc1155QuestAddress);
 
             emit QuestCreated(
                 msg.sender,
@@ -78,14 +105,8 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
             );
             quests[questId_].questAddress = address(newQuest);
             quests[questId_].totalParticipants = totalParticipants_;
-            newQuest.transferOwnership(msg.sender);
-            return address(newQuest);
-        }
 
-        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
-            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
-
-            Erc1155Quest newQuest = new Erc1155Quest(
+            Erc1155Quest(newQuest).initialize(
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -94,25 +115,23 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
                 questId_,
                 address(rabbitholeReceiptContract)
             );
-
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                contractType_,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_
-            );
-            quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalParticipants = totalParticipants_;
-            newQuest.transferOwnership(msg.sender);
-            return address(newQuest);
+            Erc1155Quest(newQuest).transferOwnership(msg.sender);
+            return newQuest;
         }
 
         revert QuestTypeInvalid();
+    }
+
+    /// @dev set erc20QuestAddress
+    /// @param erc20QuestAddress_ The address of the erc20 quest
+    function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
+        erc20QuestAddress = erc20QuestAddress_;
+    }
+
+    /// @dev set erc1155QuestAddress
+    /// @param erc1155QuestAddress_ The address of the erc1155 quest
+    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+        erc1155QuestAddress = erc1155QuestAddress_;
     }
 
     /// @dev grant the default admin role and the create quest role to the owner

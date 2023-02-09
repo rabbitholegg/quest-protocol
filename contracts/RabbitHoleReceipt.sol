@@ -34,7 +34,7 @@ contract RabbitHoleReceipt is
     IQuestFactory public QuestFactoryContract;
 
     modifier onlyMinter() {
-        msg.sender == minterAddress;
+        require(msg.sender == minterAddress, "Only minter");
         _;
     }
 

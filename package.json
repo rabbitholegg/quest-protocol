@@ -14,13 +14,14 @@
   "scripts": {
     "postinstall": "typechain",
     "precompile": "rimraf ./build/",
-    "compile": "npx hardhat compile",
+    "compile": "yarn hardhat compile",
     "pretest": "yarn compile",
-    "test": "npx hardhat test",
+    "test": "yarn hardhat test",
+    "clean": "yarn hardhat clean",
     "prepublishOnly": "yarn test",
     "prepare": "husky install",
-    "test:coverage": "npx hardhat coverage",
-    "test:gas-stories": "npx hardhat --config hardhat.gas-stories.config.ts test"
+    "test:coverage": "yarn hardhat coverage",
+    "test:gas-stories": "yarn hardhat --config hardhat.gas-stories.config.ts test"
   },
   "repository": {
     "type": "git",

@@ -8,10 +8,17 @@ async function main() {
   const protocolFeeReceipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
 
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
+  const Erc20Quest = await ethers.getContractFactory('Erc20Quest')
+  const Erc1155Quest = await ethers.getContractFactory('Erc1155Quest')
+
+  const erc20Quest = await Erc20Quest.deploy()
+  await erc20Quest.deployed()
+  const erc1155Quest = await Erc1155Quest.deploy()
+  await erc1155Quest.deployed()
 
   const deployment = await hre.upgrades.deployProxy(
     QuestFactory,
-    [claimSignerAddress, rabbitholeReceiptAddress, protocolFeeReceipient],
+    [claimSignerAddress, rabbitholeReceiptAddress, protocolFeeReceipient, erc20Quest.address, erc1155Quest.address],
     { initializer: 'initialize' }
   )
 
