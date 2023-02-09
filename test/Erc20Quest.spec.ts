@@ -397,6 +397,11 @@ describe.only('Erc20Quest', async () => {
       )
 
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee)
+
+      await expect(deployedQuestContract.connect(protocolFeeRecipient).withdrawRemainingTokens()).to.be.revertedWith(
+        'Already withdrawn'
+      )
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
     })
   })
 })

@@ -11,6 +11,7 @@ import {QuestFactory} from './QuestFactory.sol';
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
     uint256 public questFee;
+    bool public hasWithdrawn;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
 
@@ -40,6 +41,7 @@ contract Erc20Quest is Quest {
             receiptContractAddress_
         );
         questFee = questFee_;
+        hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
         questFactoryContract = QuestFactory(msg.sender);
     }
@@ -87,12 +89,14 @@ contract Erc20Quest is Quest {
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
     function withdrawRemainingTokens() public override onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
+        require(!hasWithdrawn, 'Already withdrawn');
         super.withdrawRemainingTokens();
 
         uint unclaimedTokens = (receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
         uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - protocolFee() - unclaimedTokens;
-        IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
+        hasWithdrawn = true;
 
+        IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, protocolFee());
     }
 
