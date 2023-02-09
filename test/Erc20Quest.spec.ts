@@ -339,10 +339,9 @@ describe('Erc20Quest', async () => {
 
       await deployedFactoryContract.mintReceipt(questId, messageHash, signature)
       await deployedQuestContract.start()
-      await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
-      await deployedQuestContract.connect(owner).claim()
-      await ethers.provider.send('evm_increaseTime', [expiryDate + 1000])
+      await ethers.provider.send('evm_increaseTime', [expiryDate + 1100])
       await deployedQuestContract.withdrawRemainingTokens(firstAddress.address)
+      await deployedQuestContract.connect(owner).claim()
 
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(200)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
