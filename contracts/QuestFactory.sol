@@ -9,7 +9,7 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
-import "@openzeppelin/contracts/proxy/Clones.sol";
+import '@openzeppelin/contracts/proxy/Clones.sol';
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -29,7 +29,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    RabbitHoleReceipt public rabbitholeReceiptContract;
+    RabbitHoleReceipt public rabbitHoleReceiptContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
 
@@ -38,7 +38,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function initialize(
         address claimSignerAddress_,
-        address rabbitholeReceiptContract_,
+        address rabbitHoleReceiptContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address erc1155QuestAddress_
@@ -47,7 +47,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole(msg.sender);
         claimSignerAddress = claimSignerAddress_;
-        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         setProtocolFeeRecipient(protocolFeeRecipient_);
         setQuestFee(2_000);
         erc20QuestAddress = erc20QuestAddress_;
@@ -100,7 +100,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 totalParticipants_,
                 rewardAmountOrTokenId_,
                 questId_,
-                address(rabbitholeReceiptContract),
+                address(rabbitHoleReceiptContract),
                 questFee,
                 protocolFeeRecipient
             );
@@ -134,7 +134,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 totalParticipants_,
                 rewardAmountOrTokenId_,
                 questId_,
-                address(rabbitholeReceiptContract)
+                address(rabbitHoleReceiptContract)
             );
             Erc1155Quest(newQuest).transferOwnership(msg.sender);
             return newQuest;
@@ -178,7 +178,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set the rabbithole receipt contract
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
-        rabbitholeReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
@@ -237,6 +237,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         quests[questId_].addressMinted[msg.sender] = true;
         quests[questId_].numberMinted++;
         emit ReceiptMinted(msg.sender, questId_);
-        rabbitholeReceiptContract.mint(msg.sender, questId_);
+        rabbitHoleReceiptContract.mint(msg.sender, questId_);
     }
 }
