@@ -26,12 +26,12 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
 
     address public claimSignerAddress;
     address public protocolFeeRecipient;
-    address public erc20QuestAddress;
-    address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitholeReceiptContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
+    address public erc20QuestAddress;
+    address public erc1155QuestAddress;
 
     /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token

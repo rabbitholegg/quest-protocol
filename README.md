@@ -250,6 +250,19 @@ yarn test:gas-stories
 
 ---
 
+## Deploying
+We use chugsplash to deploy our proxy contracts. Some notes.
+
+### Deploying Quest Factory
+explanation of the the `_roles` key:
+"0x00": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true }, // 'DEFAULT_ADMIN_ROLE' https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol#L57
+"0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true } //  keccak256('CREATE_QUEST_ROLE');
+
+make sure to change `claimSignerAddress`, `erc20QuestAddress` and `erc1155QuestAddress` after deploy.
+
+### Deploying RabbitHole Receipt
+make sure to change the `minterAddress` to the QuestFactory address, and `ReceiptRendererContract`, `QuestFactoryContract` after deploy.
+
 ## Upgrading
 
 The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or
