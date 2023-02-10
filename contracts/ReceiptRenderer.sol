@@ -46,7 +46,7 @@ contract ReceiptRenderer {
         uint rewardAmount_,
         address rewardAddress_
     ) public view virtual returns (bytes memory) {
-        tokenIdString = tokenId_.toString();
+        string memory tokenIdString = tokenId_.toString();
 
         bytes memory attributes = abi.encodePacked(
             '[',
