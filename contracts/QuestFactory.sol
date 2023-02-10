@@ -183,6 +183,12 @@ contract QuestFactory is Initializable, AccessControlUpgradeable, IQuestFactory 
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
+    /// @dev set the rabbithole tickets contract
+    /// @param rabbitholeTicketsContract_ The address of the rabbithole tickets contract
+    function setRabbitHoleTicketsContract(address rabbitholeTicketsContract_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        rabbitHoleTicketsContract = RabbitHoleTickets(rabbitholeTicketsContract_);
+    }
+
     /// @dev set or remave a contract address to be used as a reward
     /// @param rewardAddress_ The contract address to set
     /// @param allowed_ Whether the contract address is allowed or not
