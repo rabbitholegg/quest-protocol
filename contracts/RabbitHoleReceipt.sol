@@ -56,7 +56,7 @@ contract RabbitHoleReceipt is
     }
 
     modifier onlyMinter() {
-        require(msg.sender == minterAddress, "Only minter");
+        require(msg.sender == minterAddress, 'Only minter');
         _;
     }
 
@@ -169,7 +169,20 @@ contract RabbitHoleReceipt is
         uint rewardAmount = questContract.getRewardAmount();
         address rewardAddress = questContract.getRewardToken();
 
-        return ReceiptRendererContract.generateTokenURI(tokenId_, questId, totalParticipants, claimed, rewardAmount, rewardAddress);
+        return
+            ReceiptRendererContract.generateTokenURI(
+                tokenId_,
+                questId,
+                totalParticipants,
+                claimed,
+                rewardAmount,
+                rewardAddress
+            );
+    }
+
+    /// @dev get the current token id
+    function getTokenId() public view returns (uint) {
+        return _tokenIds.current();
     }
 
     /// @dev See {IERC165-royaltyInfo}
