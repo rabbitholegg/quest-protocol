@@ -45,7 +45,6 @@ contract Quest is OwnableUpgradeable, IQuest {
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        redeemedTokens = 0;
         __Ownable_init();
     }
 
