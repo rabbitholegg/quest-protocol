@@ -39,9 +39,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
 
-
-
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
