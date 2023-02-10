@@ -18,6 +18,9 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
+    bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
+    bytes32 public constant ERC1155 = keccak256(abi.encodePacked('erc1155'));
+
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
@@ -35,6 +38,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint public questFee;
+
+
+
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -79,7 +85,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     ) external payable onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
-        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
+        if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
             address newQuest = Clones.clone(erc20QuestAddress);
@@ -113,7 +119,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             return newQuest;
         }
 
-        if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
+        if (keccak256(abi.encodePacked(contractType_)) == ERC1155) {
             if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
 
             address newQuest = Clones.clone(erc1155QuestAddress);
