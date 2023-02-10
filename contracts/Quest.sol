@@ -3,6 +3,7 @@ pragma solidity ^0.8.15;
 
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
+import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
@@ -151,13 +152,13 @@ contract Quest is OwnableUpgradeable, IQuest {
     function withdrawRemainingTokens() public virtual onlyWithdrawAfterEnd {}
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
-    /// @param _erc20Address The address of the ERC20 token to refund
-    function refund(address _erc20Address) public onlyOwner {
-        require(_erc20Address != rewardToken, 'Cannot refund reward token');
+    /// @param erc20Address_ The address of the ERC20 token to refund
+    function refund(address erc20Address_) public onlyOwner {
+        require(erc20Address_ != rewardToken, 'Cannot refund reward token');
         uint256 balance = address(this).balance;
         payable(msg.sender).transfer(balance);
 
-        uint256 erc20Balance = IERC20(_erc20Address).balanceOf(address(this));
-        IERC20(rewardToken).safeTransfer(owner(), erc20Balance);
+        uint256 erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
+        IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
     }
 }
