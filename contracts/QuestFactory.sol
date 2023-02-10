@@ -238,7 +238,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external {
         if (quests[questId_].numberMinted + 1 > quests[questId_].totalParticipants) revert OverMaxAllowedToMint();
         if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
         if (!QuestContract(quests[questId_].questAddress).hasStarted()) revert QuestNotStarted();

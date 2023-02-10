@@ -58,13 +58,13 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Pauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function pause() public onlyOwner onlyStarted {
+    function pause() external onlyOwner onlyStarted {
         isPaused = true;
     }
 
     /// @notice Unpauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() public onlyOwner onlyStarted {
+    function unPause() external onlyOwner onlyStarted {
         isPaused = false;
     }
 
@@ -97,7 +97,7 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() public virtual onlyQuestActive {
+    function claim() external virtual onlyQuestActive {
         if (isPaused) revert QuestPaused();
 
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
@@ -106,7 +106,7 @@ contract Quest is OwnableUpgradeable, IQuest {
 
         uint256 redeemableTokenCount = 0;
         for (uint i = 0; i < tokens.length; i++) {
-            if (!isClaimed(tokens[i])) {
+            if (!this.isClaimed(tokens[i])) {
                 redeemableTokenCount++;
             }
         }
@@ -136,23 +136,23 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Checks if a Receipt token id has been used to claim a reward
     /// @param tokenId_ The token id to check
-    function isClaimed(uint256 tokenId_) public view returns (bool) {
+    function isClaimed(uint256 tokenId_) external view returns (bool) {
         return claimedList[tokenId_] == true;
     }
 
     /// @dev Returns the reward amount
-    function getRewardAmount() public view returns (uint256) {
+    function getRewardAmount() external view returns (uint256) {
         return rewardAmountInWeiOrTokenId;
     }
 
     /// @dev Returns the reward token address
-    function getRewardToken() public view returns (address) {
+    function getRewardToken() external view returns (address) {
         return rewardToken;
     }
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
-    function refund(address erc20Address_) public onlyOwner {
+    function refund(address erc20Address_) external onlyOwner {
         require(erc20Address_ != rewardToken, 'Cannot refund reward token');
 
         uint balance = address(this).balance;
