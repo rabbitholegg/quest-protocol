@@ -46,7 +46,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address erc1155QuestAddress_
-    ) public initializer {
+    ) external initializer {
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole(msg.sender);
@@ -76,7 +76,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_
-    ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
+    ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {

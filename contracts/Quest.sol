@@ -34,7 +34,7 @@ contract Quest is OwnableUpgradeable, IQuest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    ) internal onlyInitializing {
+    ) public onlyInitializing {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -149,9 +149,6 @@ contract Quest is OwnableUpgradeable, IQuest {
     function getRewardToken() public view returns (address) {
         return rewardToken;
     }
-
-    /// @notice Allows the owner of the Quest to withdraw any remaining rewards after the Quest has ended
-    function withdrawRemainingTokens() public virtual onlyWithdrawAfterEnd {}
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
