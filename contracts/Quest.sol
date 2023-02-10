@@ -3,7 +3,7 @@ pragma solidity ^0.8.15;
 
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {IQuest} from './interfaces/IQuest.sol';
-import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
@@ -159,6 +159,6 @@ contract Quest is OwnableUpgradeable, IQuest {
         payable(msg.sender).transfer(balance);
 
         uint256 erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
+        IERC20(erc20Address_).safeTransfer(msg.sender, erc20Balance);
     }
 }
