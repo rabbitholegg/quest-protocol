@@ -7,7 +7,7 @@ interface IQuestFactory {
     error AddressNotSigned();
     error AddressAlreadyMinted();
     error InvalidHash();
-    error OnlyOwnerCanCreate1155Quest();
+    error OnlyAdminCanCreate1155Quest();
     error RewardNotAllowed();
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
@@ -15,7 +15,17 @@ interface IQuestFactory {
     error QuestNotStarted();
     error QuestEnded();
 
-    event QuestCreated(address indexed creator, address indexed contractAddress, string indexed questId, string contractType, address rewardTokenAddress, uint256 endTime, uint256 startTime, uint256 totalParticipants, uint256 rewardAmountOrTokenId);
+    event QuestCreated(
+        address indexed creator,
+        address indexed contractAddress,
+        string indexed questId,
+        string contractType,
+        address rewardTokenAddress,
+        uint256 endTime,
+        uint256 startTime,
+        uint256 totalParticipants,
+        uint256 rewardAmountOrTokenId
+    );
     event ReceiptMinted(address indexed recipient, string indexed questId);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);

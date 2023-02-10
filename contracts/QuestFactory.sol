@@ -8,7 +8,6 @@ import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -16,7 +15,7 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+contract QuestFactory is Initializable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -47,9 +46,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address erc20QuestAddress_,
         address erc1155QuestAddress_
     ) public initializer {
-        __Ownable_init();
         __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole(msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(CREATE_QUEST_ROLE, msg.sender);
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         rabbitHoleTicketsContract = RabbitHoleTickets(rabbitHoleTicketsContract_);
@@ -114,7 +113,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc1155'))) {
-            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
+            if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) revert OnlyAdminCanCreate1155Quest();
 
             address newQuest = Clones.clone(erc1155QuestAddress);
 
@@ -155,53 +154,46 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set erc20QuestAddress
     /// @param erc20QuestAddress_ The address of the erc20 quest
-    function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
+    function setErc20QuestAddress(address erc20QuestAddress_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         erc20QuestAddress = erc20QuestAddress_;
     }
 
     /// @dev set erc1155QuestAddress
     /// @param erc1155QuestAddress_ The address of the erc1155 quest
-    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         erc1155QuestAddress = erc1155QuestAddress_;
-    }
-
-    /// @dev grant the default admin role and the create quest role to the owner
-    /// @param account_ The account to grant admin and create quest roles
-    function grantDefaultAdminAndCreateQuestRole(address account_) internal {
-        _grantRole(DEFAULT_ADMIN_ROLE, account_);
-        _grantRole(CREATE_QUEST_ROLE, account_);
     }
 
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
-    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
+    function setClaimSignerAddress(address claimSignerAddress_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         claimSignerAddress = claimSignerAddress_;
     }
 
     /// @dev set the protocol fee recipient
     /// @param protocolFeeRecipient_ The address of the protocol fee recipient
-    function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
+    function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
     /// @dev set the rabbithole receipt contract
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
-    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
+    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
     /// @param rewardAddress_ The contract address to set
     /// @param allowed_ Whether the contract address is allowed or not
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyOwner {
+    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         rewardAllowlist[rewardAddress_] = allowed_;
     }
 
     /// @dev set the quest fee
     /// @notice the quest fee should be in Basis Point units: https://www.investopedia.com/terms/b/basispoint.asp
     /// @param questFee_ The quest fee value
-    function setQuestFee(uint256 questFee_) public onlyOwner {
+    function setQuestFee(uint256 questFee_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
     }

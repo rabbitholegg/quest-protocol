@@ -141,8 +141,9 @@ describe('QuestFactory', () => {
     const erc20QuestId = 'asdf'
     const erc1155QuestId = 'fdsa'
 
-    it('should init with right owner', async () => {
-      expect(await deployedFactoryContract.owner()).to.equal(owner.address)
+    it('should init with owner as admin', async () => {
+      const adminRole = await deployedFactoryContract.DEFAULT_ADMIN_ROLE()
+      expect(await deployedFactoryContract.hasRole(adminRole, owner.address)).to.equal(true)
     })
 
     it('should revert if incorrect quest contract type', async () => {
@@ -246,7 +247,7 @@ describe('QuestFactory', () => {
             'erc1155',
             erc1155QuestId
           )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
+      ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyAdminCanCreate1155Quest')
     })
 
     it('Should revert if reward address is removed from allowlist', async () => {
@@ -321,6 +322,14 @@ describe('QuestFactory', () => {
       await deployedFactoryContract.setClaimSignerAddress(newAddress)
       expect(await deployedFactoryContract.claimSignerAddress()).to.equal(newAddress)
     })
+
+    it('Should revert if msg.sender does not have correct role', async () => {
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).setClaimSignerAddress(royaltyRecipient.address)
+      ).to.be.revertedWith(
+        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+      )
+    })
   })
 
   describe('setProtocolFeeRecipient()', () => {
@@ -334,6 +343,14 @@ describe('QuestFactory', () => {
       await expect(
         deployedFactoryContract.setProtocolFeeRecipient(constants.AddressZero)
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
+    })
+
+    it('Should revert if msg.sender does not have correct role', async () => {
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).setProtocolFeeRecipient(royaltyRecipient.address)
+      ).to.be.revertedWith(
+        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
+      )
     })
   })
 
@@ -349,6 +366,12 @@ describe('QuestFactory', () => {
       await expect(deployedFactoryContract.setQuestFee(newQuestFee)).to.be.revertedWithCustomError(
         questFactoryContract,
         'QuestFeeTooHigh'
+      )
+    })
+
+    it('Should revert if msg.sender does not have correct role', async () => {
+      await expect(deployedFactoryContract.connect(royaltyRecipient).setQuestFee(0)).to.be.revertedWith(
+        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`
       )
     })
   })
