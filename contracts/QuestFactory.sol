@@ -253,7 +253,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
-        currentQuest.numberMinted++;
+        ++currentQuest.numberMinted;
         emit ReceiptMinted(msg.sender, questId_);
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
     }
