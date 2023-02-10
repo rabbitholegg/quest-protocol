@@ -162,7 +162,7 @@ contract RabbitHoleReceipt is
         require(_exists(tokenId_), 'ERC721URIStorage: URI query for nonexistent token');
         require(QuestFactoryContract != IQuestFactory(address(0)), 'QuestFactory not set');
 
-        string storage questId = questIdForTokenId[tokenId_];
+        string memory questId = questIdForTokenId[tokenId_];
         (address questAddress, uint totalParticipants, ) = QuestFactoryContract.questInfo(questId);
         IQuest questContract = IQuest(questAddress);
 
