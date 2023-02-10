@@ -10,7 +10,7 @@ import {QuestFactory} from './QuestFactory.sol';
 /// @notice This contract is used to create a quest that rewards ERC20 tokens.
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
-    uint256 public questFee;
+    uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;

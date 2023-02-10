@@ -113,7 +113,7 @@ contract RabbitHoleReceipt is
         uint msgSenderBalance = balanceOf(claimingAddress_);
         uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
         uint foundTokens = 0;
-        QUEST_ID = keccak256(bytes(questId_));
+        bytes32 QUEST_ID = keccak256(bytes(questId_));
 
         for (uint i = 0; i < msgSenderBalance; i++) {
             uint tokenId = tokenOfOwnerByIndex(claimingAddress_, i);
