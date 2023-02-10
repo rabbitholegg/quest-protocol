@@ -115,7 +115,7 @@ contract Quest is OwnableUpgradeable, IQuest {
         _transferRewards(totalRedeemableRewards);
         redeemedTokens += redeemableTokenCount;
 
-        emit Claimed(msg.sender, totalRedeemableRewards);
+        emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
     }
 
     /// @notice Calculate the amount of rewards
