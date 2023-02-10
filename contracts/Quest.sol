@@ -157,10 +157,11 @@ contract Quest is OwnableUpgradeable, IQuest {
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) public onlyOwner {
         require(erc20Address_ != rewardToken, 'Cannot refund reward token');
-        uint256 balance = address(this).balance;
-        payable(msg.sender).transfer(balance);
 
-        uint256 erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        IERC20(rewardToken).safeTransfer(msg.sender, erc20Balance);
+        uint balance = address(this).balance;
+        if (balance > 0) payable(msg.sender).transfer(balance);
+
+        uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
+        if (erc20Balance > 0) IERC20(rewardToken).safeTransfer(msg.sender, erc20Balance);
     }
 }
