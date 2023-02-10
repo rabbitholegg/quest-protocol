@@ -76,7 +76,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_
-    ) public onlyRole(CREATE_QUEST_ROLE) returns (address) {
+    ) external payable onlyRole(CREATE_QUEST_ROLE) returns (address) {
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         if (keccak256(abi.encodePacked(contractType_)) == keccak256(abi.encodePacked('erc20'))) {
