@@ -106,7 +106,7 @@ contract Quest is OwnableUpgradeable, IQuest {
 
         uint256 redeemableTokenCount = 0;
         for (uint i = 0; i < tokens.length;) {
-            if (!isClaimed(tokens[i])) {
+            if (!this.isClaimed(tokens[i])) {
             unchecked{redeemableTokenCount++;}
             }
         unchecked{i++;}

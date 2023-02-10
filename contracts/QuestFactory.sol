@@ -37,7 +37,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
-    uint public questFee;
+    uint16 public questFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -80,7 +80,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory contractType_,
         string memory questId_
     ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
-        if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
+        Quest storage currentQuest = quests[questId_];
+        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
         ++currentQuest.numberMinted;
 
         if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
@@ -205,7 +206,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set the quest fee
     /// @notice the quest fee should be in Basis Point units: https://www.investopedia.com/terms/b/basispoint.asp
     /// @param questFee_ The quest fee value
-    function setQuestFee(uint256 questFee_) public onlyOwner {
+    function setQuestFee(uint16 questFee_) public onlyOwner {
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
     }
@@ -219,7 +220,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
     function questInfo(string memory questId_) external view returns (address, uint, uint) {
-        currentQuest = quests[questId_];
+        Quest storage currentQuest = quests[questId_];
         return (currentQuest.questAddress, currentQuest.totalParticipants, currentQuest.numberMinted);
     }
 
@@ -244,7 +245,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external {
-        currentQuest = quests[questId_];
+        Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
         if (!QuestContract(currentQuest.questAddress).hasStarted()) revert QuestNotStarted();
@@ -255,7 +256,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
-        emit ReceiptMinted(msg.sender, questId_);
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
     }

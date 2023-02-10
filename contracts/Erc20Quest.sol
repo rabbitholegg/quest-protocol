@@ -28,7 +28,7 @@ contract Erc20Quest is Quest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
-        uint256 questFee_,
+        uint16 questFee_,
         address protocolFeeRecipient_
     ) external initializer {
         super.questInit(
