@@ -22,7 +22,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    ) public initializer {
+    ) external initializer {
         super.questInit(
             rewardTokenAddress_,
             endTime_,
@@ -55,8 +55,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     }
 
     /// @dev Withdraws the remaining tokens from the contract. Only able to be called by owner
-    function withdrawRemainingTokens() public override onlyOwner onlyWithdrawAfterEnd {
-        super.withdrawRemainingTokens();
+    function withdrawRemainingTokens() external onlyOwner onlyWithdrawAfterEnd {
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
             owner(),

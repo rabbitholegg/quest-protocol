@@ -5,7 +5,7 @@ pragma solidity =0.8.16;
 // Allows anyone to claim a token if they exist in a merkle root.
 interface IQuest {
     // This event is triggered whenever a call to #claim succeeds.
-    event Claimed(address account, uint256 amount);
+    event Claimed(address account, address rewardAddress, uint256 amount);
 
     error AlreadyClaimed();
     error NoTokensToClaim();
@@ -21,6 +21,8 @@ interface IQuest {
     error MustImplementInChild();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
+
     function getRewardAmount() external view returns (uint256);
+
     function getRewardToken() external view returns (address);
 }

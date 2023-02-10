@@ -45,7 +45,7 @@ contract RabbitHoleReceipt is
         address royaltyRecipient_,
         address minterAddress_,
         uint royaltyFee_
-    ) public initializer {
+    ) external initializer {
         __ERC721_init('RabbitHoleReceipt', 'RHR');
         __ERC721URIStorage_init();
         __Ownable_init();
@@ -56,38 +56,38 @@ contract RabbitHoleReceipt is
     }
 
     modifier onlyMinter() {
-        require(msg.sender == minterAddress, "Only minter");
+        require(msg.sender == minterAddress, 'Only minter');
         _;
     }
 
     /// @dev set the receipt renderer contract
     /// @param receiptRenderer_ the address of the receipt renderer contract
-    function setReceiptRenderer(address receiptRenderer_) public onlyOwner {
+    function setReceiptRenderer(address receiptRenderer_) external onlyOwner {
         ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
     /// @dev set the royalty recipient
     /// @param royaltyRecipient_ the address of the royalty recipient
-    function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
+    function setRoyaltyRecipient(address royaltyRecipient_) external onlyOwner {
         royaltyRecipient = royaltyRecipient_;
     }
 
     /// @dev set the quest factory contract
     /// @param questFactory_ the address of the quest factory contract
-    function setQuestFactory(address questFactory_) public onlyOwner {
+    function setQuestFactory(address questFactory_) external onlyOwner {
         QuestFactoryContract = IQuestFactory(questFactory_);
     }
 
     /// @dev set the minter address
     /// @param minterAddress_ the address of the minter
-    function setMinterAddress(address minterAddress_) public onlyOwner {
+    function setMinterAddress(address minterAddress_) external onlyOwner {
         minterAddress = minterAddress_;
         emit MinterAddressSet(minterAddress_);
     }
 
     /// @dev set the royalty fee
     /// @param royaltyFee_ the royalty fee
-    function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
+    function setRoyaltyFee(uint256 royaltyFee_) external onlyOwner {
         royaltyFee = royaltyFee_;
         emit RoyaltyFeeSet(royaltyFee_);
     }
@@ -95,7 +95,7 @@ contract RabbitHoleReceipt is
     /// @dev mint a receipt
     /// @param to_ the address to mint to
     /// @param questId_ the quest id
-    function mint(address to_, string memory questId_) public onlyMinter {
+    function mint(address to_, string memory questId_) external onlyMinter {
         _tokenIds.increment();
         uint newTokenID = _tokenIds.current();
         questIdForTokenId[newTokenID] = questId_;
@@ -109,7 +109,7 @@ contract RabbitHoleReceipt is
     function getOwnedTokenIdsOfQuest(
         string memory questId_,
         address claimingAddress_
-    ) public view returns (uint[] memory) {
+    ) external view returns (uint[] memory) {
         uint msgSenderBalance = balanceOf(claimingAddress_);
         uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
         uint foundTokens = 0;
@@ -170,7 +170,20 @@ contract RabbitHoleReceipt is
         uint rewardAmount = questContract.getRewardAmount();
         address rewardAddress = questContract.getRewardToken();
 
-        return ReceiptRendererContract.generateTokenURI(tokenId_, questId, totalParticipants, claimed, rewardAmount, rewardAddress);
+        return
+            ReceiptRendererContract.generateTokenURI(
+                tokenId_,
+                questId,
+                totalParticipants,
+                claimed,
+                rewardAmount,
+                rewardAddress
+            );
+    }
+
+    /// @dev get the current token id
+    function getTokenId() public view returns (uint) {
+        return _tokenIds.current();
     }
 
     /// @dev See {IERC165-royaltyInfo}

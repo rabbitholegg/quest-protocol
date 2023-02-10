@@ -49,7 +49,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address erc1155QuestAddress_
-    ) public initializer {
+    ) external initializer {
         __Ownable_init();
         __AccessControl_init();
         grantDefaultAdminAndCreateQuestRole(msg.sender);
@@ -79,9 +79,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmountOrTokenId_,
         string memory contractType_,
         string memory questId_
-    ) external payable onlyRole(CREATE_QUEST_ROLE) returns (address) {
-        currentQuest = quests[questId_];
-        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
+    ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
+        if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
+        ++currentQuest.numberMinted;
+
         if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
@@ -242,7 +243,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external {
         currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
@@ -256,5 +257,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         emit ReceiptMinted(msg.sender, questId_);
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
+        emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
     }
 }
