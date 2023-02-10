@@ -80,8 +80,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory contractType_,
         string memory questId_
     ) external payable onlyRole(CREATE_QUEST_ROLE) returns (address) {
-        if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
-
+        currentQuest = quests[questId_];
+        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
         if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
@@ -98,8 +98,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 totalParticipants_,
                 rewardAmountOrTokenId_
             );
-            quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalParticipants = totalParticipants_;
+            currentQuest.questAddress = address(newQuest);
+            currentQuest.totalParticipants = totalParticipants_;
 
             Erc20Quest(newQuest).initialize(
                 rewardTokenAddress_,
@@ -132,8 +132,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 totalParticipants_,
                 rewardAmountOrTokenId_
             );
-            quests[questId_].questAddress = address(newQuest);
-            quests[questId_].totalParticipants = totalParticipants_;
+            currentQuest.questAddress = address(newQuest);
+            currentQuest.totalParticipants = totalParticipants_;
 
             Erc1155Quest(newQuest).initialize(
                 rewardTokenAddress_,
@@ -218,7 +218,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
     function questInfo(string memory questId_) external view returns (address, uint, uint) {
-        return (quests[questId_].questAddress, quests[questId_].totalParticipants, quests[questId_].numberMinted);
+        currentQuest = quests[questId_];
+        return (currentQuest.questAddress, currentQuest.totalParticipants, currentQuest.numberMinted);
     }
 
     /// @dev return status of whether an address has minted a receipt for a quest
@@ -242,16 +243,17 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) public {
-        if (quests[questId_].numberMinted + 1 > quests[questId_].totalParticipants) revert OverMaxAllowedToMint();
-        if (quests[questId_].addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
-        if (!QuestContract(quests[questId_].questAddress).hasStarted()) revert QuestNotStarted();
-        if (block.timestamp < QuestContract(quests[questId_].questAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestContract(quests[questId_].questAddress).endTime()) revert QuestEnded();
+        currentQuest = quests[questId_];
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
+        if (!QuestContract(currentQuest.questAddress).hasStarted()) revert QuestNotStarted();
+        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
-        quests[questId_].addressMinted[msg.sender] = true;
-        quests[questId_].numberMinted++;
+        currentQuest.addressMinted[msg.sender] = true;
+        currentQuest.numberMinted++;
         emit ReceiptMinted(msg.sender, questId_);
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
     }
