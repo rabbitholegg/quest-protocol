@@ -110,4 +110,15 @@ contract Erc20Quest is Quest {
     function protocolFee() public view returns (uint256) {
         return (receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee) / 10_000;
     }
+
+    /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
+    /// @param _erc20Address The address of the ERC20 token to refund
+    function refund(address _erc20Address) public onlyOwner {
+        require(_erc20Address != rewardToken, 'Cannot refund reward token');
+        uint256 balance = address(this).balance;
+        payable(msg.sender).transfer(balance);
+
+        uint256 erc20Balance = IERC20(rewardToken).balanceOf(address(this));
+        IERC20(rewardToken).safeTransfer(owner(), erc20Balance);
+    }
 }
