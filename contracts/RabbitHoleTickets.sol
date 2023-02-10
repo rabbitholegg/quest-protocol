@@ -38,7 +38,7 @@ contract RabbitHoleTickets is
         address royaltyRecipient_,
         address minterAddress_,
         uint royaltyFee_
-    ) public initializer {
+    ) external initializer {
         __ERC1155_init('');
         __Ownable_init();
         __ERC1155Burnable_init();
@@ -55,26 +55,26 @@ contract RabbitHoleTickets is
 
     /// @dev set the ticket renderer contract
     /// @param ticketRenderer_ the address of the ticket renderer contract
-    function setTicketRenderer(address ticketRenderer_) public onlyOwner {
+    function setTicketRenderer(address ticketRenderer_) external onlyOwner {
         TicketRendererContract = TicketRenderer(ticketRenderer_);
     }
 
     /// @dev set the royalty recipient
     /// @param royaltyRecipient_ the address of the royalty recipient
-    function setRoyaltyRecipient(address royaltyRecipient_) public onlyOwner {
+    function setRoyaltyRecipient(address royaltyRecipient_) external onlyOwner {
         royaltyRecipient = royaltyRecipient_;
     }
 
     /// @dev set the royalty fee
     /// @param royaltyFee_ the royalty fee
-    function setRoyaltyFee(uint256 royaltyFee_) public onlyOwner {
+    function setRoyaltyFee(uint256 royaltyFee_) external onlyOwner {
         royaltyFee = royaltyFee_;
         emit RoyaltyFeeSet(royaltyFee_);
     }
 
     /// @dev set the minter address
     /// @param minterAddress_ the address of the minter
-    function setMinterAddress(address minterAddress_) public onlyOwner {
+    function setMinterAddress(address minterAddress_) external onlyOwner {
         minterAddress = minterAddress_;
         emit MinterAddressSet(minterAddress_);
     }
@@ -84,7 +84,7 @@ contract RabbitHoleTickets is
     /// @param id_ the id of the ticket to mint
     /// @param amount_ the amount of the ticket to mint
     /// @param data_ the data to pass to the mint function
-    function mint(address to_, uint256 id_, uint256 amount_, bytes memory data_) public onlyMinter {
+    function mint(address to_, uint256 id_, uint256 amount_, bytes memory data_) external onlyMinter {
         _mint(to_, id_, amount_, data_);
     }
 
@@ -98,7 +98,7 @@ contract RabbitHoleTickets is
         uint256[] memory ids_,
         uint256[] memory amounts_,
         bytes memory data_
-    ) public onlyMinter {
+    ) external onlyMinter {
         _mintBatch(to_, ids_, amounts_, data_);
     }
 
