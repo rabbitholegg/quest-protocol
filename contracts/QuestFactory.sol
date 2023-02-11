@@ -82,8 +82,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        ++currentQuest.numberMinted;
-
         if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
