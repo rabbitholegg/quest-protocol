@@ -45,7 +45,6 @@ contract Quest is OwnableUpgradeable, IQuest {
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        redeemedTokens = 0;
         __Ownable_init();
     }
 
@@ -71,8 +70,9 @@ contract Quest is OwnableUpgradeable, IQuest {
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length; i++) {
+        for (uint i = 0; i < tokenIds_.length;) {
             claimedList[tokenIds_[i]] = true;
+        unchecked{i++;}
         }
     }
 
@@ -105,10 +105,11 @@ contract Quest is OwnableUpgradeable, IQuest {
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length; i++) {
+        for (uint i = 0; i < tokens.length;) {
             if (!this.isClaimed(tokens[i])) {
-                redeemableTokenCount++;
+            unchecked{redeemableTokenCount++;}
             }
+        unchecked{i++;}
         }
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
@@ -116,7 +117,7 @@ contract Quest is OwnableUpgradeable, IQuest {
         uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
         _transferRewards(totalRedeemableRewards);
-        redeemedTokens += redeemableTokenCount;
+        redeemedTokens = redeemedTokens + redeemableTokenCount;
 
         emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
     }

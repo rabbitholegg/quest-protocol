@@ -10,7 +10,7 @@ import {QuestFactory} from './QuestFactory.sol';
 /// @notice This contract is used to create a quest that rewards ERC20 tokens.
 contract Erc20Quest is Quest {
     using SafeERC20 for IERC20;
-    uint256 public questFee;
+    uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     QuestFactory public questFactoryContract;
@@ -28,7 +28,7 @@ contract Erc20Quest is Quest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_,
-        uint256 questFee_,
+        uint16 questFee_,
         address protocolFeeRecipient_
     ) external initializer {
         super.questInit(
