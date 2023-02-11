@@ -20,13 +20,13 @@ contract RabbitHoleTickets is
     event MinterAddressSet(address indexed minterAddress);
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    CountersUpgradeable.Counter private _tokenIds;
 
     // storage
     address public royaltyRecipient;
     address public minterAddress;
     uint public royaltyFee;
     TicketRenderer public TicketRendererContract;
+    CountersUpgradeable.Counter private _tokenIds;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
