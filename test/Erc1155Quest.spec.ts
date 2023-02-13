@@ -210,9 +210,9 @@ describe('Erc1155Quest', () => {
     it('should set pause correctly', async () => {
       expect(await deployedQuestContract.hasStarted()).to.equal(false)
       await deployedQuestContract.connect(owner).start()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
-      expect(await deployedQuestContract.isPaused()).to.equal(true)
+      expect(await deployedQuestContract.paused()).to.equal(true)
     })
   })
 
@@ -225,13 +225,13 @@ describe('Erc1155Quest', () => {
 
     it('should set unPause correctly', async () => {
       expect(await deployedQuestContract.hasStarted()).to.equal(false)
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).start()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
-      expect(await deployedQuestContract.isPaused()).to.equal(true)
+      expect(await deployedQuestContract.paused()).to.equal(true)
       await deployedQuestContract.connect(owner).unPause()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
     })
   })
 
@@ -246,7 +246,7 @@ describe('Erc1155Quest', () => {
       await ethers.provider.send('evm_increaseTime', [10000])
       await deployedQuestContract.pause()
 
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'QuestPaused')
+      await expect(deployedQuestContract.claim()).to.be.revertedWith('Pausable: paused')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
 

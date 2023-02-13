@@ -244,7 +244,7 @@
 //
 //             await expect(deployedQuestContract.claim(firstAddress.address, objectOfAddressesAndRewards[firstAddress.address], claim.proof)).to.be.revertedWithCustomError(
 //                 questContract,
-//                 'QuestPaused'
+//                 'Pausable: paused'
 //             )
 //         })
 //
