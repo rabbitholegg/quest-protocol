@@ -2,15 +2,16 @@
 pragma solidity =0.8.16;
 
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import {IQuest} from './interfaces/IQuest.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
-contract Quest is OwnableUpgradeable, IQuest {
+contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
@@ -20,7 +21,6 @@ contract Quest is OwnableUpgradeable, IQuest {
     uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
     bool public hasStarted;
-    bool public isPaused;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -46,25 +46,25 @@ contract Quest is OwnableUpgradeable, IQuest {
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         __Ownable_init();
+        __Pausable_init();
     }
 
     /// @notice Starts the Quest
     /// @dev Only the owner of the Quest can call this function
     function start() public virtual onlyOwner {
-        isPaused = false;
         hasStarted = true;
     }
 
     /// @notice Pauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function pause() external onlyOwner onlyStarted {
-        isPaused = true;
+        _pause();
     }
 
     /// @notice Unpauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function unPause() external onlyOwner onlyStarted {
-        isPaused = false;
+        _unpause();
     }
 
     /// @notice Marks token ids as claimed
@@ -97,9 +97,7 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() external virtual onlyQuestActive {
-        if (isPaused) revert QuestPaused();
-
+    function claim() external virtual onlyQuestActive whenNotPaused {
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
