@@ -6,6 +6,7 @@ pragma solidity =0.8.16;
 interface IQuest {
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address account, address rewardAddress, uint256 amount);
+    event Started(uint timestamp);
 
     error AlreadyClaimed();
     error NoTokensToClaim();

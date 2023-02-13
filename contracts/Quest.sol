@@ -53,6 +53,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     /// @dev Only the owner of the Quest can call this function
     function start() public virtual onlyOwner {
         hasStarted = true;
+        emit Started(block.timestamp);
     }
 
     /// @notice Pauses the Quest
@@ -70,9 +71,11 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length;) {
+        for (uint i = 0; i < tokenIds_.length; ) {
             claimedList[tokenIds_[i]] = true;
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -103,11 +106,15 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length;) {
+        for (uint i = 0; i < tokens.length; ) {
             if (!this.isClaimed(tokens[i])) {
-            unchecked{redeemableTokenCount++;}
+                unchecked {
+                    redeemableTokenCount++;
+                }
             }
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
