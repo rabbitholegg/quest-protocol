@@ -190,8 +190,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set the rabbithole receipt contract
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
-    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) public onlyOwner {
+    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+    }
+
+    /// @dev set the rabbithole tickets contract
+    /// @param rabbitholeTicketsContract_ The address of the rabbithole tickets contract
+    function setRabbitHoleTicketsContract(address rabbitholeTicketsContract_) external onlyOwner {
+        rabbitHoleTicketsContract = RabbitHoleTickets(rabbitholeTicketsContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
