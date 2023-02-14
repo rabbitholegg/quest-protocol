@@ -329,6 +329,7 @@ describe('Erc1155Quest', () => {
       await deployedQuestContract.connect(owner).withdrawRemainingTokens()
 
       await deployedQuestContract.connect(firstAddress).claim()
+      expect(await deployedSampleErc1155Contract.balanceOf(firstAddress.address, rewardAmount)).to.equal('1')
     })
 
     it('should transfer all rewards back to owner', async () => {
