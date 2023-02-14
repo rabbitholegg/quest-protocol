@@ -23,14 +23,21 @@ describe('ReceiptRenderer Contract', async () => {
   describe('generateTextFields', () => {
     it('generates the correct text fields', async () => {
       let textFields = await deployedReceiptRenderer.generateTextFields(claimed, questId, rewardAmount, wrappedEthAddress);
-      expect(textFields).to.equal('<g filter="url(#E)" class="I"><text fill="#0f0f16" xml:space="preserve" style="white-space:pre" font-size="26" font-weight="bold" letter-spacing="0.07em"><tspan y="750" x="325" class="J">CLAIMED</tspan></text></g><g filter="url(#F)" class="H I J L"><text font-size="26" letter-spacing="0em" x="50%" y="615"><tspan>RabbitHole</tspan></text></g><g filter="url(#G)" class="H I J L"><text font-size="39.758" letter-spacing="0.05em" x="50%" y="365">0.000000000000001 WETH</text></g>')
+      expect(textFields).to.equal('<g filter="url(#E)" class="I"><text fill="#0f0f16" xml:space="preserve" style="white-space:pre" font-size="26" font-weight="bold" letter-spacing="0.07em"><tspan y="750" x="325" class="J">CLAIMED</tspan></text></g><g filter="url(#F)" class="H I J L"><text font-size="26" letter-spacing="0em" x="50%" y="615"><tspan>RabbitHole</tspan></text></g><g filter="url(#G)" class="H I J L"><text font-size="39.758" letter-spacing="0.05em" x="50%" y="365"> 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</text></g>')
     })
   })
 
-  describe('humanRewardAmountAndSymbol', () => {
+  describe('humanRewardAmount', () => {
     it('generates the reward amount and symbol text', async () => {
-      let rewardAmountText = await deployedReceiptRenderer.humanRewardAmountAndSymbol(ethers.BigNumber.from("100000000000000000"), wrappedEthAddress);
-      expect(rewardAmountText).to.equal("0.1 WETH")
+      let rewardAmountText = await deployedReceiptRenderer.humanRewardAmount(ethers.BigNumber.from("100000000000000000"), wrappedEthAddress);
+      expect(rewardAmountText).to.equal("0.1")
+    })
+  })
+
+  describe('symbolForAddress', () => {
+    it('generates the correct symbol for the address', async () => {
+      let symbol = await deployedReceiptRenderer.symbolForAddress(wrappedEthAddress);
+      expect(symbol).to.equal("WETH")
     })
   })
 
@@ -65,7 +72,7 @@ describe('ReceiptRenderer Contract', async () => {
           },
           {
             "trait_type": "Reward Amount",
-            "value": rewardAmount.toString()
+            "value": "0.000000000000001"
           },
           {
             "trait_type": "Reward Address",
