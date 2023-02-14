@@ -6,7 +6,7 @@ export type QuestContractType = {
   owner: () => Promise<string>
   startTime: () => Promise<number>
   endTime: () => Promise<number>
-  hasQueued: () => Promise<boolean>
+  queued: () => Promise<boolean>
   merkleRoot: () => Promise<void>
   address: string
   connect: (address: SignerWithAddress) => {

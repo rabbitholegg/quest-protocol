@@ -166,8 +166,8 @@ describe('Erc1155Quest', () => {
       })
 
       it('Should set has started with correct value', async () => {
-        const hasQueued = await deployedQuestContract.hasQueued()
-        expect(hasQueued).to.equal(false)
+        const queued = await deployedQuestContract.queued()
+        expect(queued).to.equal(false)
       })
 
       it('Should set the end time with correct value', async () => {
@@ -194,9 +194,9 @@ describe('Erc1155Quest', () => {
     })
 
     it('should set start correctly', async () => {
-      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      expect(await deployedQuestContract.queued()).to.equal(false)
       await deployedQuestContract.connect(owner).queue()
-      expect(await deployedQuestContract.hasQueued()).to.equal(true)
+      expect(await deployedQuestContract.queued()).to.equal(true)
     })
   })
 
@@ -208,7 +208,7 @@ describe('Erc1155Quest', () => {
     })
 
     it('should set pause correctly', async () => {
-      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      expect(await deployedQuestContract.queued()).to.equal(false)
       await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
@@ -224,7 +224,7 @@ describe('Erc1155Quest', () => {
     })
 
     it('should set unPause correctly', async () => {
-      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      expect(await deployedQuestContract.queued()).to.equal(false)
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
@@ -237,7 +237,7 @@ describe('Erc1155Quest', () => {
 
   describe('claim()', async () => {
     it('should fail if quest has not started yet', async () => {
-      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      expect(await deployedQuestContract.queued()).to.equal(false)
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NotStarted')
     })
 
