@@ -22,8 +22,8 @@ describe('ReceiptRenderer Contract', async () => {
 
   describe('generateTextFields', () => {
     it('generates the correct text fields', async () => {
-      let textFields = await deployedReceiptRenderer.generateTextFields(claimed, questId, "0.000000000000001", "WETH");
-      expect(textFields).to.equal('<g filter="url(#E)" class="I"><text fill="#0f0f16" xml:space="preserve" style="white-space:pre" font-size="26" font-weight="bold" letter-spacing="0.07em"><tspan y="750" x="325" class="J">CLAIMED</tspan></text></g><g filter="url(#F)" class="H I J L"><text font-size="26" letter-spacing="0em" x="50%" y="615"><tspan>RabbitHole</tspan></text></g><g filter="url(#G)" class="H I J L"><text font-size="39.758" letter-spacing="0.05em" x="50%" y="365">0.000000000000001 WETH</text></g>')
+      let textFields = await deployedReceiptRenderer.generateTextFields(claimed, questId, "0.01", "WETH");
+      expect(textFields).to.equal('<g filter="url(#E)" class="I"><text fill="#0f0f16" xml:space="preserve" style="white-space:pre" font-size="26" font-weight="bold" letter-spacing="0.07em"><tspan y="750" x="325" class="J">CLAIMED</tspan></text></g><g filter="url(#F)" class="H I J L"><text font-size="26" letter-spacing="0em" x="50%" y="615"><tspan>RabbitHole</tspan></text></g><g filter="url(#G)" class="H I J L"><text font-size="39.758" letter-spacing="0.05em" x="50%" y="365">0.01 WETH</text></g>')
     })
   })
 
