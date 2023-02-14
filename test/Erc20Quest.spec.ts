@@ -167,8 +167,8 @@ describe('Erc20Quest', async () => {
       })
 
       it('Should set has started with correct value', async () => {
-        const hasStarted = await deployedQuestContract.hasStarted()
-        expect(hasStarted).to.equal(false)
+        const hasQueued = await deployedQuestContract.hasQueued()
+        expect(hasQueued).to.equal(false)
       })
 
       it('Should set the end time with correct value', async () => {
@@ -187,17 +187,17 @@ describe('Erc20Quest', async () => {
     })
   })
 
-  describe('start()', () => {
+  describe('queue()', () => {
     it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).start()).to.be.revertedWith(
+      await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
 
     it('should set start correctly', async () => {
-      expect(await deployedQuestContract.hasStarted()).to.equal(false)
-      await deployedQuestContract.connect(owner).start()
-      expect(await deployedQuestContract.hasStarted()).to.equal(true)
+      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      await deployedQuestContract.connect(owner).queue()
+      expect(await deployedQuestContract.hasQueued()).to.equal(true)
     })
   })
 
@@ -209,8 +209,8 @@ describe('Erc20Quest', async () => {
     })
 
     it('should set pause correctly', async () => {
-      expect(await deployedQuestContract.hasStarted()).to.equal(false)
-      await deployedQuestContract.connect(owner).start()
+      expect(await deployedQuestContract.hasQueued()).to.equal(false)
+      await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
@@ -225,9 +225,9 @@ describe('Erc20Quest', async () => {
     })
 
     it('should set unPause correctly', async () => {
-      expect(await deployedQuestContract.hasStarted()).to.equal(false)
+      expect(await deployedQuestContract.hasQueued()).to.equal(false)
       expect(await deployedQuestContract.paused()).to.equal(false)
-      await deployedQuestContract.connect(owner).start()
+      await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
@@ -238,12 +238,12 @@ describe('Erc20Quest', async () => {
 
   describe('claim()', async () => {
     it('should fail if quest has not started yet', async () => {
-      expect(await deployedQuestContract.hasStarted()).to.equal(false)
+      expect(await deployedQuestContract.hasQueued()).to.equal(false)
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NotStarted')
     })
 
     it('should fail if quest is paused', async () => {
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedQuestContract.pause()
 
@@ -251,12 +251,12 @@ describe('Erc20Quest', async () => {
     })
 
     it('should fail if before start time stamp', async () => {
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'ClaimWindowNotStarted')
     })
 
     it('should fail if the contract is out of rewards', async () => {
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(expiryDate + 1)
       await deployedQuestContract.withdrawRemainingTokens()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
@@ -264,7 +264,7 @@ describe('Erc20Quest', async () => {
 
     it('should only transfer the correct amount of rewards', async () => {
       await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
 
       await time.increaseTo(startDate)
 
@@ -282,7 +282,7 @@ describe('Erc20Quest', async () => {
     it('should let you claim mulitiple rewards if you have multiple tokens', async () => {
       await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
       await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
 
       await time.increaseTo(startDate)
 
@@ -301,7 +301,7 @@ describe('Erc20Quest', async () => {
 
     it('should not let you claim if you have already claimed', async () => {
       await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
 
       await time.increaseTo(expiryDate + 1)
       await deployedQuestContract.claim()
@@ -335,7 +335,7 @@ describe('Erc20Quest', async () => {
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from owner', async () => {
       await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
 
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
@@ -361,7 +361,7 @@ describe('Erc20Quest', async () => {
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from protocolFeeRecipient', async () => {
       await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
 
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)

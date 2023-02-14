@@ -20,7 +20,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
-    bool public hasStarted;
+    bool public hasQueued;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -49,11 +49,11 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
         __Pausable_init();
     }
 
-    /// @notice Starts the Quest
+    /// @notice Queues the Quest
     /// @dev Only the owner of the Quest can call this function
-    function start() public virtual onlyOwner {
-        hasStarted = true;
-        emit Started(block.timestamp);
+    function queue() public virtual onlyOwner {
+        hasQueued = true;
+        emit Queued(block.timestamp);
     }
 
     /// @notice Pauses the Quest
@@ -87,13 +87,13 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
 
     /// @notice Checks if the Quest has started at the function level
     modifier onlyStarted() {
-        if (!hasStarted) revert NotStarted();
+        if (!hasQueued) revert NotStarted();
         _;
     }
 
     /// @notice Checks if quest has started both at the function level and at the start time
     modifier onlyQuestActive() {
-        if (!hasStarted) revert NotStarted();
+        if (!hasQueued) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
