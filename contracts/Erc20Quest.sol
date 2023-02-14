@@ -2,8 +2,8 @@
 pragma solidity =0.8.16;
 
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {Quest} from './Quest.sol';
 import {QuestFactory} from './QuestFactory.sol';
+import {Quest} from './Quest.sol';
 
 /// @title Erc20Quest
 /// @author RabbitHole.gg
@@ -13,7 +13,6 @@ contract Erc20Quest is Quest {
     uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
-    QuestFactory public questFactoryContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -43,7 +42,6 @@ contract Erc20Quest is Quest {
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFactoryContract = QuestFactory(msg.sender);
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
@@ -97,12 +95,6 @@ contract Erc20Quest is Quest {
 
         IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, this.protocolFee());
-    }
-
-    /// @notice Call the QuestFactory contract to get the amount of receipts that have been minted
-    /// @return The amount of receipts that have been minted for the given quest
-    function receiptRedeemers() external view returns (uint256) {
-        return questFactoryContract.getNumberMinted(questId);
     }
 
     /// @notice Function that calculates the protocol fee

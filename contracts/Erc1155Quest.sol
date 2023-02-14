@@ -3,6 +3,7 @@ pragma solidity =0.8.16;
 
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import {ERC1155Holder} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
+import {QuestFactory} from './QuestFactory.sol';
 import {Quest} from './Quest.sol';
 
 /// @title Erc1155Quest
@@ -56,11 +57,14 @@ contract Erc1155Quest is Quest, ERC1155Holder {
 
     /// @dev Withdraws the remaining tokens from the contract. Only able to be called by owner
     function withdrawRemainingTokens() external onlyOwner onlyWithdrawAfterEnd {
+        uint unclaimedTokens = (receiptRedeemers() - redeemedTokens);
+        uint nonClaimableTokens = IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) - unclaimedTokens;
+
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
             owner(),
             rewardAmountInWeiOrTokenId,
-            IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId),
+            nonClaimableTokens,
             '0x00'
         );
     }

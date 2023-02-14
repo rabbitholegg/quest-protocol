@@ -121,7 +121,7 @@ contract ReceiptRenderer {
     /// @param rewardAmountString_ The string decimal of reward tokens that the user is eligible for
     /// @param rewardTokenSymbol_ The symbol of the reward token
     /// @return SVG parts that include the text fields
-    function generateTextFields(bool claimed_, string memory questId_, string memory rewardAmountString_, string memory rewardTokenSymbol_) external view returns (string memory) {
+    function generateTextFields(bool claimed_, string memory questId_, string memory rewardAmountString_, string memory rewardTokenSymbol_) external pure returns (string memory) {
         bytes memory text = abi.encodePacked(
             '<g filter="url(#E)" class="I"><text fill="#0f0f16" xml:space="preserve" style="white-space:pre" font-size="26" font-weight="bold" letter-spacing="0.07em"><tspan y="750" x="325" class="J">',
             claimed_ ? 'CLAIMED' : 'REDEEMABLE',

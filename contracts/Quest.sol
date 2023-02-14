@@ -6,6 +6,7 @@ import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
@@ -15,6 +16,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
+    QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
@@ -44,6 +46,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
         totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
+        questFactoryContract = QuestFactory(msg.sender); // or do we need to pass this in? bc being called from child
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         __Ownable_init();
         __Pausable_init();
@@ -131,6 +134,12 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(uint256 amount_) internal virtual {
         revert MustImplementInChild();
+    }
+
+    // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
+    /// @return The amount of receipts that have been minted for the given quest
+    function receiptRedeemers() public view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
     }
 
     /// @notice Checks if a Receipt token id has been used to claim a reward
