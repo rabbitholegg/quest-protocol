@@ -5,13 +5,14 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
-contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
+contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQuest {
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
@@ -97,7 +98,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() external virtual onlyQuestActive whenNotPaused {
+    function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
