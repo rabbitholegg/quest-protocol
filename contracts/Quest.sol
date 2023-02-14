@@ -46,7 +46,7 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
         totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
-        questFactoryContract = QuestFactory(msg.sender); // or do we need to pass this in? bc being called from child
+        questFactoryContract = QuestFactory(msg.sender);
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         __Ownable_init();
         __Pausable_init();
