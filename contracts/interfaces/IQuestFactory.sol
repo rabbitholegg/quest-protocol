@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity =0.8.16;
 
 interface IQuestFactory {
     error QuestIdUsed();
@@ -12,9 +12,21 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
     error QuestFeeTooHigh();
+    error QuestNotStarted();
+    error QuestEnded();
 
-    event QuestCreated(address indexed creator, address indexed contractAddress, string indexed questId, string contractType, address rewardTokenAddress, uint256 endTime, uint256 startTime, uint256 totalParticipants, uint256 rewardAmountOrTokenId);
-    event ReceiptMinted(address indexed recipient, string indexed questId);
+    event QuestCreated(
+        address indexed creator,
+        address indexed contractAddress,
+        string questId,
+        string contractType,
+        address rewardTokenAddress,
+        uint256 endTime,
+        uint256 startTime,
+        uint256 totalParticipants,
+        uint256 rewardAmountOrTokenId
+    );
+    event ReceiptMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

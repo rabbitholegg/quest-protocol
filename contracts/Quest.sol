@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity =0.8.16;
 
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import {IQuest} from './interfaces/IQuest.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
+import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
-contract Quest is OwnableUpgradeable, IQuest {
+contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
+    using SafeERC20 for IERC20;
+
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     address public rewardToken;
     uint256 public endTime;
@@ -17,7 +21,6 @@ contract Quest is OwnableUpgradeable, IQuest {
     uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
     bool public hasStarted;
-    bool public isPaused;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -31,7 +34,7 @@ contract Quest is OwnableUpgradeable, IQuest {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    ) internal onlyInitializing {
+    ) public onlyInitializing {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (startTime_ <= block.timestamp) revert StartTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -42,39 +45,39 @@ contract Quest is OwnableUpgradeable, IQuest {
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
-        redeemedTokens = 0;
         __Ownable_init();
+        __Pausable_init();
     }
 
     /// @notice Starts the Quest
     /// @dev Only the owner of the Quest can call this function
     function start() public virtual onlyOwner {
-        isPaused = false;
         hasStarted = true;
     }
 
     /// @notice Pauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function pause() public onlyOwner onlyStarted {
-        isPaused = true;
+    function pause() external onlyOwner onlyStarted {
+        _pause();
     }
 
     /// @notice Unpauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() public onlyOwner onlyStarted {
-        isPaused = false;
+    function unPause() external onlyOwner onlyStarted {
+        _unpause();
     }
 
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length; i++) {
+        for (uint i = 0; i < tokenIds_.length;) {
             claimedList[tokenIds_[i]] = true;
+        unchecked{i++;}
         }
     }
 
     /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyAdminWithdrawAfterEnd() {
+    modifier onlyWithdrawAfterEnd() {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
         _;
     }
@@ -94,18 +97,17 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() public virtual onlyQuestActive {
-        if (isPaused) revert QuestPaused();
-
+    function claim() external virtual onlyQuestActive whenNotPaused {
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length; i++) {
-            if (!isClaimed(tokens[i])) {
-                redeemableTokenCount++;
+        for (uint i = 0; i < tokens.length;) {
+            if (!this.isClaimed(tokens[i])) {
+            unchecked{redeemableTokenCount++;}
             }
+        unchecked{i++;}
         }
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
@@ -113,9 +115,9 @@ contract Quest is OwnableUpgradeable, IQuest {
         uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
         _transferRewards(totalRedeemableRewards);
-        redeemedTokens += redeemableTokenCount;
+        redeemedTokens = redeemedTokens + redeemableTokenCount;
 
-        emit Claimed(msg.sender, totalRedeemableRewards);
+        emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
     }
 
     /// @notice Calculate the amount of rewards
@@ -133,20 +135,29 @@ contract Quest is OwnableUpgradeable, IQuest {
 
     /// @notice Checks if a Receipt token id has been used to claim a reward
     /// @param tokenId_ The token id to check
-    function isClaimed(uint256 tokenId_) public view returns (bool) {
+    function isClaimed(uint256 tokenId_) external view returns (bool) {
         return claimedList[tokenId_] == true;
     }
 
     /// @dev Returns the reward amount
-    function getRewardAmount() public view returns (uint256) {
+    function getRewardAmount() external view returns (uint256) {
         return rewardAmountInWeiOrTokenId;
     }
 
     /// @dev Returns the reward token address
-    function getRewardToken() public view returns (address) {
+    function getRewardToken() external view returns (address) {
         return rewardToken;
     }
 
-    /// @notice Allows the owner of the Quest to withdraw any remaining rewards after the Quest has ended
-    function withdrawRemainingTokens(address to_) public virtual onlyOwner onlyAdminWithdrawAfterEnd {}
+    /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
+    /// @param erc20Address_ The address of the ERC20 token to refund
+    function refund(address erc20Address_) external onlyOwner {
+        require(erc20Address_ != rewardToken, 'Cannot refund reward token');
+
+        uint balance = address(this).balance;
+        if (balance > 0) payable(msg.sender).transfer(balance);
+
+        uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
+        if (erc20Balance > 0) IERC20(rewardToken).safeTransfer(msg.sender, erc20Balance);
+    }
 }

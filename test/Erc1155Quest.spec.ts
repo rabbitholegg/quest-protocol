@@ -1,8 +1,9 @@
+import { Result } from '@ethersproject/abi'
 import { expect } from 'chai'
 import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Wallet, utils } from 'ethers'
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Erc1155Quest__factory,
   RabbitHoleReceipt__factory,
@@ -11,7 +12,7 @@ import {
   SampleErc1155,
   RabbitHoleReceipt,
   QuestFactory,
-  QuestFactory__factory
+  QuestFactory__factory,
 } from '../typechain-types'
 
 describe('Erc1155Quest', () => {
@@ -76,7 +77,7 @@ describe('Erc1155Quest', () => {
     const waitedTx = await createQuestTx.wait()
 
     const event = waitedTx?.events?.find((event) => event.event === 'QuestCreated')
-    const [_from, contractAddress, _type] = event?.args
+    const [_from, contractAddress, _type] = event?.args as Result
 
     deployedQuestContract = questContract.attach(contractAddress)
     await transferRewardsToDistributor()
@@ -98,12 +99,15 @@ describe('Erc1155Quest', () => {
   const deployFactoryContract = async () => {
     const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
     const erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
+    const rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     const deployedErc20Quest = await erc20QuestContract.deploy()
     const deployedErc1155Quest = await erc1155QuestContract.deploy()
+    const deployedRabbitHoleTickets = await rabbitHoleTicketsContract.deploy()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitholeReceiptContract.address,
+      deployedRabbitHoleTickets.address,
       wallet.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
@@ -206,9 +210,9 @@ describe('Erc1155Quest', () => {
     it('should set pause correctly', async () => {
       expect(await deployedQuestContract.hasStarted()).to.equal(false)
       await deployedQuestContract.connect(owner).start()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
-      expect(await deployedQuestContract.isPaused()).to.equal(true)
+      expect(await deployedQuestContract.paused()).to.equal(true)
     })
   })
 
@@ -221,13 +225,13 @@ describe('Erc1155Quest', () => {
 
     it('should set unPause correctly', async () => {
       expect(await deployedQuestContract.hasStarted()).to.equal(false)
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).start()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
-      expect(await deployedQuestContract.isPaused()).to.equal(true)
+      expect(await deployedQuestContract.paused()).to.equal(true)
       await deployedQuestContract.connect(owner).unPause()
-      expect(await deployedQuestContract.isPaused()).to.equal(false)
+      expect(await deployedQuestContract.paused()).to.equal(false)
     })
   })
 
@@ -242,7 +246,7 @@ describe('Erc1155Quest', () => {
       await ethers.provider.send('evm_increaseTime', [10000])
       await deployedQuestContract.pause()
 
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'QuestPaused')
+      await expect(deployedQuestContract.claim()).to.be.revertedWith('Pausable: paused')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
 
@@ -254,7 +258,7 @@ describe('Erc1155Quest', () => {
     it('should fail if the contract is out of rewards', async () => {
       await deployedQuestContract.start()
       await ethers.provider.send('evm_increaseTime', [10000])
-      await deployedQuestContract.withdrawRemainingTokens(owner.address)
+      await deployedQuestContract.withdrawRemainingTokens()
       await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
       await ethers.provider.send('evm_increaseTime', [-10000])
     })
@@ -303,15 +307,16 @@ describe('Erc1155Quest', () => {
 
   describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdraw', async () => {
-      await expect(
-        deployedQuestContract.connect(firstAddress).withdrawRemainingTokens(owner.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('should revert if trying to withdraw before end date', async () => {
-      await expect(
-        deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
-      ).to.be.revertedWithCustomError(questContract, 'NoWithdrawDuringClaim')
+      await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens()).to.be.revertedWithCustomError(
+        questContract,
+        'NoWithdrawDuringClaim'
+      )
     })
 
     it('should transfer all rewards back to owner', async () => {
@@ -323,7 +328,7 @@ describe('Erc1155Quest', () => {
       expect(beginningContractBalance.toString()).to.equal('100')
       expect(beginningOwnerBalance.toString()).to.equal('0')
       await ethers.provider.send('evm_increaseTime', [expiryDate + 100])
-      await deployedQuestContract.connect(owner).withdrawRemainingTokens(owner.address)
+      await deployedQuestContract.connect(owner).withdrawRemainingTokens()
 
       const endContactBalance = await deployedSampleErc1155Contract.balanceOf(
         deployedQuestContract.address,

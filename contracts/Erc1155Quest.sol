@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity =0.8.16;
 
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import {ERC1155Holder} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
@@ -9,7 +9,6 @@ import {Quest} from './Quest.sol';
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests with a reward token that implements the ERC1155 standard
 contract Erc1155Quest is Quest, ERC1155Holder {
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -23,7 +22,7 @@ contract Erc1155Quest is Quest, ERC1155Holder {
         uint256 rewardAmountInWeiOrTokenId_,
         string memory questId_,
         address receiptContractAddress_
-    ) public initializer {
+    ) external initializer {
         super.questInit(
             rewardTokenAddress_,
             endTime_,
@@ -56,12 +55,10 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     }
 
     /// @dev Withdraws the remaining tokens from the contract. Only able to be called by owner
-    /// @param to_ The address to send the remaining tokens to
-    function withdrawRemainingTokens(address to_) public override onlyOwner {
-        super.withdrawRemainingTokens(to_);
+    function withdrawRemainingTokens() external onlyOwner onlyWithdrawAfterEnd {
         IERC1155(rewardToken).safeTransferFrom(
             address(this),
-            to_,
+            owner(),
             rewardAmountInWeiOrTokenId,
             IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId),
             '0x00'

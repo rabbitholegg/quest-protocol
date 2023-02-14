@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity =0.8.16;
 
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
@@ -15,7 +15,7 @@ contract TicketRenderer {
     /// @return encoded JSON following the generic OpenSea metadata standard
     function generateTokenURI(
         uint tokenId_
-    ) public pure returns (string memory) {
+    ) external pure returns (string memory) {
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "RabbitHole Tickets #',
@@ -33,7 +33,7 @@ contract TicketRenderer {
     /// @dev generates the on-chain SVG for an 1155 token ID
     /// @param tokenId_ The token id to generate the svg for
     /// @return encoded JSON for an SVG image
-    function generateSVG(uint tokenId_) public pure returns (string memory) {
+    function generateSVG(uint tokenId_) internal pure returns (string memory) {
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
             '<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
