@@ -35,7 +35,7 @@ contract QuestFactory is OwnableUpgradeable, AccessControlUpgradeable, IQuestFac
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
-    uint public questFee;
+    uint16 public questFee;
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
 

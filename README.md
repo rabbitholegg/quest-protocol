@@ -251,14 +251,22 @@ yarn test:gas-stories
 ---
 
 ## Deploying
-We use chugsplash to deploy our proxy contracts.
+We use chugsplash to deploy our proxy contracts, and OZ defender to upgrade them.
+To deploy first deploy the questerc1155 and questerc20 contracts, through the scripts. then deploy via chugsplash.
+
+after deploying we need to change the owner of the factory and receipt and tickets contracts to the multisig.
+
+to do that go to each contract on etherscan, click internaTxs and click the first `from` address, this is the proxy mananger.
+- navigate to transferProxyOwnership (not transferOwnership)
+- you'll call this function for each proxy. the first parameter, referenceName, will be ReceiptRenderer for the first tx, RabbitHoleReceipt for the next, and QuestFactory for the third, etc.
+- set newOwner to the multisig address
 
 ### Deploying Quest Factory
 explanation of the the `_roles` key:
 "0x00": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true }, // 'DEFAULT_ADMIN_ROLE' https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol#L57
 "0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true } //  keccak256('CREATE_QUEST_ROLE');
 
-make sure to change `claimSignerAddress`, `erc20QuestAddress` and `erc1155QuestAddress` after deploy.
+make sure to change `claimSignerAddress`, `erc20QuestAddress` and `erc1155QuestAddress` after deploy, or deploy the contracts first and set them in the chugsplash config.
 
 ### Deploying RabbitHole Receipt
 make sure to change the `minterAddress` to the QuestFactory address, and `ReceiptRendererContract`, `QuestFactoryContract` after deploy.
@@ -268,9 +276,9 @@ make sure to change the `minterAddress` to the QuestFactory address, and `Receip
 ## Deployed Addresses
 ### Goerli
 
- │ 'RabbitHoleReceipt' │ '0x5fa55346fc7979FC521115C4Cf37AECc35B36Ec6' │
- │   'QuestFactory'    │ '0x5B421516995D47c6082708614eC1E6a52C6F8EcD' │
- │ 'RabbitHoleTickets' │ '0x70dd3F5f2356fdAeaE5aE517e0fB862b1Ce2F29C' │
+ │ 'RabbitHoleReceipt' │ '0xA9Fe321BA99d312a8e33C153f6A7Be9072204f51' │
+ │ 'RabbitHoleTickets' │ '0xe939B475380cd0C0ecCaED1EF9D67A68890aa12b' │
+ │   'QuestFactory'    │ '0xf0cEe4D873F44Ed0165e33DC84f0E93DA349FfE4' │
 
 ---
 
