@@ -35,10 +35,10 @@ contract Erc1155Quest is Quest, ERC1155Holder {
     }
 
     /// @dev Checks the balance to ensure that it has enough for all of the participants. Only able to be called by owner
-    function start() public override {
+    function queue() public override {
         if (IERC1155(rewardToken).balanceOf(address(this), rewardAmountInWeiOrTokenId) < totalParticipants)
             revert TotalAmountExceedsBalance();
-        super.start();
+        super.queue();
     }
 
     /// @dev Transfers the reward token `rewardAmountInWeiOrTokenId` to the msg.sender

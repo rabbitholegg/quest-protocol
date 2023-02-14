@@ -380,14 +380,14 @@ describe('QuestFactory', () => {
       erc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
     })
 
-    it('Should fail when trying to mint before quest has started', async () => {
+    it('Should fail when trying to mint before quest has been queued', async () => {
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotStarted')
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotQueued')
     })
 
     it('Should fail when trying to mint before quest time has started', async () => {
-      await erc20Quest.start()
+      await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate - 1)
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
@@ -395,14 +395,14 @@ describe('QuestFactory', () => {
     })
 
     it('Should mint a receipt', async () => {
-      await erc20Quest.start()
+      await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate)
       await deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
     })
 
     it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
-      await erc20Quest.start()
+      await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate)
       await expect(
         deployedFactoryContract.connect(royaltyRecipient).mintReceipt(erc20QuestId, messageHash, signature)
@@ -410,7 +410,7 @@ describe('QuestFactory', () => {
     })
 
     it('Should fail if user is able to call mintReceipt multiple times', async () => {
-      await erc20Quest.start()
+      await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate)
       await deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
@@ -422,7 +422,7 @@ describe('QuestFactory', () => {
     })
 
     it('Should fail when trying to mint after quest time has passed', async () => {
-      await erc20Quest.start()
+      await erc20Quest.queue()
       await time.setNextBlockTimestamp(expiryDate + 1)
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)

@@ -21,7 +21,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
-    bool public hasStarted;
+    bool public queued;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -50,10 +50,11 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         __Pausable_init();
     }
 
-    /// @notice Starts the Quest
+    /// @notice Queues the Quest
     /// @dev Only the owner of the Quest can call this function
-    function start() public virtual onlyOwner {
-        hasStarted = true;
+    function queue() public virtual onlyOwner {
+        queued = true;
+        emit Queued(block.timestamp);
     }
 
     /// @notice Pauses the Quest
@@ -71,9 +72,11 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length;) {
+        for (uint i = 0; i < tokenIds_.length; ) {
             claimedList[tokenIds_[i]] = true;
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -85,13 +88,13 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
 
     /// @notice Checks if the Quest has started at the function level
     modifier onlyStarted() {
-        if (!hasStarted) revert NotStarted();
+        if (!queued) revert NotStarted();
         _;
     }
 
     /// @notice Checks if quest has started both at the function level and at the start time
     modifier onlyQuestActive() {
-        if (!hasStarted) revert NotStarted();
+        if (!queued) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
@@ -104,11 +107,15 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length;) {
+        for (uint i = 0; i < tokens.length; ) {
             if (!this.isClaimed(tokens[i])) {
-            unchecked{redeemableTokenCount++;}
+                unchecked {
+                    redeemableTokenCount++;
+                }
             }
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
