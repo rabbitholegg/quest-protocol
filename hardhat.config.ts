@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
       default: 1,
       1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74', // mainnet, multisig
       5: '0xE662f9575634dbbca894B756d1A19A851c824f00', // goerli, eoa
-      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145' // optimisim, multisig
+      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145' // optimism, multisig
     },
 		claimSignerAddress: { // public address on API
       1: '0x458d84d42878930C929C660F24F1505368107276',
@@ -81,12 +81,16 @@ const config: HardhatUserConfig = {
     },
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_API_KEY}`,
-      accounts: process.env.TESTNET_PRIVATE_KEY ? [`0x${process.env.TESTNET_PRIVATE_KEY}`] : [],
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
     },
     optimism: {
       url: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
     },
+    optimismGoerli: {
+      url: `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+    }
   },
 }
 

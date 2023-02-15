@@ -12,7 +12,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ticketRenderer = await TicketRenderer.deploy()
   await ticketRenderer.deployed()
 
-
   const minterAddress = owner
   const royaltyBps = 100
   const initArgs = [ticketRenderer.address, royaltyRecipient, minterAddress, royaltyBps, owner]
@@ -24,13 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000020',
     proxy: {
       owner: owner,
-      proxyContract: 'OpenZeppelinTransparentProxy',
-      execute: {
-        init: {
-          methodName: 'initialize',
-          args: initArgs,
-        },
-      }
+      proxyContract: 'OpenZeppelinTransparentProxy'
     },
     log: true,
   });
