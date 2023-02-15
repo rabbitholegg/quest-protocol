@@ -309,10 +309,13 @@ transfer ownership to the multisig
 ## Deployed Addresses
 ### Goerli
 
- │ 'RabbitHoleReceipt' │ '0xA9Fe321BA99d312a8e33C153f6A7Be9072204f51' │
- │ 'RabbitHoleTickets' │ '0xe939B475380cd0C0ecCaED1EF9D67A68890aa12b' │
- │   'QuestFactory'    │ '0xf0cEe4D873F44Ed0165e33DC84f0E93DA349FfE4' │
-
+| RabbitHoleReceipt | 0xA9Fe321BA99d312a8e33C153f6A7Be9072204f51 |
+| RabbitHoleTickets | 0xe939B475380cd0C0ecCaED1EF9D67A68890aa12b |
+| QuestFactory | 0xf0cEe4D873F44Ed0165e33DC84f0E93DA349FfE4 |
+| Erc20Quest | 0xba446ed104d0Cc8Aa99530Ed1eb5dc2DFbd9b4b4 |
+| Erc1155Quest | 0xf9c8832ADa3041c3fa2879268c056B65AB7fC11a |
+| TicketRenderer | 0x7AC903CD8bCe2A0Fe900aB2fFEb7110068359E6f |
+| ReceiptRenderer | 0x88E264e09724c073023EcF1a8AA706a19E81D783 |
 ---
 
 ## Upgrading
