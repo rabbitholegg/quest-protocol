@@ -1,19 +1,30 @@
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-require('dotenv').config()
+require('dotenv').config();
+require('hardhat-deploy');
+// require("@nomiclabs/hardhat-ethers");
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-import 'hardhat-gas-reporter'
-import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-ethers'
-import '@nomiclabs/hardhat-waffle'
+import "@nomicfoundation/hardhat-toolbox";
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
-import '@typechain/hardhat'
-import 'solidity-coverage'
 
 const config: HardhatUserConfig = {
+  namedAccounts: {
+    deployer: 0,
+		claimSignerAddress: {
+      1: '0x22890b38D6ab6090e5123DB7497f4bCE7062929F',
+      5: '0x0000000000000000000000000000000000000000',
+      10: '0x0000000000000000000000000000000000000000',
+    },
+    protocolFeeReceipient: {
+      1: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
+      5: '0x0000000000000000000000000000000000000000',
+      10: '0x0000000000000000000000000000000000000000',
+    }
+	},
   gasReporter: {
     gasPrice: 100,
   },
