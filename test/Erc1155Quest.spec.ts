@@ -321,7 +321,7 @@ describe('Erc1155Quest', () => {
 
     it('should allow a user to claim after withdrawRemainingTokens is called', async () => {
       await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
-      await deployedQuestContract.start()
+      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
       await time.setNextBlockTimestamp(expiryDate + 1)
