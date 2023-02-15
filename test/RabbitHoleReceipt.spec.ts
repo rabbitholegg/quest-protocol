@@ -41,6 +41,7 @@ describe('RabbitholeReceipt Contract', async () => {
       royaltyRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
+      contractOwner.address
     ])
 
     await RHReceipt.setQuestFactory(deployedFactoryContract.address)

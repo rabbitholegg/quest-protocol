@@ -100,6 +100,7 @@ describe('Erc20Quest', async () => {
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
+      owner.address
     ])) as QuestFactory
   }
 
@@ -113,6 +114,7 @@ describe('Erc20Quest', async () => {
       owner.address,
       minterAddress.address, // as a placeholder, would the factory contract
       10,
+      owner.address
     ])) as RabbitHoleReceipt
   }
 

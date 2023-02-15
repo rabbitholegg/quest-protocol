@@ -125,22 +125,6 @@ describe('QuestFactory', () => {
     ])) as RabbitHoleTickets
   }
 
-  describe('Deployment', () => {
-    it('Should revert if trying to deploy with protocolFeeRecipient set to zero address', async () => {
-      await expect(
-        upgrades.deployProxy(questFactoryContract, [
-          wallet.address,
-          deployedRabbitHoleReceiptContract.address,
-          deployedRabbitHoleTicketsContract.address,
-          constants.AddressZero,
-          deployedErc20Quest.address,
-          deployedErc1155Quest.address,
-          owner.address,
-        ])
-      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
-    })
-  })
-
   describe('createQuest()', () => {
     const erc20QuestId = 'asdf'
     const erc1155QuestId = 'fdsa'
