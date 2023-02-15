@@ -21,7 +21,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const rabbitholeReceiptAddress = '0x83149DE08844331591DD45E9D3A89D1CF64f59Bc'
   const rabbitholeTicketsAddress = '0x68dE4434a00374C2b63A0D90E5FD8C7d2878eEe2'
 
-  console.log('initialize args:', [claimSignerAddress, rabbitholeReceiptAddress, rabbitholeTicketsAddress, protocolFeeReceipient, erc20addy, erc1155addy, owner])
+  const initArgs = [claimSignerAddress, rabbitholeReceiptAddress, rabbitholeTicketsAddress, protocolFeeReceipient, erc20addy, erc1155addy, owner]
+  console.log('initialize args:', initArgs)
 
   await deploy('QuestFactory', {
     contract: 'QuestFactory',
@@ -33,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [claimSignerAddress, rabbitholeReceiptAddress, rabbitholeTicketsAddress, protocolFeeReceipient, erc20addy, erc1155addy, deployer],
+          args: initArgs,
         },
       }
     },

@@ -259,6 +259,11 @@ All contracts are deployed with the same addresses on Goerli, Mainnet and Optimi
 |RabbitHole Receipt|0x83149DE08844331591DD45E9D3A89D1CF64f59Bc|
 |RabbitHole Tickets|0x68dE4434a00374C2b63A0D90E5FD8C7d2878eEe2|
 
+
+## Deployment
+`yarn hardhat deploy --network network_name` where network_name is one of `goerli`, `mainnet`, `optimism`
+`yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+
 ## Upgrading
 
 The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or
