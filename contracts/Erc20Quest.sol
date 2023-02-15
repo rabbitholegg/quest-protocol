@@ -2,8 +2,8 @@
 pragma solidity =0.8.16;
 
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {Quest} from './Quest.sol';
 import {QuestFactory} from './QuestFactory.sol';
+import {Quest} from './Quest.sol';
 
 /// @title Erc20Quest
 /// @author RabbitHole.gg
@@ -13,7 +13,6 @@ contract Erc20Quest is Quest {
     uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
-    QuestFactory public questFactoryContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -43,7 +42,6 @@ contract Erc20Quest is Quest {
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFactoryContract = QuestFactory(msg.sender);
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
@@ -64,12 +62,12 @@ contract Erc20Quest is Quest {
         return (this.maxTotalRewards() * questFee) / 10_000;
     }
 
-    /// @notice Starts the quest by marking it ready to start at the contract level. Marking a quest ready to start does not mean that it is live. It also requires that the start time has passed
+    /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
-    function start() public override {
+    function queue() public override {
         if (IERC20(rewardToken).balanceOf(address(this)) < this.maxTotalRewards() + this.maxProtocolReward())
             revert TotalAmountExceedsBalance();
-        super.start();
+        super.queue();
     }
 
     /// @notice Internal function that transfers the rewards to the msg.sender
@@ -92,17 +90,13 @@ contract Erc20Quest is Quest {
         require(!hasWithdrawn, 'Already withdrawn');
 
         uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
-        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) - this.protocolFee() - unclaimedTokens;
+        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) -
+            this.protocolFee() -
+            unclaimedTokens;
         hasWithdrawn = true;
 
         IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
         IERC20(rewardToken).safeTransfer(protocolFeeRecipient, this.protocolFee());
-    }
-
-    /// @notice Call the QuestFactory contract to get the amount of receipts that have been minted
-    /// @return The amount of receipts that have been minted for the given quest
-    function receiptRedeemers() external view returns (uint256) {
-        return questFactoryContract.getNumberMinted(questId);
     }
 
     /// @notice Function that calculates the protocol fee

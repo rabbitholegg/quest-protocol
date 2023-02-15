@@ -5,22 +5,25 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the base contract for all Quests. The Erc20Quest and Erc1155Quest contracts inherit from this contract.
-contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
+contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQuest {
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
+    QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public rewardAmountInWeiOrTokenId;
-    bool public hasStarted;
+    bool public queued;
     string public questId;
     uint256 public redeemedTokens;
 
@@ -44,15 +47,17 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
         totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
+        questFactoryContract = QuestFactory(msg.sender);
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         __Ownable_init();
         __Pausable_init();
     }
 
-    /// @notice Starts the Quest
+    /// @notice Queues the Quest
     /// @dev Only the owner of the Quest can call this function
-    function start() public virtual onlyOwner {
-        hasStarted = true;
+    function queue() public virtual onlyOwner {
+        queued = true;
+        emit Queued(block.timestamp);
     }
 
     /// @notice Pauses the Quest
@@ -70,9 +75,11 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length;) {
+        for (uint i = 0; i < tokenIds_.length; ) {
             claimedList[tokenIds_[i]] = true;
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -84,30 +91,34 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
 
     /// @notice Checks if the Quest has started at the function level
     modifier onlyStarted() {
-        if (!hasStarted) revert NotStarted();
+        if (!queued) revert NotStarted();
         _;
     }
 
     /// @notice Checks if quest has started both at the function level and at the start time
     modifier onlyQuestActive() {
-        if (!hasStarted) revert NotStarted();
+        if (!queued) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() external virtual onlyQuestActive whenNotPaused {
+    function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length;) {
+        for (uint i = 0; i < tokens.length; ) {
             if (!this.isClaimed(tokens[i])) {
-            unchecked{redeemableTokenCount++;}
+                unchecked {
+                    redeemableTokenCount++;
+                }
             }
-        unchecked{i++;}
+            unchecked {
+                i++;
+            }
         }
 
         if (redeemableTokenCount == 0) revert AlreadyClaimed();
@@ -131,6 +142,12 @@ contract Quest is PausableUpgradeable, OwnableUpgradeable, IQuest {
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(uint256 amount_) internal virtual {
         revert MustImplementInChild();
+    }
+
+    // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
+    /// @return The amount of receipts that have been minted for the given quest
+    function receiptRedeemers() public view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
     }
 
     /// @notice Checks if a Receipt token id has been used to claim a reward

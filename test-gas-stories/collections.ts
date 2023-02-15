@@ -98,7 +98,7 @@ describe('Collections', () => {
     erc20Quest = (await ethers.getContractFactory('Erc20Quest')).attach(erc20QuestAddress) as Erc20Quest
     const val = (await erc20Quest.maxTotalRewards()).add(await erc20Quest.maxProtocolReward())
     await contracts.sampleErc20.transfer(erc20QuestAddress, val)
-    tx = await erc20Quest.start()
+    tx = await erc20Quest.queue()
     await story('Erc20Quest', 'Start', 'startQuest', 'Start ERC20 quest', tx)
   }
 
@@ -107,7 +107,7 @@ describe('Collections', () => {
     const erc1155QuestAddress = erc1155QuestStruct.questAddress
     erc1155Quest = (await ethers.getContractFactory('Erc1155Quest')).attach(erc1155QuestAddress) as Erc1155Quest
     await contracts.sampleErc1155.safeTransferFrom(owner.address, erc1155QuestAddress, 1, 10, '0x')
-    tx = await erc1155Quest.start()
+    tx = await erc1155Quest.queue()
     await story('Erc1155Quest', 'Start', 'startQuest', 'Start ERC1155 quest', tx)
   }
 
