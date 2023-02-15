@@ -252,24 +252,57 @@ yarn test:gas-stories
 
 ## Deploying
 We use chugsplash to deploy our proxy contracts, and OZ defender to upgrade them.
-To deploy first deploy the questerc1155 and questerc20 contracts, through the scripts. then deploy via chugsplash.
+To deploy first deploy the QuestErc1155, QuestErc20, ReceiptRendererContract, and TicketRendererContract contracts through their deploy scripts.
 
-after deploying we need to change the owner of the factory and receipt and tickets contracts to the multisig.
+`yarn hardhat run scripts/deployRenderContracts.js --network goerli`
+`yarn hardhat run scripts/deployQuestContracts.js --network goerli`
+
+Then update the chugsplash file (see below, mostly changing _owner, and contract addreses) then deploy via chugsplash like this `yarn hardhat chugsplash-deploy --config-path chugsplash.json --network goerli`
+
+after deploying we need to change the owner of the factory, receipt, and tickets contracts to the multisig so we can upgrade via OZ defender.
 
 to do that go to each contract on etherscan, click internaTxs and click the first `from` address, this is the proxy mananger.
 - navigate to transferProxyOwnership (not transferOwnership)
-- you'll call this function for each proxy. the first parameter, referenceName, will be ReceiptRenderer for the first tx, RabbitHoleReceipt for the next, and QuestFactory for the third, etc.
+- you'll call this function for each proxy. the first parameter, referenceName, will be RabbitHoleTickets for the first tx, RabbitHoleReceipt for the next, and QuestFactory for the third, etc.
 - set newOwner to the multisig address
 
 ### Deploying Quest Factory
+#### Before deploy
+set `_owner` to the deployer in the chugsplash config
+set correct members keys for `_roles` to the deployer address in the chugsplash config
+
 explanation of the the `_roles` key:
+```
 "0x00": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true }, // 'DEFAULT_ADMIN_ROLE' https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol#L57
 "0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true } //  keccak256('CREATE_QUEST_ROLE');
+```
 
-make sure to change `claimSignerAddress`, `erc20QuestAddress` and `erc1155QuestAddress` after deploy, or deploy the contracts first and set them in the chugsplash config.
+#### After deploy
+set these addresses
+`claimSignerAddress` to the API server public address
+`erc20QuestAddress` and `erc1155QuestAddress` to their respective contract addresses
+transfer ownership to the multisig
 
 ### Deploying RabbitHole Receipt
-make sure to change the `minterAddress` to the QuestFactory address, and `ReceiptRendererContract`, `QuestFactoryContract` after deploy.
+#### Before deploy
+set `_owner` to the deployer
+
+#### After deploy
+set these addresses
+`minterAddress` to the QuestFactory address
+`royaltyRecipient` to the multisig
+`ReceiptRendererContract`, `QuestFactoryContract`, `ReceiptRendererContract` to their respective contract addresses
+transfer ownership to the multisig
+
+### Deploying RabbitHole Tickets
+#### Before deploy
+set `_owner` to the deployer
+
+#### After deploy
+set these addresses
+`royaltyRecipient` to the multisig
+`TicketRendererContract` to the TicketRenderer contract address
+transfer ownership to the multisig
 
 ---
 
