@@ -291,7 +291,7 @@ set `_owner` to the deployer
 set these addresses
 `minterAddress` to the QuestFactory address
 `royaltyRecipient` to the multisig
-`ReceiptRendererContract`, `QuestFactoryContract`, `ReceiptRendererContract` to their respective contract addresses
+`ReceiptRendererContract`, `QuestFactoryContract`, to their respective contract addresses
 transfer ownership to the multisig
 
 ### Deploying RabbitHole Tickets
@@ -302,6 +302,7 @@ set `_owner` to the deployer
 set these addresses
 `royaltyRecipient` to the multisig
 `TicketRendererContract` to the TicketRenderer contract address
+`minterAddress` to ??
 transfer ownership to the multisig
 
 ---

@@ -1,0 +1,74 @@
+{
+  "options": {
+    "projectName": "RabbitHole.gg Quest Protocol"
+  },
+  "contracts": {
+    "RabbitHoleReceipt": {
+      "contract": "RabbitHoleReceipt",
+      "variables": {
+        "_owner": "0xE662f9575634dbbca894B756d1A19A851c824f00",
+        "_name": "RabbitHoleReceipt",
+        "_symbol": "RHR",
+        "royaltyRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
+        "minterAddress": "0x0000000000000000000000000000000000000000",
+        "ReceiptRendererContract": "0x0000000000000000000000000000000000000000",
+        "QuestFactoryContract": "0x0000000000000000000000000000000000000000",
+        "royaltyFee": 100,
+        "_tokenIds": 0,
+        "questIdForTokenId": {},
+        "timestampForTokenId": {},
+        "_initialized": 1,
+        "_initializing": false,
+        "__gap": [],
+        "_allTokens": [],
+        "_owners": {},
+        "_balances": {},
+        "_tokenApprovals": {},
+        "_operatorApprovals": {},
+        "_tokenURIs": {},
+        "_ownedTokens": {},
+        "_ownedTokensIndex": {},
+        "_allTokensIndex": {}
+      }
+    },
+    "RabbitHoleTickets": {
+      "contract": "RabbitHoleTickets",
+      "variables": {
+        "_owner": "0xE662f9575634dbbca894B756d1A19A851c824f00",
+        "royaltyRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
+        "minterAddress": "0x0000000000000000000000000000000000000000",
+        "TicketRendererContract": "0x0000000000000000000000000000000000000000",
+        "royaltyFee": 100,
+        "_tokenIds": 0,
+        "_initialized": 1,
+        "_initializing": false,
+        "__gap": [],
+        "_balances": {},
+        "_operatorApprovals": {},
+        "_uri": ""
+      }
+    },
+    "QuestFactory": {
+      "contract": "QuestFactory",
+      "variables": {
+        "_owner": "0xE662f9575634dbbca894B756d1A19A851c824f00",
+        "_roles": {
+          "0x0000000000000000000000000000000000000000000000000000000000000000": { "members": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true }, "adminRole": "0x0000000000000000000000000000000000000000000000000000000000000000" },
+          "0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd": { "members": { "0xE662f9575634dbbca894B756d1A19A851c824f00": true }, "adminRole": "0x0000000000000000000000000000000000000000000000000000000000000000" }
+        },
+        "rabbitHoleReceiptContract": "{{RabbitHoleReceipt}}",
+        "rabbitHoleTicketsContract": "{{RabbitHoleTickets}}",
+        "protocolFeeRecipient": "0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0",
+        "questFee": 2000,
+        "claimSignerAddress": "0x0000000000000000000000000000000000000000",
+        "erc20QuestAddress": "0x0000000000000000000000000000000000000000",
+        "erc1155QuestAddress": "0x0000000000000000000000000000000000000000",
+        "quests": {},
+        "rewardAllowlist": {},
+        "_initialized": 1,
+        "_initializing": false,
+        "__gap": []
+      }
+    }
+  }
+}
