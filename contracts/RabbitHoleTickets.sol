@@ -2,7 +2,7 @@
 pragma solidity =0.8.16;
 
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
@@ -37,11 +37,12 @@ contract RabbitHoleTickets is
         address ticketRenderer_,
         address royaltyRecipient_,
         address minterAddress_,
-        uint royaltyFee_
+        uint royaltyFee_,
+        address owner_
     ) external initializer {
         __ERC1155_init('');
-        __Ownable_init();
         __ERC1155Burnable_init();
+        __Ownable_init(owner_);
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;

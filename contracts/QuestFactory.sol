@@ -8,7 +8,7 @@ import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -48,16 +48,17 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rabbitHoleTicketsContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
-        address erc1155QuestAddress_
+        address erc1155QuestAddress_,
+        address ownerAddress_
     ) external initializer {
-        __Ownable_init();
+        __Ownable_init(ownerAddress_);
         __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole(msg.sender);
+        grantDefaultAdminAndCreateQuestRole(ownerAddress_);
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         rabbitHoleTicketsContract = RabbitHoleTickets(rabbitHoleTicketsContract_);
-        setProtocolFeeRecipient(protocolFeeRecipient_);
-        setQuestFee(2_000);
+        protocolFeeRecipient = protocolFeeRecipient_;
+        questFee = 2_000;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
     }

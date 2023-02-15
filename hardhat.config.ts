@@ -6,22 +6,33 @@ require('hardhat-deploy');
 // require("@nomiclabs/hardhat-ethers");
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-import '@nomiclabs/hardhat-ethers'
-import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers"
+import "@nomicfoundation/hardhat-toolbox"
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 
 const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: 0,
-		claimSignerAddress: {
-      1: '0x22890b38D6ab6090e5123DB7497f4bCE7062929F',
-      5: '0x0000000000000000000000000000000000000000',
+    owner: { // multisig
+      default: 1,
+      1: '0x0000000000000000000000000000000000000000',
+      5: '0xE662f9575634dbbca894B756d1A19A851c824f00',
+      10: '0x0000000000000000000000000000000000000000'
+    },
+		claimSignerAddress: { // public address on API
+      1: '0x0000000000000000000000000000000000000000',
+      5: '0x22890b38D6ab6090e5123DB7497f4bCE7062929F',
       10: '0x0000000000000000000000000000000000000000',
     },
-    protocolFeeReceipient: {
-      1: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
-      5: '0x0000000000000000000000000000000000000000',
+    protocolFeeReceipient: { // multisig
+      1: '0x0000000000000000000000000000000000000000',
+      5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
+      10: '0x0000000000000000000000000000000000000000',
+    },
+    royaltyRecipient: { // multisig
+      1: '0x0000000000000000000000000000000000000000',
+      5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
       10: '0x0000000000000000000000000000000000000000',
     }
 	},

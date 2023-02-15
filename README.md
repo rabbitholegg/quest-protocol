@@ -250,6 +250,15 @@ yarn test:gas-stories
 
 ---
 
+## Addressses
+All contracts are deployed with the same addresses on Goerli, Mainnet and Optimism. The addresses are as follows:
+
+|Contract Name|Address|
+|-------------|-------|
+|Quest Factory|0xE4A85599217c4F5dE677e542738ba4031098A72D|
+|RabbitHole Receipt|0x83149DE08844331591DD45E9D3A89D1CF64f59Bc|
+|RabbitHole Tickets|0x68dE4434a00374C2b63A0D90E5FD8C7d2878eEe2|
+
 ## Upgrading
 
 The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or

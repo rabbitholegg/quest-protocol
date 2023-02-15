@@ -80,6 +80,7 @@ describe('QuestFactory', () => {
       protocolFeeAddress,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
+      owner.address,
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
@@ -106,6 +107,7 @@ describe('QuestFactory', () => {
       royaltyRecipient.address,
       owner.address,
       69,
+      owner.address
     ])) as RabbitHoleReceipt
   }
 
@@ -119,6 +121,7 @@ describe('QuestFactory', () => {
       royaltyRecipient.address,
       owner.address,
       10,
+      owner.address
     ])) as RabbitHoleTickets
   }
 
@@ -132,6 +135,7 @@ describe('QuestFactory', () => {
           constants.AddressZero,
           deployedErc20Quest.address,
           deployedErc1155Quest.address,
+          owner.address,
         ])
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressZeroNotAllowed')
     })
