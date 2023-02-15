@@ -8,14 +8,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, owner, royaltyRecipient} = await getNamedAccounts();
 
-  const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
-  const receiptRenderer = await ReceiptRenderer.deploy()
-  await receiptRenderer.deployed()
+  // const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
+  // const receiptRenderer = await ReceiptRenderer.deploy()
+  // await receiptRenderer.deployed()
 
-  const minterAddress = '0xE4A85599217c4F5dE677e542738ba4031098A72D' // The factory address
-  const royaltyBps = 100
-  const initArgs = [receiptRenderer.address, royaltyRecipient, minterAddress, royaltyBps, owner]
-  console.log('initialize args:', initArgs)
+  // const minterAddress = '0xE4A85599217c4F5dE677e542738ba4031098A72D' // The factory address
+  // const royaltyBps = 100
+  // const initArgs = [receiptRenderer.address, royaltyRecipient, minterAddress, royaltyBps, owner]
+  // console.log('initialize args:', initArgs)
 
   await deploy('RabbitHoleReceipt', {
     contract: 'RabbitHoleReceipt',

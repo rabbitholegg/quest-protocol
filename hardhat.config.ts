@@ -16,9 +16,9 @@ const config: HardhatUserConfig = {
     deployer: 0,
     owner: {
       default: 1,
-      1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74', // mainnet, multisig
-      5: '0xE662f9575634dbbca894B756d1A19A851c824f00', // goerli, eoa
-      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145' // optimism, multisig
+      1: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
+      5: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
+      10: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
     },
 		claimSignerAddress: { // public address on API
       1: '0x458d84d42878930C929C660F24F1505368107276',
@@ -58,8 +58,9 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
+      mainnet: process.env.MAIN_ETHERSCAN_API_KEY,
+      goerli: process.env.GOE_ETHERSCAN_API_KEY,
+      optimisticEthereum: process.env.OPT_ETHERSCAN_API_KEY,
     },
   },
   networks: {
