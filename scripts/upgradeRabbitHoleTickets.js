@@ -5,7 +5,7 @@ const { ethers } = require('hardhat')
 async function main() {
   hre.run('compile')
   // const address = '0x5C3eBe0C4a1F1505a4A106859CaBdca0913fa42F' // goerli
-  const address = '0x70dd3F5f2356fdAeaE5aE517e0fB862b1Ce2F29C' // goerli chugsplash
+  const address = '0xe939B475380cd0C0ecCaED1EF9D67A68890aa12b' // goerli chugsplash
   const contract = await ethers.getContractFactory('RabbitHoleTickets')
 
   const implAddress = await upgrades.erc1967.getImplementationAddress(address)
