@@ -7,6 +7,7 @@ import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
+import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
 /// @title Quest
@@ -16,6 +17,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
+    QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
@@ -45,6 +47,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         totalParticipants = totalParticipants_;
         rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
         questId = questId_;
+        questFactoryContract = QuestFactory(msg.sender);
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         __Ownable_init();
         __Pausable_init();
@@ -139,6 +142,12 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(uint256 amount_) internal virtual {
         revert MustImplementInChild();
+    }
+
+    // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
+    /// @return The amount of receipts that have been minted for the given quest
+    function receiptRedeemers() public view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
     }
 
     /// @notice Checks if a Receipt token id has been used to claim a reward

@@ -319,6 +319,19 @@ describe('Erc1155Quest', () => {
       )
     })
 
+    it('should allow a user to claim after withdrawRemainingTokens is called', async () => {
+      await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
+      await deployedQuestContract.start()
+      await time.setNextBlockTimestamp(startDate + 1)
+      await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
+      await time.setNextBlockTimestamp(expiryDate + 1)
+
+      await deployedQuestContract.connect(owner).withdrawRemainingTokens()
+
+      await deployedQuestContract.connect(firstAddress).claim()
+      expect(await deployedSampleErc1155Contract.balanceOf(firstAddress.address, rewardAmount)).to.equal('1')
+    })
+
     it('should transfer all rewards back to owner', async () => {
       const beginningContractBalance = await deployedSampleErc1155Contract.balanceOf(
         deployedQuestContract.address,
