@@ -14,11 +14,11 @@ import '@openzeppelin/hardhat-defender'
 const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: 0,
-    owner: { // multisig
+    owner: {
       default: 1,
-      1: '0x0000000000000000000000000000000000000000',
-      5: '0xE662f9575634dbbca894B756d1A19A851c824f00',
-      10: '0x0000000000000000000000000000000000000000'
+      1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74', // mainnet, multisig
+      5: '0xE662f9575634dbbca894B756d1A19A851c824f00', // goerli, eoa
+      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145' // optimisim, multisig
     },
 		claimSignerAddress: { // public address on API
       1: '0x0000000000000000000000000000000000000000',
@@ -26,14 +26,14 @@ const config: HardhatUserConfig = {
       10: '0x0000000000000000000000000000000000000000',
     },
     protocolFeeReceipient: { // multisig
-      1: '0x0000000000000000000000000000000000000000',
+      1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
       5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
-      10: '0x0000000000000000000000000000000000000000',
+      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145',
     },
     royaltyRecipient: { // multisig
-      1: '0x0000000000000000000000000000000000000000',
+      1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
       5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
-      10: '0x0000000000000000000000000000000000000000',
+      10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145',
     }
 	},
   gasReporter: {
