@@ -152,31 +152,14 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 
 ---
 
-## Deployments
+## Addressses
+All contracts are deployed with the same addresses on Goerli, Mainnet and Optimism. The addresses are as follows:
 
-| Chain           | Quest Factory Contract                     |
-| --------------- | ------------------------------------------ |
-| Ethereum        | 0x0                                        |
-| Goerli          | 0x37A4a767269B5D1651E544Cd2f56BDfeADC37B05 |
-| Polygon Mainnet | 0x0                                        |
-| Optimism        | 0x0                                        |
-| Arbitrum        | 0x0                                        |
-
-| Chain           | RabbitHole Receipt Contract                |
-| --------------- | ------------------------------------------ |
-| Ethereum        | 0x0                                        |
-| Goerli          | 0xa61826ea8F5C08B0c9DC6925A9DEc80204F32292 |
-| Polygon Mainnet | 0x0                                        |
-| Optimism        | 0x0                                        |
-| Arbitrum        | 0x0                                        |
-
-| Chain           | RabbitHole Tickets Contract                |
-| --------------- | ------------------------------------------ |
-| Ethereum        | 0x0                                        |
-| Goerli          | 0xCa0A3439803e1EA9B787258Eafb85A6C665a9b30 |
-| Polygon Mainnet | 0x0                                        |
-| Optimism        | 0x0                                        |
-| Arbitrum        | 0x0                                        |
+|Contract Name|Address|
+|-------------|-------|
+|Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
+|RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
+|RabbitHole Tickets|0xB0A67B12F2983a0796Fb7CC5C28C153eA074D327|
 
 ---
 
