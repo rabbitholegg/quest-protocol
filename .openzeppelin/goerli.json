@@ -102,6 +102,10 @@
     {
       "address": "0xE4A85599217c4F5dE677e542738ba4031098A72D",
       "kind": "transparent"
+    },
+    {
+      "address": "0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E",
+      "kind": "transparent"
     }
   ],
   "impls": {
