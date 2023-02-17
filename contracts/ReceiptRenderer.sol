@@ -74,7 +74,7 @@ contract ReceiptRenderer {
             '",',
             '"description": "RabbitHole.gg Receipts are used to claim rewards from completed quests.",',
             '"image": "',
-            generateSVG(claimed_, questId_, humanRewardAmountString, rewardTokenSymbol),
+            generateSVG(claimed_, humanRewardAmountString, rewardTokenSymbol),
             '",',
             '"attributes": ',
             attributes,
@@ -102,11 +102,10 @@ contract ReceiptRenderer {
 
     /// @dev generates the on-chain SVG for an ERC-721 token ID
     /// @param claimed_ Whether or not the token has been claimed
-    /// @param questId_ The questId tied to the tokenId
     /// @param rewardAmountString_ The string decimal of reward tokens that the user is eligible for
     /// @param rewardTokenSymbol_ The symbol of the reward token
     /// @return base64 encoded SVG image
-    function generateSVG(bool claimed_, string memory questId_, string memory rewardAmountString_, string memory rewardTokenSymbol_) internal view returns (string memory) {
+    function generateSVG(bool claimed_, string memory rewardAmountString_, string memory rewardTokenSymbol_) internal pure returns (string memory) {
         bytes memory svg = abi.encodePacked(
             claimed_ ? PURPLE_SVG : GREEN_SVG,
             rewardAmountString_,
