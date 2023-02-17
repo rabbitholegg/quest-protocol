@@ -93,6 +93,7 @@ describe('Erc1155Quest', () => {
       owner.address,
       owner.address,
       10,
+      owner.address
     ])) as RabbitHoleReceipt
   }
 
@@ -111,6 +112,7 @@ describe('Erc1155Quest', () => {
       wallet.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
+      owner.address
     ])) as QuestFactory
   }
 

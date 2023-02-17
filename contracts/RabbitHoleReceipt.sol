@@ -4,7 +4,7 @@ pragma solidity =0.8.16;
 import '@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
@@ -44,11 +44,12 @@ contract RabbitHoleReceipt is
         address receiptRenderer_,
         address royaltyRecipient_,
         address minterAddress_,
-        uint royaltyFee_
+        uint royaltyFee_,
+        address owner_
     ) external initializer {
         __ERC721_init('RabbitHoleReceipt', 'RHR');
         __ERC721URIStorage_init();
-        __Ownable_init();
+        __Ownable_init(owner_);
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;
