@@ -22,7 +22,8 @@ describe('RabbitholeTickets Contract', async () => {
       deployedTicketRenderer.address,
       royaltyRecipient.address,
       minterAddress.address,
-      10
+      10,
+      contractOwner.address
     ])
   })
 

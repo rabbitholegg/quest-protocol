@@ -25,6 +25,7 @@ describe('RabbitholeReceipt Contract', async () => {
       royaltyRecipient.address,
       minterAddress.address,
       10,
+      contractOwner.address
     ])
 
     const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
@@ -41,6 +42,7 @@ describe('RabbitholeReceipt Contract', async () => {
       royaltyRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
+      contractOwner.address
     ])
 
     await RHReceipt.setQuestFactory(deployedFactoryContract.address)
