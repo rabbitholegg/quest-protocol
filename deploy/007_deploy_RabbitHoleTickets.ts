@@ -8,15 +8,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, owner, royaltyRecipient} = await getNamedAccounts();
 
-  // const TicketRenderer = await ethers.getContractFactory('TicketRenderer')
-  // const ticketRenderer = await TicketRenderer.deploy()
-  // await ticketRenderer.deployed()
-
-  // const minterAddress = owner
-  // const royaltyBps = 100
-  // const initArgs = [ticketRenderer.address, royaltyRecipient, minterAddress, royaltyBps, owner]
-  // console.log('initialize args:', initArgs)
-
   await deploy('RabbitHoleTickets', {
     contract: 'RabbitHoleTickets',
     from: deployer,
@@ -31,6 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true; // only run once
 };
 
-export default func;
 func.tags = ['RabbitHoleTickets'];
 func.id = 'deploy_RabbitHoleTickets';
+
+export default func;
