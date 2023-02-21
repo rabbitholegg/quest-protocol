@@ -81,7 +81,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
       verify: {
         etherscan: {
-          apiUrl: process.env.MAIN_ETHERSCAN_API_KEY
+          apiKey: process.env.MAIN_ETHERSCAN_API_KEY
         }
       }
     },
@@ -90,7 +90,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
       verify: {
         etherscan: {
-          apiUrl: process.env.MAIN_ETHERSCAN_API_KEY
+          apiKey: process.env.MAIN_ETHERSCAN_API_KEY
         }
       }
     },
@@ -99,7 +99,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
       verify: {
         etherscan: {
-          apiUrl: process.env.OPT_ETHERSCAN_API_KEY
+          apiKey: process.env.OPT_ETHERSCAN_API_KEY
         }
       }
     },
@@ -108,7 +108,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
       verify: {
         etherscan: {
-          apiUrl: process.env.OPT_ETHERSCAN_API_KEY
+          apiKey: process.env.OPT_ETHERSCAN_API_KEY
         }
       }
     }
