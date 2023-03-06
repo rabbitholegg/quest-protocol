@@ -59,7 +59,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       mainnet: process.env.MAIN_ETHERSCAN_API_KEY,
-      goerli: process.env.GOE_ETHERSCAN_API_KEY,
+      goerli: process.env.MAIN_ETHERSCAN_API_KEY,
       optimisticEthereum: process.env.OPT_ETHERSCAN_API_KEY,
     },
   },
@@ -79,18 +79,38 @@ const config: HardhatUserConfig = {
     mainnet: {
       url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.MAIN_ETHERSCAN_API_KEY
+        }
+      }
     },
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.MAIN_ETHERSCAN_API_KEY
+        }
+      }
     },
     optimism: {
       url: `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.OPT_ETHERSCAN_API_KEY
+        }
+      }
     },
     optimismGoerli: {
       url: `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.OPT_ETHERSCAN_API_KEY
+        }
+      }
     }
   },
 }
