@@ -100,7 +100,6 @@ const config: HardhatUserConfig = {
       }
     },
     polygon: {
-      gasMultiplier: 2,
       gasPrice: 500_000_000_000,
       url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
