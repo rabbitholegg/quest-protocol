@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('RabbitHoleTickets', {
     contract: 'RabbitHoleTickets',
     from: deployer,
-    deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000021', // 20 for for production, 21 for staging
+    deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000020', // 20 for for production, 21 for staging
     proxy: {
       owner: owner,
       proxyContract: 'OpenZeppelinTransparentProxy'
