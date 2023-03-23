@@ -8,7 +8,7 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 /// @title ReceiptRenderer
 /// @author RabbitHole.gg
 /// @dev This contract is used to render on-chain data for RabbitHole Receipts (ERC-721 standard)
-contract ReceiptRenderer {
+contract ReceiptRendererForDeployer {
     using Strings for uint256;
 
     /// @dev generates the tokenURI for a given ERC-721 token ID
