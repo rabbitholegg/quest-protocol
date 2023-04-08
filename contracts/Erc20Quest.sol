@@ -72,8 +72,8 @@ contract Erc20Quest is Quest {
 
     /// @notice Internal function that transfers the rewards to the msg.sender
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(uint256 amount_) internal override {
-        IERC20(rewardToken).safeTransfer(msg.sender, amount_);
+    function _transferRewards(address sender_, uint256 amount_) internal override {
+        IERC20(rewardToken).safeTransfer(sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount

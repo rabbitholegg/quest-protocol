@@ -6,6 +6,7 @@ import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import './ReceiptRenderer.sol';
 import './interfaces/IQuestFactory.sol';
@@ -16,7 +17,7 @@ contract SoulboundRabbitHoleReceipt is
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
-    OwnableUpgradeable,
+    OwnableUpgradeable
 {
     event MinterAddressSet(address indexed minterAddress);
 
@@ -83,50 +84,6 @@ contract SoulboundRabbitHoleReceipt is
         _safeMint(to_, newTokenID);
     }
 
-    /// @dev get the token ids for a quest owned by an address, since this is soulbound it can only be 1.
-    /// @param questId_ the quest id
-    /// @param claimingAddress_ the address claiming to own the tokens
-    function getOwnedTokenIdsOfQuest(
-        string memory questId_,
-        address claimingAddress_
-    ) external view returns (uint[] memory) {
-        uint msgSenderBalance = balanceOf(claimingAddress_);
-        bytes32 QUEST_ID = keccak256(bytes(questId_));
-
-        if (msgSenderBalance == 0 || keccak256(bytes(questIdForTokenId[tokenId])) != QUEST_ID) {
-            return new uint[](0);
-        }
-
-        // return an array with the token id
-        uint[] memory tokenIds = new uint[](1);
-        tokenIds[0] = tokenId;
-        return tokenIds;
-
-
-        uint[] memory tokenIdsForQuest = new uint[](msgSenderBalance);
-        uint foundTokens = 0;
-
-
-        for (uint i = 0; i < msgSenderBalance; i++) {
-            uint tokenId = tokenOfOwnerByIndex(claimingAddress_, i);
-            if () {
-                tokenIdsForQuest[i] = tokenId;
-                foundTokens++;
-            }
-        }
-
-        uint[] memory filteredTokens = new uint[](foundTokens);
-        uint filterTokensIndexTracker = 0;
-
-        for (uint i = 0; i < msgSenderBalance; i++) {
-            if (tokenIdsForQuest[i] > 0) {
-                filteredTokens[filterTokensIndexTracker] = tokenIdsForQuest[i];
-                filterTokensIndexTracker++;
-            }
-        }
-        return filteredTokens;
-    }
-
     /// @dev return the token uri, this delegates to the receipt renderer contract
     function tokenURI(
         uint tokenId_
@@ -163,11 +120,19 @@ contract SoulboundRabbitHoleReceipt is
         _burn(tokenId);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256) pure override internal {
-        require(from == address(0) || to == address(0), "This a Soulbound token. It cannot be transferred. It can only be burned by the token owner.");
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+        require(from == address(0) || to == address(0), "This is a Soulbound token. It cannot be transferred. It can only be burned by the token owner.");
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721) {
+    function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
         super._burn(tokenId);
+    }
+
+    /// @dev returns true if the supplied interface id is supported
+    /// @param interfaceId_ the interface id
+    function supportsInterface(
+        bytes4 interfaceId_
+    ) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
+        return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }

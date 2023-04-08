@@ -19,6 +19,7 @@ interface IQuest {
     error AmountExceedsBalance();
     error NotStarted();
     error MustImplementInChild();
+    error NotQuestFactory();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
 

@@ -102,6 +102,18 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         _;
     }
 
+    modifier onlyQuestFactory() {
+        if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
+        _;
+    }
+
+    function claimSoulbound(address sender_) external virtual nonReentrant whenNotPaused onlyQuestFactory {
+        uint256 totalRedeemableRewards = _calculateRewards(1);
+        _transferRewards(sender_, totalRedeemableRewards);
+        redeemedTokens = redeemedTokens + 1;
+        emit Claimed(sender_, rewardToken, totalRedeemableRewards);
+    }
+
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
     function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
@@ -125,7 +137,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
 
         uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
-        _transferRewards(totalRedeemableRewards);
+        _transferRewards(msg.sender, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + redeemableTokenCount;
 
         emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
@@ -140,7 +152,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
     /// @notice Transfer the rewards to the user
     /// @dev This function must be implemented in the child contracts
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(uint256 amount_) internal virtual {
+    function _transferRewards(address sender_, uint256 amount_) internal virtual {
         revert MustImplementInChild();
     }
 

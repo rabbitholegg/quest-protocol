@@ -44,8 +44,8 @@ contract Erc1155Quest is Quest, ERC1155Holder {
 
     /// @dev Transfers the reward token `rewardAmountInWeiOrTokenId` to the msg.sender
     /// @param amount_ The amount of reward tokens to transfer
-    function _transferRewards(uint256 amount_) internal override {
-        IERC1155(rewardToken).safeTransferFrom(address(this), msg.sender, rewardAmountInWeiOrTokenId, amount_, '0x00');
+    function _transferRewards(address sender_, uint256 amount_) internal override {
+        IERC1155(rewardToken).safeTransferFrom(address(this), sender_, rewardAmountInWeiOrTokenId, amount_, '0x00');
     }
 
     /// @dev Returns the amount of rewards. Since an 1155 is just one token, this returns itself
