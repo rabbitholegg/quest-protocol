@@ -29,8 +29,8 @@ contract SoulboundRabbitHoleReceipt is
     mapping(uint => uint) public timestampForTokenId;
     address public royaltyRecipient;
     address public minterAddress;
-    ReceiptRenderer public ReceiptRendererContract;
-    IQuestFactory public QuestFactoryContract;
+    ReceiptRenderer public receiptRendererContract;
+    IQuestFactory public questFactoryContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -45,8 +45,9 @@ contract SoulboundRabbitHoleReceipt is
         __ERC721_init('SoulboundRabbitHoleReceipt', 'RHR');
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
+        require(minterAddress_ != address(0), 'Minter address cannot be zero address');
         minterAddress = minterAddress_;
-        ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
+        receiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
     modifier onlyMinter() {
@@ -57,18 +58,19 @@ contract SoulboundRabbitHoleReceipt is
     /// @dev set the receipt renderer contract
     /// @param receiptRenderer_ the address of the receipt renderer contract
     function setReceiptRenderer(address receiptRenderer_) external onlyOwner {
-        ReceiptRendererContract = ReceiptRenderer(receiptRenderer_);
+        receiptRendererContract = ReceiptRenderer(receiptRenderer_);
     }
 
     /// @dev set the quest factory contract
     /// @param questFactory_ the address of the quest factory contract
     function setQuestFactory(address questFactory_) external onlyOwner {
-        QuestFactoryContract = IQuestFactory(questFactory_);
+        questFactoryContract = IQuestFactory(questFactory_);
     }
 
     /// @dev set the minter address
     /// @param minterAddress_ the address of the minter
     function setMinterAddress(address minterAddress_) external onlyOwner {
+        require(minterAddress_ != address(0), 'Minter address cannot be zero address');
         minterAddress = minterAddress_;
         emit MinterAddressSet(minterAddress_);
     }
@@ -89,10 +91,10 @@ contract SoulboundRabbitHoleReceipt is
         uint tokenId_
     ) public view virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
         require(_exists(tokenId_), 'ERC721URIStorage: URI query for nonexistent token');
-        require(QuestFactoryContract != IQuestFactory(address(0)), 'QuestFactory not set');
+        require(questFactoryContract != IQuestFactory(address(0)), 'QuestFactory not set');
 
         string memory questId = questIdForTokenId[tokenId_];
-        (address questAddress, uint totalParticipants, ) = QuestFactoryContract.questInfo(questId);
+        (address questAddress, uint totalParticipants, ) = questFactoryContract.questInfo(questId);
         IQuest questContract = IQuest(questAddress);
 
         bool claimed = questContract.isClaimed(tokenId_);
@@ -100,7 +102,7 @@ contract SoulboundRabbitHoleReceipt is
         address rewardAddress = questContract.getRewardToken();
 
         return
-            ReceiptRendererContract.generateTokenURI(
+            receiptRendererContract.generateTokenURI(
                 tokenId_,
                 questId,
                 totalParticipants,

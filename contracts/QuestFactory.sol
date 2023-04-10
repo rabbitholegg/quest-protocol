@@ -10,6 +10,7 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {SoulboundRabbitHoleReceipt} from './SoulboundRabbitHoleReceipt.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -17,7 +18,7 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory, ReentrancyGuard {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
     bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
     bytes32 public constant ERC1155 = keccak256(abi.encodePacked('erc1155'));
@@ -279,7 +280,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintSoulboundReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external {
+    function claimAndMint(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
