@@ -27,7 +27,6 @@ contract SoulboundRabbitHoleReceipt is
     // storage
     mapping(uint => string) public questIdForTokenId;
     mapping(uint => uint) public timestampForTokenId;
-    address public royaltyRecipient;
     address public minterAddress;
     ReceiptRenderer public receiptRendererContract;
     IQuestFactory public questFactoryContract;

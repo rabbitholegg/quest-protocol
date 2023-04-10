@@ -276,11 +276,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
     }
 
-    /// @dev mint a Soulbound RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
+    /// @dev mint a Soulbound RabbitHole Receipt and claim rewards. Note: this contract must be set as Minter on the receipt contract
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claimAndMint(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
+    function mintAndClaim(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
