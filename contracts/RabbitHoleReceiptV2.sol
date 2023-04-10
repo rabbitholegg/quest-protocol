@@ -12,7 +12,7 @@ import './ReceiptRenderer.sol';
 import './interfaces/IQuestFactory.sol';
 import './interfaces/IQuest.sol';
 
-contract SoulboundRabbitHoleReceipt is
+contract RabbitHoleReceiptV2 is
     Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
@@ -41,7 +41,7 @@ contract SoulboundRabbitHoleReceipt is
         address minterAddress_,
         address owner_
     ) external initializer {
-        __ERC721_init('SoulboundRabbitHoleReceipt', 'RHR');
+        __ERC721_init('RabbitHoleReceiptV2', 'RHR');
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
         require(minterAddress_ != address(0), 'Minter address cannot be zero address');

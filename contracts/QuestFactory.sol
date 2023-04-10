@@ -8,8 +8,8 @@ import {Erc20Quest} from './Erc20Quest.sol';
 import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
+import {RabbitHoleReceiptV2} from './RabbitHoleReceiptV2.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {SoulboundRabbitHoleReceipt} from './SoulboundRabbitHoleReceipt.sol';
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
@@ -40,7 +40,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
-    SoulboundRabbitHoleReceipt public soulboundRabbitHoleReceiptContract;
+    RabbitHoleReceiptV2 public rabbitHoleReceiptV2Contract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -53,7 +53,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address erc20QuestAddress_,
         address erc1155QuestAddress_,
         address ownerAddress_,
-        address soulboundRabbitHoleReceiptContract_
+        address rabbitHoleReceiptV2Contract_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -61,7 +61,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         rabbitHoleTicketsContract = RabbitHoleTickets(rabbitHoleTicketsContract_);
-        soulboundRabbitHoleReceiptContract = SoulboundRabbitHoleReceipt(soulboundRabbitHoleReceiptContract_);
+        rabbitHoleReceiptV2Contract = RabbitHoleReceiptV2(rabbitHoleReceiptV2Contract_);
         protocolFeeRecipient = protocolFeeRecipient_;
         questFee = 2_000;
         erc20QuestAddress = erc20QuestAddress_;
@@ -200,10 +200,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
-    /// @dev set the soulbound rabbithole receipt contract
-    /// @param soulboundRabbitHoleReceiptContract_ The address of the soulbound rabbithole receipt contract
-    function setSoulboundRabbitHoleReceiptContract(address soulboundRabbitHoleReceiptContract_) external onlyOwner {
-        soulboundRabbitHoleReceiptContract = SoulboundRabbitHoleReceipt(soulboundRabbitHoleReceiptContract_);
+    /// @dev set the rabbithole receipt v2 contract
+    /// @param rabbitHoleReceiptV2Contract_ The address of the rabbithole receipt v2 contract
+    function setRabbitHoleReceiptV2Contract(address rabbitHoleReceiptV2Contract_) external onlyOwner {
+        rabbitHoleReceiptV2Contract = RabbitHoleReceiptV2(rabbitHoleReceiptV2Contract_);
     }
 
     /// @dev set the rabbithole tickets contract
@@ -276,7 +276,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
     }
 
-    /// @dev mint a Soulbound RabbitHole Receipt and claim rewards. Note: this contract must be set as Minter on the receipt contract
+    /// @dev mint a Soulbound RabbitHole Receipt V2 and claim rewards. Note: this contract must be set as Minter on the receipt contract
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
@@ -292,8 +292,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
-        soulboundRabbitHoleReceiptContract.mint(msg.sender, questId_);
+        rabbitHoleReceiptV2Contract.mint(msg.sender, questId_);
         QuestContract(currentQuest.questAddress).claimSoulbound(msg.sender);
-        emit ReceiptMinted(msg.sender, quests[questId_].questAddress, soulboundRabbitHoleReceiptContract.getTokenId(), questId_);
+        emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptV2Contract.getTokenId(), questId_);
     }
 }
