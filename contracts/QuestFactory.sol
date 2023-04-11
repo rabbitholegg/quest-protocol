@@ -40,6 +40,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint16 public mintFee;
+    address public mintFeeRecipient;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -191,6 +192,22 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
+    /// @dev set the mintFeeRecipient
+    /// @param mintFeeRecipient_ The address of the mint fee recipient
+    function setMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
+        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
+        mintFeeRecipient = mintFeeRecipient_;
+    }
+
+    /// @dev get the mintFeeRecipient return the protocol fee recipient if the mint fee recipient is not set
+    /// @return address the mint fee recipient
+    function getMintFeeRecipient() public view returns (address) {
+        if (mintFeeRecipient == address(0)) {
+            return protocolFeeRecipient;
+        }
+        return mintFeeRecipient;
+    }
+
     /// @dev set the rabbithole receipt contract
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
@@ -285,8 +302,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 require(success, "Failed to return change");
             }
 
-            // Send the protocol fee to the protocol fee recipient
-            (bool success, ) = protocolFeeRecipient.call{value: requiredFee}("");
+            // Send the mint fee to the mint fee recipient
+            (bool success, ) = getMintFeeRecipient().call{value: requiredFee}("");
             require(success, "Failed to send protocol fee");
         }
     }
