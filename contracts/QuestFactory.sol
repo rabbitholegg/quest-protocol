@@ -9,6 +9,7 @@ import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
+import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -16,7 +17,7 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory, ReentrancyGuardUpgradeable {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
     bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
     bytes32 public constant ERC1155 = keccak256(abi.encodePacked('erc1155'));
@@ -38,6 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
+    uint16 public mintFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -209,11 +211,19 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev set the quest fee
-    /// @notice the quest fee should be in Basis Point units: https://www.investopedia.com/terms/b/basispoint.asp
+    /// @notice the quest fee should be in Basis Point units
     /// @param questFee_ The quest fee value
     function setQuestFee(uint16 questFee_) public onlyOwner {
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
+    }
+
+    /// @dev set the mint fee
+    /// @notice the mint fee should be in Basis Point units
+    /// @param mintFee_ The mint fee value
+    function setMintFee(uint16 mintFee_) public onlyOwner {
+        if (mintFee_ > 10_000) revert MintFeeTooHigh();
+        mintFee = mintFee_;
     }
 
     /// @dev return the number of minted receipts for a quest
@@ -249,7 +259,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external {
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant {
+        uint requiredFee = (msg.value * mintFee) / 10_000;
+        require(msg.value >= requiredFee, "Insufficient mint fee");
+
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
@@ -263,5 +276,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
+
+        if(mintFee > 0) {
+            // Refund any excess payment
+            uint change = msg.value - requiredFee;
+            if (change > 0) {
+                (bool success, ) = msg.sender.call{value: change}("");
+                require(success, "Failed to return change");
+            }
+
+            // Send the protocol fee to the protocol fee recipient
+            (bool success, ) = protocolFeeRecipient.call{value: requiredFee}("");
+            require(success, "Failed to send protocol fee");
+        }
     }
 }

@@ -12,6 +12,7 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
     error QuestFeeTooHigh();
+    error MintFeeTooHigh();
     error QuestNotQueued();
     error QuestNotStarted();
     error QuestEnded();
