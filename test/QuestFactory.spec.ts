@@ -28,13 +28,13 @@ describe('QuestFactory', () => {
   let deployedFactoryContract: QuestFactory
   let deployedErc20Quest: Erc20Quest
   let deployedErc1155Quest: Erc1155Quest
-  const protocolFeeAddress = '0xE8B17e572c1Eea45fCE267F30aE38862CF03BC84'
   let expiryDate: number, startDate: number
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
+  let protocolRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
   let rabbitHoleTicketsContract: RabbitHoleTickets__factory
@@ -46,7 +46,7 @@ describe('QuestFactory', () => {
   let wallet: Wallet
 
   beforeEach(async () => {
-    ;[owner, royaltyRecipient] = await ethers.getSigners()
+    ;[owner, royaltyRecipient, protocolRecipient] = await ethers.getSigners()
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
@@ -77,7 +77,7 @@ describe('QuestFactory', () => {
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
       deployedRabbitHoleTicketsContract.address,
-      protocolFeeAddress,
+      protocolRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
       owner.address,
@@ -107,7 +107,7 @@ describe('QuestFactory', () => {
       royaltyRecipient.address,
       owner.address,
       69,
-      owner.address
+      owner.address,
     ])) as RabbitHoleReceipt
   }
 
@@ -121,7 +121,7 @@ describe('QuestFactory', () => {
       royaltyRecipient.address,
       owner.address,
       10,
-      owner.address
+      owner.address,
     ])) as RabbitHoleTickets
   }
 
@@ -415,6 +415,36 @@ describe('QuestFactory', () => {
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
+    })
+
+    it('should revert if the mint fee is insufficient', async function () {
+      const requiredFee = 1000
+      await erc20Quest.queue()
+      await deployedFactoryContract.setMintFee(requiredFee)
+      await time.setNextBlockTimestamp(startDate)
+
+      await expect(
+        deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature, {
+          value: requiredFee - 1,
+        })
+      ).to.be.revertedWith('Insufficient mint fee')
+    })
+
+    it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
+      const requiredFee = 1000
+      await erc20Quest.queue()
+      await deployedFactoryContract.setMintFee(requiredFee)
+      await time.setNextBlockTimestamp(startDate)
+      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
+
+      await expect(
+        deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature, {
+          value: requiredFee + 100,
+        })
+      ).to.emit(deployedFactoryContract, 'ReceiptMinted')
+      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+        balanceBefore.add(requiredFee)
+      )
     })
   })
 })

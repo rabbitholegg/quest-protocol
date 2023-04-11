@@ -12,7 +12,6 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error AddressZeroNotAllowed();
     error QuestFeeTooHigh();
-    error MintFeeTooHigh();
     error QuestNotQueued();
     error QuestNotStarted();
     error QuestEnded();
@@ -29,6 +28,7 @@ interface IQuestFactory {
         uint256 rewardAmountOrTokenId
     );
     event ReceiptMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
+    event MintFeeSet(uint percent);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

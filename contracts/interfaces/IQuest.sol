@@ -7,7 +7,6 @@ interface IQuest {
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint timestamp);
-    event MintFeeSet(uint16 percent);
 
     error AlreadyClaimed();
     error NoTokensToClaim();

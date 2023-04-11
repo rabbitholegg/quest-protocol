@@ -39,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     RabbitHoleTickets public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
-    uint16 public mintFee;
+    uint public mintFee;
     address public mintFeeRecipient;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -236,10 +236,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev set the mint fee
-    /// @notice the mint fee should be in Basis Point units
+    /// @notice the mint fee in ether
     /// @param mintFee_ The mint fee value
-    function setMintFee(uint16 mintFee_) public onlyOwner {
-        if (mintFee_ > 10_000) revert MintFeeTooHigh();
+    function setMintFee(uint mintFee_) public onlyOwner {
         mintFee = mintFee_;
         emit MintFeeSet(mintFee_);
     }
@@ -278,8 +277,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant {
-        uint requiredFee = (msg.value * mintFee) / 10_000;
-        require(msg.value >= requiredFee, "Insufficient mint fee");
+        require(msg.value >= mintFee, "Insufficient mint fee");
 
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
@@ -297,15 +295,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         if(mintFee > 0) {
             // Refund any excess payment
-            uint change = msg.value - requiredFee;
+            uint change = msg.value - mintFee;
             if (change > 0) {
                 (bool success, ) = msg.sender.call{value: change}("");
                 require(success, "Failed to return change");
             }
 
             // Send the mint fee to the mint fee recipient
-            (bool success, ) = getMintFeeRecipient().call{value: requiredFee}("");
-            require(success, "Failed to send protocol fee");
+            (bool success, ) = getMintFeeRecipient().call{value: mintFee}("");
+            require(success, "Failed to send mint fee");
         }
     }
 }
