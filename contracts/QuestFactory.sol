@@ -241,6 +241,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function setMintFee(uint16 mintFee_) public onlyOwner {
         if (mintFee_ > 10_000) revert MintFeeTooHigh();
         mintFee = mintFee_;
+        emit MintFeeSet(mintFee_);
     }
 
     /// @dev return the number of minted receipts for a quest
