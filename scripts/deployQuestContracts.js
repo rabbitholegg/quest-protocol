@@ -3,7 +3,7 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const Erc20Quest = await ethers.getContractFactory('Erc20Quest')
+  const Erc20Quest = await ethers.getContractFactory('Quest')
   const Erc1155Quest = await ethers.getContractFactory('Erc1155Quest')
 
   const erc20Quest = await Erc20Quest.deploy()
