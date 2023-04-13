@@ -175,6 +175,6 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         if (balance > 0) payable(msg.sender).transfer(balance);
 
         uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        if (erc20Balance > 0) IERC20(rewardToken).safeTransfer(msg.sender, erc20Balance);
+        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(msg.sender, erc20Balance);
     }
 }
