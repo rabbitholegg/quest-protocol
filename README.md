@@ -153,7 +153,7 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ---
 
 ## Addressses
-All contracts are deployed with the same addresses on Goerli, Mainnet and Optimism. The addresses are as follows:
+All contracts are deployed with the same addresses on Sepolia, Mainnet and Optimism. The addresses are as follows:
 
 |Contract Name|Address|
 |-------------|-------|
