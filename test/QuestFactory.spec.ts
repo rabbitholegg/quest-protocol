@@ -35,6 +35,7 @@ describe('QuestFactory', () => {
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
+  let mintFeeRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
   let rabbitHoleTicketsContract: RabbitHoleTickets__factory
@@ -46,7 +47,7 @@ describe('QuestFactory', () => {
   let wallet: Wallet
 
   beforeEach(async () => {
-    ;[owner, royaltyRecipient, protocolRecipient] = await ethers.getSigners()
+    ;[owner, royaltyRecipient, protocolRecipient, mintFeeRecipient] = await ethers.getSigners()
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
@@ -341,6 +342,17 @@ describe('QuestFactory', () => {
     })
   })
 
+  describe('getMintFeeRecipient', () => {
+    it('Should return the protocolRecipient when no mintFeeRecipient is set', async () => {
+      expect(await deployedFactoryContract.getMintFeeRecipient()).to.equal(protocolRecipient.address)
+    })
+
+    it('Should return the mintFeeRecipient when set', async () => {
+      await deployedFactoryContract.setMintFeeRecipient(mintFeeRecipient.address)
+      expect(await deployedFactoryContract.getMintFeeRecipient()).to.equal(mintFeeRecipient.address)
+    })
+  })
+
   describe('mintReceipt()', () => {
     const erc20QuestId = 'asdf'
     let messageHash: string
@@ -432,6 +444,7 @@ describe('QuestFactory', () => {
 
     it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
       const requiredFee = 1000
+      const extraChange = 100
       await erc20Quest.queue()
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
@@ -439,9 +452,12 @@ describe('QuestFactory', () => {
 
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature, {
-          value: requiredFee + 100,
+          value: requiredFee + extraChange,
         })
-      ).to.emit(deployedFactoryContract, 'ReceiptMinted')
+      )
+        .to.emit(deployedFactoryContract, 'ReceiptMinted')
+        .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
+        .withArgs(owner.address, extraChange)
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
         balanceBefore.add(requiredFee)
       )

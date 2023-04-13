@@ -299,6 +299,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             if (change > 0) {
                 (bool success, ) = msg.sender.call{value: change}("");
                 require(success, "Failed to return change");
+                emit ExtraMintFeeReturned(msg.sender, change);
             }
 
             // Send the mint fee to the mint fee recipient
