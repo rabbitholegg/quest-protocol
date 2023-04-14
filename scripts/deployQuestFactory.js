@@ -5,7 +5,6 @@ const { ethers } = require('hardhat')
 async function main() {
   const claimSignerAddress = '0x22890b38D6ab6090e5123DB7497f4bCE7062929F'
   const rabbitholeReceiptAddress = '0x61A8CC96a3576C2a50716a0cDE70BF373C018aa6' // goerli
-  const rabbitholeTicketsAddress = '0x5C3eBe0C4a1F1505a4A106859CaBdca0913fa42F' // goerli
   const protocolFeeReceipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
 
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
@@ -19,7 +18,7 @@ async function main() {
 
   const deployment = await hre.upgrades.deployProxy(
     QuestFactory,
-    [claimSignerAddress, rabbitholeReceiptAddress, rabbitholeTicketsAddress, protocolFeeReceipient, erc20Quest.address, erc1155Quest.address],
+    [claimSignerAddress, rabbitholeReceiptAddress, protocolFeeReceipient, erc20Quest.address],
     { initializer: 'initialize' }
   )
 

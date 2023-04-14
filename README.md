@@ -50,12 +50,9 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ├── README.md
 ├── audits
 ├── contracts
-│   ├── Erc1155Quest.sol
-│   ├── Erc20Quest.sol
 │   ├── Quest.sol
 │   ├── QuestFactory.sol
 │   ├── RabbitHoleReceipt.sol
-│   ├── RabbitHoleTickets.sol
 │   ├── ReceiptRenderer.sol
 │   ├── SampleERC20.sol
 │   ├── SampleErc1155.sol
@@ -68,12 +65,9 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ├── coverage
 │   ├── base.css
 │   ├── contracts
-│   │   ├── Erc1155Quest.sol.html
-│   │   ├── Erc20Quest.sol.html
 │   │   ├── Quest.sol.html
 │   │   ├── QuestFactory.sol.html
 │   │   ├── RabbitHoleReceipt.sol.html
-│   │   ├── RabbitHoleTickets.sol.html
 │   │   ├── ReceiptRenderer.sol.html
 │   │   ├── SampleERC20.sol.html
 │   │   ├── SampleErc1155.sol.html
@@ -91,12 +85,9 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 │   ├── lcov-report
 │   │   ├── base.css
 │   │   ├── contracts
-│   │   │   ├── Erc1155Quest.sol.html
-│   │   │   ├── Erc20Quest.sol.html
 │   │   │   ├── Quest.sol.html
 │   │   │   ├── QuestFactory.sol.html
 │   │   │   ├── RabbitHoleReceipt.sol.html
-│   │   │   ├── RabbitHoleTickets.sol.html
 │   │   │   ├── ReceiptRenderer.sol.html
 │   │   │   ├── SampleERC20.sol.html
 │   │   │   ├── SampleErc1155.sol.html
@@ -130,17 +121,14 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ├── scripts
 │   ├── deployQuestFactory.js
 │   ├── deployRabbitHoleReceipt.js
-│   ├── deployRabbitHoleTickets.js
 │   ├── upgradeQuestFactory.js
 │   ├── upgradeRabbitHoleReceipt.js
-│   └── upgradeRabbitHoleTickets.js
 ├── test
 │   ├── Erc1155Quest.spec.ts
 │   ├── Erc20Quest.spec.ts
 │   ├── Quest.spec.ts
 │   ├── QuestFactory.spec.ts
 │   ├── RabbitHoleReceipt.spec.ts
-│   ├── RabbitHoleTickets.spec.ts
 │   ├── SampleErc1155.spec.ts
 │   ├── SampleErc20.spec.ts
 │   └── types.ts
@@ -159,7 +147,6 @@ All contracts are deployed with the same addresses on Sepolia, Mainnet and Optim
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
 |RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
-|RabbitHole Tickets|0xB0A67B12F2983a0796Fb7CC5C28C153eA074D327|
 
 ---
 
