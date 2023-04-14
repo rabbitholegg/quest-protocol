@@ -2,19 +2,20 @@
 pragma solidity =0.8.16;
 
 interface IQuestFactory {
-    error QuestIdUsed();
-    error OverMaxAllowedToMint();
-    error AddressNotSigned();
     error AddressAlreadyMinted();
+    error AddressNotSigned();
+    error AddressZeroNotAllowed();
+    error Erc20QuestAddressNotSet();
     error InvalidHash();
     error OnlyOwnerCanCreate1155Quest();
-    error RewardNotAllowed();
-    error QuestTypeInvalid();
-    error AddressZeroNotAllowed();
+    error OverMaxAllowedToMint();
+    error QuestEnded();
     error QuestFeeTooHigh();
+    error QuestIdUsed();
     error QuestNotQueued();
     error QuestNotStarted();
-    error QuestEnded();
+    error QuestTypeInvalid();
+    error RewardNotAllowed();
 
     event QuestCreated(
         address indexed creator,
