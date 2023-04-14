@@ -16,7 +16,6 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory, ReentrancyGuardUpgradeable {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
-    bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -25,7 +24,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
     }
-
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
