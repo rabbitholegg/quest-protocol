@@ -1,6 +1,7 @@
 {
   "search.exclude": {
     "**/coverage.json": true,
-    "**/deployments/*": true
+    "**/deployments/*": true,
+    "**/.openzeppelin/*": true
   }
 }
