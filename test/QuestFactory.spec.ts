@@ -3,15 +3,13 @@ import { ethers, upgrades } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
-  Erc20Quest,
-  Erc1155Quest,
+  Quest,
   SampleERC20,
   SampleErc1155,
   QuestFactory,
   RabbitHoleReceipt,
   RabbitHoleTickets,
-  Erc20Quest__factory,
-  Erc1155Quest__factory,
+  Quest__factory,
   QuestFactory__factory,
   RabbitHoleReceipt__factory,
   RabbitHoleTickets__factory,
@@ -26,8 +24,7 @@ describe('QuestFactory', () => {
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedRabbitHoleTicketsContract: RabbitHoleTickets
   let deployedFactoryContract: QuestFactory
-  let deployedErc20Quest: Erc20Quest
-  let deployedErc1155Quest: Erc1155Quest
+  let deployedErc20Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
   const rewardAmount = 10
@@ -39,8 +36,7 @@ describe('QuestFactory', () => {
 
   let questFactoryContract: QuestFactory__factory
   let rabbitHoleTicketsContract: RabbitHoleTickets__factory
-  let erc20QuestContract: Erc20Quest__factory
-  let erc1155QuestContract: Erc1155Quest__factory
+  let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
   let sampleERC1155Contract: SampleErc1155__factory
@@ -55,8 +51,7 @@ describe('QuestFactory', () => {
     wallet = Wallet.fromMnemonic(mnemonic)
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
-    erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
-    erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
+    erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -72,7 +67,6 @@ describe('QuestFactory', () => {
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
     await deployedErc20Quest.deployed()
-    deployedErc1155Quest = await erc1155QuestContract.deploy()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
@@ -80,7 +74,7 @@ describe('QuestFactory', () => {
       deployedRabbitHoleTicketsContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
-      deployedErc1155Quest.address,
+      deployedErc20Quest.address, // as a placeholder remove this
       owner.address,
     ])) as QuestFactory
 
@@ -128,24 +122,9 @@ describe('QuestFactory', () => {
 
   describe('createQuest()', () => {
     const erc20QuestId = 'asdf'
-    const erc1155QuestId = 'fdsa'
 
     it('should init with right owner', async () => {
       expect(await deployedFactoryContract.owner()).to.equal(owner.address)
-    })
-
-    it('should revert if incorrect quest contract type', async () => {
-      await expect(
-        deployedFactoryContract.createQuest(
-          deployedSampleErc20Contract.address,
-          expiryDate,
-          startDate,
-          totalRewards,
-          rewardAmount,
-          'some-incorrect-contract-type',
-          erc20QuestId
-        )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestTypeInvalid')
     })
 
     it('Should revert if reward address is not on the reward allowlist', async () => {
@@ -179,63 +158,9 @@ describe('QuestFactory', () => {
       )
       await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
-      const deployedErc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
+      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
       expect(await deployedErc20Quest.startTime()).to.equal(startDate)
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
-    })
-
-    it('Should create a new ERC1155 quest', async () => {
-      const tx = await deployedFactoryContract.createQuest(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        rewardAmount,
-        'erc1155',
-        erc1155QuestId
-      )
-      await tx.wait()
-      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
-      const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
-      expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
-      expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
-    })
-
-    it('Should create a new ERC1155 quest with RabbitHoleTickets', async () => {
-      await deployedFactoryContract.createQuest(
-        deployedRabbitHoleTicketsContract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        rewardAmount,
-        'erc1155',
-        erc1155QuestId
-      )
-      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
-      const deployedErc1155Quest = await ethers.getContractAt('Erc1155Quest', questAddress)
-      expect(await deployedErc1155Quest.startTime()).to.equal(startDate)
-      expect(await deployedErc1155Quest.owner()).to.equal(owner.address)
-
-      const ticketBalance = await deployedRabbitHoleTicketsContract.balanceOf(questAddress, rewardAmount)
-      expect(ticketBalance).to.equal(totalRewards)
-    })
-
-    it('Should revert when creating an ERC1155 quest that is not from the owner', async () => {
-      const createQuestRole = await deployedFactoryContract.CREATE_QUEST_ROLE()
-      await deployedFactoryContract.grantRole(createQuestRole, royaltyRecipient.address)
-      await expect(
-        deployedFactoryContract
-          .connect(royaltyRecipient)
-          .createQuest(
-            deployedSampleErc20Contract.address,
-            expiryDate,
-            startDate,
-            totalRewards,
-            rewardAmount,
-            'erc1155',
-            erc1155QuestId
-          )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'OnlyOwnerCanCreate1155Quest')
     })
 
     it('Should revert if reward address is removed from allowlist', async () => {
@@ -358,7 +283,7 @@ describe('QuestFactory', () => {
     let messageHash: string
     let signature: string
     let questAddress: string
-    let erc20Quest: Erc20Quest
+    let erc20Quest: Quest
 
     beforeEach(async () => {
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), erc20QuestId])
@@ -377,7 +302,7 @@ describe('QuestFactory', () => {
 
       const transferAmount = totalRewards * rewardAmount + totalRewards * rewardAmount * 0.2
       await deployedSampleErc20Contract.transfer(questAddress, transferAmount)
-      erc20Quest = await ethers.getContractAt('Erc20Quest', questAddress)
+      erc20Quest = await ethers.getContractAt('Quest', questAddress)
     })
 
     it('Should fail when trying to mint before quest has been queued', async () => {

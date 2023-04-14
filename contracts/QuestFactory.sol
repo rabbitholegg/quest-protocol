@@ -4,8 +4,6 @@ pragma solidity =0.8.16;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
-import {Erc20Quest} from './Erc20Quest.sol';
-import {Erc1155Quest} from './Erc1155Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
@@ -86,90 +84,42 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
-            if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+        if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+        address newQuest = Clones.clone(erc20QuestAddress);
 
-            address newQuest = Clones.clone(erc20QuestAddress);
+        emit QuestCreated(
+            msg.sender,
+            address(newQuest),
+            questId_,
+            contractType_,
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmountOrTokenId_
+        );
+        currentQuest.questAddress = address(newQuest);
+        currentQuest.totalParticipants = totalParticipants_;
 
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                contractType_,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_
-            );
-            currentQuest.questAddress = address(newQuest);
-            currentQuest.totalParticipants = totalParticipants_;
-
-            Erc20Quest(newQuest).initialize(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_,
-                questId_,
-                address(rabbitHoleReceiptContract),
-                questFee,
-                protocolFeeRecipient
-            );
-            Erc20Quest(newQuest).transferOwnership(msg.sender);
-            return newQuest;
-        }
-
-        if (keccak256(abi.encodePacked(contractType_)) == ERC1155) {
-            if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
-
-            address newQuest = Clones.clone(erc1155QuestAddress);
-
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                contractType_,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_
-            );
-            currentQuest.questAddress = address(newQuest);
-            currentQuest.totalParticipants = totalParticipants_;
-
-            Erc1155Quest(newQuest).initialize(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmountOrTokenId_,
-                questId_,
-                address(rabbitHoleReceiptContract)
-            );
-            Erc1155Quest(newQuest).transferOwnership(msg.sender);
-
-            if (address(rewardTokenAddress_) == address(rabbitHoleTicketsContract)) {
-                rabbitHoleTicketsContract.mint(newQuest, rewardAmountOrTokenId_, totalParticipants_, '0x00');
-            }
-
-            return newQuest;
-        }
-
-        revert QuestTypeInvalid();
+        QuestContract(newQuest).initialize(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmountOrTokenId_,
+            questId_,
+            address(rabbitHoleReceiptContract),
+            questFee,
+            protocolFeeRecipient
+        );
+        QuestContract(newQuest).transferOwnership(msg.sender);
+        return newQuest;
     }
 
     /// @dev set erc20QuestAddress
     /// @param erc20QuestAddress_ The address of the erc20 quest
     function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
         erc20QuestAddress = erc20QuestAddress_;
-    }
-
-    /// @dev set erc1155QuestAddress
-    /// @param erc1155QuestAddress_ The address of the erc1155 quest
-    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
-        erc1155QuestAddress = erc1155QuestAddress_;
     }
 
     /// @dev grant the default admin role and the create quest role to the owner

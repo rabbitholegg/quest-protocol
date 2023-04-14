@@ -9,7 +9,7 @@ async function main() {
   const protocolFeeReceipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
 
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
-  const Erc20Quest = await ethers.getContractFactory('Erc20Quest')
+  const Erc20Quest = await ethers.getContractFactory('Quest')
   const Erc1155Quest = await ethers.getContractFactory('Erc1155Quest')
 
   const erc20Quest = await Erc20Quest.deploy()
