@@ -31,7 +31,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
-    address public erc1155QuestAddress; // todo remove this
+    address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     RabbitHoleTickets public rabbitHoleTicketsContract;
@@ -120,13 +120,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param erc20QuestAddress_ The address of the erc20 quest
     function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
         erc20QuestAddress = erc20QuestAddress_;
-    }
-
-    // todo remove this function
-    /// @dev set erc1155QuestAddress
-    /// @param erc1155QuestAddress_ The address of the erc1155 quest
-    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
-        erc1155QuestAddress = erc1155QuestAddress_;
     }
 
     /// @dev grant the default admin role and the create quest role to the owner
