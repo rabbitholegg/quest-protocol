@@ -86,7 +86,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (keccak256(abi.encodePacked(contractType_)) == ERC20) {
             if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
 
-            address newQuest = Clones.clone(erc20QuestAddress);
+            bytes32 salt = keccak256(abi.encodePacked(msg.sender, rewardTokenAddress_));
+            address newQuest = Clones.cloneDeterministic(erc20QuestAddress, salt);
 
             emit QuestCreated(
                 msg.sender,
@@ -120,7 +121,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (keccak256(abi.encodePacked(contractType_)) == ERC1155) {
             if (msg.sender != owner()) revert OnlyOwnerCanCreate1155Quest();
 
-            address newQuest = Clones.clone(erc1155QuestAddress);
+            bytes32 salt = keccak256(abi.encodePacked(msg.sender, rewardTokenAddress_));
+            address newQuest = Clones.cloneDeterministic(erc1155QuestAddress, salt);
 
             emit QuestCreated(
                 msg.sender,
