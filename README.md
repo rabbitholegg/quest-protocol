@@ -153,7 +153,7 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ---
 
 ## Addressses
-All contracts are deployed with the same addresses on Goerli, Mainnet and Optimism. The addresses are as follows:
+All contracts are deployed with the same addresses on Sepolia, Mainnet and Optimism. The addresses are as follows:
 
 |Contract Name|Address|
 |-------------|-------|
@@ -236,15 +236,6 @@ yarn test:gas-stories
 ```
 
 ---
-
-## Addressses
-All contracts are deployed with the same addresses on Goerli, Mainnet and Optimism. The addresses are as follows:
-
-|Contract Name|Address|
-|-------------|-------|
-|Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
-|RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
-|RabbitHole Tickets|0xB0A67B12F2983a0796Fb7CC5C28C153eA074D327|
 
 ## Deployment
 `yarn hardhat deploy --network network_name` where network_name is one of `goerli`, `mainnet`, `optimism`
