@@ -42,99 +42,72 @@ For more information on all docs related to the Quest Protocol, see the document
 Generated with:
 
 ```bash
-tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typechain-types -I cache -I img.png
+tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typechain-types -I cache -I img.png -I deployments
 ```
 
 ```
 ├── LICENSE
 ├── README.md
-├── audits
 ├── contracts
-│   ├── Quest.sol
-│   ├── QuestFactory.sol
-│   ├── RabbitHoleReceipt.sol
-│   ├── ReceiptRenderer.sol
-│   ├── SampleERC20.sol
-│   ├── SampleErc1155.sol
-│   ├── TicketRenderer.sol
-│   ├── interfaces
-│   │   ├── IQuest.sol
-│   │   └── IQuestFactory.sol
-│   └── test
-│       └── TestERC20.sol
-├── coverage
-│   ├── base.css
-│   ├── contracts
-│   │   ├── Quest.sol.html
-│   │   ├── QuestFactory.sol.html
-│   │   ├── RabbitHoleReceipt.sol.html
-│   │   ├── ReceiptRenderer.sol.html
-│   │   ├── SampleERC20.sol.html
-│   │   ├── SampleErc1155.sol.html
-│   │   ├── TicketRenderer.sol.html
-│   │   ├── index.html
-│   │   ├── interfaces
-│   │   │   ├── IQuest.sol.html
-│   │   │   ├── IQuestFactory.sol.html
-│   │   │   └── index.html
-│   │   └── test
-│   │       ├── TestERC20.sol.html
-│   │       └── index.html
-│   ├── coverage-final.json
-│   ├── index.html
-│   ├── lcov-report
-│   │   ├── base.css
-│   │   ├── contracts
-│   │   │   ├── Quest.sol.html
-│   │   │   ├── QuestFactory.sol.html
-│   │   │   ├── RabbitHoleReceipt.sol.html
-│   │   │   ├── ReceiptRenderer.sol.html
-│   │   │   ├── SampleERC20.sol.html
-│   │   │   ├── SampleErc1155.sol.html
-│   │   │   ├── TicketRenderer.sol.html
-│   │   │   ├── index.html
-│   │   │   ├── interfaces
-│   │   │   │   ├── IQuest.sol.html
-│   │   │   │   ├── IQuestFactory.sol.html
-│   │   │   │   └── index.html
-│   │   │   └── test
-│   │   │       ├── TestERC20.sol.html
-│   │   │       └── index.html
-│   │   ├── index.html
-│   │   ├── prettify.css
-│   │   ├── prettify.js
-│   │   ├── sort-arrow-sprite.png
-│   │   └── sorter.js
-│   ├── lcov.info
-│   ├── prettify.css
-│   ├── prettify.js
-│   ├── sort-arrow-sprite.png
-│   └── sorter.js
+│   ├── OwnableUpgradeable.sol
+│   ├── Quest.sol
+│   ├── QuestFactory.sol
+│   ├── RabbitHoleReceipt.sol
+│   ├── ReceiptRenderer.sol
+│   ├── interfaces
+│   │   ├── IQuest.sol
+│   │   └── IQuestFactory.sol
+│   └── test
+│       ├── SampleERC20.sol
+│       ├── SampleErc1155.sol
+│       └── TestERC20.sol
 ├── coverage.json
+├── deploy
+│   ├── 001_deploy_erc20Quest.ts
+│   ├── 003_deploy_questFactory.ts
+│   ├── 004_deploy_ReceiptRenderer.ts
+│   └── 005_deploy_RabbitHoleReceipt.ts
 ├── docs
-│   ├── overview.md
-│   ├── quest-claim.md
-│   └── quest-create.md
+│   ├── overview.md
+│   ├── quest-claim.md
+│   └── quest-create.md
+├── gas-stories.txt
 ├── hardhat.config.ts
-├── node_modules  [492 entries exceeds filelimit, not opening dir]
+├── hardhat.gas-stories.config.ts
+├── node_modules  [507 entries exceeds filelimit, not opening dir]
 ├── package.json
 ├── scripts
-│   ├── deployQuestFactory.js
-│   ├── deployRabbitHoleReceipt.js
-│   ├── upgradeQuestFactory.js
-│   ├── upgradeRabbitHoleReceipt.js
+│   ├── deployQuestContracts.js
+│   ├── deployQuestFactory.js
+│   ├── deployRabbitHoleReceipt.js
+│   ├── deployRenderContracts.js
+│   ├── upgradeQuestFactory.js
+│   └── upgradeRabbitHoleReceipt.js
+├── slither.config.json
+├── svgs
+│   ├── green-final-compressed.svg
+│   ├── green-final.svg
+│   ├── receipt-compressed.svg
+│   ├── receipt.svg
+│   ├── violet-final-compressed.svg
+│   └── violet-final.svg
 ├── test
-│   ├── Erc1155Quest.spec.ts
-│   ├── Erc20Quest.spec.ts
-│   ├── Quest.spec.ts
-│   ├── QuestFactory.spec.ts
-│   ├── RabbitHoleReceipt.spec.ts
-│   ├── SampleErc1155.spec.ts
-│   ├── SampleErc20.spec.ts
-│   └── types.ts
+│   ├── Quest.spec.ts
+│   ├── QuestFactory.spec.ts
+│   ├── RabbitHoleReceipt.spec.ts
+│   ├── ReceiptRenderer.spec.ts
+│   ├── SampleErc1155.spec.ts
+│   ├── SampleErc20.spec.ts
+│   ├── helpers
+│   │   ├── deploy.ts
+│   │   └── snapshot.ts
+│   └── types.ts
 ├── test-gas-stories
+│   ├── collections.ts
+│   └── gas-stories.ts
 ├── tsconfig.json
 ├── waffle.json
+├── yarn-error.log
 └── yarn.lock
 ```
 
