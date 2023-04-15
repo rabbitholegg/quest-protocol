@@ -7,7 +7,7 @@ import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
+import 'solmate/src/utils/ReentrancyGuard.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -15,7 +15,7 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory, ReentrancyGuardUpgradeable {
+contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory, ReentrancyGuard {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
     bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
     bytes32 public constant ERC1155 = keccak256(abi.encodePacked('erc1155'));

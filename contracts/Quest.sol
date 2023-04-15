@@ -5,7 +5,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import 'solmate/src/utils/ReentrancyGuard.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
