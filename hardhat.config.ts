@@ -3,7 +3,6 @@
  */
 require('dotenv').config()
 require('hardhat-deploy')
-// require("@nomiclabs/hardhat-ethers");
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
 import '@nomiclabs/hardhat-ethers'
