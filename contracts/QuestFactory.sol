@@ -54,7 +54,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         questFee = 2_000;
         erc20QuestAddress = erc20QuestAddress_;
-        erc1155QuestAddress = erc1155QuestAddress_;
         locked = 1;
     }
 
@@ -72,7 +71,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
+    /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
     /// @return address the quest contract address
@@ -81,7 +80,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        uint256 rewardAmountOrTokenId_,
+        uint256 rewardAmount_,
         string memory contractType_,
         string memory questId_
     ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
@@ -100,7 +99,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime_,
             startTime_,
             totalParticipants_,
-            rewardAmountOrTokenId_
+            rewardAmount_
         );
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
@@ -110,7 +109,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime_,
             startTime_,
             totalParticipants_,
-            rewardAmountOrTokenId_,
+            rewardAmount_,
             questId_,
             address(rabbitHoleReceiptContract),
             questFee,
