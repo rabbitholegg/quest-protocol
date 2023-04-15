@@ -5,7 +5,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
@@ -13,7 +13,7 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
-contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQuest {
+contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, IQuest {
     using SafeERC20 for IERC20;
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
@@ -63,6 +63,7 @@ contract Quest is ReentrancyGuard, PausableUpgradeable, OwnableUpgradeable, IQue
         protocolFeeRecipient = protocolFeeRecipient_;
         __Ownable_init();
         __Pausable_init();
+        __ReentrancyGuard_init();
     }
 
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
