@@ -73,7 +73,6 @@
     "dotenv": "^16.0.1",
     "ethers": "^5.7.2",
     "hardhat": "^2.12.6",
-    "hardhat-preprocessor": "^0.1.5",
-    "solmate": "^6.7.0"
+    "hardhat-preprocessor": "^0.1.5"
   }
 }

@@ -38,7 +38,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint16 public questFee;
     uint public mintFee;
     address public mintFeeRecipient;
-    uint256 private locked = 1;
+    uint256 private locked;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -62,6 +62,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         questFee = 2_000;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
+        locked = 1;
     }
 
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
