@@ -95,7 +95,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
         if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
-        address newQuest = Clones.cloneDeterministic(erc1155QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
+        address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
 
         emit QuestCreated(
             msg.sender,
