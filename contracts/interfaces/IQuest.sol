@@ -14,6 +14,7 @@ interface IQuest {
     error EndTimeInPast();
     error EndTimeLessThanOrEqualToStartTime();
     error MustImplementInChild();
+    error NotQuestFactory();
     error NoTokensToClaim();
     error NoWithdrawDuringClaim();
     error NotStarted();

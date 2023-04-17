@@ -66,6 +66,23 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
+    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_) {
+        Quest storage currentQuest = quests[questId_];
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
+        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
+        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
+        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        _;
+    }
+
+    modifier sufficientMintFee() {
+        require(msg.value >= mintFee, "Insufficient mint fee");
+        _;
+    }
+
     /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
@@ -219,16 +236,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
-        require(msg.value >= mintFee, "Insufficient mint fee");
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
-        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
-        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
@@ -241,16 +250,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant {
-        require(msg.value >= mintFee, "Insufficient mint fee");
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
-        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
-        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;

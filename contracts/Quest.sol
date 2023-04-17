@@ -179,7 +179,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @notice Internal function that transfers the rewards to the msg.sender
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(address sender_, uint256 amount_) internal override {
+    function _transferRewards(address sender_, uint256 amount_) internal {
         IERC20(rewardToken).safeTransfer(sender_, amount_);
     }
 
