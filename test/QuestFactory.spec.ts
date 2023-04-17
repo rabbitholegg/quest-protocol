@@ -5,20 +5,17 @@ import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Quest,
   SampleERC20,
-  SampleErc1155,
   QuestFactory,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
-  SampleErc1155__factory,
 } from '../typechain-types'
 import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
-  let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
   let deployedErc20Quest: Quest
@@ -35,7 +32,6 @@ describe('QuestFactory', () => {
   let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
-  let sampleERC1155Contract: SampleErc1155__factory
   let wallet: Wallet
 
   beforeEach(async () => {
@@ -50,10 +46,8 @@ describe('QuestFactory', () => {
     erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
-    sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
 
     await deploySampleErc20Contract()
-    await deploySampleErc1155Conract()
     await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
   })
@@ -76,11 +70,6 @@ describe('QuestFactory', () => {
   const deploySampleErc20Contract = async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', '1000000000', owner.address)
     await deployedSampleErc20Contract.deployed()
-  }
-
-  const deploySampleErc1155Conract = async () => {
-    deployedSampleErc1155Contract = await sampleERC1155Contract.deploy()
-    await deployedSampleErc1155Contract.deployed()
   }
 
   const deployRabbitHoleReceiptContract = async () => {

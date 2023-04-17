@@ -59,7 +59,6 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 │   │   └── IQuestFactory.sol
 │   └── test
 │       ├── SampleERC20.sol
-│       ├── SampleErc1155.sol
 │       └── TestERC20.sol
 ├── coverage.json
 ├── deploy
@@ -96,7 +95,6 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 │   ├── QuestFactory.spec.ts
 │   ├── RabbitHoleReceipt.spec.ts
 │   ├── ReceiptRenderer.spec.ts
-│   ├── SampleErc1155.spec.ts
 │   ├── SampleErc20.spec.ts
 │   ├── helpers
 │   │   ├── deploy.ts
