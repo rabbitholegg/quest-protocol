@@ -5,24 +5,18 @@ import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Quest,
   SampleERC20,
-  SampleErc1155,
   QuestFactory,
   RabbitHoleReceipt,
-  RabbitHoleTickets,
   Quest__factory,
   QuestFactory__factory,
   RabbitHoleReceipt__factory,
-  RabbitHoleTickets__factory,
   SampleERC20__factory,
-  SampleErc1155__factory,
 } from '../typechain-types'
 import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
-  let deployedSampleErc1155Contract: SampleErc1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
-  let deployedRabbitHoleTicketsContract: RabbitHoleTickets
   let deployedFactoryContract: QuestFactory
   let deployedErc20Quest: Quest
   let expiryDate: number, startDate: number
@@ -35,11 +29,9 @@ describe('QuestFactory', () => {
   let mintFeeRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
-  let rabbitHoleTicketsContract: RabbitHoleTickets__factory
   let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
-  let sampleERC1155Contract: SampleErc1155__factory
   let wallet: Wallet
 
   beforeEach(async () => {
@@ -53,14 +45,10 @@ describe('QuestFactory', () => {
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
-    rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
-    sampleERC1155Contract = await ethers.getContractFactory('SampleErc1155')
 
     await deploySampleErc20Contract()
-    await deploySampleErc1155Conract()
     await deployRabbitHoleReceiptContract()
-    await deployRabbitHoleTicketsContract()
     await deployFactoryContract()
   })
 
@@ -71,25 +59,17 @@ describe('QuestFactory', () => {
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
-      deployedRabbitHoleTicketsContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
-      deployedErc20Quest.address, // as a placeholder remove this
       owner.address,
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
-    await deployedRabbitHoleTicketsContract.setMinterAddress(deployedFactoryContract.address)
   }
 
   const deploySampleErc20Contract = async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', '1000000000', owner.address)
     await deployedSampleErc20Contract.deployed()
-  }
-
-  const deploySampleErc1155Conract = async () => {
-    deployedSampleErc1155Contract = await sampleERC1155Contract.deploy()
-    await deployedSampleErc1155Contract.deployed()
   }
 
   const deployRabbitHoleReceiptContract = async () => {
@@ -104,20 +84,6 @@ describe('QuestFactory', () => {
       69,
       owner.address,
     ])) as RabbitHoleReceipt
-  }
-
-  const deployRabbitHoleTicketsContract = async () => {
-    const TicketRenderer = await ethers.getContractFactory('TicketRenderer')
-    const deployedTicketRenderer = await TicketRenderer.deploy()
-    await deployedTicketRenderer.deployed()
-
-    deployedRabbitHoleTicketsContract = (await upgrades.deployProxy(rabbitHoleTicketsContract, [
-      deployedTicketRenderer.address,
-      royaltyRecipient.address,
-      owner.address,
-      10,
-      owner.address,
-    ])) as RabbitHoleTickets
   }
 
   describe('createQuest()', () => {

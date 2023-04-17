@@ -87,17 +87,13 @@ describe('Erc20Quest', async () => {
 
   const deployFactoryContract = async () => {
     const erc20QuestContract = await ethers.getContractFactory('Quest')
-    const rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     const deployedErc20Quest = await erc20QuestContract.deploy()
-    const deployedRabbitHoleTickets = await rabbitHoleTicketsContract.deploy()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitholeReceiptContract.address,
-      deployedRabbitHoleTickets.address,
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
-      deployedErc20Quest.address, // as a placeholder, should remove
       owner.address,
     ])) as QuestFactory
   }

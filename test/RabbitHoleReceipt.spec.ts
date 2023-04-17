@@ -29,17 +29,13 @@ describe('RabbitholeReceipt Contract', async () => {
     ])
 
     const erc20QuestContract = await ethers.getContractFactory('Quest')
-    const rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
     const deployedErc20Quest = await erc20QuestContract.deploy()
-    const deployedRabbitHoleTickets = await rabbitHoleTicketsContract.deploy()
 
     deployedFactoryContract = await upgrades.deployProxy(questFactory, [
       royaltyRecipient.address,
       RHReceipt.address,
-      deployedRabbitHoleTickets.address,
       royaltyRecipient.address,
       deployedErc20Quest.address,
-      deployedErc20Quest.address, // todo: placeholder, remove param
       contractOwner.address,
     ])
 

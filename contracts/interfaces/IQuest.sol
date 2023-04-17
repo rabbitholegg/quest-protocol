@@ -9,16 +9,16 @@ interface IQuest {
     event Queued(uint timestamp);
 
     error AlreadyClaimed();
-    error NoTokensToClaim();
-    error EndTimeInPast();
-    error StartTimeInPast();
-    error EndTimeLessThanOrEqualToStartTime();
-    error ClaimWindowNotStarted();
-    error NoWithdrawDuringClaim();
-    error TotalAmountExceedsBalance();
     error AmountExceedsBalance();
-    error NotStarted();
+    error ClaimWindowNotStarted();
+    error EndTimeInPast();
+    error EndTimeLessThanOrEqualToStartTime();
     error MustImplementInChild();
+    error NoTokensToClaim();
+    error NoWithdrawDuringClaim();
+    error NotStarted();
+    error StartTimeInPast();
+    error TotalAmountExceedsBalance();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
 

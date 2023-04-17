@@ -5,7 +5,6 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
-import {RabbitHoleTickets} from './RabbitHoleTickets.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
@@ -16,8 +15,6 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
-    bytes32 public constant ERC20 = keccak256(abi.encodePacked('erc20'));
-    bytes32 public constant ERC1155 = keccak256(abi.encodePacked('erc1155'));
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -26,14 +23,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
     }
-
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
     RabbitHoleReceipt public rabbitHoleReceiptContract;
-    RabbitHoleTickets public rabbitHoleTicketsContract;
+    address public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint public mintFee;
@@ -46,10 +42,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function initialize(
         address claimSignerAddress_,
         address rabbitHoleReceiptContract_,
-        address rabbitHoleTicketsContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
-        address erc1155QuestAddress_,
         address ownerAddress_
     ) external initializer {
         __Ownable_init(ownerAddress_);
@@ -57,11 +51,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         grantDefaultAdminAndCreateQuestRole(ownerAddress_);
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
-        rabbitHoleTicketsContract = RabbitHoleTickets(rabbitHoleTicketsContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
         questFee = 2_000;
         erc20QuestAddress = erc20QuestAddress_;
-        erc1155QuestAddress = erc1155QuestAddress_;
         locked = 1;
     }
 
@@ -74,13 +66,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
-    /// @dev Create either an erc20 or erc1155 quest, only accounts with the CREATE_QUEST_ROLE can create quests
+    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmountOrTokenId_ The reward amount for an erc20 quest or the token id for an erc1155 quest
-    /// @param contractType_ The type of quest, either erc20 or erc1155
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
     /// @return address the quest contract address
     function createQuest(
@@ -88,13 +80,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        uint256 rewardAmountOrTokenId_,
+        uint256 rewardAmount_,
         string memory contractType_,
         string memory questId_
     ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
         if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+        if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
         address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
 
         emit QuestCreated(
@@ -106,7 +99,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime_,
             startTime_,
             totalParticipants_,
-            rewardAmountOrTokenId_
+            rewardAmount_
         );
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
@@ -116,7 +109,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime_,
             startTime_,
             totalParticipants_,
-            rewardAmountOrTokenId_,
+            rewardAmount_,
             questId_,
             address(rabbitHoleReceiptContract),
             questFee,
@@ -172,12 +165,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-    }
-
-    /// @dev set the rabbithole tickets contract
-    /// @param rabbitholeTicketsContract_ The address of the rabbithole tickets contract
-    function setRabbitHoleTicketsContract(address rabbitholeTicketsContract_) external onlyOwner {
-        rabbitHoleTicketsContract = RabbitHoleTickets(rabbitholeTicketsContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
