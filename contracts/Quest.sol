@@ -22,7 +22,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalParticipants;
-    uint256 public rewardAmountInWeiOrTokenId;
+    uint256 public rewardAmountInWei;
     bool public queued;
     string public questId;
     uint256 public redeemedTokens;
@@ -41,7 +41,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         uint256 endTime_,
         uint256 startTime_,
         uint256 totalParticipants_,
-        uint256 rewardAmountInWeiOrTokenId_,
+        uint256 rewardAmountInWei_,
         string memory questId_,
         address receiptContractAddress_,
         uint16 questFee_,
@@ -54,7 +54,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         startTime = startTime_;
         rewardToken = rewardTokenAddress_;
         totalParticipants = totalParticipants_;
-        rewardAmountInWeiOrTokenId = rewardAmountInWeiOrTokenId_;
+        rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
         questFactoryContract = QuestFactory(msg.sender);
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
@@ -122,6 +122,18 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         _;
     }
 
+    modifier onlyQuestFactory() {
+        if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
+        _;
+    }
+
+    function singleClaim(address sender_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
+        uint256 totalRedeemableRewards = _calculateRewards(1);
+        _transferRewards(sender_, totalRedeemableRewards);
+        redeemedTokens = redeemedTokens + 1;
+        emit Claimed(sender_, rewardToken, totalRedeemableRewards);
+    }
+
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
     function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
@@ -145,7 +157,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
 
         uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
-        _transferRewards(totalRedeemableRewards);
+        _transferRewards(msg.sender, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + redeemableTokenCount;
 
         emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
@@ -154,7 +166,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
     /// @return The maximum amount of rewards that can be claimed by all users
     function maxTotalRewards() external view returns (uint256) {
-        return totalParticipants * rewardAmountInWeiOrTokenId;
+        return totalParticipants * rewardAmountInWei;
     }
 
     /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
@@ -165,9 +177,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     }
 
     /// @notice Internal function that transfers the rewards to the msg.sender
+    /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(uint256 amount_) internal {
-        IERC20(rewardToken).safeTransfer(msg.sender, amount_);
+    function _transferRewards(address sender_, uint256 amount_) internal override {
+        IERC20(rewardToken).safeTransfer(sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount
@@ -175,7 +188,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @param redeemableTokenCount_ The amount of tokens that can be redeemed
     /// @return The total amount of rewards that can be claimed by a user
     function _calculateRewards(uint256 redeemableTokenCount_) internal view returns (uint256) {
-        return redeemableTokenCount_ * rewardAmountInWeiOrTokenId;
+        return redeemableTokenCount_ * rewardAmountInWei;
     }
 
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
@@ -183,7 +196,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         require(!hasWithdrawn, 'Already withdrawn');
 
-        uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWeiOrTokenId;
+        uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
         uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) -
             this.protocolFee() -
             unclaimedTokens;
@@ -195,7 +208,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
 
     /// @notice Function that calculates the protocol fee
     function protocolFee() external view returns (uint256) {
-        return (this.receiptRedeemers() * rewardAmountInWeiOrTokenId * questFee) / 10_000;
+        return (this.receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
     }
 
     // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
@@ -212,7 +225,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
 
     /// @dev Returns the reward amount
     function getRewardAmount() external view returns (uint256) {
-        return rewardAmountInWeiOrTokenId;
+        return rewardAmountInWei;
     }
 
     /// @dev Returns the reward token address

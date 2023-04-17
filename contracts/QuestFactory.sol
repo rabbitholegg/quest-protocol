@@ -219,13 +219,30 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
+        require(msg.value >= mintFee, "Insufficient mint fee");
+        Quest storage currentQuest = quests[questId_];
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
+        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
+        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
+        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+
+        currentQuest.addressMinted[msg.sender] = true;
+        ++currentQuest.numberMinted;
+        QuestContract(currentQuest.questAddress).singleClaim(msg.sender);
+
+        if(mintFee > 0) processMintFee(msg.sender);
+    }
+
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant {
         require(msg.value >= mintFee, "Insufficient mint fee");
-
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
@@ -240,18 +257,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
 
-        if(mintFee > 0) {
-            // Refund any excess payment
-            uint change = msg.value - mintFee;
-            if (change > 0) {
-                (bool success, ) = msg.sender.call{value: change}("");
-                require(success, "Failed to return change");
-                emit ExtraMintFeeReturned(msg.sender, change);
-            }
+        if(mintFee > 0) processMintFee(msg.sender);
+    }
 
-            // Send the mint fee to the mint fee recipient
-            (bool success, ) = getMintFeeRecipient().call{value: mintFee}("");
-            require(success, "Failed to send mint fee");
+    function processMintFee(address sender_) internal {
+        // Refund any excess payment
+        uint change = msg.value - mintFee;
+        if (change > 0) {
+            (bool success, ) = sender_.call{value: change}("");
+            require(success, "Failed to return change");
+            emit ExtraMintFeeReturned(sender_, change);
         }
+
+        // Send the mint fee to the mint fee recipient
+        (bool success, ) = getMintFeeRecipient().call{value: mintFee}("");
+        require(success, "Failed to send mint fee");
     }
 }
