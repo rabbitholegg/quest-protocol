@@ -78,9 +78,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
-    modifier sufficientMintFee() {
+    modifier takeMintFee() {
         require(msg.value >= mintFee, "Insufficient mint fee");
         _;
+        if(mintFee > 0) processMintFee();
     }
 
     /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
@@ -236,38 +237,36 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant takeMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
         QuestContract(currentQuest.questAddress).singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee(msg.sender);
+
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant takeMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
-
-        if(mintFee > 0) processMintFee(msg.sender);
     }
 
-    function processMintFee(address sender_) internal {
+    function processMintFee() internal {
         // Refund any excess payment
         uint change = msg.value - mintFee;
         if (change > 0) {
-            (bool success, ) = sender_.call{value: change}("");
+            (bool success, ) = msg.sender.call{value: change}("");
             require(success, "Failed to return change");
-            emit ExtraMintFeeReturned(sender_, change);
+            emit ExtraMintFeeReturned(msg.sender, change);
         }
 
         // Send the mint fee to the mint fee recipient
