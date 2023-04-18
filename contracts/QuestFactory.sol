@@ -262,7 +262,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if(mintFee > 0) processMintFee();
     }
 
-    function processMintFee() internal {
+    function processMintFee() private {
         // Refund any excess payment
         uint change = msg.value - mintFee;
         if (change > 0) {
