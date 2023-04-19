@@ -6,6 +6,7 @@ import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -66,16 +67,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
-    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
-    /// @param questId_ The id of the quest
-    /// @return address the quest contract address
-    function createQuest(
+    modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
+        Quest storage currentQuest = quests[questId_];
+        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
+        if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+        if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
+        _;
+    }
+
+    function createQuestInternal(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -83,13 +83,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory contractType_,
         string memory questId_
-    ) external onlyRole(CREATE_QUEST_ROLE) returns (address) {
+    ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
-        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
-        if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
         address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
-
         emit QuestCreated(
             msg.sender,
             address(newQuest),
@@ -115,7 +111,78 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questFee,
             protocolFeeRecipient
         );
+
+        return newQuest;
+    }
+
+    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
+    /// @param questId_ The id of the quest
+    /// @return address the quest contract address
+    function createQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory contractType_,
+        string memory questId_
+    ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createQuestInternal(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            contractType_,
+            questId_
+        );
+
         QuestContract(newQuest).transferOwnership(msg.sender);
+
+        return newQuest;
+    }
+
+
+    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @dev only accounts with the CREATE_QUEST_ROLE can create quests
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
+    /// @param questId_ The id of the quest
+    /// @return address the quest contract address
+    function createQuestAndStart(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory contractType_,
+        string memory questId_
+    ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createQuestInternal(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            contractType_,
+            questId_
+        );
+
+        // transfer rewards to the quest contract, must be approved first
+        IERC20(rewardTokenAddress_).transferFrom(msg.sender, newQuest, QuestContract(newQuest).totalTransferAmount());
+        QuestContract(newQuest).queue();
+        QuestContract(newQuest).transferOwnership(msg.sender);
+
         return newQuest;
     }
 
@@ -244,14 +311,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             // Refund any excess payment
             uint change = msg.value - mintFee;
             if (change > 0) {
-                (bool success, ) = msg.sender.call{value: change}("");
-                require(success, "Failed to return change");
+                (bool changeSuccess, ) = msg.sender.call{value: change}("");
+                require(changeSuccess, "Failed to return change");
                 emit ExtraMintFeeReturned(msg.sender, change);
             }
 
             // Send the mint fee to the mint fee recipient
-            (bool success, ) = getMintFeeRecipient().call{value: mintFee}("");
-            require(success, "Failed to send mint fee");
+            (bool feeSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
+            require(feeSuccess, "Failed to send mint fee");
         }
     }
 }
