@@ -6,7 +6,7 @@ import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -15,6 +15,8 @@ import '@openzeppelin/contracts/proxy/Clones.sol';
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+    using SafeERC20 for IERC20;
+
     bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
@@ -178,12 +180,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questId_
         );
 
-        // transfer rewards to the quest contract, must be approved first
-        SafeERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, rewardAmount_);
-        QuestContract(newQuest).queue();
+        transferAndStartQuest(newQuest, rewardTokenAddress_);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
+    }
+
+
+    /// @dev Transfer the total transfer amount to the quest contract
+    /// @dev Contract must be approved to transfer first
+    /// @param newQuest_ The address of the new quest
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    function transferAndStartQuest(address newQuest_, address rewardTokenAddress_) internal {
+        IERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
+        QuestContract(newQuest_).queue();
     }
 
     /// @dev set erc20QuestAddress
