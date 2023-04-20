@@ -6,7 +6,7 @@ import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
@@ -70,7 +70,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (rewardAllowlist[rewardTokenAddress_] == false) revert RewardNotAllowed();
+        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
         if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
         _;
     }
@@ -179,7 +179,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
 
         // transfer rewards to the quest contract, must be approved first
-        IERC20(rewardTokenAddress_).transferFrom(msg.sender, newQuest, QuestContract(newQuest).totalTransferAmount());
+        SafeERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, rewardAmount_);
         QuestContract(newQuest).queue();
         QuestContract(newQuest).transferOwnership(msg.sender);
 
