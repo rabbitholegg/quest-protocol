@@ -194,7 +194,7 @@ describe('QuestFactory', () => {
       )
     })
 
-    it('createQuestAndStart should create a new quest and start it', async () => {
+    it('createQuestAndQueue should create a new quest and start it', async () => {
       // this.maxTotalRewards() + this.maxProtocolReward()
       const maxTotalRewards = totalRewards * rewardAmount
       const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
@@ -204,7 +204,7 @@ describe('QuestFactory', () => {
       // approve the quest factory to spend the reward token
       await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
 
-      const tx = await deployedFactoryContract.createQuestAndStart(
+      const tx = await deployedFactoryContract.createQuestAndQueue(
         deployedSampleErc20Contract.address,
         expiryDate,
         startDate,

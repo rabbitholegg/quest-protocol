@@ -117,6 +117,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
+    /// @dev Transfer the total transfer amount to the quest contract
+    /// @dev Contract must be approved to transfer first
+    /// @param newQuest_ The address of the new quest
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
+        IERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
+        QuestContract(newQuest_).queue();
+    }
+
     /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
@@ -161,7 +170,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
     /// @return address the quest contract address
-    function createQuestAndStart(
+    function createQuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -180,20 +189,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questId_
         );
 
-        transferAndStartQuest(newQuest, rewardTokenAddress_);
+        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
-    }
-
-
-    /// @dev Transfer the total transfer amount to the quest contract
-    /// @dev Contract must be approved to transfer first
-    /// @param newQuest_ The address of the new quest
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    function transferAndStartQuest(address newQuest_, address rewardTokenAddress_) internal {
-        IERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
-        QuestContract(newQuest_).queue();
     }
 
     /// @dev set erc20QuestAddress
