@@ -304,7 +304,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender] == true) revert AddressAlreadyMinted();
+        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
         if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
         if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
         if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
