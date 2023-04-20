@@ -66,10 +66,15 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         __ReentrancyGuard_init();
     }
 
+    /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
+    function totalTransferAmount() external view returns (uint256) {
+        return this.maxTotalRewards() + this.maxProtocolReward();
+    }
+
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (IERC20(rewardToken).balanceOf(address(this)) < this.maxTotalRewards() + this.maxProtocolReward())
+        if (IERC20(rewardToken).balanceOf(address(this)) < this.totalTransferAmount())
             revert TotalAmountExceedsBalance();
         queued = true;
         emit Queued(block.timestamp);
