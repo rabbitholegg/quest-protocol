@@ -4,20 +4,19 @@ const { ethers } = require('hardhat')
 
 async function main() {
   const Erc20Quest = await ethers.getContractFactory('Quest')
-  const Erc1155Quest = await ethers.getContractFactory('Erc1155Quest')
-
   const erc20Quest = await Erc20Quest.deploy()
   await erc20Quest.deployed()
-  const erc1155Quest = await Erc1155Quest.deploy()
-  await erc1155Quest.deployed()
-
   console.log('deployed Erc20Quest to:', erc20Quest.address)
-  console.log('deployed Erc1155Quest to:', erc1155Quest.address)
-
   console.log('verifying erc20Quest: ', erc20Quest.address)
   await hre.run('verify:verify', { address: erc20Quest.address })
-  console.log('verifying erc1155Quest: ', erc1155Quest.address)
-  await hre.run('verify:verify', { address: erc1155Quest.address })
+
+  // to manually upgrade the quest factory
+  // const QuestFactory = await ethers.getContractFactory('QuestFactory')
+  // const questFactory = await QuestFactory.deploy()
+  // await questFactory.deployed()
+  // console.log('deployed QuestFactory to:', questFactory.address)
+  // console.log('verifying questFactory: ', questFactory.address)
+  // await hre.run('verify:verify', { address: questFactory.address })
 }
 
 main()
