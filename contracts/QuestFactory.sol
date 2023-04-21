@@ -221,6 +221,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
     }
 
+    function initLocked() public onlyOwner {
+        require(locked == 0, "Already locked");
+        locked = 1;
+    }
+
     /// @dev set the mintFeeRecipient
     /// @param mintFeeRecipient_ The address of the mint fee recipient
     function setMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
