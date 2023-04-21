@@ -63,6 +63,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
     /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
     modifier nonReentrant() virtual {
+        if (locked == 0) locked = 1;
         require(locked == 1, "REENTRANCY");
         locked = 2;
         _;
@@ -219,11 +220,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
         if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         protocolFeeRecipient = protocolFeeRecipient_;
-    }
-
-    function initLocked() public onlyOwner {
-        require(locked == 0, "Already locked");
-        locked = 1;
     }
 
     /// @dev set the mintFeeRecipient
