@@ -67,6 +67,7 @@ const config: HardhatUserConfig = {
       mainnet: process.env.MAIN_ETHERSCAN_API_KEY,
       goerli: process.env.MAIN_ETHERSCAN_API_KEY,
       optimisticEthereum: process.env.OPT_ETHERSCAN_API_KEY,
+      optimisticGoerli: process.env.OPT_ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
     },
   },
