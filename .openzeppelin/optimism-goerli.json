@@ -10,7 +10,7 @@
     }
   ],
   "impls": {
-    "22f514d96df2396b0e2fe9ade4dc83bd2d56fe50ea0b4038d7cc140cf48de5d0": {
+    "225f6ab6a13f09723acd1c4b5ed958500d32a71d51424ddf48a892352db76450": {
       "address": "0xe9D8495706aEA9f107bb4CB30B7500c271Be3dCB",
       "layout": {
         "solcVersion": "0.8.16",
@@ -124,7 +124,7 @@
             "label": "rabbitHoleReceiptContract",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(RabbitHoleReceipt)9628",
+            "type": "t_contract(RabbitHoleReceipt)9636",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:34"
           },
@@ -198,7 +198,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(RabbitHoleReceipt)9628": {
+          "t_contract(RabbitHoleReceipt)9636": {
             "label": "contract RabbitHoleReceipt",
             "numberOfBytes": "20"
           },
