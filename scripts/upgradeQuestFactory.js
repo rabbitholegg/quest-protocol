@@ -12,7 +12,7 @@ async function main() {
   console.log('Old implementation address:', implAddress)
 
   // force import only needed first time after deploy
-  hre.upgrades.forceImport(address, contract)
+  // hre.upgrades.forceImport(address, contract)
 
   const proposal = await hre.defender.proposeUpgrade(address, contract)
   console.log('Upgrade proposal created at:', proposal.url)

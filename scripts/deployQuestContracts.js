@@ -9,10 +9,10 @@ async function main() {
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
 
   // deploy new quest
-  // const erc20Quest = await Erc20Quest.deploy()
-  // await erc20Quest.deployed()
-  // console.log('deployed Erc20Quest to:', erc20Quest.address)
-  // await hre.run('verify:verify', { address: erc20Quest.address })
+  const erc20Quest = await Erc20Quest.deploy()
+  await erc20Quest.deployed()
+  console.log('deployed Erc20Quest to:', erc20Quest.address)
+  await hre.run('verify:verify', { address: erc20Quest.address })
 
   // to manually upgrade the quest factory
   // validate upgrade
