@@ -25,11 +25,13 @@ contract QuestTerminalDiscount is
     // storage
     address public royaltyRecipient;
     address public minterAddress;
+    address public questFactoryAddress;
     uint public royaltyFee;
     mapping(uint256 => Discount) public discounts;
     struct Discount {
-        uint256 percentage;
-        uint256 maxUses;
+        uint16 percentage;
+        uint16 maxUses;
+        uint16 usedCount;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -40,6 +42,7 @@ contract QuestTerminalDiscount is
     function initialize(
         address royaltyRecipient_,
         address minterAddress_,
+        address questFactoryAddress_,
         uint royaltyFee_,
         address owner_
     ) external initializer {
@@ -48,11 +51,17 @@ contract QuestTerminalDiscount is
         __Ownable_init(owner_);
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
+        questFactoryAddress = questFactoryAddress_;
         royaltyFee = royaltyFee_;
     }
 
     modifier onlyMinter() {
         require(msg.sender == minterAddress, 'Only minter');
+        _;
+    }
+
+    modifier onlyQuestFactory() {
+        require(msg.sender == questFactoryAddress, 'Only quest factory');
         _;
     }
 
@@ -73,6 +82,12 @@ contract QuestTerminalDiscount is
         emit MinterAddressSet(minterAddress_);
     }
 
+    /// @dev set the quest factory address
+    /// @param questFactoryAddress_ the address of the quest factory
+    function setQuestFactoryAddress(address questFactoryAddress_) external onlyOwner {
+        questFactoryAddress = questFactoryAddress_;
+    }
+
     /// @dev set the royalty fee
     /// @param royaltyFee_ the royalty fee
     function setRoyaltyFee(uint256 royaltyFee_) external onlyOwner {
@@ -84,11 +99,17 @@ contract QuestTerminalDiscount is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     /// @param maxDiscountUses_ the max discount uses
-    function mint(address to_, uint discountPercentage_, uint maxDiscountUses_) external onlyMinter {
+    function mint(address to_, uint16 discountPercentage_, uint16 maxDiscountUses_, uint16 usedCount_) external onlyMinter {
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
-        discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_);
+        discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_, usedCount_);
         _safeMint(to_, tokenId);
+    }
+
+    /// @dev increment used count
+    /// @param tokenId_ the token id
+    function incrementUsedCount(uint tokenId_) external onlyQuestFactory {
+        discounts[tokenId_].usedCount++;
     }
 
     /// @dev get the owned token ids of an address
