@@ -6,9 +6,11 @@ import {
   Quest,
   SampleERC20,
   QuestFactory,
+  QuestTerminalDiscount,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
+  QuestTerminalDiscount__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
 } from '../typechain-types'
@@ -18,6 +20,7 @@ describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
+  let deployedQuestTerminalDiscountContract: QuestTerminalDiscount
   let deployedErc20Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
@@ -29,6 +32,8 @@ describe('QuestFactory', () => {
   let mintFeeRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
+  let questTerminalDiscountContract: QuestTerminalDiscount__factory
+  let questTerminalDiscount: QuestTerminalDiscount__factory
   let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
@@ -43,6 +48,7 @@ describe('QuestFactory', () => {
     wallet = Wallet.fromMnemonic(mnemonic)
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
+    questTerminalDiscountContract = await ethers.getContractFactory('QuestTerminalDiscount')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -50,7 +56,20 @@ describe('QuestFactory', () => {
     await deploySampleErc20Contract()
     await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
+    await deployQuestTerminalDiscount()
   })
+
+  const deployQuestTerminalDiscount = async () => {
+    deployedQuestTerminalDiscountContract = await upgrades.deployProxy(questTerminalDiscountContract, [
+      royaltyRecipient.address,
+      protocolRecipient.address,
+      deployedFactoryContract.address,
+      10,
+      owner.address,
+    ])
+
+    deployedFactoryContract.setQuestTerminalDiscountContract(deployedQuestTerminalDiscountContract.address)
+  }
 
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
@@ -62,6 +81,7 @@ describe('QuestFactory', () => {
       protocolRecipient.address,
       deployedErc20Quest.address,
       owner.address,
+      owner.address, // this will become the questTerminalDiscount contract
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
@@ -211,7 +231,8 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc20',
-        erc20QuestId
+        erc20QuestId,
+        0 //TODO test with a created discountTokenId
       )
 
       await tx.wait()

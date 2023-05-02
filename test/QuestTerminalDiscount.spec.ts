@@ -4,6 +4,7 @@ import { ethers, upgrades } from 'hardhat'
 
 describe('QuestTerminalDiscount Contract', async () => {
   let questTerminalDiscount: Contract,
+    questFactory: Contract,
     contractOwner: { address: String },
     royaltyRecipient: { address: String },
     minterAddress: { address: String },
@@ -12,13 +13,29 @@ describe('QuestTerminalDiscount Contract', async () => {
   beforeEach(async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
     const QuestTerminalDiscount = await ethers.getContractFactory('QuestTerminalDiscount')
+    const QuestFactory = await ethers.getContractFactory('QuestFactory')
+
+    const erc20QuestContract = await ethers.getContractFactory('Quest')
+    const deployedErc20Quest = await erc20QuestContract.deploy()
+
+    questFactory = await upgrades.deployProxy(QuestFactory, [
+      royaltyRecipient.address,
+      firstAddress.address, // really RH Receipt contract but doesnt matter here
+      royaltyRecipient.address,
+      deployedErc20Quest.address,
+      contractOwner.address,
+      firstAddress.address, // really questTerminalDiscount address but don't have yet
+    ])
 
     questTerminalDiscount = await upgrades.deployProxy(QuestTerminalDiscount, [
       royaltyRecipient.address,
       minterAddress.address,
+      questFactory.address,
       10,
       contractOwner.address,
     ])
+
+    questFactory.setQuestTerminalDiscountContract(questTerminalDiscount.address)
   })
 
   describe('Deployment', () => {

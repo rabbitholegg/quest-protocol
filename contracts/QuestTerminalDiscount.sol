@@ -99,10 +99,10 @@ contract QuestTerminalDiscount is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     /// @param maxDiscountUses_ the max discount uses
-    function mint(address to_, uint16 discountPercentage_, uint16 maxDiscountUses_, uint16 usedCount_) external onlyMinter {
+    function mint(address to_, uint16 discountPercentage_, uint16 maxDiscountUses_) external onlyMinter {
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
-        discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_, usedCount_);
+        discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_, 0);
         _safeMint(to_, tokenId);
     }
 

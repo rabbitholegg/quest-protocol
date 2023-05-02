@@ -112,7 +112,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if(discountTokenId_ == 0){
             protocolFee = questFee;
         }else{
-            protocolFee = calculateDiscountedFee(discountTokenId_);
+            protocolFee = doDiscountedFee(discountTokenId_);
         }
 
         QuestContract(newQuest).initialize(
@@ -130,18 +130,17 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    // instead of discountPercentage of questFee should we just make it the total fee?
-    // do we require or return questfee when maxUses are up?
-    // will another person be creating quests on behalf of the owner of the discount token? if so the require below will need to change
-    function calculateDiscountedFee(uint tokenId_) internal returns (uint16) {
+    // instead of discountPercentage of questFee should we just make it the total fee? -> currently no
+    // do we require or return questfee when maxUses are up? -> currently return qusetfee
+    // will another person be creating quests on behalf of the owner of the discount token? if so the require below will need to change -> currently not possible
+    function doDiscountedFee(uint tokenId_) internal returns (uint16) {
         require(questTerminalDiscountContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
 
         (uint16 discountPercentage, uint16 maxDiscountUses, uint16 usedCount) = questTerminalDiscountContract.discounts(tokenId_);
         if(usedCount > maxDiscountUses) return questFee;
 
-        uint16 discountAmount = (questFee * discountPercentage) / 100; // This math is not correct
         questTerminalDiscountContract.incrementUsedCount(tokenId_);
-        return questFee - discountAmount;
+        return (questFee * (100 - discountPercentage)) / 100;
     }
 
     /// @dev Transfer the total transfer amount to the quest contract
