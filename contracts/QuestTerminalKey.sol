@@ -100,6 +100,9 @@ contract QuestTerminalKey is
     /// @param discountPercentage_ the discount percentage
     /// @param maxDiscountUses_ the max discount uses
     function mint(address to_, uint16 discountPercentage_, uint16 maxDiscountUses_) external onlyMinter {
+        require(discountPercentage_ <= 10000, 'Invalid discount percentage');
+        require(maxDiscountUses_ <= 1000, 'Invalid max discount uses');
+
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_, 0);
