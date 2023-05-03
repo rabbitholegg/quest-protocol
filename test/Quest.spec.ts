@@ -15,7 +15,7 @@ import {
   QuestFactory__factory,
 } from '../typechain-types'
 
-describe('Erc20Quest', async () => {
+describe('Quest', async () => {
   let deployedQuestContract: Quest
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
@@ -95,6 +95,7 @@ describe('Erc20Quest', async () => {
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       owner.address,
+      owner.address, // as a placeholder, would the QuestTerminalKey contract
     ])) as QuestFactory
   }
 

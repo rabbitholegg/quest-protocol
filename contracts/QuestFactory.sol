@@ -10,7 +10,7 @@ import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeE
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
-import "./QuestTerminalDiscount.sol";
+import "./QuestTerminalKey.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -39,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    QuestTerminalDiscount private questTerminalDiscountContract;
+    QuestTerminalKey private questTerminalKeyContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -50,7 +50,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address ownerAddress_,
-        address questTerminalDiscountAddress_
+        address questTerminalKeyAddress_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -58,10 +58,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFee = 2_000;
+        questFee = 2_000; // in BIPS
         erc20QuestAddress = erc20QuestAddress_;
         locked = 1;
-        questTerminalDiscountContract = QuestTerminalDiscount(questTerminalDiscountAddress_);
+        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
     }
 
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
@@ -130,17 +130,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    // instead of discountPercentage of questFee should we just make it the total fee? -> currently no
     // do we require or return questfee when maxUses are up? -> currently return qusetfee
     // will another person be creating quests on behalf of the owner of the discount token? if so the require below will need to change -> currently not possible
     function doDiscountedFee(uint tokenId_) internal returns (uint16) {
-        require(questTerminalDiscountContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
+        require(questTerminalKeyContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
 
-        (uint16 discountPercentage, uint16 maxDiscountUses, uint16 usedCount) = questTerminalDiscountContract.discounts(tokenId_);
+        (uint16 discountPercentage, uint16 maxDiscountUses, uint16 usedCount) = questTerminalKeyContract.discounts(tokenId_);
         if(usedCount > maxDiscountUses) return questFee;
 
-        questTerminalDiscountContract.incrementUsedCount(tokenId_);
-        return (questFee * (100 - discountPercentage)) / 100;
+        questTerminalKeyContract.incrementUsedCount(tokenId_);
+        return uint16((uint(questFee) * (10000 - uint(discountPercentage))) / 10000);
     }
 
     /// @dev Transfer the total transfer amount to the quest contract
@@ -273,10 +272,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
 
-    /// @dev set questTerminalDiscountContract address
-    /// @param questTerminalDiscountContract_ The address of the questTerminalDiscountContract
-    function setQuestTerminalDiscountContract(address questTerminalDiscountContract_) external onlyOwner {
-        questTerminalDiscountContract = QuestTerminalDiscount(questTerminalDiscountContract_);
+    /// @dev set questTerminalKeyContract address
+    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
+    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
+        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward

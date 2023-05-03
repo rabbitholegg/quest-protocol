@@ -9,7 +9,7 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 
-contract QuestTerminalDiscount is
+contract QuestTerminalKey is
     Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
@@ -29,7 +29,7 @@ contract QuestTerminalDiscount is
     uint public royaltyFee;
     mapping(uint256 => Discount) public discounts;
     struct Discount {
-        uint16 percentage;
+        uint16 percentage; //in BIPS
         uint16 maxUses;
         uint16 usedCount;
     }
@@ -46,7 +46,7 @@ contract QuestTerminalDiscount is
         uint royaltyFee_,
         address owner_
     ) external initializer {
-        __ERC721_init('QuestTerminalDiscount', 'QTD');
+        __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
         royaltyRecipient = royaltyRecipient_;
@@ -66,7 +66,7 @@ contract QuestTerminalDiscount is
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://api.rabbithole.gg/nft/discount/";
+        return "https://api.rabbithole.gg/nft/qtk/";
     }
 
     /// @dev set the royalty recipient
@@ -95,7 +95,7 @@ contract QuestTerminalDiscount is
         emit RoyaltyFeeSet(royaltyFee_);
     }
 
-    /// @dev mint a QuestTerminalDiscount NFT
+    /// @dev mint a QuestTerminalKey NFT
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     /// @param maxDiscountUses_ the max discount uses

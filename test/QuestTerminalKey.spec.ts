@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { Contract } from 'ethers'
 import { ethers, upgrades } from 'hardhat'
 
-describe('QuestTerminalDiscount Contract', async () => {
-  let questTerminalDiscount: Contract,
+describe('QuestTerminalKey Contract', async () => {
+  let questTerminalKey: Contract,
     questFactory: Contract,
     contractOwner: { address: String },
     royaltyRecipient: { address: String },
@@ -12,7 +12,7 @@ describe('QuestTerminalDiscount Contract', async () => {
 
   beforeEach(async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
-    const QuestTerminalDiscount = await ethers.getContractFactory('QuestTerminalDiscount')
+    const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
     const QuestFactory = await ethers.getContractFactory('QuestFactory')
 
     const erc20QuestContract = await ethers.getContractFactory('Quest')
@@ -24,10 +24,10 @@ describe('QuestTerminalDiscount Contract', async () => {
       royaltyRecipient.address,
       deployedErc20Quest.address,
       contractOwner.address,
-      firstAddress.address, // really questTerminalDiscount address but don't have yet
+      firstAddress.address, // really questTerminalKey address but don't have it yet
     ])
 
-    questTerminalDiscount = await upgrades.deployProxy(QuestTerminalDiscount, [
+    questTerminalKey = await upgrades.deployProxy(QuestTerminalKey, [
       royaltyRecipient.address,
       minterAddress.address,
       questFactory.address,
@@ -35,31 +35,32 @@ describe('QuestTerminalDiscount Contract', async () => {
       contractOwner.address,
     ])
 
-    questFactory.setQuestTerminalDiscountContract(questTerminalDiscount.address)
+    questFactory.setQuestTerminalKeyContract(questTerminalKey.address)
   })
 
   describe('Deployment', () => {
     it('deploys and initializes the the 721 correctly', async () => {
-      expect(await questTerminalDiscount.symbol()).to.equal('QTD')
-      expect(await questTerminalDiscount.name()).to.equal('QuestTerminalDiscount')
-      expect(await questTerminalDiscount.minterAddress()).to.equal(minterAddress.address)
-      expect(await questTerminalDiscount.royaltyRecipient()).to.equal(royaltyRecipient.address)
+      expect(await questTerminalKey.symbol()).to.equal('QTK')
+      expect(await questTerminalKey.name()).to.equal('QuestTerminalKey')
+      expect(await questTerminalKey.minterAddress()).to.equal(minterAddress.address)
+      expect(await questTerminalKey.royaltyRecipient()).to.equal(royaltyRecipient.address)
     })
   })
 
   describe('mint', () => {
     it('mints a token with correct questId', async () => {
-      await questTerminalDiscount.connect(minterAddress).mint(firstAddress.address, 100, 3)
-      const discount = await questTerminalDiscount.discounts(1)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      const discount = await questTerminalKey.discounts(1)
 
-      expect(await questTerminalDiscount.balanceOf(firstAddress.address)).to.eq(1)
+      expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(1)
       expect(discount.percentage).to.eq(100)
       expect(discount.maxUses).to.eq(3)
-      expect(await questTerminalDiscount.tokenURI(1)).to.eq('https://api.rabbithole.gg/nft/discount/1')
+      expect(discount.usedCount).to.eq(0)
+      expect(await questTerminalKey.tokenURI(1)).to.eq('https://api.rabbithole.gg/nft/qtk/1')
     })
 
     it('reverts if not called by minter', async () => {
-      await expect(questTerminalDiscount.connect(firstAddress).mint(firstAddress.address, 100, 3)).to.be.revertedWith(
+      await expect(questTerminalKey.connect(firstAddress).mint(firstAddress.address, 100, 3)).to.be.revertedWith(
         'Only minter'
       )
     })
@@ -67,11 +68,11 @@ describe('QuestTerminalDiscount Contract', async () => {
 
   describe('getOwnedTokenIds', () => {
     it('returns the correct token ids', async () => {
-      await questTerminalDiscount.connect(minterAddress).mint(firstAddress.address, 100, 3)
-      await questTerminalDiscount.connect(minterAddress).mint(firstAddress.address, 100, 3)
-      await questTerminalDiscount.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
 
-      const ownedTokenIds = await questTerminalDiscount.getOwnedTokenIds(firstAddress.address)
+      const ownedTokenIds = await questTerminalKey.getOwnedTokenIds(firstAddress.address)
       const ownedTokenIdsAsNumbers = ownedTokenIds.map((tokenId: any) => tokenId.toNumber())
 
       expect(ownedTokenIdsAsNumbers).to.eql([1, 2, 3])
