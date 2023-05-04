@@ -19,6 +19,7 @@ contract QuestTerminalKey is
 {
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
+    event questFactoryAddressSet(address indexed questFactoryAddress);
     using CountersUpgradeable for CountersUpgradeable.Counter;
     CountersUpgradeable.Counter private _tokenIds;
 
@@ -69,23 +70,31 @@ contract QuestTerminalKey is
         return "https://api.rabbithole.gg/nft/qtk/";
     }
 
+    /// @dev modifier to check for zero address
+    /// @param _address the address to check
+    modifier nonZeroAddress(address _address) {
+        require(_address != address(0), 'Zero address');
+        _;
+    }
+
     /// @dev set the royalty recipient
     /// @param royaltyRecipient_ the address of the royalty recipient
-    function setRoyaltyRecipient(address royaltyRecipient_) external onlyOwner {
+    function setRoyaltyRecipient(address royaltyRecipient_) external nonZeroAddress(royaltyRecipient_) onlyOwner {
         royaltyRecipient = royaltyRecipient_;
     }
 
     /// @dev set the minter address
     /// @param minterAddress_ the address of the minter
-    function setMinterAddress(address minterAddress_) external onlyOwner {
+    function setMinterAddress(address minterAddress_) external nonZeroAddress(minterAddress_) onlyOwner {
         minterAddress = minterAddress_;
         emit MinterAddressSet(minterAddress_);
     }
 
     /// @dev set the quest factory address
     /// @param questFactoryAddress_ the address of the quest factory
-    function setQuestFactoryAddress(address questFactoryAddress_) external onlyOwner {
+    function setQuestFactoryAddress(address questFactoryAddress_) external nonZeroAddress(questFactoryAddress_) onlyOwner {
         questFactoryAddress = questFactoryAddress_;
+        emit questFactoryAddressSet(questFactoryAddress_);
     }
 
     /// @dev set the royalty fee
@@ -138,15 +147,6 @@ contract QuestTerminalKey is
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
     {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
-    }
-
-    /// @dev burn a token
-    /// @param tokenId the token id
-    function _burn(uint256 tokenId)
-        internal
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
-    {
-        super._burn(tokenId);
     }
 
     /// @dev returns the token uri
