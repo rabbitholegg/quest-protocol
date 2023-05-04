@@ -19,7 +19,7 @@ contract QuestTerminalKey is
 {
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
-    event questFactoryAddressSet(address indexed questFactoryAddress);
+    event QuestFactoryAddressSet(address indexed questFactoryAddress);
     using CountersUpgradeable for CountersUpgradeable.Counter;
     CountersUpgradeable.Counter private _tokenIds;
 
@@ -94,7 +94,7 @@ contract QuestTerminalKey is
     /// @param questFactoryAddress_ the address of the quest factory
     function setQuestFactoryAddress(address questFactoryAddress_) external nonZeroAddress(questFactoryAddress_) onlyOwner {
         questFactoryAddress = questFactoryAddress_;
-        emit questFactoryAddressSet(questFactoryAddress_);
+        emit QuestFactoryAddressSet(questFactoryAddress_);
     }
 
     /// @dev set the royalty fee
