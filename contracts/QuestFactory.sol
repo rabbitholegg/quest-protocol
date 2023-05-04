@@ -136,7 +136,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         require(questTerminalKeyContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
 
         (uint16 discountPercentage, uint16 maxDiscountUses, uint16 usedCount) = questTerminalKeyContract.discounts(tokenId_);
-        if(usedCount > maxDiscountUses) return questFee;
+        if(usedCount >= maxDiscountUses) return questFee;
 
         questTerminalKeyContract.incrementUsedCount(tokenId_);
         return uint16((uint(questFee) * (10000 - uint(discountPercentage))) / 10000);
