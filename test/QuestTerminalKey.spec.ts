@@ -56,7 +56,23 @@ describe('QuestTerminalKey Contract', async () => {
       expect(discount.percentage).to.eq(100)
       expect(discount.maxUses).to.eq(3)
       expect(discount.usedCount).to.eq(0)
-      expect(await questTerminalKey.tokenURI(1)).to.eq('https://api.rabbithole.gg/nft/qtk/1')
+
+      const base64encoded = await questTerminalKey.tokenURI(1)
+      const buff = Buffer.from(base64encoded.replace('data:application/json;base64,', ''), 'base64')
+      const metadata = buff.toString('ascii')
+
+      const expectedMetadata = {
+        name: 'RabbitHole.gg QuestTerminalKey #1',
+        description: 'The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.',
+        image: 'https://rabbithole.gg/_next/image?url=%2FQTKNFT.png',
+        attributes: [
+          { trait_type: 'Discount Percentage', value: '100' },
+          { trait_type: 'Discount Max Uses', value: '3' },
+          { trait_type: 'Discount Used Count', value: '0' },
+        ],
+      }
+
+      expect(JSON.parse(metadata)).to.eql(expectedMetadata)
     })
 
     it('reverts if not called by minter', async () => {

@@ -8,6 +8,8 @@ import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import '@openzeppelin/contracts/utils/Base64.sol';
+import '@openzeppelin/contracts/utils/Strings.sol';
 
 contract QuestTerminalKey is
     Initializable,
@@ -20,10 +22,13 @@ contract QuestTerminalKey is
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
     event QuestFactoryAddressSet(address indexed questFactoryAddress);
+
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    CountersUpgradeable.Counter private _tokenIds;
+    using Strings for uint256;
+    using Strings for uint16;
 
     // storage
+    CountersUpgradeable.Counter private _tokenIds;
     address public royaltyRecipient;
     address public minterAddress;
     address public questFactoryAddress;
@@ -64,10 +69,6 @@ contract QuestTerminalKey is
     modifier onlyQuestFactory() {
         require(msg.sender == questFactoryAddress, 'Only quest factory');
         _;
-    }
-
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://api.rabbithole.gg/nft/qtk/";
     }
 
     /// @dev modifier to check for zero address
@@ -159,14 +160,64 @@ contract QuestTerminalKey is
     }
 
     /// @dev returns the token uri
-    /// @param tokenId the token id
-    function tokenURI(uint256 tokenId)
+    /// @param tokenId_ the token id
+    function tokenURI(uint256 tokenId_)
         public
         view
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        bytes memory dataURI = generateDataURI(tokenId_);
+        return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
+    }
+
+    /// @dev returns the data uri in json format
+    /// @param tokenId_ the token id
+    function generateDataURI(
+        uint tokenId_
+    ) internal view virtual returns (bytes memory) {
+        string memory tokenIdString = tokenId_.toString();
+
+        bytes memory attributes = abi.encodePacked(
+            '[',
+            generateAttribute('Discount Percentage', discounts[tokenId_].percentage.toString()),
+            ',',
+            generateAttribute('Discount Max Uses', discounts[tokenId_].maxUses.toString()),
+            ',',
+            generateAttribute('Discount Used Count', discounts[tokenId_].usedCount.toString()),
+            ']'
+        );
+        bytes memory dataURI = abi.encodePacked(
+            '{',
+            '"name": "RabbitHole.gg QuestTerminalKey #',
+            tokenIdString,
+            '",',
+            '"description": "The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.",',
+            '"image": "',
+            "https://rabbithole.gg/_next/image?url=%2FQTKNFT.png",
+            '",',
+            '"attributes": ',
+            attributes,
+            '}'
+        );
+        return dataURI;
+    }
+
+    /// @dev generates an attribute object for an ERC-721 token
+    /// @param key The key for the attribute
+    /// @param value The value for the attribute
+    function generateAttribute(string memory key, string memory value) internal pure returns (string memory) {
+        bytes memory attribute = abi.encodePacked(
+            '{',
+            '"trait_type": "',
+            key,
+            '",',
+            '"value": "',
+            value,
+            '"',
+            '}'
+        );
+        return string(attribute);
     }
 
     /// @dev See {IERC165-royaltyInfo}
