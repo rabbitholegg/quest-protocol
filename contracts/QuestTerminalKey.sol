@@ -149,6 +149,15 @@ contract QuestTerminalKey is
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
+    /// @dev burn a token
+    /// @param tokenId the token id
+    function _burn(uint256 tokenId)
+        internal
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+    {
+        super._burn(tokenId);
+    }
+
     /// @dev returns the token uri
     /// @param tokenId the token id
     function tokenURI(uint256 tokenId)
