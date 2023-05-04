@@ -95,7 +95,7 @@ describe('Quest', async () => {
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       owner.address,
-      owner.address, // as a placeholder, would the QuestTerminalKey contract
+      ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
     ])) as QuestFactory
   }
 
@@ -107,7 +107,7 @@ describe('Quest', async () => {
     deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
       deployedReceiptRenderer.address,
       owner.address,
-      minterAddress.address, // as a placeholder, would the factory contract
+      minterAddress.address, // as a placeholder, would be the factory contract
       10,
       owner.address,
     ])) as RabbitHoleReceipt

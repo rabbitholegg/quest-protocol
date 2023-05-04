@@ -232,7 +232,7 @@ describe('QuestFactory', () => {
         rewardAmount,
         'erc20',
         erc20QuestId,
-        0 //TODO test with a created discountTokenId
+        0
       )
 
       await tx.wait()
