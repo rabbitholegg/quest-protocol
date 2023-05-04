@@ -170,6 +170,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
+    /// @param jsonSpecCID The CID of the JSON spec for the quest
     /// @return address the quest contract address
     function createQuestAndQueue(
         address rewardTokenAddress_,
@@ -178,7 +179,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory contractType_,
-        string memory questId_
+        string memory questId_,
+        string memory jsonSpecCID
     ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
             rewardTokenAddress_,
@@ -191,6 +193,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
+        QuestContract(newQuest).setJsonSpecCID(jsonSpecCID);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
