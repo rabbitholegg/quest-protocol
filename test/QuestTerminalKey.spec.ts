@@ -49,24 +49,26 @@ describe('QuestTerminalKey Contract', async () => {
 
   describe('mint', () => {
     it('mints a token with correct questId', async () => {
-      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000, 3)
       const discount = await questTerminalKey.discounts(1)
 
       expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(1)
-      expect(discount.percentage).to.eq(100)
+      expect(await questTerminalKey.ownerOf(1)).to.eq(firstAddress.address)
+      expect(discount.percentage).to.eq(1000)
       expect(discount.maxUses).to.eq(3)
       expect(discount.usedCount).to.eq(0)
 
       const base64encoded = await questTerminalKey.tokenURI(1)
-      const buff = Buffer.from(base64encoded.replace('data:application/json;base64,', ''), 'base64')
-      const metadata = buff.toString('ascii')
+      const metadata = Buffer.from(base64encoded.replace('data:application/json;base64,', ''), 'base64').toString(
+        'ascii'
+      )
 
       const expectedMetadata = {
         name: 'RabbitHole.gg QuestTerminalKey #1',
         description: 'The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.',
         image: 'https://rabbithole.gg/_next/image?url=%2FQTKNFT.png',
         attributes: [
-          { trait_type: 'Discount Percentage', value: '100' },
+          { trait_type: 'Discount Percentage BPS', value: '1000' },
           { trait_type: 'Discount Max Uses', value: '3' },
           { trait_type: 'Discount Used Count', value: '0' },
         ],

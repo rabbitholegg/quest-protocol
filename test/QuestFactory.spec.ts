@@ -246,20 +246,27 @@ describe('QuestFactory', () => {
     })
 
     it('createQuestAndQueue should create a new quest and start it with a discount', async () => {
-      // mint a deployedQuestTerminalKeyContract to user
-      await deployedQuestTerminalKeyContract.connect(protocolRecipient).mint(owner.address, 5000, 10)
+      // mint a deployedQuestTerminalKeyContract to user, with one max use
+      await deployedQuestTerminalKeyContract.connect(protocolRecipient).mint(owner.address, 5000, 1)
       const ids = await deployedQuestTerminalKeyContract.getOwnedTokenIds(owner.address)
       const discountTokenId = ids[0].toNumber()
 
-      // this.maxTotalRewards() + this.maxProtocolReward()
       const maxTotalRewards = totalRewards * rewardAmount
-      const maxProtocolReward = (maxTotalRewards * (2_000 * 0.5)) / 10_000 // minus 50% for discount
+      const questFee = 2_000
+      const discountedQuestFee = questFee * 0.5 // minus 50% for discount
+      const maxProtocolRewardDiscounted = (maxTotalRewards * discountedQuestFee) / 10_000
+      const maxProtocolReward = (maxTotalRewards * questFee) / 10_000
+      const transferAmountDiscounted = maxTotalRewards + maxProtocolRewardDiscounted
       const transferAmount = maxTotalRewards + maxProtocolReward
 
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-      // approve the quest factory to spend the reward token
-      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+      // approve the quest factory to spend the reward token, twice the amount because we will deploy two quests
+      await deployedSampleErc20Contract.approve(
+        deployedFactoryContract.address,
+        transferAmountDiscounted + transferAmount
+      )
 
+      // first quest uses the discounted quest fee
       const tx = await deployedFactoryContract.createQuestAndQueue(
         deployedSampleErc20Contract.address,
         expiryDate,
@@ -278,7 +285,29 @@ describe('QuestFactory', () => {
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
 
       expect(await deployedErc20Quest.queued()).to.equal(true)
-      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
+      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmountDiscounted)
+      expect(await deployedErc20Quest.questFee()).to.equal(discountedQuestFee)
+
+      // second quest uses the full quest fee
+      const tx2 = await deployedFactoryContract.createQuestAndQueue(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        'erc20',
+        erc20QuestId + 'nodiscount',
+        discountTokenId
+      )
+
+      await tx2.wait()
+      const questAddress2 = await deployedFactoryContract
+        .quests(erc20QuestId + 'nodiscount')
+        .then((res) => res.questAddress)
+      const deployedErc20Quest2 = await ethers.getContractAt('Quest', questAddress2)
+
+      expect(await deployedSampleErc20Contract.balanceOf(questAddress2)).to.equal(transferAmount)
+      expect(await deployedErc20Quest2.questFee()).to.equal(questFee)
     })
   })
 

@@ -180,7 +180,7 @@ contract QuestTerminalKey is
 
         bytes memory attributes = abi.encodePacked(
             '[',
-            generateAttribute('Discount Percentage', discounts[tokenId_].percentage.toString()),
+            generateAttribute('Discount Percentage BPS', discounts[tokenId_].percentage.toString()),
             ',',
             generateAttribute('Discount Max Uses', discounts[tokenId_].maxUses.toString()),
             ',',
