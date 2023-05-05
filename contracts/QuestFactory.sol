@@ -92,7 +92,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             msg.sender,
             address(newQuest),
             questId_,
-            "ERC20",
+            "erc20",
             rewardTokenAddress_,
             endTime_,
             startTime_,
