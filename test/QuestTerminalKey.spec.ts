@@ -33,6 +33,7 @@ describe('QuestTerminalKey Contract', async () => {
       questFactory.address,
       10,
       contractOwner.address,
+      'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
     ])
 
     questFactory.setQuestTerminalKeyContract(questTerminalKey.address)
@@ -49,13 +50,12 @@ describe('QuestTerminalKey Contract', async () => {
 
   describe('mint', () => {
     it('mints a token with correct questId', async () => {
-      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000)
       const discount = await questTerminalKey.discounts(1)
 
       expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(1)
       expect(await questTerminalKey.ownerOf(1)).to.eq(firstAddress.address)
       expect(discount.percentage).to.eq(1000)
-      expect(discount.maxUses).to.eq(3)
       expect(discount.usedCount).to.eq(0)
 
       const base64encoded = await questTerminalKey.tokenURI(1)
@@ -66,10 +66,9 @@ describe('QuestTerminalKey Contract', async () => {
       const expectedMetadata = {
         name: 'RabbitHole.gg QuestTerminalKey #1',
         description: 'The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.',
-        image: 'https://rabbithole.gg/_next/image?url=%2FQTKNFT.png',
+        image: 'ipfs://QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
         attributes: [
           { trait_type: 'Discount Percentage BPS', value: '1000' },
-          { trait_type: 'Discount Max Uses', value: '3' },
           { trait_type: 'Discount Used Count', value: '0' },
         ],
       }
@@ -78,7 +77,7 @@ describe('QuestTerminalKey Contract', async () => {
     })
 
     it('reverts if not called by minter', async () => {
-      await expect(questTerminalKey.connect(firstAddress).mint(firstAddress.address, 100, 3)).to.be.revertedWith(
+      await expect(questTerminalKey.connect(firstAddress).mint(firstAddress.address, 1000)).to.be.revertedWith(
         'Only minter'
       )
     })
@@ -86,9 +85,9 @@ describe('QuestTerminalKey Contract', async () => {
 
   describe('getOwnedTokenIds', () => {
     it('returns the correct token ids', async () => {
-      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
-      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
-      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 100, 3)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000)
+      await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000)
 
       const ownedTokenIds = await questTerminalKey.getOwnedTokenIds(firstAddress.address)
       const ownedTokenIdsAsNumbers = ownedTokenIds.map((tokenId: any) => tokenId.toNumber())

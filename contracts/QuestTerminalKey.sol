@@ -33,6 +33,7 @@ contract QuestTerminalKey is
     address public minterAddress;
     address public questFactoryAddress;
     uint public royaltyFee;
+    string public imageIPFSHash;
     mapping(uint256 => Discount) public discounts;
     struct Discount {
         uint16 percentage; //in BIPS
@@ -49,7 +50,8 @@ contract QuestTerminalKey is
         address minterAddress_,
         address questFactoryAddress_,
         uint royaltyFee_,
-        address owner_
+        address owner_,
+        string memory imageIPFSHash_
     ) external initializer {
         __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
@@ -58,6 +60,7 @@ contract QuestTerminalKey is
         minterAddress = minterAddress_;
         questFactoryAddress = questFactoryAddress_;
         royaltyFee = royaltyFee_;
+        imageIPFSHash = imageIPFSHash_;
     }
 
     modifier onlyMinter() {
@@ -75,6 +78,12 @@ contract QuestTerminalKey is
     modifier nonZeroAddress(address _address) {
         require(_address != address(0), 'Zero address');
         _;
+    }
+
+    /// @dev set the image IPFS hash
+    /// @param imageIPFSHash_ the image IPFS hash
+    function setImageIPFSHash(string memory imageIPFSHash_) external onlyOwner {
+        imageIPFSHash = imageIPFSHash_;
     }
 
     /// @dev set the royalty recipient
@@ -189,13 +198,17 @@ contract QuestTerminalKey is
             '",',
             '"description": "The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.",',
             '"image": "',
-            "https://rabbithole.gg/_next/image?url=%2FQTKNFT.png",
+            tokenImage(),
             '",',
             '"attributes": ',
             attributes,
             '}'
         );
         return dataURI;
+    }
+
+    function tokenImage() internal view virtual returns (string memory) {
+        return string(abi.encodePacked('ipfs://', imageIPFSHash));
     }
 
     /// @dev generates an attribute object for an ERC-721 token
