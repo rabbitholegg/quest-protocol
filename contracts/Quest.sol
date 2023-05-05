@@ -74,6 +74,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         require(bytes(jsonSpecCID).length == 0, 'jsonSpecCID already set');
 
         jsonSpecCID = jsonSpecCID_;
+        emit JsonSpecCIDSet(jsonSpecCID_);
     }
 
     /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee

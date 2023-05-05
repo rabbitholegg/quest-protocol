@@ -188,7 +188,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).setJsonSpecCID(jsonSpecCID);
+        if(bytes(jsonSpecCID).length > 0) QuestContract(newQuest).setJsonSpecCID(jsonSpecCID);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;

@@ -7,6 +7,7 @@ interface IQuest {
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint timestamp);
+    event JsonSpecCIDSet(string cid);
 
     error AlreadyClaimed();
     error AmountExceedsBalance();
