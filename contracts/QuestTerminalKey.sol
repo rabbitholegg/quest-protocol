@@ -36,7 +36,6 @@ contract QuestTerminalKey is
     mapping(uint256 => Discount) public discounts;
     struct Discount {
         uint16 percentage; //in BIPS
-        uint16 maxUses;
         uint16 usedCount;
     }
 
@@ -108,14 +107,12 @@ contract QuestTerminalKey is
     /// @dev mint a QuestTerminalKey NFT
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
-    /// @param maxDiscountUses_ the max discount uses
-    function mint(address to_, uint16 discountPercentage_, uint16 maxDiscountUses_) external onlyMinter {
+    function mint(address to_, uint16 discountPercentage_) external onlyMinter {
         require(discountPercentage_ <= 10000, 'Invalid discount percentage');
-        require(maxDiscountUses_ <= 1000, 'Invalid max discount uses');
 
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
-        discounts[tokenId] = Discount(discountPercentage_, maxDiscountUses_, 0);
+        discounts[tokenId] = Discount(discountPercentage_, 0);
         _safeMint(to_, tokenId);
     }
 
@@ -181,8 +178,6 @@ contract QuestTerminalKey is
         bytes memory attributes = abi.encodePacked(
             '[',
             generateAttribute('Discount Percentage BPS', discounts[tokenId_].percentage.toString()),
-            ',',
-            generateAttribute('Discount Max Uses', discounts[tokenId_].maxUses.toString()),
             ',',
             generateAttribute('Discount Used Count', discounts[tokenId_].usedCount.toString()),
             ']'

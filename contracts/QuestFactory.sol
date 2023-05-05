@@ -130,13 +130,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    // do we require or return questfee when maxUses are up? -> currently return qusetfee
-    // will another person be creating quests on behalf of the owner of the discount token? if so the require below will need to change -> currently not possible
     function doDiscountedFee(uint tokenId_) internal returns (uint16) {
         require(questTerminalKeyContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
 
-        (uint16 discountPercentage, uint16 maxDiscountUses, uint16 usedCount) = questTerminalKeyContract.discounts(tokenId_);
-        if(usedCount >= maxDiscountUses) return questFee;
+        (uint16 discountPercentage, ) = questTerminalKeyContract.discounts(tokenId_);
 
         questTerminalKeyContract.incrementUsedCount(tokenId_);
         return uint16((uint(questFee) * (10000 - uint(discountPercentage))) / 10000);
