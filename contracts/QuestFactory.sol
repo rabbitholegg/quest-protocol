@@ -84,7 +84,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory contractType_,
         string memory questId_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
@@ -93,7 +92,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             msg.sender,
             address(newQuest),
             questId_,
-            contractType_,
+            "ERC20",
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -151,7 +150,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             rewardAmount_,
-            contractType_,
             questId_
         );
 
@@ -168,7 +166,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
     /// @param jsonSpecCID The CID of the JSON spec for the quest
     /// @return address the quest contract address
@@ -178,7 +175,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory contractType_,
         string memory questId_,
         string memory jsonSpecCID
     ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
@@ -188,7 +184,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             rewardAmount_,
-            contractType_,
             questId_
         );
 

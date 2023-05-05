@@ -210,8 +210,8 @@ describe('QuestFactory', () => {
         startDate,
         totalRewards,
         rewardAmount,
-        'erc20',
-        erc20QuestId
+        erc20QuestId,
+        'cid'
       )
 
       await tx.wait()
@@ -221,6 +221,7 @@ describe('QuestFactory', () => {
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
 
       expect(await deployedErc20Quest.queued()).to.equal(true)
+      expect(await deployedErc20Quest.jsonSpecCID()).to.equal('cid')
       expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
     })
   })

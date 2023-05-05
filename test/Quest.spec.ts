@@ -183,6 +183,35 @@ describe('Erc20Quest', async () => {
     })
   })
 
+  describe('setJsonSpecCID()', () => {
+    it('should only allow the owner to set', async () => {
+      await expect(deployedQuestContract.connect(firstAddress).setJsonSpecCID('cidhere')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should not allow the owner to set an empty string', async () => {
+      await expect(deployedQuestContract.connect(owner).setJsonSpecCID('')).to.be.revertedWith(
+        'jsonSpecCID cannot be empty'
+      )
+    })
+
+    it('should set the json spec cid correctly', async () => {
+      const cid = 'QmQ1Q2Q3Q4Q5Q6Q7Q8Q9Q10Q11Q12Q13Q14Q15Q16Q17Q18Q19Q20'
+      await deployedQuestContract.connect(owner).setJsonSpecCID(cid)
+      expect(await deployedQuestContract.jsonSpecCID()).to.equal(cid)
+    })
+
+    it('should not be ale to set the json spec cid twice', async () => {
+      const cid = 'cid1'
+      await deployedQuestContract.connect(owner).setJsonSpecCID(cid)
+      expect(await deployedQuestContract.jsonSpecCID()).to.equal(cid)
+      await expect(deployedQuestContract.connect(owner).setJsonSpecCID('cid2')).to.be.revertedWith(
+        'jsonSpecCID already set'
+      )
+    })
+  })
+
   describe('queue()', () => {
     it('should only allow the owner to start', async () => {
       await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWith(
