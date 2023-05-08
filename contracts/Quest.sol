@@ -30,6 +30,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
+    string public jsonSpecCID;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -64,6 +65,16 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         __Ownable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
+    }
+
+    /// @dev set jsonSpecCID only if its empty
+    /// @param jsonSpecCID_ The jsonSpecCID to set
+    function setJsonSpecCID(string memory jsonSpecCID_) external onlyOwner {
+        require(bytes(jsonSpecCID_).length > 0, 'jsonSpecCID cannot be empty');
+        require(bytes(jsonSpecCID).length == 0, 'jsonSpecCID already set');
+
+        jsonSpecCID = jsonSpecCID_;
+        emit JsonSpecCIDSet(jsonSpecCID_);
     }
 
     /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
