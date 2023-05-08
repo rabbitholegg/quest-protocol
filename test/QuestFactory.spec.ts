@@ -275,8 +275,8 @@ describe('QuestFactory', () => {
         startDate,
         totalRewards,
         rewardAmount,
-        'erc20',
         erc20QuestId,
+        'jsonSpecCid',
         discountTokenId
       )
 
