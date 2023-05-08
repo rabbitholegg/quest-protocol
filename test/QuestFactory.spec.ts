@@ -6,9 +6,11 @@ import {
   Quest,
   SampleERC20,
   QuestFactory,
+  QuestTerminalKey,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
+  QuestTerminalKey__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
 } from '../typechain-types'
@@ -18,6 +20,7 @@ describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
+  let deployedQuestTerminalKeyContract: QuestTerminalKey
   let deployedErc20Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
@@ -29,6 +32,8 @@ describe('QuestFactory', () => {
   let mintFeeRecipient: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
+  let questTerminalKeyContract: QuestTerminalKey__factory
+  let questTerminalKey: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
@@ -43,6 +48,7 @@ describe('QuestFactory', () => {
     wallet = Wallet.fromMnemonic(mnemonic)
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
+    questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -50,7 +56,21 @@ describe('QuestFactory', () => {
     await deploySampleErc20Contract()
     await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
+    await deployQuestTerminalKey()
   })
+
+  const deployQuestTerminalKey = async () => {
+    deployedQuestTerminalKeyContract = await upgrades.deployProxy(questTerminalKeyContract, [
+      royaltyRecipient.address,
+      protocolRecipient.address,
+      deployedFactoryContract.address,
+      10,
+      owner.address,
+      'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
+    ])
+
+    deployedFactoryContract.setQuestTerminalKeyContract(deployedQuestTerminalKeyContract.address)
+  }
 
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
@@ -62,6 +82,7 @@ describe('QuestFactory', () => {
       protocolRecipient.address,
       deployedErc20Quest.address,
       owner.address,
+      owner.address, // this will become the questTerminalKey contract
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
@@ -211,7 +232,8 @@ describe('QuestFactory', () => {
         totalRewards,
         rewardAmount,
         'erc20',
-        erc20QuestId
+        erc20QuestId,
+        0
       )
 
       await tx.wait()
@@ -222,6 +244,51 @@ describe('QuestFactory', () => {
 
       expect(await deployedErc20Quest.queued()).to.equal(true)
       expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
+    })
+
+    it('createQuestAndQueue should create a new quest and start it with a discount', async () => {
+      // mint a deployedQuestTerminalKeyContract to user, with one max use
+      await deployedQuestTerminalKeyContract.connect(protocolRecipient).mint(owner.address, 5000)
+      const ids = await deployedQuestTerminalKeyContract.getOwnedTokenIds(owner.address)
+      const discountTokenId = ids[0].toNumber()
+
+      const maxTotalRewards = totalRewards * rewardAmount
+      const questFee = 2_000
+      const discountedQuestFee = questFee * 0.5 // minus 50% for discount
+      const maxProtocolRewardDiscounted = (maxTotalRewards * discountedQuestFee) / 10_000
+      const maxProtocolReward = (maxTotalRewards * questFee) / 10_000
+      const transferAmountDiscounted = maxTotalRewards + maxProtocolRewardDiscounted
+      const transferAmount = maxTotalRewards + maxProtocolReward
+
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      // approve the quest factory to spend the reward token, twice the amount because we will deploy two quests
+      await deployedSampleErc20Contract.approve(
+        deployedFactoryContract.address,
+        transferAmountDiscounted + transferAmount
+      )
+
+      // first quest uses the discounted quest fee
+      const tx = await deployedFactoryContract.createQuestAndQueue(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        'erc20',
+        erc20QuestId,
+        discountTokenId
+      )
+
+      await tx.wait()
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
+      expect(await deployedErc20Quest.startTime()).to.equal(startDate)
+      expect(await deployedErc20Quest.owner()).to.equal(owner.address)
+
+      expect(await deployedErc20Quest.queued()).to.equal(true)
+      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmountDiscounted)
+      expect(await deployedErc20Quest.questFee()).to.equal(discountedQuestFee)
+      expect(await deployedQuestTerminalKeyContract.discounts(discountTokenId)).to.eql([5000, 1]) // percentage, usedCount
     })
   })
 
