@@ -15,7 +15,7 @@ import {
   QuestFactory__factory,
 } from '../typechain-types'
 
-describe('Erc20Quest', async () => {
+describe('Quest', async () => {
   let deployedQuestContract: Quest
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
@@ -95,6 +95,7 @@ describe('Erc20Quest', async () => {
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       owner.address,
+      ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
     ])) as QuestFactory
   }
 
@@ -106,7 +107,7 @@ describe('Erc20Quest', async () => {
     deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
       deployedReceiptRenderer.address,
       owner.address,
-      minterAddress.address, // as a placeholder, would the factory contract
+      minterAddress.address, // as a placeholder, would be the factory contract
       10,
       owner.address,
     ])) as RabbitHoleReceipt

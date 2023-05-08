@@ -10,6 +10,7 @@ import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeE
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/Clones.sol';
+import "./QuestTerminalKey.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -38,6 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
+    QuestTerminalKey private questTerminalKeyContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -47,7 +49,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rabbitHoleReceiptContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
-        address ownerAddress_
+        address ownerAddress_,
+        address questTerminalKeyAddress_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -55,9 +58,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFee = 2_000;
+        questFee = 2_000; // in BIPS
         erc20QuestAddress = erc20QuestAddress_;
         locked = 1;
+        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
     }
 
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
@@ -84,7 +88,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory questId_
+        string memory questId_,
+        uint256 discountTokenId_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
         address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
@@ -99,8 +104,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_
         );
+        uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
+
+        if(discountTokenId_ == 0){
+            protocolFee = questFee;
+        }else{
+            protocolFee = doDiscountedFee(discountTokenId_);
+        }
 
         QuestContract(newQuest).initialize(
             rewardTokenAddress_,
@@ -110,11 +122,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             address(rabbitHoleReceiptContract),
-            questFee,
+            protocolFee,
             protocolFeeRecipient
         );
 
         return newQuest;
+    }
+
+    function doDiscountedFee(uint tokenId_) internal returns (uint16) {
+        require(questTerminalKeyContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
+
+        (uint16 discountPercentage, ) = questTerminalKeyContract.discounts(tokenId_);
+
+        questTerminalKeyContract.incrementUsedCount(tokenId_);
+        return uint16((uint(questFee) * (10000 - uint(discountPercentage))) / 10000);
     }
 
     /// @dev Transfer the total transfer amount to the quest contract
@@ -150,7 +171,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             rewardAmount_,
-            questId_
+            questId_,
+            0
         );
 
         QuestContract(newQuest).transferOwnership(msg.sender);
@@ -168,6 +190,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param jsonSpecCID The CID of the JSON spec for the quest
+    /// @param discountTokenId_ The id of the discount token
     /// @return address the quest contract address
     function createQuestAndQueue(
         address rewardTokenAddress_,
@@ -177,6 +200,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory jsonSpecCID
+        uint256 discountTokenId_
     ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
             rewardTokenAddress_,
@@ -184,7 +208,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             rewardAmount_,
-            questId_
+            questId_,
+            discountTokenId_
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
@@ -240,6 +265,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
+    }
+
+
+    /// @dev set questTerminalKeyContract address
+    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
+    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
+        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
