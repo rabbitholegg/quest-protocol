@@ -199,7 +199,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory questId_,
-        string memory jsonSpecCID
+        string memory jsonSpecCID,
         uint256 discountTokenId_
     ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
