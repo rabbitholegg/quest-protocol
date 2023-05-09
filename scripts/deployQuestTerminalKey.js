@@ -5,10 +5,10 @@ const { ethers } = require('hardhat')
 async function main() {
   const royaltyRecipient = '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
   const minterAddress = '0x61A8CC96a3576C2a50716a0cDE70BF373C018aa6' // goerli
-  const questFactoryAddress = '0x10851543671491656606E6A49dE32c9cCb41b4F8' // goerli
+  const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E'
   const royaltyFee = 1000 // 10%
   const owner = '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
-  const ipfsCid = 'QmdfTbBqBPQ7VNxZEYEj14VmRuZBkqFbiwReogJgS1zR1n'
+  const ipfsCid = 'bafybeib6k2l4fmqg5j3buk3yue4fxy7qeswaz7ban5ygmfzu7ts6n2jaeu'
 
   const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
 
