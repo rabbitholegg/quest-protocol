@@ -5,12 +5,12 @@ const { ethers } = require('hardhat')
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre
   const { deploy } = deployments
-  const { deployer, owner, royaltyRecipient } = await getNamedAccounts()
+  const { deployer, owner } = await getNamedAccounts()
 
   await deploy('QuestTerminalKey', {
     contract: 'QuestTerminalKey',
     from: deployer,
-    deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000020', // 20 for for production, 21 for staging
+    deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000021', // 20 for for production, 21 for staging
     proxy: {
       owner: owner,
       proxyContract: 'OpenZeppelinTransparentProxy',

@@ -9,19 +9,16 @@ async function main() {
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
 
   // deploy new quest
-  const erc20Quest = await Erc20Quest.deploy()
-  await erc20Quest.deployed()
-  console.log('deployed Erc20Quest to:', erc20Quest.address)
-  await hre.run('verify:verify', { address: erc20Quest.address })
+  // const erc20Quest = await Erc20Quest.deploy()
+  // await erc20Quest.deployed()
+  // console.log('deployed Erc20Quest to:', erc20Quest.address)
+  // await hre.run('verify:verify', { address: erc20Quest.address })
 
-  // to manually upgrade the quest factory
-  // validate upgrade
-  await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
-  // deploy new implementation
-  const questFactory = await QuestFactory.deploy()
-  await questFactory.deployed()
-  console.log('deployed QuestFactory to:', questFactory.address)
-  await hre.run('verify:verify', { address: questFactory.address })
+  // Validates and deploys a new implementation contract
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
+  console.log('deployed QuestFactory to:', NewImplementationAddress)
+  await hre.run('verify:verify', { address: NewImplementationAddress })
 }
 
 main()
