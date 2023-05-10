@@ -118,6 +118,7 @@ All contracts are deployed with the same addresses on Sepolia, Mainnet and Optim
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
 |RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
+|Quest Terminal Key|0x7D269bACbb14106048C9AA62748E2e964f346800|
 
 ---
 
