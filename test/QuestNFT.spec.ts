@@ -91,6 +91,11 @@ describe('QuestNFT Contract', async () => {
       await expect(questNFT.connect(firstAddress).safeMint(firstAddress.address)).to.be.revertedWith(
         'Only minter address'
       )
+
+      // todo test onlyQuestBetweenStartEnd modifier
     })
+
+    // todo test withdrawRemainingTokens fx
+    // todo test refund fx
   })
 })

@@ -114,7 +114,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _unpause();
     }
 
-    function safeMint(address to_) public onlyMinter onlyQuestBetweenStartEnd whenNotPaused nonReentrant {
+    function safeMint(address to_) public onlyMinter t whenNotPaused nonReentrant {
         require (address(this).balance >= this.totalTransferAmount(), 'balance not gte totalTransferAmount');
 
         _tokenIdCounter.increment();
