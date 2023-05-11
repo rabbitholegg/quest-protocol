@@ -10,11 +10,12 @@ import {IERC2981Upgradeable, IERC165Upgradeable} from '@openzeppelin/contracts-u
 import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {Base64} from '@openzeppelin/contracts/utils/Base64.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 /// @title QuestNFT
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc721 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
-contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable {
+contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20 for IERC20;
 
@@ -65,6 +66,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         __ERC721_init(name_, symbol_);
         __Ownable_init();
         __Pausable_init();
+        __ReentrancyGuard_init();
     }
 
     /// @notice Prevents reward withdrawal until the Quest has ended
@@ -112,7 +114,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _unpause();
     }
 
-    function safeMint(address to_) public onlyMinter onlyQuestBetweenStartEnd whenNotPaused {
+    function safeMint(address to_) public onlyMinter onlyQuestBetweenStartEnd whenNotPaused nonReentrant {
         require (address(this).balance >= this.totalTransferAmount(), 'balance not gte totalTransferAmount');
 
         _tokenIdCounter.increment();
