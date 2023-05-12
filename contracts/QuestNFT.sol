@@ -29,6 +29,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     uint16 public questFee;
     string public jsonSpecCID;
     string public imageIPFSHash;
+    string public description;
     string public questId;
 
     event JsonSpecCIDSet(string cid);
@@ -49,6 +50,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         string memory jsonSpecCID_,
         string memory name_,
         string memory symbol_,
+        string memory description_,
         string memory imageIPFSHash_
     ) external initializer {
         require (endTime_ > block.timestamp, 'endTime_ in past');
@@ -63,6 +65,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         jsonSpecCID = jsonSpecCID_;
         minterAddress = minterAdress_;
         imageIPFSHash = imageIPFSHash_;
+        description = description_;
         __ERC721_init(name_, symbol_);
         __Ownable_init();
         __Pausable_init();
@@ -114,9 +117,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _unpause();
     }
 
-    function safeMint(address to_) public onlyMinter t whenNotPaused nonReentrant {
-        require (address(this).balance >= this.totalTransferAmount(), 'balance not gte totalTransferAmount');
-
+    function safeMint(address to_) public onlyMinter onlyQuestBetweenStartEnd whenNotPaused nonReentrant {
         _tokenIdCounter.increment();
         uint tokenId = _tokenIdCounter.current();
         _safeMint(to_, tokenId);
@@ -131,19 +132,19 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    /// @dev Function that allows the owner to withdraw the remaining coins in the contract
+    /// @dev Function that to withdraw the remaining coins in the contract to the owner
     /// @notice This function can only be called after the quest end time
-    function withdrawRemainingTokens() external onlyOwner onlyAfterQuestEnd {
+    function withdrawRemainingTokens() external onlyAfterQuestEnd {
         uint balance = address(this).balance;
-        if (balance > 0) payable(msg.sender).transfer(balance);
+        if (balance > 0) payable(owner()).transfer(balance);
 
     }
 
-    /// @dev saftey net function to transfer tokens sent to the contract to the contract owner.
+    /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
-    function refund(address erc20Address_) external onlyOwner {
+    function refund(address erc20Address_) external {
         uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(msg.sender, erc20Balance);
+        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
     }
 
     /// @dev returns the token uri
@@ -168,11 +169,12 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
             '"name": "',
             name(),
             '",',
-            '"description": "The RabbitHole.gg Quest Completion NFT",',
+            '"description": "',
+            description,
+            '",',
             '"image": "',
             tokenImage(),
-            '",',
-            '"attributes": []',
+            '"',
             '}'
         );
         return dataURI;
@@ -191,7 +193,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     ) external view override returns (address receiver, uint256 royaltyAmount) {
         require(_exists(tokenId_), 'Nonexistent token');
 
-        uint256 royaltyPayment = (salePrice_ * 1_000) / 10_000; // 10% royalty
+        uint256 royaltyPayment = (salePrice_ * 200) / 10_000; // 2% royalty
         return (owner(), royaltyPayment);
     }
 
