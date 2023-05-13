@@ -7,10 +7,12 @@ import {
   SampleERC20,
   QuestFactory,
   QuestTerminalKey,
+  QuestNFT,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
   QuestTerminalKey__factory,
+  QuestNFT__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
 } from '../typechain-types'
@@ -21,11 +23,13 @@ describe('QuestFactory', () => {
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
   let deployedQuestTerminalKeyContract: QuestTerminalKey
+  let deployedQuestNFTContract: QuestNFT
   let deployedErc20Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
+  const nftQuestFee = 100
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
@@ -33,6 +37,7 @@ describe('QuestFactory', () => {
 
   let questFactoryContract: QuestFactory__factory
   let questTerminalKeyContract: QuestTerminalKey__factory
+  let questNFTContract: QuestNFT__factory
   let questTerminalKey: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
@@ -49,6 +54,7 @@ describe('QuestFactory', () => {
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
+    questNFTContract = await ethers.getContractFactory('QuestNFT')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -75,6 +81,8 @@ describe('QuestFactory', () => {
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
     await deployedErc20Quest.deployed()
+    deployedQuestNFTContract = await questNFTContract.deploy()
+    await deployedQuestNFTContract.deployed()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
@@ -83,6 +91,8 @@ describe('QuestFactory', () => {
       deployedErc20Quest.address,
       owner.address,
       owner.address, // this will become the questTerminalKey contract
+      deployedQuestNFTContract.address,
+      nftQuestFee,
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
@@ -450,6 +460,43 @@ describe('QuestFactory', () => {
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
         balanceBefore.add(requiredFee)
       )
+    })
+  })
+
+  describe('createQuestNFT()', () => {
+    it('Should create a questNFT', async () => {
+      const totalParticipants = 10
+      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+
+      const tx = await deployedFactoryContract.createQuestNFT(
+        expiryDate,
+        startDate,
+        totalParticipants,
+        'NFTQuestID',
+        'jsonSpecCid',
+        'NFT Name',
+        'NFTS',
+        'NFT Description',
+        'ImageipfsHash',
+        { value: transferAmount.toNumber() }
+      )
+      await tx.wait()
+
+      const questNFTAddress = await deployedFactoryContract.quests('NFTQuestID').then((res) => res.questAddress)
+      const deployedNFTQuest = await ethers.getContractAt('QuestNFT', questNFTAddress)
+
+      expect(await deployedNFTQuest.startTime()).to.equal(startDate)
+      expect(await deployedNFTQuest.owner()).to.equal(owner.address)
+      expect(await deployedNFTQuest.jsonSpecCID()).to.equal('jsonSpecCid')
+      expect(await deployedNFTQuest.name()).to.equal('NFT Name')
+      expect(await deployedNFTQuest.symbol()).to.equal('NFTS')
+      expect(await ethers.provider.getBalance(deployedNFTQuest.address)).to.eq(transferAmount)
+    })
+  })
+
+  describe('mintQuestNFT()', () => {
+    it('Should mint a questNFT', async () => {
+      // todo
     })
   })
 })

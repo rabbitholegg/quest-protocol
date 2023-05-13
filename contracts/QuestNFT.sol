@@ -155,15 +155,12 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         override(ERC721Upgradeable)
         returns (string memory)
     {
-        bytes memory dataURI = generateDataURI(tokenId_);
+        bytes memory dataURI = generateDataURI();
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
-    /// @param tokenId_ the token id
-    function generateDataURI(
-        uint tokenId_
-    ) internal view virtual returns (bytes memory) {
+    function generateDataURI() internal view virtual returns (bytes memory) {
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "',
@@ -182,6 +179,11 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
 
     function tokenImage() internal view virtual returns (string memory) {
         return string(abi.encodePacked('ipfs://', imageIPFSHash));
+    }
+
+    /// @dev get the current token id
+    function getTokenId() public view returns (uint) {
+        return _tokenIdCounter.current();
     }
 
     /// @dev See {IERC165-royaltyInfo}
