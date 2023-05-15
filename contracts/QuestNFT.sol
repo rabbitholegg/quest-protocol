@@ -46,7 +46,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         string memory questId_,
         uint16 questFee_,
         address protocolFeeRecipient_,
-        address minterAdress_, // should always be the QuestFactory contract
+        address minterAddress_, // should always be the QuestFactory contract
         string memory jsonSpecCID_,
         string memory name_,
         string memory symbol_,
@@ -63,7 +63,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
         jsonSpecCID = jsonSpecCID_;
-        minterAddress = minterAdress_;
+        minterAddress = minterAddress_;
         imageIPFSHash = imageIPFSHash_;
         description = description_;
         __ERC721_init(name_, symbol_);
