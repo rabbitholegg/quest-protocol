@@ -288,7 +288,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             data.imageIPFSHash
         );
 
-        (bool feeSuccess, ) = payable(newQuest).call{value: msg.value}("");
+        payable(newQuest).call{value: msg.value}("");
         QuestNFTContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
@@ -460,7 +460,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
         QuestNFTContract(questNFTAddress).safeMint(msg.sender);
-        emit questNFTMinted(msg.sender, quests[questId_].questAddress, QuestNFTContract(questNFTAddress).getTokenId(), questId_);
+        emit QuestNFTMinted(msg.sender, quests[questId_].questAddress, QuestNFTContract(questNFTAddress).getTokenId(), questId_);
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract

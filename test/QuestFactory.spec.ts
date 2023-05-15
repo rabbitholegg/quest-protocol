@@ -489,14 +489,77 @@ describe('QuestFactory', () => {
       expect(await deployedNFTQuest.owner()).to.equal(owner.address)
       expect(await deployedNFTQuest.jsonSpecCID()).to.equal('jsonSpecCid')
       expect(await deployedNFTQuest.name()).to.equal('NFT Name')
-      expect(await deployedNFTQuest.symbol()).to.equal('NFTS')
+      expect(await deployedNFTQuest.symbol()).to.equal('NF')
       expect(await ethers.provider.getBalance(deployedNFTQuest.address)).to.eq(transferAmount)
     })
   })
 
   describe('mintQuestNFT()', () => {
-    it('Should mint a questNFT', async () => {
-      // todo
+    const nftQuestId = 'NftQuestId'
+    const totalParticipants = 10
+    let messageHash: string
+    let signature: string
+    let questNFTAddress: string
+    let QuestNFT: QuestNFT
+
+    beforeEach(async () => {
+      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+      messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), nftQuestId])
+      signature = await wallet.signMessage(utils.arrayify(messageHash))
+      const tx = await deployedFactoryContract.createQuestNFT(
+        expiryDate,
+        startDate,
+        totalParticipants,
+        nftQuestId,
+        'jsonSpecCid',
+        'NFT Name',
+        'NFTS',
+        'NFT Description',
+        'ImageipfsHash',
+        { value: transferAmount.toNumber() }
+      )
+      await tx.wait()
+      questNFTAddress = (await deployedFactoryContract.quests(nftQuestId)).questAddress
+
+      QuestNFT = await ethers.getContractAt('QuestNFT', questNFTAddress)
+    })
+
+    it('Should mint a QuestNFT', async () => {
+      await time.setNextBlockTimestamp(startDate + 1)
+      await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
+      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+    })
+
+    it('Should fail when trying to mint before quest time has started', async () => {
+      await time.setNextBlockTimestamp(startDate - 1)
+      await expect(
+        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotStarted')
+    })
+
+    it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
+      await time.setNextBlockTimestamp(startDate)
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).mintQuestNFT(nftQuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
+    })
+
+    it('Should fail when user tries to mint multiple times', async () => {
+      await time.setNextBlockTimestamp(startDate + 1)
+      await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
+      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+
+      await expect(
+        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
+      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+    })
+
+    it('Should fail when trying to mint after quest time has passed', async () => {
+      await time.setNextBlockTimestamp(expiryDate + 1)
+      await expect(
+        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
     })
   })
 })
