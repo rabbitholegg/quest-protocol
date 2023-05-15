@@ -5,7 +5,6 @@ import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('QuestNFT Contract', async () => {
   let questNFT: Contract,
-    questFactory: Contract,
     contractOwner: { address: String },
     royaltyRecipient: { address: String },
     minterAddress: { address: String },
@@ -17,25 +16,12 @@ describe('QuestNFT Contract', async () => {
   beforeEach(async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
     const QuestNFT = await ethers.getContractFactory('QuestNFT')
-    const QuestFactory = await ethers.getContractFactory('QuestFactory')
-    const erc20QuestContract = await ethers.getContractFactory('Quest')
-
-    const deployedErc20Quest = await erc20QuestContract.deploy()
 
     const latestTime = await time.latest()
     expiryDate = latestTime + 10000
     startDate = latestTime + 10
 
     questFee = 100
-
-    questFactory = await upgrades.deployProxy(QuestFactory, [
-      royaltyRecipient.address,
-      firstAddress.address, // really RH Receipt contract but doesnt matter here
-      royaltyRecipient.address,
-      deployedErc20Quest.address,
-      contractOwner.address,
-      firstAddress.address, // really questTerminalKey address but doesnt matter here
-    ])
 
     questNFT = await upgrades.deployProxy(QuestNFT, [
       expiryDate,

@@ -489,7 +489,7 @@ describe('QuestFactory', () => {
       expect(await deployedNFTQuest.owner()).to.equal(owner.address)
       expect(await deployedNFTQuest.jsonSpecCID()).to.equal('jsonSpecCid')
       expect(await deployedNFTQuest.name()).to.equal('NFT Name')
-      expect(await deployedNFTQuest.symbol()).to.equal('NF')
+      expect(await deployedNFTQuest.symbol()).to.equal('NFTS')
       expect(await ethers.provider.getBalance(deployedNFTQuest.address)).to.eq(transferAmount)
     })
   })

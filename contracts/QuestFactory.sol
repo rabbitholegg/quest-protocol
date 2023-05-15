@@ -448,19 +448,19 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param signature_ The signature of the hash
     function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
         Quest storage currentQuest = quests[questId_];
-        address payable questNFTAddress = payable(currentQuest.questAddress);
+        address payable questNFTInstance = payable(currentQuest.questAddress);
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (block.timestamp < QuestNFTContract(questNFTAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestNFTContract(questNFTAddress).endTime()) revert QuestEnded();
+        if (block.timestamp < QuestNFTContract(questNFTInstance).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestNFTContract(questNFTInstance).endTime()) revert QuestEnded();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
-        QuestNFTContract(questNFTAddress).safeMint(msg.sender);
-        emit QuestNFTMinted(msg.sender, quests[questId_].questAddress, QuestNFTContract(questNFTAddress).getTokenId(), questId_);
+        QuestNFTContract(questNFTInstance).safeMint(msg.sender);
+        emit QuestNFTMinted(msg.sender, quests[questId_].questAddress, QuestNFTContract(questNFTInstance).getTokenId(), questId_);
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
