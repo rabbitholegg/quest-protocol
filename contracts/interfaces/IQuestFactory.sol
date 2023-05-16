@@ -16,6 +16,7 @@ interface IQuestFactory {
     error QuestNotStarted();
     error QuestTypeInvalid();
     error RewardNotAllowed();
+    error ZeroAddressNotAllowed();
 
     event QuestCreated(
         address indexed creator,
@@ -32,6 +33,7 @@ interface IQuestFactory {
     event QuestNFTMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
     event MintFeeSet(uint percent);
     event ExtraMintFeeReturned(address indexed recipient, uint amount);
+    event NftQuestFeeSet(uint fee)
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

@@ -26,7 +26,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalParticipants;
-    uint16 public questFee;
+    uint256 public questFee;
     string public jsonSpecCID;
     string public imageIPFSHash;
     string public description;
@@ -44,7 +44,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         uint256 startTime_,
         uint256 totalParticipants_,
         string memory questId_,
-        uint16 questFee_,
+        uint256 questFee_,
         address protocolFeeRecipient_,
         address minterAddress_, // should always be the QuestFactory contract
         string memory jsonSpecCID_,
@@ -121,7 +121,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _tokenIdCounter.increment();
         uint tokenId = _tokenIdCounter.current();
         _safeMint(to_, tokenId);
-        protocolFeeRecipient.call{value: questFee}("");
+        (bool success, ) = protocolFeeRecipient.call{value: questFee}("");
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
@@ -136,7 +136,9 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     /// @notice This function can only be called after the quest end time
     function withdrawRemainingTokens() external onlyAfterQuestEnd {
         uint balance = address(this).balance;
-        if (balance > 0) owner().call{value: balance}("");
+        if (balance > 0) {
+            (bool success, ) = owner().call{value: balance}("");
+        }
 
     }
 

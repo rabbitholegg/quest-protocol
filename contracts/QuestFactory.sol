@@ -39,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public mintFeeRecipient;
     uint256 private locked;
     QuestTerminalKey private questTerminalKeyContract;
-    uint16 public nftQuestFee;
+    uint public nftQuestFee;
     address public questNFTAddress;
     struct QuestNFTData {
         uint256 endTime;
@@ -64,7 +64,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address ownerAddress_,
         address questTerminalKeyAddress_,
         address payable questNFTAddress_,
-        uint16 nftQuestFee_
+        uint nftQuestFee_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -94,6 +94,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
         if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
         if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
+        _;
+    }
+
+    modifier nonZeroAddress(address _address) {
+        if (_address == address(0)) revert ZeroAddressNotAllowed();
         _;
     }
 
@@ -284,7 +289,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             data.imageIPFSHash
         );
 
-        payable(newQuest).call{value: msg.value}("");
+        (bool success, ) = payable(newQuest).call{value: msg.value}("");
         QuestNFTContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
@@ -362,14 +367,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set the questNFT Address
     /// @param questNFTAddress_ The address of the questNFT
-    function setQuestNFTAddress(address questNFTAddress_) external onlyOwner {
+    function setQuestNFTAddress(address questNFTAddress_) external onlyOwner nonZeroAddress(questNFTAddress_) {
         questNFTAddress = questNFTAddress_;
     }
 
     /// @dev set the nftQuestFee
     /// @param nftQuestFee_ The value of the nftQuestFee
-    function setNftQuestFee(uint16 nftQuestFee_) external onlyOwner {
+    function setNftQuestFee(uint nftQuestFee_) external onlyOwner {
         nftQuestFee = nftQuestFee_;
+        emit NftQuestFeeSet(nftQuestFee_);
     }
 
     /// @dev set questTerminalKeyContract address
