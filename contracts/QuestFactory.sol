@@ -289,6 +289,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
 
         (bool success, ) = payable(newQuest).call{value: msg.value}("");
+        require(success, "QuestFactory: Failed to send coins to the QuestNFT contract");
         QuestNFTContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;

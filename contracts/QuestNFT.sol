@@ -122,6 +122,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         uint tokenId = _tokenIdCounter.current();
         _safeMint(to_, tokenId);
         (bool success, ) = protocolFeeRecipient.call{value: questFee}("");
+        require(success, 'protocol fee transfer failed');
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
@@ -138,6 +139,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         uint balance = address(this).balance;
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
+            require(success, 'withdraw remaining tokens failed');
         }
 
     }
