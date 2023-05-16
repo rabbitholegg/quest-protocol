@@ -16,7 +16,7 @@ describe('QuestTerminalKey Contract', async () => {
     questTerminalKey = await upgrades.deployProxy(QuestTerminalKey, [
       royaltyRecipient.address,
       minterAddress.address,
-      contractOwner.address, // really the questFactory address, but not needed here
+      ethers.constants.AddressZero, // this is questFactory address, but not needed here
       10,
       contractOwner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
