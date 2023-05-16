@@ -4,21 +4,26 @@ const { ethers } = require('hardhat')
 
 async function main() {
   const Erc20Quest = await ethers.getContractFactory('Quest')
-  const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E' // production everywhere
-  // const questFactoryAddress = '0x10851543671491656606E6A49dE32c9cCb41b4F8' // goerli staging
+  // const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E' // production everywhere
+  const questFactoryAddress = '0x74016208260cE10ef421ed0CFC4C7Baae0BaEF86' // sepolia staging
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
 
   // deploy new quest
-  const erc20Quest = await Erc20Quest.deploy()
-  await erc20Quest.deployed()
-  console.log('deployed Erc20Quest to:', erc20Quest.address)
-  await hre.run('verify:verify', { address: erc20Quest.address })
+  // const erc20Quest = await Erc20Quest.deploy()
+  // await erc20Quest.deployed()
+  // console.log('deployed Erc20Quest to:', erc20Quest.address)
+  // await hre.run('verify:verify', { address: erc20Quest.address })
+
+  // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
+  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract
-  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
-  const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
-  console.log('deployed QuestFactory to:', NewImplementationAddress)
-  await hre.run('verify:verify', { address: NewImplementationAddress })
+  await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
+  const questFactoryImp = await QuestFactory.deploy()
+  await questFactoryImp.deployed()
+  console.log('deployed QuestFactory to:', questFactoryImp.address)
+  await hre.run('verify:verify', { address: questFactoryImp.address })
 }
 
 main()
