@@ -18,8 +18,6 @@ import "./QuestTerminalKey.sol";
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeERC20 for IERC20;
 
-    bytes32 public constant CREATE_QUEST_ROLE = keccak256('CREATE_QUEST_ROLE');
-
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
@@ -54,7 +52,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
-        grantDefaultAdminAndCreateQuestRole(ownerAddress_);
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
@@ -147,7 +144,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         QuestContract(newQuest_).queue();
     }
 
-    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
+    /// @dev Create an erc20 quest
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
@@ -164,7 +161,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory contractType_,
         string memory questId_
-    ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
             rewardTokenAddress_,
             endTime_,
@@ -182,7 +179,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
 
     /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @dev only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
@@ -201,7 +197,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory questId_,
         string memory jsonSpecCID,
         uint256 discountTokenId_
-    ) external onlyRole(CREATE_QUEST_ROLE) checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
             rewardTokenAddress_,
             endTime_,
@@ -223,13 +219,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param erc20QuestAddress_ The address of the erc20 quest
     function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
         erc20QuestAddress = erc20QuestAddress_;
-    }
-
-    /// @dev grant the default admin role and the create quest role to the owner
-    /// @param account_ The account to grant admin and create quest roles
-    function grantDefaultAdminAndCreateQuestRole(address account_) internal {
-        _grantRole(DEFAULT_ADMIN_ROLE, account_);
-        _grantRole(CREATE_QUEST_ROLE, account_);
     }
 
     /// @dev set the claim signer address

@@ -197,22 +197,25 @@ describe('QuestFactory', () => {
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
 
-    it('Should revert if msg.sender does not have correct role', async () => {
-      await expect(
-        deployedFactoryContract
-          .connect(royaltyRecipient)
-          .createQuest(
-            deployedSampleErc20Contract.address,
-            expiryDate,
-            startDate,
-            totalRewards,
-            rewardAmount,
-            'erc20',
-            erc20QuestId
-          )
-      ).to.be.revertedWith(
-        `AccessControl: account ${royaltyRecipient.address.toLowerCase()} is missing role 0xf9ca453be4e83785e69957dffc5e557020ebe7df32422c6d32ccad977982cadd`
-      )
+    it('Should allow anyone to create a quest', async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+
+      const tx = await deployedFactoryContract
+        .connect(royaltyRecipient)
+        .createQuest(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          rewardAmount,
+          'erc20',
+          erc20QuestId
+        )
+      await tx.wait()
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
+      expect(await deployedErc20Quest.startTime()).to.equal(startDate)
+      expect(await deployedErc20Quest.owner()).to.equal(royaltyRecipient.address)
     })
 
     it('createQuestAndQueue should create a new quest and start it', async () => {
