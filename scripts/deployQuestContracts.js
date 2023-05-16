@@ -15,10 +15,10 @@ async function main() {
   // await hre.run('verify:verify', { address: erc20Quest.address })
 
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
-  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
   const questFactoryImp = await QuestFactory.deploy()
   await questFactoryImp.deployed()
