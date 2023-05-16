@@ -238,7 +238,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     /// @dev Create a NFT quest and start it at the same time. The function will transfer the total questFee amount to the QuestNFT
-    /// @dev only accounts with the CREATE_QUEST_ROLE can create quests
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
@@ -259,7 +258,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory symbol_,
         string memory description_,
         string memory imageIPFSHash_
-    ) external payable onlyRole(CREATE_QUEST_ROLE) returns (address) {
+    ) external payable returns (address) {
         QuestNFTData memory data = QuestNFTData({
             endTime: endTime_,
             startTime: startTime_,
