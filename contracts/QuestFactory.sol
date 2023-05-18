@@ -256,7 +256,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
     }
 
-
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
