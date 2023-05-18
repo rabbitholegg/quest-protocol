@@ -67,7 +67,7 @@ describe('QuestFactory', () => {
       10,
       owner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
-      'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARzzzz',
+      'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
     ])
 
     deployedFactoryContract.setQuestTerminalKeyContract(deployedQuestTerminalKeyContract.address)
