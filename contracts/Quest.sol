@@ -49,7 +49,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         address protocolFeeRecipient_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
-        if (startTime_ <= block.timestamp) revert StartTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
         endTime = endTime_;
         startTime = startTime_;
