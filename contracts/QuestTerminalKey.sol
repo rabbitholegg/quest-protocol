@@ -202,10 +202,8 @@ contract QuestTerminalKey is
         );
         bytes memory dataURI = abi.encodePacked(
             '{',
-            '"name": "RabbitHole.gg QuestTerminalKey #',
-            tokenIdString,
-            '",',
-            '"description": "The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.",',
+            '"name": "Quest Terminal Key",',
+            '"description": "A key that can be used to create quests in the Quest Terminal",',
             '"image": "',
             tokenImage(),
             '",',

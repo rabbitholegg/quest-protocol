@@ -65,8 +65,8 @@ describe('QuestTerminalKey Contract', async () => {
       )
 
       const expectedMetadata = {
-        name: 'RabbitHole.gg QuestTerminalKey #1',
-        description: 'The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.',
+        name: 'Quest Terminal Key',
+        description: 'A key that can be used to create quests in the Quest Terminal',
         image: 'ipfs://QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
         animation_url: 'ipfs://QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARzzzz',
         attributes: [
