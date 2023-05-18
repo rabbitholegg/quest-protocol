@@ -18,7 +18,6 @@ interface IQuest {
     error NoTokensToClaim();
     error NoWithdrawDuringClaim();
     error NotStarted();
-    error StartTimeInPast();
     error TotalAmountExceedsBalance();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
