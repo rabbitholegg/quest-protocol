@@ -99,7 +99,7 @@ describe('QuestNFT Contract', async () => {
     })
   })
 
-  describe('withdrawRemainingTokens', () => {
+  describe('withdrawRemainingCoins', () => {
     it('withdraws remaining tokens', async () => {
       const contractOwnerStartingBalance = await ethers.provider.getBalance(contractOwner.address)
       await time.setNextBlockTimestamp(startDate + 1)
@@ -110,7 +110,7 @@ describe('QuestNFT Contract', async () => {
       await questNFT.connect(minterAddress).safeMint(firstAddress.address)
       await time.setNextBlockTimestamp(expiryDate + 1)
 
-      await questNFT.connect(minterAddress).withdrawRemainingTokens()
+      await questNFT.connect(minterAddress).withdrawRemainingCoins()
       expect(await ethers.provider.getBalance(contractOwner.address)).to.eq(
         contractOwnerStartingBalance.add(1500 - questFee * 1)
       )
@@ -123,7 +123,7 @@ describe('QuestNFT Contract', async () => {
         value: 1500,
       })
       await questNFT.connect(minterAddress).safeMint(firstAddress.address)
-      await expect(questNFT.connect(minterAddress).withdrawRemainingTokens()).to.be.revertedWith('Quest has not ended')
+      await expect(questNFT.connect(minterAddress).withdrawRemainingCoins()).to.be.revertedWith('Quest has not ended')
     })
   })
 

@@ -135,7 +135,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
 
     /// @dev Function that to withdraw the remaining coins in the contract to the owner
     /// @notice This function can only be called after the quest end time
-    function withdrawRemainingTokens() external onlyAfterQuestEnd {
+    function withdrawRemainingCoins() external onlyAfterQuestEnd {
         uint balance = address(this).balance;
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
