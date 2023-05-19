@@ -34,6 +34,7 @@ contract QuestTerminalKey is
     address public questFactoryAddress;
     uint public royaltyFee;
     string public imageIPFSHash;
+    string public animationUrlIPFSHash;
     mapping(uint256 => Discount) public discounts;
     struct Discount {
         uint16 percentage; //in BIPS
@@ -51,7 +52,8 @@ contract QuestTerminalKey is
         address questFactoryAddress_,
         uint royaltyFee_,
         address owner_,
-        string memory imageIPFSHash_
+        string memory imageIPFSHash_,
+        string memory animationUrlIPFSHash_
     ) external initializer {
         __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
@@ -61,6 +63,7 @@ contract QuestTerminalKey is
         questFactoryAddress = questFactoryAddress_;
         royaltyFee = royaltyFee_;
         imageIPFSHash = imageIPFSHash_;
+        animationUrlIPFSHash = animationUrlIPFSHash_;
     }
 
     modifier onlyMinter() {
@@ -84,6 +87,12 @@ contract QuestTerminalKey is
     /// @param imageIPFSHash_ the image IPFS hash
     function setImageIPFSHash(string memory imageIPFSHash_) external onlyOwner {
         imageIPFSHash = imageIPFSHash_;
+    }
+
+    /// @dev set the animation URL IPFS hash
+    /// @param animationUrlIPFSHash_ the animation URL IPFS hash
+    function setAnimationUrlIPFSHash(string memory animationUrlIPFSHash_) external onlyOwner {
+        animationUrlIPFSHash = animationUrlIPFSHash_;
     }
 
     /// @dev set the royalty recipient
@@ -193,12 +202,13 @@ contract QuestTerminalKey is
         );
         bytes memory dataURI = abi.encodePacked(
             '{',
-            '"name": "RabbitHole.gg QuestTerminalKey #',
-            tokenIdString,
-            '",',
-            '"description": "The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.",',
+            '"name": "Quest Terminal Key",',
+            '"description": "A key that can be used to create quests in the Quest Terminal",',
             '"image": "',
             tokenImage(),
+            '",',
+            '"animation_url": "',
+            animationUrl(),
             '",',
             '"attributes": ',
             attributes,
@@ -209,6 +219,13 @@ contract QuestTerminalKey is
 
     function tokenImage() internal view virtual returns (string memory) {
         return string(abi.encodePacked('ipfs://', imageIPFSHash));
+    }
+
+    function animationUrl() internal view virtual returns (string memory) {
+        if (bytes(animationUrlIPFSHash).length == 0) {
+            return '';
+        }
+        return string(abi.encodePacked('ipfs://', animationUrlIPFSHash));
     }
 
     /// @dev generates an attribute object for an ERC-721 token
