@@ -3,19 +3,18 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const claimSignerAddress = '0x94c3e5e801830dD65CD786F2fe37e79c65DF4148'
-  const rabbitholeReceiptAddress = '0x85b76151Bba84D5ab6a043Daa40F29F33b4Eb362' // sepolia
-  const protocolFeeReceipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
+  const royaltyRecipient = '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
+  const minterAddress = '0x61A8CC96a3576C2a50716a0cDE70BF373C018aa6' // goerli
+  const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E'
+  const royaltyFee = 1000 // 10%
+  const owner = '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
+  const ipfsCid = 'bafybeib6k2l4fmqg5j3buk3yue4fxy7qeswaz7ban5ygmfzu7ts6n2jaeu'
 
-  const QuestFactory = await ethers.getContractFactory('QuestFactory')
-  const Erc20Quest = await ethers.getContractFactory('Quest')
-
-  const erc20Quest = await Erc20Quest.deploy()
-  await erc20Quest.deployed()
+  const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
 
   const deployment = await hre.upgrades.deployProxy(
-    QuestFactory,
-    [claimSignerAddress, rabbitholeReceiptAddress, protocolFeeReceipient, erc20Quest.address],
+    QuestTerminalKey,
+    [royaltyRecipient, minterAddress, questFactoryAddress, royaltyFee, owner, ipfsCid],
     { initializer: 'initialize' }
   )
 
