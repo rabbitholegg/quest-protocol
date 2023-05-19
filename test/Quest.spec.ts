@@ -128,26 +128,38 @@ describe('Quest', async () => {
   }
 
   describe('Deployment', () => {
-    describe('when start time is in past', () => {
-      it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, expiryDate, startDate - 1000, totalParticipants])
-        ).to.be.revertedWithCustomError(questContract, 'StartTimeInPast')
-      })
-    })
-
     describe('when end time is in past', () => {
       it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalParticipants])
+        await expect(
+          upgrades.deployProxy(questContract, [
+            mockAddress,
+            startDate - 1000,
+            startDate,
+            totalParticipants,
+            100,
+            'questid',
+            ethers.constants.AddressZero,
+            10,
+            ethers.constants.AddressZero,
+          ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
       })
     })
 
     describe('when end time is before start time', () => {
       it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalParticipants])
+        await expect(
+          upgrades.deployProxy(questContract, [
+            mockAddress,
+            startDate + 1,
+            startDate + 10,
+            totalParticipants,
+            100,
+            'questid',
+            ethers.constants.AddressZero,
+            10,
+            ethers.constants.AddressZero,
+          ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
     })

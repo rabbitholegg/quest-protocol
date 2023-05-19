@@ -34,6 +34,7 @@ describe('QuestTerminalKey Contract', async () => {
       10,
       contractOwner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
+      'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
     ])
 
     questFactory.setQuestTerminalKeyContract(questTerminalKey.address)
@@ -64,9 +65,10 @@ describe('QuestTerminalKey Contract', async () => {
       )
 
       const expectedMetadata = {
-        name: 'RabbitHole.gg QuestTerminalKey #1',
-        description: 'The RabbitHole.gg QuestTerminalKey is used as key to access the Terminal.',
+        name: 'Quest Terminal Key',
+        description: 'A key that can be used to create quests in the Quest Terminal',
         image: 'ipfs://QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
+        animation_url: 'ipfs://QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
         attributes: [
           { trait_type: 'Discount Percentage BPS', value: '1000' },
           { trait_type: 'Discount Used Count', value: '0' },
