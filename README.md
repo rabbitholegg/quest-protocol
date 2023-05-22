@@ -119,7 +119,7 @@ Mainnet, Optimism and Polygon:
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
 |RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
-|Quest Terminal Key|0x7D269bACbb14106048C9AA62748E2e964f346800|
+|Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 
 
 Sepolia:
