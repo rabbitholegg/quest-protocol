@@ -1,13 +1,13 @@
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-require('dotenv').config();
-require('hardhat-deploy');
+require('dotenv').config()
+require('hardhat-deploy')
 // require("@nomiclabs/hardhat-ethers");
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-import "@nomiclabs/hardhat-ethers"
-import "@nomicfoundation/hardhat-toolbox"
+import '@nomiclabs/hardhat-ethers'
+import '@nomicfoundation/hardhat-toolbox'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 
@@ -18,24 +18,27 @@ const config: HardhatUserConfig = {
       default: 1,
       1: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
       5: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
-      10: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c'
+      10: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
     },
-		claimSignerAddress: { // public address on API
+    claimSignerAddress: {
+      // public address on API
       1: '0x458d84d42878930C929C660F24F1505368107276',
       5: '0x22890b38D6ab6090e5123DB7497f4bCE7062929F',
       10: '0x458d84d42878930C929C660F24F1505368107276',
     },
-    protocolFeeReceipient: { // multisig
+    protocolFeeReceipient: {
+      // multisig
       1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
       5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
       10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145',
     },
-    royaltyRecipient: { // multisig
+    royaltyRecipient: {
+      // multisig
       1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
       5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
       10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145',
-    }
-	},
+    },
+  },
   gasReporter: {
     gasPrice: 100,
   },
@@ -76,6 +79,15 @@ const config: HardhatUserConfig = {
         },
       },
     },
+    arbitrum: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ARBITRUM_API_KEY}`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.ARBISCAN_API_KEY,
+        },
+      },
+    },
     mainnet: {
       url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
@@ -91,7 +103,7 @@ const config: HardhatUserConfig = {
     optimismGoerli: {
       url: `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
-    }
+    },
   },
 }
 
