@@ -13,22 +13,22 @@ async function main() {
   const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
   const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
 
-  // // deploy new quest
-  // const erc20Quest = await Erc20Quest.deploy()
-  // await erc20Quest.deployed()
-  // console.log('deployed Erc20Quest to:', erc20Quest.address)
-  // await hre.run('verify:verify', { address: erc20Quest.address })
+  // deploy new quest
+  const erc20Quest = await Erc20Quest.deploy()
+  await erc20Quest.deployed()
+  console.log('deployed Erc20Quest to:', erc20Quest.address)
+  await hre.run('verify:verify', { address: erc20Quest.address })
 
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
-  // await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
-  // const questFactoryImp = await QuestFactory.deploy()
-  // await questFactoryImp.deployed()
-  // console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
-  // await hre.run('verify:verify', { address: questFactoryImp.address })
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
+  const questFactoryImp = await QuestFactory.deploy()
+  await questFactoryImp.deployed()
+  console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
+  await hre.run('verify:verify', { address: questFactoryImp.address })
 
   // Validates and deploys a new implementation contract for RabbitHoleReceipt
   await hre.upgrades.forceImport(rabbitHoleReceiptAddress, RabbitHoleReceipt)
@@ -39,12 +39,12 @@ async function main() {
   await hre.run('verify:verify', { address: RabbitHoleReceiptImp.address })
 
   // validates and deploys a new implementation contract for QuestTerminalKey
-  // await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
-  // await hre.upgrades.validateUpgrade(questTerminalKeyAddress, QuestTerminalKey)
-  // const QTKImp = await QuestTerminalKey.deploy()
-  // await QTKImp.deployed()
-  // console.log('deployed QTK to:', QTKImp.address)
-  // await hre.run('verify:verify', { address: QTKImp.address })
+  await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
+  await hre.upgrades.validateUpgrade(questTerminalKeyAddress, QuestTerminalKey)
+  const QTKImp = await QuestTerminalKey.deploy()
+  await QTKImp.deployed()
+  console.log('deployed QTK to:', QTKImp.address)
+  await hre.run('verify:verify', { address: QTKImp.address })
 }
 
 main()
