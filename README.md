@@ -207,8 +207,11 @@ yarn test:gas-stories
 ---
 
 ## Deployment
+checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt conctracts and hence address) then run:
 `yarn hardhat deploy --network network_name` where network_name is one of `goerli`, `mainnet`, `optimism`
 `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+
+use sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e` for the quest terminal key.
 
 ## Upgrading
 
