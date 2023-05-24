@@ -105,11 +105,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @notice Marks token ids as claimed
     /// @param tokenIds_ The token ids to mark as claimed
     function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length; ) {
+        for (uint i = 0; i < tokenIds_.length; i++) {
             claimedList[tokenIds_[i]] = true;
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -145,14 +142,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         if (tokens.length == 0) revert NoTokensToClaim();
 
         uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length; ) {
+        for (uint i = 0; i < tokens.length; i++) {
             if (!this.isClaimed(tokens[i])) {
                 unchecked {
                     redeemableTokenCount++;
                 }
-            }
-            unchecked {
-                i++;
             }
         }
 
