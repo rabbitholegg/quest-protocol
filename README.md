@@ -113,22 +113,13 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 
 ## Addressses
 
-Mainnet, Optimism, Polygon and Arbitrum:
+Mainnet, Optimism, Polygon Arbitrum, and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
 |RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
 |Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
-
-
-Sepolia:
-
-|Contract Name|Address|
-|-------------|-------|
-|QuestFactory|0x74016208260cE10ef421ed0CFC4C7Baae0BaEF86|
-|RabbitHole Receipt|0x85b76151Bba84D5ab6a043Daa40F29F33b4Eb362|
-|QuestTerminalKey|0x28D0Eb40015148fAe83A9D2C465d3ddf570b9217|
 
 ---
 
