@@ -113,7 +113,7 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 
 ## Addressses
 
-Mainnet, Optimism and Polygon:
+Mainnet, Optimism, Polygon and Arbitrum:
 
 |Contract Name|Address|
 |-------------|-------|
