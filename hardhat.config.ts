@@ -73,6 +73,7 @@ const config: HardhatUserConfig = {
       optimisticEthereum: process.env.OPT_ETHERSCAN_API_KEY,
       optimisticGoerli: process.env.OPT_ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
+      arbitrumOne: process.env.ARBISCAN_API_KEY,
     },
   },
   networks: {
@@ -123,6 +124,15 @@ const config: HardhatUserConfig = {
       verify: {
         etherscan: {
           apiKey: process.env.POLYGONSCAN_API_KEY,
+        },
+      },
+    },
+    arbitrum: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ARBITRUM_API_KEY}`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.ARBISCAN_API_KEY,
         },
       },
     },
