@@ -7,18 +7,18 @@ interface IQuest {
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint timestamp);
+    event JsonSpecCIDSet(string cid);
 
     error AlreadyClaimed();
-    error NoTokensToClaim();
-    error EndTimeInPast();
-    error StartTimeInPast();
-    error EndTimeLessThanOrEqualToStartTime();
-    error ClaimWindowNotStarted();
-    error NoWithdrawDuringClaim();
-    error TotalAmountExceedsBalance();
     error AmountExceedsBalance();
-    error NotStarted();
+    error ClaimWindowNotStarted();
+    error EndTimeInPast();
+    error EndTimeLessThanOrEqualToStartTime();
     error MustImplementInChild();
+    error NoTokensToClaim();
+    error NoWithdrawDuringClaim();
+    error NotStarted();
+    error TotalAmountExceedsBalance();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
 

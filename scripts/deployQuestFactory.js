@@ -3,23 +3,19 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const claimSignerAddress = '0x22890b38D6ab6090e5123DB7497f4bCE7062929F'
-  const rabbitholeReceiptAddress = '0x61A8CC96a3576C2a50716a0cDE70BF373C018aa6' // goerli
-  const rabbitholeTicketsAddress = '0x5C3eBe0C4a1F1505a4A106859CaBdca0913fa42F' // goerli
+  const claimSignerAddress = '0x94c3e5e801830dD65CD786F2fe37e79c65DF4148'
+  const rabbitholeReceiptAddress = '0x85b76151Bba84D5ab6a043Daa40F29F33b4Eb362' // sepolia
   const protocolFeeReceipient = '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0' // goerli
 
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
-  const Erc20Quest = await ethers.getContractFactory('Erc20Quest')
-  const Erc1155Quest = await ethers.getContractFactory('Erc1155Quest')
+  const Erc20Quest = await ethers.getContractFactory('Quest')
 
   const erc20Quest = await Erc20Quest.deploy()
   await erc20Quest.deployed()
-  const erc1155Quest = await Erc1155Quest.deploy()
-  await erc1155Quest.deployed()
 
   const deployment = await hre.upgrades.deployProxy(
     QuestFactory,
-    [claimSignerAddress, rabbitholeReceiptAddress, rabbitholeTicketsAddress, protocolFeeReceipient, erc20Quest.address, erc1155Quest.address],
+    [claimSignerAddress, rabbitholeReceiptAddress, protocolFeeReceipient, erc20Quest.address],
     { initializer: 'initialize' }
   )
 

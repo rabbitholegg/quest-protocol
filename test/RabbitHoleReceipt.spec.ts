@@ -25,24 +25,19 @@ describe('RabbitholeReceipt Contract', async () => {
       royaltyRecipient.address,
       minterAddress.address,
       10,
-      contractOwner.address
+      contractOwner.address,
     ])
 
-    const erc20QuestContract = await ethers.getContractFactory('Erc20Quest')
-    const erc1155QuestContract = await ethers.getContractFactory('Erc1155Quest')
-    const rabbitHoleTicketsContract = await ethers.getContractFactory('RabbitHoleTickets')
+    const erc20QuestContract = await ethers.getContractFactory('Quest')
     const deployedErc20Quest = await erc20QuestContract.deploy()
-    const deployedErc1155Quest = await erc1155QuestContract.deploy()
-    const deployedRabbitHoleTickets = await rabbitHoleTicketsContract.deploy()
 
     deployedFactoryContract = await upgrades.deployProxy(questFactory, [
       royaltyRecipient.address,
       RHReceipt.address,
-      deployedRabbitHoleTickets.address,
       royaltyRecipient.address,
       deployedErc20Quest.address,
-      deployedErc1155Quest.address,
-      contractOwner.address
+      contractOwner.address,
+      royaltyRecipient.address, // placeholder for questTerminalKey
     ])
 
     await RHReceipt.setQuestFactory(deployedFactoryContract.address)
