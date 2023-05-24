@@ -3,10 +3,6 @@
  */
 require('dotenv').config()
 require('hardhat-deploy')
-<<<<<<< HEAD
-// require("@nomiclabs/hardhat-ethers");
-=======
->>>>>>> origin/main
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
 import '@nomiclabs/hardhat-ethers'
@@ -25,10 +21,7 @@ const config: HardhatUserConfig = {
       1: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
       5: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
       10: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
-<<<<<<< HEAD
-=======
       137: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
->>>>>>> origin/main
     },
     claimSignerAddress: {
       // public address on API
@@ -49,10 +42,7 @@ const config: HardhatUserConfig = {
       1: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
       5: '0xC4a68e2c152bCA2fE5E8D26FFb8AA44bCE1B56b0',
       10: '0xbD72a3Cd66B3e40E5151B153164905FD65b55145',
-<<<<<<< HEAD
-=======
       137: '0x482c973675b3E3f84A23Dc03430aCfF293952e74',
->>>>>>> origin/main
     },
   },
   gasReporter: {
