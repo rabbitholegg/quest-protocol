@@ -3,10 +3,15 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const Erc20Quest = await ethers.getContractFactory('Quest')
   const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E' // production everywhere
-  // const questFactoryAddress = '0x10851543671491656606E6A49dE32c9cCb41b4F8' // goerli staging
+  const questTerminalKeyAddress = '0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab' // production everywhere
+  const rabbitHoleReceiptAddress = '0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E' // production everywhere
+  // const questFactoryAddress = '0x74016208260cE10ef421ed0CFC4C7Baae0BaEF86' // sepolia staging
+  // const questTerminalKeyAddress = '0x28D0Eb40015148fAe83A9D2C465d3ddf570b9217' // sepolia staging
+  const Erc20Quest = await ethers.getContractFactory('Quest')
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
+  const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
+  const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
 
   // deploy new quest
   const erc20Quest = await Erc20Quest.deploy()
@@ -14,14 +19,32 @@ async function main() {
   console.log('deployed Erc20Quest to:', erc20Quest.address)
   await hre.run('verify:verify', { address: erc20Quest.address })
 
-  // to manually upgrade the quest factory
-  // validate upgrade
+  // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
+  // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
+
+  // Validates and deploys a new implementation contract for QuestFactory
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
-  // deploy new implementation
-  const questFactory = await QuestFactory.deploy()
-  await questFactory.deployed()
-  console.log('deployed QuestFactory to:', questFactory.address)
-  await hre.run('verify:verify', { address: questFactory.address })
+  const questFactoryImp = await QuestFactory.deploy()
+  await questFactoryImp.deployed()
+  console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
+  await hre.run('verify:verify', { address: questFactoryImp.address })
+
+  // Validates and deploys a new implementation contract for RabbitHoleReceipt
+  await hre.upgrades.forceImport(rabbitHoleReceiptAddress, RabbitHoleReceipt)
+  await hre.upgrades.validateUpgrade(rabbitHoleReceiptAddress, RabbitHoleReceipt)
+  const RabbitHoleReceiptImp = await RabbitHoleReceipt.deploy()
+  await RabbitHoleReceiptImp.deployed()
+  console.log('deployed RabbitHoleReceipt Implementation to:', RabbitHoleReceiptImp.address)
+  await hre.run('verify:verify', { address: RabbitHoleReceiptImp.address })
+
+  // validates and deploys a new implementation contract for QuestTerminalKey
+  await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
+  await hre.upgrades.validateUpgrade(questTerminalKeyAddress, QuestTerminalKey)
+  const QTKImp = await QuestTerminalKey.deploy()
+  await QTKImp.deployed()
+  console.log('deployed QTK to:', QTKImp.address)
+  await hre.run('verify:verify', { address: QTKImp.address })
 }
 
 main()

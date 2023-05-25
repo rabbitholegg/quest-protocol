@@ -5,7 +5,7 @@ const { ethers } = require('hardhat')
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre
   const { deploy } = deployments
-  const { deployer, owner, royaltyRecipient } = await getNamedAccounts()
+  const { deployer, owner } = await getNamedAccounts()
 
   await deploy('QuestTerminalKey', {
     contract: 'QuestTerminalKey',
