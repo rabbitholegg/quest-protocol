@@ -96,6 +96,8 @@ describe('Quest', async () => {
       deployedErc20Quest.address,
       owner.address,
       ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
+      ethers.constants.AddressZero, // as a placeholder would be the questNFTAddress
+      100, // the nftQuestFee
     ])) as QuestFactory
   }
 

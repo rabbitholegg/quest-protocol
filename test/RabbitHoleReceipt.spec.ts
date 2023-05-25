@@ -4,7 +4,6 @@ import { ethers, upgrades } from 'hardhat'
 
 describe('RabbitholeReceipt Contract', async () => {
   let RHReceipt: Contract,
-    deployedFactoryContract: Contract,
     deployedReceiptRenderer: Contract,
     contractOwner: { address: String },
     royaltyRecipient: { address: String },
@@ -13,7 +12,6 @@ describe('RabbitholeReceipt Contract', async () => {
 
   beforeEach(async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
-    const questFactory = await ethers.getContractFactory('QuestFactory')
     const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
     const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
 
@@ -27,20 +25,6 @@ describe('RabbitholeReceipt Contract', async () => {
       10,
       contractOwner.address,
     ])
-
-    const erc20QuestContract = await ethers.getContractFactory('Quest')
-    const deployedErc20Quest = await erc20QuestContract.deploy()
-
-    deployedFactoryContract = await upgrades.deployProxy(questFactory, [
-      royaltyRecipient.address,
-      RHReceipt.address,
-      royaltyRecipient.address,
-      deployedErc20Quest.address,
-      contractOwner.address,
-      royaltyRecipient.address, // placeholder for questTerminalKey
-    ])
-
-    await RHReceipt.setQuestFactory(deployedFactoryContract.address)
   })
 
   describe('Deployment', () => {
@@ -64,27 +48,6 @@ describe('RabbitholeReceipt Contract', async () => {
       await expect(RHReceipt.connect(firstAddress).mint(firstAddress.address, 'def456')).to.be.revertedWith(
         'Only minter'
       )
-    })
-  })
-
-  // todo, this needs a quest created
-  xdescribe('tokenURI', () => {
-    it('has the correct metadata', async () => {
-      await RHReceipt.connect(minterAddress).mint(minterAddress.address, 'abc123')
-      let base64encoded = await RHReceipt.tokenURI(1)
-
-      let buff = Buffer.from(base64encoded.replace('data:application/json;base64,', ''), 'base64')
-      let metadata = buff.toString('ascii')
-
-      let expectedMetada = {
-        name: 'RabbitHole Quest #abc123 Redeemer #1',
-        description:
-          'This is a receipt for a RabbitHole Quest. You can use this receipt to claim a reward on RabbitHole.',
-        image:
-          'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiIHZpZXdCb3g9IjAgMCAzNTAgMzUwIj48c3R5bGU+LmJhc2UgeyBmaWxsOiB3aGl0ZTsgZm9udC1mYW1pbHk6IHNlcmlmOyBmb250LXNpemU6IDE0cHg7IH08L3N0eWxlPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9ImJsYWNrIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBjbGFzcz0iYmFzZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UmFiYml0SG9sZSBRdWVzdCAjYWJjMTIzPC90ZXh0Pjx0ZXh0IHg9IjcwJSIgeT0iNDAlIiBjbGFzcz0iYmFzZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UmFiYml0SG9sZSBRdWVzdCBSZWNlaXB0ICMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATwvdGV4dD48L3N2Zz4=',
-      }
-
-      expect(JSON.parse(metadata)).to.eql(expectedMetada)
     })
   })
 

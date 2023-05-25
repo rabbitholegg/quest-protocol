@@ -4,7 +4,6 @@ import { ethers, upgrades } from 'hardhat'
 
 describe('QuestTerminalKey Contract', async () => {
   let questTerminalKey: Contract,
-    questFactory: Contract,
     contractOwner: { address: String },
     royaltyRecipient: { address: String },
     minterAddress: { address: String },
@@ -13,31 +12,16 @@ describe('QuestTerminalKey Contract', async () => {
   beforeEach(async () => {
     ;[contractOwner, royaltyRecipient, minterAddress, firstAddress] = await ethers.getSigners()
     const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
-    const QuestFactory = await ethers.getContractFactory('QuestFactory')
-
-    const erc20QuestContract = await ethers.getContractFactory('Quest')
-    const deployedErc20Quest = await erc20QuestContract.deploy()
-
-    questFactory = await upgrades.deployProxy(QuestFactory, [
-      royaltyRecipient.address,
-      firstAddress.address, // really RH Receipt contract but doesnt matter here
-      royaltyRecipient.address,
-      deployedErc20Quest.address,
-      contractOwner.address,
-      firstAddress.address, // really questTerminalKey address but don't have it yet
-    ])
 
     questTerminalKey = await upgrades.deployProxy(QuestTerminalKey, [
       royaltyRecipient.address,
       minterAddress.address,
-      questFactory.address,
+      ethers.constants.AddressZero, // this is questFactory address, but not needed here
       10,
       contractOwner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
       'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
     ])
-
-    questFactory.setQuestTerminalKeyContract(questTerminalKey.address)
   })
 
   describe('Deployment', () => {
