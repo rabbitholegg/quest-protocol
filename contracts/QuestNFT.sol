@@ -135,7 +135,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
 
     /// @dev Function that to withdraw the remaining coins in the contract to the owner
     /// @notice This function can only be called after the quest end time
-    function withdrawRemainingCoins() external onlyAfterQuestEnd {
+    function withdrawRemainingCoins() external onlyAfterQuestEnd nonReentrant {
         uint balance = address(this).balance;
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
@@ -146,7 +146,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
 
     /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
-    function refund(address erc20Address_) external {
+    function refund(address erc20Address_) external nonReentrant {
         uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
         if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
     }
