@@ -466,6 +466,17 @@ describe('QuestFactory', () => {
         balanceBefore.add(requiredFee)
       )
     })
+
+    it('should not be able to mint a receipt NFT and then claim it with claimRewards for the same quest', async () => {
+      await erc20Quest.queue()
+      await time.setNextBlockTimestamp(startDate)
+      await deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
+      expect(await deployedRabbitHoleReceiptContract.balanceOf(owner.address)).to.equal(1)
+
+      await expect(
+        deployedFactoryContract.claimRewards(erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
+    })
   })
 
   describe('createQuestNFT()', () => {
