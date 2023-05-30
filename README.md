@@ -112,12 +112,14 @@ tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typech
 ---
 
 ## Addressses
-All contracts are deployed with the same addresses on Sepolia, Mainnet and Optimism. The addresses are as follows:
+
+Mainnet, Optimism, Polygon Arbitrum, and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
 |RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
+|Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 
 ---
 
@@ -196,8 +198,11 @@ yarn test:gas-stories
 ---
 
 ## Deployment
+checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt conctracts and hence address) then run:
 `yarn hardhat deploy --network network_name` where network_name is one of `goerli`, `mainnet`, `optimism`
 `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+
+use sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e` for the quest terminal key.
 
 ## Upgrading
 

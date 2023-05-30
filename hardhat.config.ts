@@ -12,7 +12,10 @@ import '@openzeppelin/hardhat-defender'
 
 const config: HardhatUserConfig = {
   namedAccounts: {
-    deployer: 0,
+    deployer: {
+      default: 0,
+      5: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
+    },
     owner: {
       default: 1,
       1: '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c',
@@ -66,8 +69,11 @@ const config: HardhatUserConfig = {
     apiKey: {
       mainnet: process.env.MAIN_ETHERSCAN_API_KEY,
       goerli: process.env.MAIN_ETHERSCAN_API_KEY,
+      sepolia: process.env.MAIN_ETHERSCAN_API_KEY,
       optimisticEthereum: process.env.OPT_ETHERSCAN_API_KEY,
+      optimisticGoerli: process.env.OPT_ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
+      arbitrumOne: process.env.ARBISCAN_API_KEY,
     },
   },
   networks: {
@@ -80,6 +86,15 @@ const config: HardhatUserConfig = {
       settings: {
         debug: {
           revertStrings: 'debug',
+        },
+      },
+    },
+    arbitrum: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ARBITRUM_API_KEY}`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.ARBISCAN_API_KEY,
         },
       },
     },
@@ -102,6 +117,7 @@ const config: HardhatUserConfig = {
       },
     },
     goerli: {
+      gasPrice: 500000000000000000, // .5 ETH
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_API_KEY}`,
       accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
       verify: {
@@ -117,6 +133,15 @@ const config: HardhatUserConfig = {
       verify: {
         etherscan: {
           apiKey: process.env.POLYGONSCAN_API_KEY,
+        },
+      },
+    },
+    arbitrum: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ARBITRUM_API_KEY}`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      verify: {
+        etherscan: {
+          apiKey: process.env.ARBISCAN_API_KEY,
         },
       },
     },

@@ -30,6 +30,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
+    string public jsonSpecCID;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -48,7 +49,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         address protocolFeeRecipient_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
-        if (startTime_ <= block.timestamp) revert StartTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
         endTime = endTime_;
         startTime = startTime_;
@@ -66,10 +66,25 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         __ReentrancyGuard_init();
     }
 
+    /// @dev set jsonSpecCID only if its empty
+    /// @param jsonSpecCID_ The jsonSpecCID to set
+    function setJsonSpecCID(string memory jsonSpecCID_) external onlyOwner {
+        require(bytes(jsonSpecCID_).length > 0, 'jsonSpecCID cannot be empty');
+        require(bytes(jsonSpecCID).length == 0, 'jsonSpecCID already set');
+
+        jsonSpecCID = jsonSpecCID_;
+        emit JsonSpecCIDSet(jsonSpecCID_);
+    }
+
+    /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
+    function totalTransferAmount() external view returns (uint256) {
+        return this.maxTotalRewards() + this.maxProtocolReward();
+    }
+
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (IERC20(rewardToken).balanceOf(address(this)) < this.maxTotalRewards() + this.maxProtocolReward())
+        if (IERC20(rewardToken).balanceOf(address(this)) < this.totalTransferAmount())
             revert TotalAmountExceedsBalance();
         queued = true;
         emit Queued(block.timestamp);

@@ -15,7 +15,7 @@ import {
   QuestFactory__factory,
 } from '../typechain-types'
 
-describe('Erc20Quest', async () => {
+describe('Quest', async () => {
   let deployedQuestContract: Quest
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
@@ -95,6 +95,9 @@ describe('Erc20Quest', async () => {
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       owner.address,
+      ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
+      ethers.constants.AddressZero, // as a placeholder would be the questNFTAddress
+      100, // the nftQuestFee
     ])) as QuestFactory
   }
 
@@ -106,7 +109,7 @@ describe('Erc20Quest', async () => {
     deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
       deployedReceiptRenderer.address,
       owner.address,
-      minterAddress.address, // as a placeholder, would the factory contract
+      minterAddress.address, // as a placeholder, would be the factory contract
       10,
       owner.address,
     ])) as RabbitHoleReceipt
@@ -127,26 +130,38 @@ describe('Erc20Quest', async () => {
   }
 
   describe('Deployment', () => {
-    describe('when start time is in past', () => {
-      it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, expiryDate, startDate - 1000, totalParticipants])
-        ).to.be.revertedWithCustomError(questContract, 'StartTimeInPast')
-      })
-    })
-
     describe('when end time is in past', () => {
       it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate, totalParticipants])
+        await expect(
+          upgrades.deployProxy(questContract, [
+            mockAddress,
+            startDate - 1000,
+            startDate,
+            totalParticipants,
+            100,
+            'questid',
+            ethers.constants.AddressZero,
+            10,
+            ethers.constants.AddressZero,
+          ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
       })
     })
 
     describe('when end time is before start time', () => {
       it('Should revert', async () => {
-        expect(
-          upgrades.deployProxy(questContract, [mockAddress, startDate - 1000, startDate + 1000, totalParticipants])
+        await expect(
+          upgrades.deployProxy(questContract, [
+            mockAddress,
+            startDate + 1,
+            startDate + 10,
+            totalParticipants,
+            100,
+            'questid',
+            ethers.constants.AddressZero,
+            10,
+            ethers.constants.AddressZero,
+          ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
     })
@@ -180,6 +195,35 @@ describe('Erc20Quest', async () => {
 
     it('Deployment should set the correct owner address', async () => {
       expect(await deployedQuestContract.owner()).to.equal(owner.address)
+    })
+  })
+
+  describe('setJsonSpecCID()', () => {
+    it('should only allow the owner to set', async () => {
+      await expect(deployedQuestContract.connect(firstAddress).setJsonSpecCID('cidhere')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should not allow the owner to set an empty string', async () => {
+      await expect(deployedQuestContract.connect(owner).setJsonSpecCID('')).to.be.revertedWith(
+        'jsonSpecCID cannot be empty'
+      )
+    })
+
+    it('should set the json spec cid correctly', async () => {
+      const cid = 'QmQ1Q2Q3Q4Q5Q6Q7Q8Q9Q10Q11Q12Q13Q14Q15Q16Q17Q18Q19Q20'
+      await deployedQuestContract.connect(owner).setJsonSpecCID(cid)
+      expect(await deployedQuestContract.jsonSpecCID()).to.equal(cid)
+    })
+
+    it('should not be ale to set the json spec cid twice', async () => {
+      const cid = 'cid1'
+      await deployedQuestContract.connect(owner).setJsonSpecCID(cid)
+      expect(await deployedQuestContract.jsonSpecCID()).to.equal(cid)
+      await expect(deployedQuestContract.connect(owner).setJsonSpecCID('cid2')).to.be.revertedWith(
+        'jsonSpecCID already set'
+      )
     })
   })
 

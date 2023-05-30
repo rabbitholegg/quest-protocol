@@ -1,11 +1,11 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types'
+import { DeployFunction } from 'hardhat-deploy/types'
 const { ethers } = require('hardhat')
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
-  const {deployer, owner, royaltyRecipient} = await getNamedAccounts();
+  const { deployments, getNamedAccounts } = hre
+  const { deploy } = deployments
+  const { deployer, owner, royaltyRecipient } = await getNamedAccounts()
 
   await deploy('RabbitHoleReceipt', {
     contract: 'RabbitHoleReceipt',
@@ -13,15 +13,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deterministicDeployment: '0x0000000000000000000000000000000000000000000000000000000000000020', // 20 for for production, 21 for staging
     proxy: {
       owner: owner,
-      proxyContract: 'OpenZeppelinTransparentProxy'
+      proxyContract: 'OpenZeppelinTransparentProxy',
     },
     log: true,
-  });
+  })
 
-  return true; // only run once
-};
+  return true // only run once
+}
 
-func.tags = ['RabbitHoleReceipt'];
-func.id = 'deploy_RabbitHoleReceipt';
+func.tags = ['RabbitHoleReceipt']
+func.id = 'deploy_RabbitHoleReceipt'
 
-export default func;
+export default func
