@@ -437,4 +437,8 @@ describe('Quest', async () => {
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
     })
   })
+
+  describe('claimSingle()', async () => {
+    //todo
+  })
 })

@@ -34,6 +34,7 @@ describe('QuestFactory', () => {
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
   let mintFeeRecipient: SignerWithAddress
+  let questUser: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
   let questTerminalKeyContract: QuestTerminalKey__factory
@@ -45,7 +46,7 @@ describe('QuestFactory', () => {
   let wallet: Wallet
 
   beforeEach(async () => {
-    ;[owner, royaltyRecipient, protocolRecipient, mintFeeRecipient] = await ethers.getSigners()
+    ;[owner, royaltyRecipient, protocolRecipient, mintFeeRecipient, questUser] = await ethers.getSigners()
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
@@ -564,6 +565,87 @@ describe('QuestFactory', () => {
       await expect(
         deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
+    })
+  })
+
+  describe('claimRewards()', () => {
+    const erc20QuestId = 'rewardQuestId'
+    const maxTotalRewards = totalRewards * rewardAmount
+    const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
+    const transferAmount = maxTotalRewards + maxProtocolReward
+    let messageHash: string
+    let signature: string
+    let questAddress: string
+    let erc20Quest: Quest
+
+    beforeEach(async () => {
+      messageHash = utils.solidityKeccak256(['address', 'string'], [questUser.address.toLowerCase(), erc20QuestId])
+      signature = await wallet.signMessage(utils.arrayify(messageHash))
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+
+      await deployedFactoryContract.createQuestAndQueue(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        erc20QuestId,
+        'jsonSpecCid',
+        0
+      )
+      questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      erc20Quest = await ethers.getContractAt('Quest', questAddress)
+    })
+
+    it('Should fail when trying to claim before quest time has started', async () => {
+      await time.setNextBlockTimestamp(startDate - 1)
+      await expect(
+        deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotStarted')
+    })
+
+    it('Should claim rewards', async () => {
+      await time.setNextBlockTimestamp(startDate)
+      await deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
+      expect(await deployedSampleErc20Contract.balanceOf(questUser.address)).to.equal(rewardAmount)
+    })
+
+    it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
+      await time.setNextBlockTimestamp(startDate)
+      await expect(
+        deployedFactoryContract.connect(royaltyRecipient).claimRewards(erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
+    })
+
+    it('Should fail if user is able to call claimRewards multiple times', async () => {
+      await time.setNextBlockTimestamp(startDate)
+      await deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
+      expect(await deployedSampleErc20Contract.balanceOf(questUser.address)).to.equal(rewardAmount)
+
+      await expect(
+        deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
+      expect(await deployedSampleErc20Contract.balanceOf(questUser.address)).to.equal(rewardAmount)
+    })
+
+    it('Should fail when trying to claim after quest time has passed', async () => {
+      await time.setNextBlockTimestamp(expiryDate + 1)
+      await expect(
+        deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
+    })
+
+    it('should revert if the mint fee is insufficient', async function () {
+      const requiredFee = 1000
+      await deployedFactoryContract.setMintFee(requiredFee)
+      await time.setNextBlockTimestamp(startDate)
+
+      await expect(
+        deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
+          value: requiredFee - 1,
+        })
+      ).to.be.revertedWith('Insufficient mint fee')
     })
   })
 })
