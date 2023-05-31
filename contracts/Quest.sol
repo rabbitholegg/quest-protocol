@@ -56,7 +56,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = QuestFactory(msg.sender);
+        questFactoryContract = QuestFactory(payable(msg.sender));
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
@@ -142,11 +142,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         _;
     }
 
-    function singleClaim(address sender_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
+    /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
+    /// @param account_ The account to transfer rewards to
+    function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
         uint256 totalRedeemableRewards = _calculateRewards(1);
-        _transferRewards(sender_, totalRedeemableRewards);
+        _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
-        emit Claimed(sender_, rewardToken, totalRedeemableRewards);
+        emit Claimed(account_, rewardToken, totalRedeemableRewards);
     }
 
     /// @notice Allows user to claim the rewards entitled to them

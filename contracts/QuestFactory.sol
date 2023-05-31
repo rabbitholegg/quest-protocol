@@ -513,4 +513,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         (bool mintSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
         require(mintSuccess, "Failed to send mint fee");
     }
+
+    // Receive function to receive ETH
+    receive() external payable {}
+
+    // Fallback function to receive ETH when other functions are not available
+    fallback() external payable {}
 }
