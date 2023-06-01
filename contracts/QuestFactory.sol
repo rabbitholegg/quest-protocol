@@ -55,11 +55,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
     struct QuestData {
         address questAddress;
+        address rewardToken;
+        bool queued;
+        uint16 questFee;
+        uint startTime;
+        uint endTime;
         uint totalParticipants;
         uint numberMinted;
-        bool queued;
-        uint receiptRedeemers;
         uint redeemedTokens;
+        uint rewardAmountInWei;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -425,19 +429,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev return extended quest data for a questId
     /// @param questId_ The id of the quest
     function questData(string memory questId_) external view returns (QuestData memory) {
-        Quest storage currentQuest = quests[questId_];
-
-        bool queued = QuestContract(currentQuest.questAddress).queued();
-        uint receiptRedeemers = this.getNumberMinted(questId_);
-        uint redeemedTokens = QuestContract(currentQuest.questAddress).redeemedTokens();
+        Quest storage thisQuest = quests[questId_];
+        QuestContract questContract = QuestContract(thisQuest.questAddress);
 
         QuestData memory data = QuestData(
-            currentQuest.questAddress,
-            currentQuest.totalParticipants,
-            currentQuest.numberMinted,
-            queued,
-            receiptRedeemers,
-            redeemedTokens
+            thisQuest.questAddress,
+            questContract.rewardToken(),
+            questContract.queued(),
+            questContract.questFee(),
+            questContract.startTime(),
+            questContract.endTime(),
+            questContract.totalParticipants(),
+            thisQuest.numberMinted,
+            questContract.redeemedTokens(),
+            questContract.rewardAmountInWei()
         );
 
         return data;

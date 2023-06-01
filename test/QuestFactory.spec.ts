@@ -325,11 +325,15 @@ describe('QuestFactory', () => {
       const questData = await deployedFactoryContract.questData(erc20QuestId)
       expect(questData).to.eql([
         questAddress,
+        deployedSampleErc20Contract.address,
+        false,
+        2000, // questFee
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
         ethers.BigNumber.from(totalRewards),
         ethers.BigNumber.from(0),
-        false,
         ethers.BigNumber.from(0),
-        ethers.BigNumber.from(0),
+        ethers.BigNumber.from(rewardAmount),
       ])
     })
   })
