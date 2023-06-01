@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.16;
+pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
@@ -51,6 +52,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string symbol;
         string description;
         string imageIPFSHash;
+    }
+    struct QuestData {
+        address questAddress;
+        uint totalParticipants;
+        uint numberMinted;
+        bool queued;
+        uint receiptRedeemers;
+        uint redeemedTokens;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -412,6 +421,28 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function getNumberMinted(string memory questId_) external view returns (uint) {
         return quests[questId_].numberMinted;
     }
+
+    /// @dev return extended quest data for a questId
+    /// @param questId_ The id of the quest
+    function questData(string memory questId_) external view returns (QuestData memory) {
+        Quest storage currentQuest = quests[questId_];
+
+        bool queued = QuestContract(currentQuest.questAddress).queued();
+        uint receiptRedeemers = this.getNumberMinted(questId_);
+        uint redeemedTokens = QuestContract(currentQuest.questAddress).redeemedTokens();
+
+        QuestData memory data = QuestData(
+            currentQuest.questAddress,
+            currentQuest.totalParticipants,
+            currentQuest.numberMinted,
+            queued,
+            receiptRedeemers,
+            redeemedTokens
+        );
+
+        return data;
+    }
+
 
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
