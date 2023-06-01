@@ -566,4 +566,35 @@ describe('QuestFactory', () => {
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
     })
   })
+
+  describe('questData()', () => {
+    const erc20QuestId = 'abc123'
+
+    it('Should return the correct quest data', async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedFactoryContract.createQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        'erc20',
+        erc20QuestId
+      )
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const questData = await deployedFactoryContract.questData(erc20QuestId)
+      expect(questData).to.eql([
+        questAddress,
+        deployedSampleErc20Contract.address,
+        false,
+        2000, // questFee
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
+        ethers.BigNumber.from(totalRewards),
+        ethers.BigNumber.from(0),
+        ethers.BigNumber.from(0),
+        ethers.BigNumber.from(rewardAmount),
+      ])
+    })
+  })
 })
