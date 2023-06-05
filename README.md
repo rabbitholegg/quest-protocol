@@ -63,7 +63,7 @@ The main contracts are:
 - `QuestNFT` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/QuestNFT.sol))
   - A Quest in which the reward is a NFT
 - `Quest Terminal Key` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestTerminalKey.sol))
-  - A contract for gating access and handeling discounts for the Quest Terminal
+  - A contract for gating access and handling discounts for the Quest Terminal
 
 ---
 
@@ -129,7 +129,7 @@ yarn test:gas-stories
 ## Deployment
 
 ### RabbitHoleReceipt and QuestFactory
-- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt conctracts and hence address)
+- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt contracts and hence address)
 - `yarn hardhat deploy --network network_name`
 - `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
 
@@ -162,7 +162,7 @@ The following auditors reviewed the protocol.
 
 ## Bug Bounty
 
-Once all audits are wrapped up, all contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
+All contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
 
 The rubric we use to determine bug bounties is as follows:
 
