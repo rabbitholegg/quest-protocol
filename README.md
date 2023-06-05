@@ -14,12 +14,13 @@ Quests Protocol is a protocol to distribute token rewards for completing on-chai
 ## Table of Contents
 
 - [Quest Protocol](https://github.com/rabbitholegg/quest-protocol#quest-protocol)
-  - [Table of Contents](https://github.com/rabbitholegg/quest-protocol#table-of-contents)
   - [Documentation](https://github.com/rabbitholegg/quest-protocol#documentation)
-  - [Layout](https://github.com/rabbitholegg/quest-protocol#layout)
-  - [Deployments](https://github.com/rabbitholegg/quest-protocol#deployments)
+  - [Addresses](https://github.com/rabbitholegg/quest-protocol#addresses)
+  - [Contracts](https://github.com/rabbitholegg/quest-protocol#contracts)
+  - [Patterns](https://github.com/rabbitholegg/quest-protocol#patterns)
   - [Install](https://github.com/rabbitholegg/quest-protocol#install)
   - [Testing](https://github.com/rabbitholegg/quest-protocol#testing)
+  - [Deployment](https://github.com/rabbitholegg/quest-protocol#deployment)
   - [Upgrading](https://github.com/rabbitholegg/quest-protocol#upgrading)
   - [Audits](https://github.com/rabbitholegg/quest-protocol#audits)
   - [Bug Bounty](https://github.com/rabbitholegg/quest-protocol#bug-bounty)
@@ -37,83 +38,9 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ---
 
-## Layout
-
-Generated with:
-
-```bash
-tree --filelimit 20 -I artifacts -I contracts-upgradeable -I factories -I typechain-types -I cache -I img.png -I deployments
-```
-
-```
-├── LICENSE
-├── README.md
-├── contracts
-│   ├── OwnableUpgradeable.sol
-│   ├── Quest.sol
-│   ├── QuestFactory.sol
-│   ├── RabbitHoleReceipt.sol
-│   ├── ReceiptRenderer.sol
-│   ├── interfaces
-│   │   ├── IQuest.sol
-│   │   └── IQuestFactory.sol
-│   └── test
-│       ├── SampleERC20.sol
-│       └── TestERC20.sol
-├── coverage.json
-├── deploy
-│   ├── 001_deploy_erc20Quest.ts
-│   ├── 003_deploy_questFactory.ts
-│   ├── 004_deploy_ReceiptRenderer.ts
-│   └── 005_deploy_RabbitHoleReceipt.ts
-├── docs
-│   ├── overview.md
-│   ├── quest-claim.md
-│   └── quest-create.md
-├── gas-stories.txt
-├── hardhat.config.ts
-├── hardhat.gas-stories.config.ts
-├── node_modules  [507 entries exceeds filelimit, not opening dir]
-├── package.json
-├── scripts
-│   ├── deployQuestContracts.js
-│   ├── deployQuestFactory.js
-│   ├── deployRabbitHoleReceipt.js
-│   ├── deployRenderContracts.js
-│   ├── upgradeQuestFactory.js
-│   └── upgradeRabbitHoleReceipt.js
-├── slither.config.json
-├── svgs
-│   ├── green-final-compressed.svg
-│   ├── green-final.svg
-│   ├── receipt-compressed.svg
-│   ├── receipt.svg
-│   ├── violet-final-compressed.svg
-│   └── violet-final.svg
-├── test
-│   ├── Quest.spec.ts
-│   ├── QuestFactory.spec.ts
-│   ├── RabbitHoleReceipt.spec.ts
-│   ├── ReceiptRenderer.spec.ts
-│   ├── SampleErc20.spec.ts
-│   ├── helpers
-│   │   ├── deploy.ts
-│   │   └── snapshot.ts
-│   └── types.ts
-├── test-gas-stories
-│   ├── collections.ts
-│   └── gas-stories.ts
-├── tsconfig.json
-├── waffle.json
-├── yarn-error.log
-└── yarn.lock
-```
-
----
-
 ## Addressses
 
-Mainnet, Optimism, Polygon Arbitrum, and Sepolia:
+Mainnet, Optimism, Polygon, Arbitrum, and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
@@ -125,16 +52,18 @@ Mainnet, Optimism, Polygon Arbitrum, and Sepolia:
 
 ## Contracts
 
-The main contracts involved in this phase are:
+The main contracts are:
 
-- `Quest Factory` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/QuestFactory.sol))
-  - Creates new `Quest` instances of an ERC-1155 reward Quest or ERC-20 reward Quest.
-- `RabbitHole Receipt` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/RabbitHoleReceipt.sol))
+- `Quest Factory` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestFactory.sol))
+  - Creates new `Quest` instances of an NFT reward Quest or ERC-20 reward Quest.
+- `RabbitHole Receipt` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/RabbitHoleReceipt.sol))
   - An ERC-721 contract that acts as a proof of on-chain activity. Claimed via usage of ECDSA sig/hash
-- `ERC-20 Quest` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/Erc20Quest.sol))
+- `Quest` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/Quest.sol))
   - A Quest in which the reward is an ERC-20 token
-- `ERC-1155 Quest` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main//contracts/Erc1155Quest.sol))
-  - A Quest in which the reward is an ERC-1155 token
+- `QuestNFT` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/QuestNFT.sol))
+  - A Quest in which the reward is a NFT
+- `Quest Terminal Key` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestTerminalKey.sol))
+  - A contract for gating access and handling discounts for the Quest Terminal
 
 ---
 
@@ -198,22 +127,24 @@ yarn test:gas-stories
 ---
 
 ## Deployment
-checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt conctracts and hence address) then run:
-`yarn hardhat deploy --network network_name` where network_name is one of `goerli`, `mainnet`, `optimism`
-`yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
 
-use sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e` for the quest terminal key.
+### RabbitHoleReceipt and QuestFactory
+- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt contracts and hence address)
+- `yarn hardhat deploy --network network_name`
+- `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+
+### QuestTerminalKey
+- checkout from sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+- `yarn hardhat deploy --network network_name`
 
 ## Upgrading
 
-The Quest Factory is an upgradable contract. Over time as the space evolves there will be more than just ERC-20 or
-ERC-1155 rewards and we want to be non-limiting in our compatibility.
+All contracts except the Quest instances are upgradable contracts.
 
-1. `yarn hardhat run --network goerli scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js` and
-   replace the network with `mainnet` if you are upgrading on mainnet.
+1. `yarn hardhat run --network network_name scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js`
    1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's
       usually because the contract wasn't deployed by the time verification ran. You can run verification again
-      with `yarn hardhat verify --network goerli IMPLENTATION_ADDRESS` where the implementation address is in the
+      with `yarn hardhat verify --network network_name IMPLENTATION_ADDRESS` where the implementation address is in the
       output of the upgrade script.
 2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
    the upgrade script)
@@ -223,15 +154,15 @@ ERC-1155 rewards and we want to be non-limiting in our compatibility.
 
 ## Audits
 
-The following auditors reviewed the protocol. You can see reports in `/audits` directory:
+The following auditors reviewed the protocol.
 
-- Code4rena TBD (report [here](https://github.com/rabbitholegg/quest-protocol/tree/main/audits/))
+- Code4rena (report [here](https://code4rena.com/reports/2023-01-rabbithole))
 
 ---
 
 ## Bug Bounty
 
-Once all audits are wrapped up, all contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
+All contracts except tests, interfaces, dependencies are in scope and eligible for the Quest Protocol Bug Bounty program.
 
 The rubric we use to determine bug bounties is as follows:
 
