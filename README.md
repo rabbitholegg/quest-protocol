@@ -58,8 +58,12 @@ The main contracts are:
   - Creates new `Quest` instances of an NFT reward Quest or ERC-20 reward Quest.
 - `RabbitHole Receipt` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/RabbitHoleReceipt.sol))
   - An ERC-721 contract that acts as a proof of on-chain activity. Claimed via usage of ECDSA sig/hash
-- `ERC-20 Quest` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/Quest.sol))
+- `Quest` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/Quest.sol))
   - A Quest in which the reward is an ERC-20 token
+- `QuestNFT` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/QuestNFT.sol))
+  - A Quest in which the reward is a NFT
+- `Quest Terminal Key` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestTerminalKey.sol))
+  - A contract for gating access and handeling discounts for the Quest Terminal
 
 ---
 
