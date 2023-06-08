@@ -10,6 +10,8 @@ import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
+import {ECDSAUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract QuestTerminalKey is
     Initializable,
@@ -17,7 +19,8 @@ contract QuestTerminalKey is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     OwnableUpgradeable,
-    IERC2981Upgradeable
+    IERC2981Upgradeable,
+    ReentrancyGuardUpgradeable
 {
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -40,6 +43,7 @@ contract QuestTerminalKey is
         uint16 percentage; //in BIPS
         uint16 usedCount;
     }
+    address public claimSignerAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -53,17 +57,20 @@ contract QuestTerminalKey is
         uint royaltyFee_,
         address owner_,
         string memory imageIPFSHash_,
-        string memory animationUrlIPFSHash_
+        string memory animationUrlIPFSHash_,
+        address claimSignerAddress_
     ) external initializer {
         __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
+        __ReentrancyGuard_init();
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         questFactoryAddress = questFactoryAddress_;
         royaltyFee = royaltyFee_;
         imageIPFSHash = imageIPFSHash_;
         animationUrlIPFSHash = animationUrlIPFSHash_;
+        claimSignerAddress = claimSignerAddress_;
     }
 
     modifier onlyMinter() {
@@ -134,6 +141,33 @@ contract QuestTerminalKey is
         _safeMint(to_, tokenId);
     }
 
+    /// @dev lazy mint a QuestTerminalKey NFT
+    /// @param to_ the address to mint to
+    /// @param discountPercentage_ the discount percentage
+    function lazyMint(address to_, uint16 discountPercentage_, bytes32 hash_, bytes memory signature_) external nonReentrant {
+        require(discountPercentage_ <= 10000, 'Invalid discount percentage');
+        require(recoverSigner(hash_, signature_) == claimSignerAddress, 'Address not signed');
+
+        _tokenIds.increment();
+        uint tokenId = _tokenIds.current();
+        discounts[tokenId] = Discount(discountPercentage_, 0);
+        _safeMint(to_, tokenId);
+    }
+
+    /// @dev set the claim signer address
+    /// @param claimSignerAddress_ The address of the claim signer
+    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
+        claimSignerAddress = claimSignerAddress_;
+    }
+
+    /// @dev recover the signer from a hash and signature
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
+        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
+        return ECDSAUpgradeable.recover(messageDigest, signature_);
+    }
+
     /// @dev increment used count
     /// @param tokenId_ the token id
     function incrementUsedCount(uint tokenId_) external onlyQuestFactory {
@@ -191,8 +225,6 @@ contract QuestTerminalKey is
     function generateDataURI(
         uint tokenId_
     ) internal view virtual returns (bytes memory) {
-        string memory tokenIdString = tokenId_.toString();
-
         bytes memory attributes = abi.encodePacked(
             '[',
             generateAttribute('Discount Percentage BPS', discounts[tokenId_].percentage.toString()),
