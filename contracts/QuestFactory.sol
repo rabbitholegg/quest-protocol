@@ -64,6 +64,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint numberMinted;
         uint redeemedTokens;
         uint rewardAmountInWei;
+        // add hasWithdrawn
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
