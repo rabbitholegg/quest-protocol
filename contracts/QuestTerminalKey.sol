@@ -135,16 +135,16 @@ contract QuestTerminalKey is
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
         require(discountPercentage_ <= 10000, 'Invalid discount percentage');
 
-        safeMint(to_, discountPercentage_);
+        mintWithDiscount(to_, discountPercentage_);
     }
 
     function bulkMintNoDiscount(address[] memory addresses_) external onlyMinter {
         for (uint256 i = 0; i < addresses_.length; i++) {
-            safeMint(addresses_[i], 0);
+            mintWithDiscount(addresses_[i], 0);
         }
     }
 
-    function safeMint(address to_, uint16 discountPercentage_) internal {
+    function mintWithDiscount(address to_, uint16 discountPercentage_) internal {
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
