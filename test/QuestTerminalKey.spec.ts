@@ -76,6 +76,22 @@ describe('QuestTerminalKey Contract', async () => {
     })
   })
 
+  describe('bulkMintNoDiscount', () => {
+    it('mints a token with correct questId', async () => {
+      await questTerminalKey
+        .connect(minterAddress)
+        .bulkMintNoDiscount([firstAddress.address, firstAddress.address, firstAddress.address])
+
+      expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(3)
+    })
+
+    it('reverts if not called by minter', async () => {
+      await expect(
+        questTerminalKey.connect(firstAddress).bulkMintNoDiscount([firstAddress.address])
+      ).to.be.revertedWith('Only minter')
+    })
+  })
+
   describe('lazyMint', () => {
     it('mints a token with correct questId', async () => {
       let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
