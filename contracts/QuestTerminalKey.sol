@@ -44,6 +44,7 @@ contract QuestTerminalKey is
         uint16 usedCount;
     }
     address public claimSignerAddress;
+    mapping(address => bool) public hasMinted;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -159,11 +160,13 @@ contract QuestTerminalKey is
         require(discountPercentage_ <= 10000, 'Invalid discount percentage');
         require(recoverSigner(hash_, signature_) == claimSignerAddress, 'Address not signed');
         require(keccak256(abi.encodePacked(to_, discountPercentage_)) == hash_, 'InvalidHash');
+        require(!hasMinted[msg.sender], 'Address has already minted');
 
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
         _safeMint(to_, tokenId);
+        hasMinted[msg.sender] = true;
     }
 
     /// @dev set the claim signer address

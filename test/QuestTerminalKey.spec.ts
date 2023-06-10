@@ -124,6 +124,18 @@ describe('QuestTerminalKey Contract', async () => {
       expect(JSON.parse(metadata)).to.eql(expectedMetadata)
     })
 
+    it('can only mint once', async () => {
+      let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
+      let signature = await wallet.signMessage(utils.arrayify(messageHash))
+
+      await questTerminalKey.lazyMint(firstAddress.address, 1000, messageHash, signature)
+      expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(1)
+
+      await expect(questTerminalKey.lazyMint(firstAddress.address, 1000, messageHash, signature)).to.be.revertedWith(
+        'Address has already minted'
+      )
+    })
+
     it('reverts if not signed by correct claimSignerAddress', async () => {
       let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
       let signature = await wallet2.signMessage(utils.arrayify(messageHash))
