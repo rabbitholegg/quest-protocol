@@ -94,7 +94,10 @@ describe('QuestTerminalKey Contract', async () => {
 
   describe('lazyMint', () => {
     it('mints a token with correct questId', async () => {
-      let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
+      let messageHash = utils.solidityKeccak256(
+        ['address', 'uint16', 'uint256'],
+        [firstAddress.address.toLowerCase(), 1000, 1337]
+      )
       let signature = await wallet.signMessage(utils.arrayify(messageHash))
 
       await questTerminalKey.lazyMint(firstAddress.address, 1000, messageHash, signature)
@@ -125,7 +128,10 @@ describe('QuestTerminalKey Contract', async () => {
     })
 
     it('can only mint once', async () => {
-      let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
+      let messageHash = utils.solidityKeccak256(
+        ['address', 'uint16', 'uint'],
+        [firstAddress.address.toLowerCase(), 1000, 1337]
+      )
       let signature = await wallet.signMessage(utils.arrayify(messageHash))
 
       await questTerminalKey.lazyMint(firstAddress.address, 1000, messageHash, signature)

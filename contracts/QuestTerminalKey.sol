@@ -159,7 +159,7 @@ contract QuestTerminalKey is
     function lazyMint(address to_, uint16 discountPercentage_, bytes32 hash_, bytes memory signature_) external nonReentrant {
         require(discountPercentage_ <= 10000, 'Invalid discount percentage');
         require(recoverSigner(hash_, signature_) == claimSignerAddress, 'Address not signed');
-        require(keccak256(abi.encodePacked(to_, discountPercentage_)) == hash_, 'InvalidHash');
+        require(keccak256(abi.encodePacked(to_, discountPercentage_, block.chainid)) == hash_, 'InvalidHash');
         require(!hasMinted[msg.sender], 'Address has already minted');
 
         _tokenIds.increment();
