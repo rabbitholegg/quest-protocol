@@ -143,7 +143,10 @@ describe('QuestTerminalKey Contract', async () => {
     })
 
     it('reverts if not signed by correct claimSignerAddress', async () => {
-      let messageHash = utils.solidityKeccak256(['address', 'uint16'], [firstAddress.address.toLowerCase(), 1000])
+      let messageHash = utils.solidityKeccak256(
+        ['address', 'uint16', 'uint'],
+        [firstAddress.address.toLowerCase(), 1000, 1337]
+      )
       let signature = await wallet2.signMessage(utils.arrayify(messageHash))
 
       await expect(questTerminalKey.lazyMint(firstAddress.address, 1000, messageHash, signature)).to.be.revertedWith(
