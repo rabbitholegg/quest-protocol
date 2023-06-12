@@ -594,6 +594,7 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
+        false,
       ])
     })
   })
