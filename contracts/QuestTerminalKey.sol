@@ -144,7 +144,7 @@ contract QuestTerminalKey is
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
-        _safeMint(to_, tokenId);
+        _mint(to_, tokenId);
     }
 
     /// @dev increment used count

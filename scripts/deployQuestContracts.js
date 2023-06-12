@@ -37,7 +37,7 @@ async function main() {
   // await hre.run('verify:verify', { address: RabbitHoleReceiptImp.address })
 
   // validates and deploys a new implementation contract for QuestTerminalKey
-  // await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
+  await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
   await hre.upgrades.validateUpgrade(questTerminalKeyAddress, QuestTerminalKey)
   const QTKImp = await QuestTerminalKey.deploy()
   await QTKImp.deployed()
