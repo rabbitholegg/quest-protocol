@@ -42,7 +42,6 @@ contract QuestTerminalKey is
         uint16 percentage; //in BIPS
         uint16 usedCount;
     }
-    mapping(address => bool) public hasMinted;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
