@@ -64,6 +64,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint numberMinted;
         uint redeemedTokens;
         uint rewardAmountInWei;
+        bool hasWithdrawn;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -442,7 +443,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questContract.totalParticipants(),
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
-            questContract.rewardAmountInWei()
+            questContract.rewardAmountInWei(),
+            questContract.hasWithdrawn()
         );
 
         return data;
