@@ -43,7 +43,6 @@ contract QuestTerminalKey is
         uint16 percentage; //in BIPS
         uint16 usedCount;
     }
-    address public claimSignerAddress;
     mapping(address => bool) public hasMinted;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -58,8 +57,7 @@ contract QuestTerminalKey is
         uint royaltyFee_,
         address owner_,
         string memory imageIPFSHash_,
-        string memory animationUrlIPFSHash_,
-        address claimSignerAddress_
+        string memory animationUrlIPFSHash_
     ) external initializer {
         __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
@@ -71,7 +69,6 @@ contract QuestTerminalKey is
         royaltyFee = royaltyFee_;
         imageIPFSHash = imageIPFSHash_;
         animationUrlIPFSHash = animationUrlIPFSHash_;
-        claimSignerAddress = claimSignerAddress_;
     }
 
     modifier onlyMinter() {
@@ -150,37 +147,6 @@ contract QuestTerminalKey is
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
         _safeMint(to_, tokenId);
-    }
-
-
-    /// @dev lazy mint a QuestTerminalKey NFT
-    /// @param to_ the address to mint to
-    /// @param discountPercentage_ the discount percentage
-    function lazyMint(address to_, uint16 discountPercentage_, bytes32 hash_, bytes memory signature_) external nonReentrant {
-        require(discountPercentage_ <= 10000, 'Invalid discount percentage');
-        require(recoverSigner(hash_, signature_) == claimSignerAddress, 'Address not signed');
-        require(keccak256(abi.encodePacked(to_, discountPercentage_, block.chainid)) == hash_, 'InvalidHash');
-        require(!hasMinted[msg.sender], 'Address has already minted');
-
-        _tokenIds.increment();
-        uint tokenId = _tokenIds.current();
-        discounts[tokenId] = Discount(discountPercentage_, 0);
-        _safeMint(to_, tokenId);
-        hasMinted[msg.sender] = true;
-    }
-
-    /// @dev set the claim signer address
-    /// @param claimSignerAddress_ The address of the claim signer
-    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
-        claimSignerAddress = claimSignerAddress_;
-    }
-
-    /// @dev recover the signer from a hash and signature
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
-        return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
     /// @dev increment used count
