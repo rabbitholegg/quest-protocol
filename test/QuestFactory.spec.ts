@@ -385,6 +385,7 @@ describe('QuestFactory', () => {
     })
 
     it('Should fail when trying to mint before quest has been queued', async () => {
+      await time.setNextBlockTimestamp(startDate)
       await expect(
         deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotQueued')

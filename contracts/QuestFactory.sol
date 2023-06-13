@@ -107,7 +107,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
         if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
         if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
@@ -492,6 +491,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
+        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
@@ -505,16 +505,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
+    function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
         address payable questNFTInstance = payable(currentQuest.questAddress);
-
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (block.timestamp < QuestNFTContract(questNFTInstance).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestNFTContract(questNFTInstance).endTime()) revert QuestEnded();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
@@ -528,6 +521,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param signature_ The signature of the hash
     function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
+        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
