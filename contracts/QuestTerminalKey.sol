@@ -10,6 +10,7 @@ import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import '@openzeppelin/contracts/utils/Base64.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract QuestTerminalKey is
     Initializable,
@@ -17,7 +18,8 @@ contract QuestTerminalKey is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     OwnableUpgradeable,
-    IERC2981Upgradeable
+    IERC2981Upgradeable,
+    ReentrancyGuardUpgradeable
 {
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -58,6 +60,7 @@ contract QuestTerminalKey is
         __ERC721_init('QuestTerminalKey', 'QTK');
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
+        __ReentrancyGuard_init();
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         questFactoryAddress = questFactoryAddress_;
@@ -128,10 +131,20 @@ contract QuestTerminalKey is
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
         require(discountPercentage_ <= 10000, 'Invalid discount percentage');
 
+        mintWithDiscount(to_, discountPercentage_);
+    }
+
+    function bulkMintNoDiscount(address[] memory addresses_) external onlyMinter {
+        for (uint256 i = 0; i < addresses_.length; i++) {
+            mintWithDiscount(addresses_[i], 0);
+        }
+    }
+
+    function mintWithDiscount(address to_, uint16 discountPercentage_) internal {
         _tokenIds.increment();
         uint tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
-        _safeMint(to_, tokenId);
+        _mint(to_, tokenId);
     }
 
     /// @dev increment used count

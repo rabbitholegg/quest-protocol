@@ -69,6 +69,22 @@ describe('QuestTerminalKey Contract', async () => {
     })
   })
 
+  describe('bulkMintNoDiscount', () => {
+    it('mints a token with correct questId', async () => {
+      await questTerminalKey
+        .connect(minterAddress)
+        .bulkMintNoDiscount([firstAddress.address, firstAddress.address, firstAddress.address])
+
+      expect(await questTerminalKey.balanceOf(firstAddress.address)).to.eq(3)
+    })
+
+    it('reverts if not called by minter', async () => {
+      await expect(
+        questTerminalKey.connect(firstAddress).bulkMintNoDiscount([firstAddress.address])
+      ).to.be.revertedWith('Only minter')
+    })
+  })
+
   describe('getOwnedTokenIds', () => {
     it('returns the correct token ids', async () => {
       await questTerminalKey.connect(minterAddress).mint(firstAddress.address, 1000)
