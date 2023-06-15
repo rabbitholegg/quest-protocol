@@ -491,13 +491,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
+        QuestContract questContract_ = QuestContract(currentQuest.questAddress);
+        if (!questContract_.queued()) revert QuestNotQueued();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
-        QuestContract(currentQuest.questAddress).singleClaim(msg.sender);
+        questContract_.singleClaim(msg.sender);
 
         if(mintFee > 0) processMintFee();
+
+        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
     }
 
     /// @dev mint a QuestNFT.

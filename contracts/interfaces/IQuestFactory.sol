@@ -34,6 +34,7 @@ interface IQuestFactory {
     event MintFeeSet(uint percent);
     event ExtraMintFeeReturned(address indexed recipient, uint amount);
     event NftQuestFeeSet(uint fee);
+    event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }
