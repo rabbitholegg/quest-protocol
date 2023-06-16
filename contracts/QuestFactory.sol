@@ -251,14 +251,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
+    // 2 flows
+    // 1. create 1155, then add a quest to it
+    // 2. Add a quest to an existing 1155, only the quest owner should be able to call this
+
     /// @dev Create a NFT quest and start it at the same time. The function will transfer the total questFee amount to the QuestNFT
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param questId_ The id of the quest
-    /// @param jsonSpecCID_ The CID of the JSON spec for the quest
-    /// @param name_ The name of the quest
-    /// @param symbol_ The symbol of the quest
+    /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @param description_ The description of the quest
     /// @param imageIPFSHash_ The IPFS hash of the image for the quest
     /// @return address the quest contract address
@@ -267,9 +269,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         string memory questId_,
-        string memory jsonSpecCID_,
-        string memory name_,
-        string memory symbol_,
+        string memory collectionName_,
         string memory description_,
         string memory imageIPFSHash_
     ) external payable returns (address) {
@@ -278,9 +278,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime: startTime_,
             totalParticipants: totalParticipants_,
             questId: questId_,
-            jsonSpecCID: jsonSpecCID_,
-            name: name_,
-            symbol: symbol_,
+            collectionName: collectionName_,
             description: description_,
             imageIPFSHash: imageIPFSHash_
         });
@@ -288,23 +286,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address payable newQuest = createQuestNFTInternal(data);
 
         QuestNFTContract(newQuest).initialize(
-            data.endTime,
-            data.startTime,
-            data.totalParticipants,
-            data.questId,
-            nftQuestFee,
             protocolFeeRecipient,
             address(this),
-            data.jsonSpecCID,
-            data.name,
-            data.symbol,
-            data.description,
-            data.imageIPFSHash
+            data.name
         );
-
-        (bool success, ) = payable(newQuest).call{value: msg.value}("");
-        require(success, "QuestFactory: Failed to send coins to the QuestNFT contract");
         QuestNFTContract(newQuest).transferOwnership(msg.sender);
+        QuestNFTContract(newQuest).addQuest(...);
+
+        // need a user_address => quest_address[] mapping (should it include the collection name?)
+        user1155Addresses[msg.sender].push(newQuest);
 
         return newQuest;
     }
@@ -332,6 +322,36 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.totalParticipants = data.totalParticipants;
 
         return payable(newQuest);
+    }
+
+    /// @dev Create a NFT quest and start it at the same time. The function will transfer the total questFee amount to the QuestNFT
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param questId_ The id of the quest
+    /// @param collectionName_ The collection name of the 1155 NFT contract
+    /// @param description_ The description of the quest
+    /// @param imageIPFSHash_ The IPFS hash of the image for the quest
+    /// @return address the quest contract address
+    function addQuestNFT(
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        string memory questId_,
+        string memory collectionName_, // ? or addrress questNFTAddress??
+        string memory description_,
+        string memory imageIPFSHash_
+    ) external payable {
+        Quest storage currentQuest = quests[data.questId];
+        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
+        questNFTAddress = ???;
+        require(msg.value >= totalQuestNFTFee(data.totalParticipants), "QuestFactory: msg.value is not equal to the total quest fee");
+        require(msg.sender == QuestNFTContract(questNFTAddress).owner(), "QuestFactory: only the NFT quest owner can call this function");
+
+        address payable newQuest =
+        QuestNFTContract(newQuest).addQuest(...);
+
+        return newQuest;
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {

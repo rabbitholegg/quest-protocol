@@ -34,7 +34,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         string description;
     }
     mapping(string => QuestData) public quests; // questId => QuestData
-    mapping(uint256 => uint256) public tokenIdToQuestId; // tokenId => questId
+    mapping(uint256 => string) public tokenIdToQuestId; // tokenId => questId
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -49,7 +49,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         protocolFeeRecipient = protocolFeeRecipient_;
         minterAddress = minterAddress_;
         collectionName = collectionName_;
-        __ERC1155_init("");'
+        __ERC1155_init("");
         __ERC1155Supply_init();
         __Ownable_init();
         __Pausable_init();
@@ -64,7 +64,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         uint256 questFee_,
         string memory description_,
         string memory imageIPFSHash_
-    ) internal {
+    ) public onlyMinter {
         require (endTime_ > block.timestamp, 'endTime_ in past');
         require (startTime_ > block.timestamp, 'startTime_ in past');
         require (endTime_ > startTime_, 'startTime_ before endTime_');
@@ -81,27 +81,29 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         tokenIdToQuestId[_tokenIdCounter.current()] = questId_;
     }
 
-    function mint(address to_, string memory questId_,)
+    function mint(address to_, string memory questId_)
         public
-        onlyMinter onlyQuestBetweenStartEnd(id_) whenNotPaused nonReentrant
+        onlyMinter onlyQuestBetweenStartEnd(questId_) whenNotPaused nonReentrant
     {
         QuestData storage quest = quests[questId_];
         _mint(to_, quest.tokenId, 1, "");
 
-        (bool success, ) = protocolFeeRecipient.call{value: questFee}("");
+        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
         require(success, 'protocol fee transfer failed');
     }
 
     /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyAfterQuestEnd() {
-        require (block.timestamp > endTime, 'Quest has not ended');
+    modifier onlyAfterQuestEnd(string memory questId_) {
+        QuestData storage quest = quests[questId_];
+        require (block.timestamp > quest.endTime, 'Quest has not ended');
         _;
     }
 
     /// @notice Checks if quest has started from the start time
-    modifier onlyQuestBetweenStartEnd() {
-        require(block.timestamp > startTime, 'Quest not started');
-        require(block.timestamp < endTime, 'Quest ended');
+    modifier onlyQuestBetweenStartEnd(string memory questId_) {
+        QuestData storage quest = quests[questId_];
+        require(block.timestamp > quest.startTime, 'Quest not started');
+        require(block.timestamp < quest.endTime, 'Quest ended');
         _;
     }
 
@@ -111,8 +113,9 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     }
 
     /// @dev The maximum amount of coins the quest needs for the protocol fee
-    function totalTransferAmount() external view returns (uint256) {
-        return questFee * totalParticipants;
+    function totalTransferAmount(string memory questId_) external view returns (uint256) {
+        QuestData storage quest = quests[questId_];
+        return quest.questFee * quest.totalParticipants;
     }
 
     /// @notice Pauses the Quest
@@ -137,8 +140,12 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
     /// @dev Function that to withdraw the remaining coins in the contract to the owner
     /// @notice This function can only be called after the quest end time
-    function withdrawRemainingCoins() external onlyAfterQuestEnd nonReentrant {
+    function withdrawRemainingCoins(string memory questId_) external onlyAfterQuestEnd(questId_) nonReentrant {
         uint balance = address(this).balance;
+        // TODO: this is not correct, we don't want to send the whole balance, just the balance for the specific questId_
+        // or we just don't allow to withdraw until all quests are over
+        // or balance for a questid would be the number of quest.participants - balanceOf(questId_)
+        // assuming that each participant mints 1 questNFT
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
             require(success, 'withdraw remaining tokens failed');
@@ -155,36 +162,37 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
     /// @dev returns the token uri
     /// @param tokenId_ the token id
-    function tokenURI(uint256 tokenId_)
+    function uri(uint256 tokenId_)
         public
         view
-        override(ERC721Upgradeable)
+        override(ERC1155Upgradeable)
         returns (string memory)
     {
-        bytes memory dataURI = generateDataURI();
+        bytes memory dataURI = generateDataURI(tokenId_);
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
-    function generateDataURI() internal view virtual returns (bytes memory) {
+    function generateDataURI(uint256 tokenId_) internal view virtual returns (bytes memory) {
+        QuestData storage quest = quests[tokenIdToQuestId[tokenId_]];
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "',
-            name(),
+            collectionName,
             '",',
             '"description": "',
-            description,
+            quest.description,
             '",',
             '"image": "',
-            tokenImage(),
+            tokenImage(quest.imageIPFSHash),
             '"',
             '}'
         );
         return dataURI;
     }
 
-    function tokenImage() internal view virtual returns (string memory) {
-        return string(abi.encodePacked('ipfs://', imageIPFSHash));
+    function tokenImage(string memory imageIPFSHash_) internal view virtual returns (string memory) {
+        return string(abi.encodePacked('ipfs://', imageIPFSHash_));
     }
 
     /// @dev See {IERC165-royaltyInfo}
@@ -194,7 +202,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        require(_exists(tokenId_), 'Nonexistent token');
+        require(bytes(tokenIdToQuestId[tokenId_]).length != 0, 'Nonexistent token');
 
         uint256 royaltyPayment = (salePrice_ * 200) / 10_000; // 2% royalty
         return (owner(), royaltyPayment);
