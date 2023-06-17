@@ -25,8 +25,8 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     address public minterAddress;
     string public collectionName;
     struct QuestData {
-        uint256 endTime;
         uint256 startTime;
+        uint256 endTime;
         uint256 totalParticipants;
         uint256 questFee;
         uint256 tokenId;
@@ -56,42 +56,6 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         __ReentrancyGuard_init();
     }
 
-    function addQuest(
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        string memory questId_,
-        uint256 questFee_,
-        string memory description_,
-        string memory imageIPFSHash_
-    ) public onlyMinter {
-        require (endTime_ > block.timestamp, 'endTime_ in past');
-        require (startTime_ > block.timestamp, 'startTime_ in past');
-        require (endTime_ > startTime_, 'startTime_ before endTime_');
-
-        _tokenIdCounter.increment();
-        QuestData storage quest = quests[questId_];
-        quest.endTime = endTime_;
-        quest.startTime = startTime_;
-        quest.totalParticipants = totalParticipants_;
-        quest.questFee = questFee_;
-        quest.imageIPFSHash = imageIPFSHash_;
-        quest.description = description_;
-        quest.tokenId = _tokenIdCounter.current();
-        tokenIdToQuestId[_tokenIdCounter.current()] = questId_;
-    }
-
-    function mint(address to_, string memory questId_)
-        public
-        onlyMinter onlyQuestBetweenStartEnd(questId_) whenNotPaused nonReentrant
-    {
-        QuestData storage quest = quests[questId_];
-        _mint(to_, quest.tokenId, 1, "");
-
-        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
-        require(success, 'protocol fee transfer failed');
-    }
-
     /// @notice Prevents reward withdrawal until the Quest has ended
     modifier onlyAfterQuestEnd(string memory questId_) {
         QuestData storage quest = quests[questId_];
@@ -99,9 +63,10 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         _;
     }
 
-    /// @notice Checks if quest has started from the start time
-    modifier onlyQuestBetweenStartEnd(string memory questId_) {
+    /// @notice Checks if quest exists has started from the start time
+    modifier checkQuest(string memory questId_) {
         QuestData storage quest = quests[questId_];
+        require(quest.tokenId != 0, 'Quest does not exist');
         require(block.timestamp > quest.startTime, 'Quest not started');
         require(block.timestamp < quest.endTime, 'Quest ended');
         _;
@@ -110,6 +75,50 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     modifier onlyMinter() {
         require(msg.sender == minterAddress, 'Only minter address');
         _;
+    }
+
+    function addQuest(
+        uint256 questFee_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        string memory questId_,
+        string memory description_,
+        string memory imageIPFSHash_
+    ) public onlyMinter returns (uint256) {
+        require (endTime_ > block.timestamp, 'endTime_ in past');
+        require (startTime_ > block.timestamp, 'startTime_ in past');
+        require (endTime_ > startTime_, 'startTime_ before endTime_');
+
+        _tokenIdCounter.increment();
+        QuestData storage quest = quests[questId_];
+        quest.startTime = startTime_;
+        quest.endTime = endTime_;
+        quest.totalParticipants = totalParticipants_;
+        quest.questFee = questFee_;
+        quest.imageIPFSHash = imageIPFSHash_;
+        quest.description = description_;
+        quest.tokenId = _tokenIdCounter.current();
+        tokenIdToQuestId[_tokenIdCounter.current()] = questId_;
+
+        return _tokenIdCounter.current();
+    }
+
+    function mint(address to_, string memory questId_)
+        public
+        onlyMinter checkQuest(questId_) whenNotPaused nonReentrant
+    {
+        QuestData storage quest = quests[questId_];
+
+        _mint(to_, quest.tokenId, 1, "");
+
+        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
+        require(success, 'protocol fee transfer failed');
+    }
+
+    function tokenIdFromQuestId(string memory questId_) public view returns (uint256) {
+        QuestData storage quest = quests[questId_];
+        return quest.tokenId;
     }
 
     /// @dev The maximum amount of coins the quest needs for the protocol fee
