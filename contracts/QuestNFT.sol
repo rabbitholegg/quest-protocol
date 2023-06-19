@@ -56,15 +56,9 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         __ReentrancyGuard_init();
     }
 
-    /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyAfterQuestEnd(string memory questId_) {
-        QuestData storage quest = quests[questId_];
-        require (block.timestamp > quest.endTime, 'Quest has not ended');
-        _;
-    }
-
-    /// @notice Checks if quest exists has started from the start time
-    modifier checkQuest(string memory questId_) {
+    /// @dev checks if the quest start time and end time are valid and the quest exists
+    /// @param questId_ the questId to check
+    modifier questChecks(string memory questId_) {
         QuestData storage quest = quests[questId_];
         require(quest.tokenId != 0, 'Quest does not exist');
         require(block.timestamp > quest.startTime, 'Quest not started');
@@ -106,7 +100,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
     function mint(address to_, string memory questId_)
         public
-        onlyMinter checkQuest(questId_) whenNotPaused nonReentrant
+        onlyMinter questChecks(questId_) whenNotPaused nonReentrant
     {
         QuestData storage quest = quests[questId_];
 
@@ -148,13 +142,14 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     }
 
     /// @dev Function that to withdraw the remaining coins in the contract to the owner
-    /// @notice This function can only be called after the quest end time
-    function withdrawRemainingCoins(string memory questId_) external onlyAfterQuestEnd(questId_) nonReentrant {
+    /// @notice This function can only be called after all quests have ended
+    function withdrawRemainingCoins() external nonReentrant {
         uint balance = address(this).balance;
-        // TODO: this is not correct, we don't want to send the whole balance, just the balance for the specific questId_
-        // or we just don't allow to withdraw until all quests are over
-        // or balance for a questid would be the number of quest.participants - balanceOf(questId_)
-        // assuming that each participant mints 1 questNFT
+
+        for (uint256 i = 0; i < _tokenIdCounter.current(); i++) {
+            require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
+        }
+
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
             require(success, 'withdraw remaining tokens failed');
