@@ -56,7 +56,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = QuestFactory(msg.sender);
+        questFactoryContract = QuestFactory(payable(msg.sender));
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
@@ -137,6 +137,20 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         _;
     }
 
+    modifier onlyQuestFactory() {
+        if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
+        _;
+    }
+
+    /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
+    /// @param account_ The account to transfer rewards to
+    function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
+        uint256 totalRedeemableRewards = _calculateRewards(1);
+        _transferRewards(account_, totalRedeemableRewards);
+        redeemedTokens = redeemedTokens + 1;
+        emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
+    }
+
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
     function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
@@ -160,7 +174,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
 
         uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
         _setClaimed(tokens);
-        _transferRewards(totalRedeemableRewards);
+        _transferRewards(msg.sender, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + redeemableTokenCount;
 
         emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
@@ -180,9 +194,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     }
 
     /// @notice Internal function that transfers the rewards to the msg.sender
+    /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(uint256 amount_) internal {
-        IERC20(rewardToken).safeTransfer(msg.sender, amount_);
+    function _transferRewards(address sender_, uint256 amount_) internal {
+        IERC20(rewardToken).safeTransfer(sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount

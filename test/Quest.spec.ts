@@ -437,4 +437,38 @@ describe('Quest', async () => {
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
     })
   })
+
+  describe('singleClaim()', async () => {
+    beforeEach(async () => {
+      await deployedQuestContract.queue()
+      await time.increaseTo(startDate)
+    })
+
+    it('should transfer the correct amount of rewards', async () => {
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [deployedFactoryContract.address],
+      })
+      const signer = await ethers.getSigner(deployedFactoryContract.address)
+      await firstAddress.sendTransaction({ to: signer.address, value: ethers.utils.parseEther('1') })
+      // console.log('getBalance', await ethers.provider.getBalance(signer.address))
+
+      await deployedQuestContract.connect(signer).singleClaim(owner.address)
+
+      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(rewardAmount)
+
+      await hre.network.provider.request({
+        method: 'hardhat_stopImpersonatingAccount',
+        params: [deployedFactoryContract.address],
+      })
+    })
+
+    it('should only be able to be called by the quest factory', async () => {
+      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(0)
+      await expect(deployedQuestContract.singleClaim(owner.address)).to.be.revertedWithCustomError(
+        questContract,
+        'NotQuestFactory'
+      )
+    })
+  })
 })
