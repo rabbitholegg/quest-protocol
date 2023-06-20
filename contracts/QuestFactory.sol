@@ -47,7 +47,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime;
         uint256 totalParticipants;
         string questId;
-        string collectionName;
         string description;
         string imageIPFSHash;
     }
@@ -279,7 +278,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param endTime_ The end time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param questId_ The id of the quest
-    /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @param description_ The description of the quest
     /// @param imageIPFSHash_ The IPFS hash of the image for the quest
     function addQuestToCollection(
@@ -288,7 +286,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 endTime_,
         uint256 totalParticipants_,
         string memory questId_,
-        string memory collectionName_,
         string memory description_,
         string memory imageIPFSHash_
     ) external payable nonReentrant {
@@ -297,7 +294,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime: endTime_,
             totalParticipants: totalParticipants_,
             questId: questId_,
-            collectionName: collectionName_,
             description: description_,
             imageIPFSHash: imageIPFSHash_
         });
@@ -326,6 +322,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             data.totalParticipants,
             1
         );
+    }
+
+    function ownerCollectionCount(address owner_) external view returns (uint256) {
+        return ownerCollections[owner_].length;
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
