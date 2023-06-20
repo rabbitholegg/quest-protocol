@@ -148,7 +148,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         uint256 totalRedeemableRewards = _calculateRewards(1);
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
-        emit Claimed(account_, rewardToken, totalRedeemableRewards);
+        emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
     }
 
     /// @notice Allows user to claim the rewards entitled to them

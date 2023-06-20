@@ -4,8 +4,8 @@ pragma solidity =0.8.16;
 // TODO clean this whole thing up
 // Allows anyone to claim a token if they exist in a merkle root.
 interface IQuest {
-    // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address indexed account, address rewardAddress, uint256 amount);
+    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint timestamp);
     event JsonSpecCIDSet(string cid);
 
