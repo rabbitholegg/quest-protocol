@@ -103,6 +103,23 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
+    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_) {
+        Quest storage currentQuest = quests[questId_];
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
+        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
+        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
+        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        _;
+    }
+
+    modifier sufficientMintFee() {
+        require(msg.value >= mintFee, "Insufficient mint fee");
+        _;
+    }
+
+    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
@@ -187,7 +204,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param contractType_ Deprecated, it was used when we had 1155 reward support
     /// @param questId_ The id of the quest
     /// @return address the quest contract address
     function createQuest(
@@ -196,7 +212,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory contractType_,
+        string memory, // was contractType_ , currently deprecated.
         string memory questId_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
@@ -473,21 +489,28 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSAUpgradeable.recover(messageDigest, signature_);
     }
 
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+        Quest storage currentQuest = quests[questId_];
+        QuestContract questContract_ = QuestContract(currentQuest.questAddress);
+        if (!questContract_.queued()) revert QuestNotQueued();
+
+        currentQuest.addressMinted[msg.sender] = true;
+        ++currentQuest.numberMinted;
+        questContract_.singleClaim(msg.sender);
+
+        if(mintFee > 0) processMintFee();
+
+        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+    }
+
     /// @dev mint a QuestNFT.
     /// @notice this contract must be set as Minter on the QuestNFT
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant {
+    function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
         address payable questNFTInstance = payable(currentQuest.questAddress);
-
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (block.timestamp < QuestNFTContract(questNFTInstance).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestNFTContract(questNFTInstance).endTime()) revert QuestEnded();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
@@ -499,35 +522,35 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant {
-        require(msg.value >= mintFee, "Insufficient mint fee");
-
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
         if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
-        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
+
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
 
-        if(mintFee > 0) {
-            // Refund any excess payment
-            uint change = msg.value - mintFee;
-            if (change > 0) {
-                (bool changeSuccess, ) = msg.sender.call{value: change}("");
-                require(changeSuccess, "Failed to return change");
-                emit ExtraMintFeeReturned(msg.sender, change);
-            }
-
-            // Send the mint fee to the mint fee recipient
-            (bool feeSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
-            require(feeSuccess, "Failed to send mint fee");
-        }
+        if(mintFee > 0) processMintFee();
     }
+
+    function processMintFee() private {
+        uint change = msg.value - mintFee;
+        if (change > 0) {
+            // Refund any excess payment
+            (bool changeSuccess, ) = msg.sender.call{value: change}("");
+            require(changeSuccess, "Failed to return change");
+            emit ExtraMintFeeReturned(msg.sender, change);
+        }
+        // Send the mint fee to the mint fee recipient
+        (bool mintSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
+        require(mintSuccess, "Failed to send mint fee");
+    }
+
+    // Receive function to receive ETH
+    receive() external payable {}
+
+    // Fallback function to receive ETH when other functions are not available
+    fallback() external payable {}
 }

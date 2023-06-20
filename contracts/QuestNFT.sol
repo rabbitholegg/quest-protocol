@@ -152,8 +152,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     }
 
     /// @dev returns the token uri
-    /// @param tokenId_ the token id
-    function tokenURI(uint256 tokenId_)
+    function tokenURI(uint256)
         public
         view
         override(ERC721Upgradeable)
