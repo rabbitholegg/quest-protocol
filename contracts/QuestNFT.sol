@@ -30,8 +30,8 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         uint256 totalParticipants;
         uint256 questFee;
         uint256 tokenId;
-        string imageIPFSHash;
         string description;
+        string imageIPFSHash;
     }
     mapping(string => QuestData) public quests; // questId => QuestData
     mapping(uint256 => string) public tokenIdToQuestId; // tokenId => questId
@@ -73,15 +73,15 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
     function addQuest(
         uint256 questFee_,
-        uint256 endTime_,
         uint256 startTime_,
+        uint256 endTime_,
         uint256 totalParticipants_,
         string memory questId_,
         string memory description_,
         string memory imageIPFSHash_
     ) public onlyMinter returns (uint256) {
-        require (endTime_ > block.timestamp, 'endTime_ in past');
-        require (startTime_ > block.timestamp, 'startTime_ in past');
+        require (endTime_ > block.timestamp, 'endTime_ in the past');
+        require (startTime_ > block.timestamp, 'startTime_ in the past');
         require (endTime_ > startTime_, 'startTime_ before endTime_');
 
         _tokenIdCounter.increment();
@@ -146,7 +146,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     function withdrawRemainingCoins() external nonReentrant {
         uint balance = address(this).balance;
 
-        for (uint256 i = 0; i < _tokenIdCounter.current(); i++) {
+        for (uint256 i = 1; i <= _tokenIdCounter.current(); i++) {
             require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
         }
 

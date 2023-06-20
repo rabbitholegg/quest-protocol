@@ -24,90 +24,144 @@ describe('QuestNFT Contract', async () => {
     questFee = 100
 
     questNFT = await upgrades.deployProxy(QuestNFT, [
-      expiryDate,
-      startDate,
-      5, // totalParticipants
-      'quest1', // questId_
-      questFee, // questFee
       royaltyRecipient.address, // protocolFeeRecipient
-      minterAddress.address, // minterAddress
-      '', // jsonSpecCID - blank on purpose
-      'NFT Name', // name
-      'NFTN', // symbol
-      'NFT Description', // description
-      'imageipfs', // imageIPFSHash
+      minterAddress.address,
+      'CollectionName',
     ])
   })
 
   describe('Deployment', () => {
-    it('deploys and initializes the the 721 correctly', async () => {
-      expect(await questNFT.symbol()).to.equal('NFTN')
-      expect(await questNFT.name()).to.equal('NFT Name')
+    it('deploys and initializes the the 1155 correctly', async () => {
+      expect(await questNFT.collectionName()).to.equal('CollectionName')
+      expect(await questNFT.minterAddress()).to.equal(minterAddress.address)
       expect(await questNFT.protocolFeeRecipient()).to.equal(royaltyRecipient.address)
     })
   })
 
+  describe('addQuest', () => {
+    it('adds a quest', async () => {
+      await questNFT
+        .connect(minterAddress)
+        .addQuest(questFee, startDate, expiryDate, 10, 'questID', 'Quest Description', 'imageipfscid')
+
+      expect(await questNFT.quests('questID')).to.eql([
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
+        ethers.BigNumber.from(10),
+        ethers.BigNumber.from(questFee),
+        ethers.BigNumber.from(1),
+        'Quest Description',
+        'imageipfscid',
+      ])
+    })
+
+    it('does not add a quest when not calling from minterAddress', async () => {
+      await expect(
+        questNFT.addQuest(questFee, startDate, expiryDate, 10, 'questID', 'Quest Description', 'ipfs://imageipfs')
+      ).to.be.revertedWith('Only minter address')
+    })
+
+    it('does not add a quest when start time and end time are out of sync', async () => {
+      await expect(
+        questNFT
+          .connect(minterAddress)
+          .addQuest(questFee, expiryDate, startDate, 10, 'questID', 'Quest Description', 'ipfs://imageipfs')
+      ).to.be.revertedWith('startTime_ before endTime_')
+    })
+
+    it('does not add a quest start time is in the past', async () => {
+      await expect(
+        questNFT
+          .connect(minterAddress)
+          .addQuest(questFee, 1, expiryDate, 10, 'questID', 'Quest Description', 'ipfs://imageipfs')
+      ).to.be.revertedWith('startTime_ in the past')
+    })
+
+    it('does not add a quest end time is in the past', async () => {
+      await expect(
+        questNFT
+          .connect(minterAddress)
+          .addQuest(questFee, startDate, 1, 10, 'questID', 'Quest Description', 'ipfs://imageipfs')
+      ).to.be.revertedWith('endTime_ in the past')
+    })
+  })
+
   describe('mint', () => {
+    beforeEach(async () => {
+      await questNFT
+        .connect(minterAddress)
+        .addQuest(questFee, startDate, expiryDate, 10, 'questID', 'Quest Description', 'imageipfscid')
+    })
+
     it('mints a token with correct questId', async () => {
       const royaltyRecipientStartingBalance = await ethers.provider.getBalance(royaltyRecipient.address)
       await time.setNextBlockTimestamp(startDate + 1)
-      const transferAmount = await questNFT.totalTransferAmount()
+      const transferAmount = await questNFT.totalTransferAmount('questID')
+      const tokenId = await questNFT.tokenIdFromQuestId('questID')
 
       await contractOwner.sendTransaction({
         to: questNFT.address,
         value: transferAmount.toNumber(),
       })
 
-      await questNFT.connect(minterAddress).safeMint(firstAddress.address)
+      await questNFT.connect(minterAddress).mint(firstAddress.address, 'questID')
 
-      expect(await questNFT.balanceOf(firstAddress.address)).to.eq(1)
-      expect(await questNFT.ownerOf(1)).to.eq(firstAddress.address)
+      expect(await questNFT.balanceOf(firstAddress.address, tokenId)).to.eq(1)
       expect(await ethers.provider.getBalance(royaltyRecipient.address)).to.eq(
         royaltyRecipientStartingBalance.add(questFee * 1)
       ) // only 1 token minted
 
-      const base64encoded = await questNFT.tokenURI(1)
+      const base64encoded = await questNFT.uri(tokenId)
       const metadata = Buffer.from(base64encoded.replace('data:application/json;base64,', ''), 'base64').toString(
         'ascii'
       )
 
       const expectedMetadata = {
-        name: 'NFT Name',
-        description: 'NFT Description',
-        image: 'ipfs://imageipfs',
+        description: 'Quest Description',
+        image: 'ipfs://imageipfscid',
+        name: 'CollectionName',
       }
 
       expect(JSON.parse(metadata)).to.eql(expectedMetadata)
     })
 
     it('reverts if not called by minter address', async () => {
-      await expect(questNFT.connect(firstAddress).safeMint(firstAddress.address)).to.be.revertedWith(
+      await expect(questNFT.connect(firstAddress).mint(firstAddress.address, 'questID')).to.be.revertedWith(
         'Only minter address'
       )
     })
 
     it('reverts if called before start date', async () => {
       await time.setNextBlockTimestamp(startDate - 1)
-      await expect(questNFT.connect(minterAddress).safeMint(firstAddress.address)).to.be.revertedWith(
+      await expect(questNFT.connect(minterAddress).mint(firstAddress.address, 'questID')).to.be.revertedWith(
         'Quest not started'
       )
     })
 
     it('reverts if called after end date', async () => {
       await time.setNextBlockTimestamp(expiryDate + 1)
-      await expect(questNFT.connect(minterAddress).safeMint(firstAddress.address)).to.be.revertedWith('Quest ended')
+      await expect(questNFT.connect(minterAddress).mint(firstAddress.address, 'questID')).to.be.revertedWith(
+        'Quest ended'
+      )
     })
   })
 
   describe('withdrawRemainingCoins', () => {
+    beforeEach(async () => {
+      await questNFT
+        .connect(minterAddress)
+        .addQuest(questFee, startDate, expiryDate, 10, 'questID', 'Quest Description', 'imageipfscid')
+
+      await time.setNextBlockTimestamp(startDate + 1)
+    })
+
     it('withdraws remaining tokens', async () => {
       const contractOwnerStartingBalance = await ethers.provider.getBalance(contractOwner.address)
-      await time.setNextBlockTimestamp(startDate + 1)
       await firstAddress.sendTransaction({
         to: questNFT.address,
         value: 1500,
       })
-      await questNFT.connect(minterAddress).safeMint(firstAddress.address)
+      await questNFT.connect(minterAddress).mint(firstAddress.address, 'questID')
       await time.setNextBlockTimestamp(expiryDate + 1)
 
       await questNFT.connect(minterAddress).withdrawRemainingCoins()
@@ -117,13 +171,7 @@ describe('QuestNFT Contract', async () => {
     })
 
     it('reverts if called before end date', async () => {
-      await time.setNextBlockTimestamp(startDate + 1)
-      await firstAddress.sendTransaction({
-        to: questNFT.address,
-        value: 1500,
-      })
-      await questNFT.connect(minterAddress).safeMint(firstAddress.address)
-      await expect(questNFT.connect(minterAddress).withdrawRemainingCoins()).to.be.revertedWith('Quest has not ended')
+      await expect(questNFT.withdrawRemainingCoins()).to.be.revertedWith('Not all Quests have ended')
     })
   })
 
