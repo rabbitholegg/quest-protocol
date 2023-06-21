@@ -491,7 +491,7 @@ describe('QuestFactory', () => {
           newQuestNFTAddress = event.args.newQuestNFT
         }
       })
-      expect(await deployedFactoryContract.ownerCollectionCount(owner.address)).to.equal(1)
+      expect(await deployedFactoryContract.ownerCollectionsByOwner(owner.address)).to.eql([newQuestNFTAddress])
       expect(await deployedFactoryContract.ownerCollections(owner.address, 0)).to.equal(newQuestNFTAddress)
     })
   })
