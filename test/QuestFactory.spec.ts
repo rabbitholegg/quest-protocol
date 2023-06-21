@@ -623,7 +623,8 @@ describe('QuestFactory', () => {
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), nftQuestId])
       signature = await wallet.signMessage(utils.arrayify(messageHash))
       await deployedFactoryContract.createQuestNFT('collectionName')
-      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
+      const collectionAddresses = await deployedFactoryContract.ownerCollectionsByOwner(owner.address)
+      const collectionAddress = collectionAddresses[0]
 
       const tx = await deployedFactoryContract.addQuestToCollection(
         collectionAddress,

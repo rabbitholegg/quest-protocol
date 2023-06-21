@@ -340,8 +340,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
     }
 
-    function ownerCollectionCount(address owner_) external view returns (uint256) {
-        return ownerCollections[owner_].length;
+    function ownerCollectionsByOwner(address owner_) external view returns (address[] memory) {
+        return ownerCollections[owner_];
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
