@@ -191,4 +191,27 @@ describe('QuestNFT Contract', async () => {
       expect(await deployedSampleErc20Contract.balanceOf(contractOwner.address)).to.eq(100)
     })
   })
+
+  describe('royaltyInfo', () => {
+    beforeEach(async () => {
+      await questNFT
+        .connect(minterAddress)
+        .addQuest(questFee, startDate, expiryDate, 10, 'questID', 'Quest Description', 'imageipfscid')
+
+      await time.setNextBlockTimestamp(startDate + 1)
+      const transferAmount = await questNFT.totalTransferAmount('questID')
+
+      await contractOwner.sendTransaction({
+        to: questNFT.address,
+        value: transferAmount.toNumber(),
+      })
+      await questNFT.connect(minterAddress).mint(firstAddress.address, 'questID')
+    })
+
+    it('returns the royalty recipient and fee', async () => {
+      const royaltyInfo = await questNFT.royaltyInfo(1, 1000)
+      expect(royaltyInfo[0]).to.eq(contractOwner.address)
+      expect(royaltyInfo[1]).to.eq(1000 * 0.02)
+    })
+  })
 })

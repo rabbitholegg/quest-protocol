@@ -206,7 +206,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        require(bytes(tokenIdToQuestId[tokenId_]).length != 0, 'Nonexistent token');
+        require(exists(tokenId_), 'Nonexistent token');
 
         uint256 royaltyPayment = (salePrice_ * 200) / 10_000; // 2% royalty
         return (owner(), royaltyPayment);
