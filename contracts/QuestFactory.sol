@@ -267,7 +267,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev Create an ERC1155 QuestNFT collection
     /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @return address the QuestNFT contract address
-    function createQuestNFT(string memory collectionName_) nonReentrant external returns (address) {
+    function createCollection(string memory collectionName_) nonReentrant external returns (address) {
         address payable newQuestNFT = payable(Clones.cloneDeterministic(questNFTAddress, keccak256(abi.encodePacked(msg.sender, collectionName_))));
 
         QuestNFTContract(newQuestNFT).initialize(

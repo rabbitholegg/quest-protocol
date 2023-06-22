@@ -480,9 +480,9 @@ describe('QuestFactory', () => {
     })
   })
 
-  describe('createQuestNFT()', () => {
+  describe('createCollection()', () => {
     it('Should create a quest NFT collection', async () => {
-      const tx = await deployedFactoryContract.createQuestNFT('collectionName')
+      const tx = await deployedFactoryContract.createCollection('collectionName')
       const receipt = await tx.wait()
       let newQuestNFTAddress = ''
 
@@ -500,7 +500,7 @@ describe('QuestFactory', () => {
     it('Should add a quest to a collection', async () => {
       const totalParticipants = 10
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createQuestNFT('collectionName')
+      await deployedFactoryContract.createCollection('collectionName')
       const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
 
       const tx = await deployedFactoryContract
@@ -535,7 +535,7 @@ describe('QuestFactory', () => {
     it('Should revert when adding a quest to a collection with the same questid', async () => {
       const totalParticipants = 10
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createQuestNFT('collectionName')
+      await deployedFactoryContract.createCollection('collectionName')
       const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
 
       const tx = await deployedFactoryContract
@@ -570,7 +570,7 @@ describe('QuestFactory', () => {
     it('Should revert when not passing the correct msg.value', async () => {
       const totalParticipants = 10
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createQuestNFT('collectionName')
+      await deployedFactoryContract.createCollection('collectionName')
       const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
 
       await expect(
@@ -591,7 +591,7 @@ describe('QuestFactory', () => {
     it('Should revert when not passing the correct msg.value', async () => {
       const totalParticipants = 10
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createQuestNFT('collectionName')
+      await deployedFactoryContract.createCollection('collectionName')
       const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
 
       await expect(
@@ -622,7 +622,7 @@ describe('QuestFactory', () => {
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), nftQuestId])
       signature = await wallet.signMessage(utils.arrayify(messageHash))
-      await deployedFactoryContract.createQuestNFT('collectionName')
+      await deployedFactoryContract.createCollection('collectionName')
       const collectionAddresses = await deployedFactoryContract.ownerCollectionsByOwner(owner.address)
       const collectionAddress = collectionAddresses[0]
 
