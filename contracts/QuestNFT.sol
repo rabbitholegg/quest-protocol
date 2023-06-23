@@ -81,7 +81,6 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         string memory imageIPFSHash_
     ) public onlyMinter returns (uint256) {
         require (endTime_ > block.timestamp, 'endTime_ in the past');
-        require (startTime_ > block.timestamp, 'startTime_ in the past');
         require (endTime_ > startTime_, 'startTime_ before endTime_');
 
         _tokenIdCounter.increment();
