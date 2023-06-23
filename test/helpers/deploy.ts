@@ -48,9 +48,10 @@ export async function deployAll(
     questTerminalKeyAddress: questTerminalKey.address,
     questNFTAddress: questNFT.address,
   })
-  rabbitHoleReceipt.setQuestFactory(questFactory.address)
-  questTerminalKey.setQuestFactoryAddress(questFactory.address)
-  questTerminalKey.setMinterAddress(questFactory.address)
+  await rabbitHoleReceipt.setQuestFactory(questFactory.address)
+  await rabbitHoleReceipt.setMinterAddress(questFactory.address)
+  await questTerminalKey.setQuestFactoryAddress(questFactory.address)
+  await questTerminalKey.setMinterAddress(questFactory.address)
 
   return {
     quest,

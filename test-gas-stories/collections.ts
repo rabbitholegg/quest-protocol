@@ -1,4 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { ContractTransaction, utils } from 'ethers'
 import { ethers } from 'hardhat'
 import { story } from './gas-stories'
@@ -10,6 +11,7 @@ describe('Collections', () => {
   let owner: SignerWithAddress
   let claimAddressSigner: SignerWithAddress
   let firstAddress: SignerWithAddress
+  let secondAddress: SignerWithAddress
   let contracts: TestContracts
   let questFactory: QuestFactory
   let erc20Quest: Quest
@@ -20,14 +22,15 @@ describe('Collections', () => {
   let startDate
 
   beforeEach(async () => {
-    ;[owner, claimAddressSigner, firstAddress] = await ethers.getSigners()
+    ;[owner, claimAddressSigner, firstAddress, secondAddress] = await ethers.getSigners()
     contracts = await deployAll(owner, claimAddressSigner)
     tx = await contracts.questFactory.setRewardAllowlistAddress(contracts.sampleErc20.address, true)
     await story('QuestFactory', 'RewardAllowlist', 'setRewardAllowlistAddress', 'Set the reward allowlist', tx)
     questFactory = contracts.questFactory
 
-    expiryDate = Math.floor(Date.now() / 1000) + 10000
-    startDate = Math.floor(Date.now() / 1000) + 1000
+    const latestTime = await time.latest()
+    expiryDate = latestTime + 10000
+    startDate = latestTime + 100
 
     await createErc20Quest()
 
@@ -43,6 +46,7 @@ describe('Collections', () => {
   const createErc20Quest = async () => {
     const totalParticipants = 1000
     const rewardAmount = 10
+
     tx = await contracts.questFactory
       .connect(owner)
       .createQuest(
@@ -52,7 +56,7 @@ describe('Collections', () => {
         totalParticipants,
         rewardAmount,
         'erc20',
-        'quest-id'
+        questId
       )
     await story('QuestFactory', 'Quest', 'createQuest', 'Create ERC20 quest', tx)
   }
@@ -61,24 +65,24 @@ describe('Collections', () => {
     const erc20QuestStruct = await contracts.questFactory.connect(owner).quests(questId)
     const erc20QuestAddress = erc20QuestStruct.questAddress
     erc20Quest = (await ethers.getContractFactory('Quest')).attach(erc20QuestAddress) as Quest
-    const val = (await erc20Quest.maxTotalRewards()).add(await erc20Quest.maxProtocolReward())
+    const val = await erc20Quest.totalTransferAmount()
     await contracts.sampleErc20.transfer(erc20QuestAddress, val)
     tx = await erc20Quest.queue()
     await story('Quest', 'Start', 'startQuest', 'Start ERC20 quest', tx)
   }
 
   it('Mint Receipt and Claim Rewards', async () => {
-    const hash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
-    const signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
+    let hash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
+    let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
     tx = await questFactory.connect(firstAddress).mintReceipt(questId, hash, signature)
     await story('QuestFactory', 'Mint Receipt', 'mintReceipt', '1st mint', tx)
     tx = await erc20Quest.connect(firstAddress).claim()
     await story('Quest', 'Claim', 'claim', '1st claim', tx)
 
-    const hash2 = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId2])
-    const signature2 = await claimAddressSigner.signMessage(utils.arrayify(hash2))
-    tx = await questFactory.connect(firstAddress).mintReceipt(questId2, hash2, signature2)
-    await story('QuestFactory', 'Mint Receipt', 'mintReceipt', '2st mint', tx)
+    hash = utils.solidityKeccak256(['address', 'string'], [secondAddress.address.toLowerCase(), questId])
+    signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
+    tx = await questFactory.connect(secondAddress).mintReceipt(questId, hash, signature)
+    await story('QuestFactory', 'Mint Receipt', 'mintReceipt', '2nd mint', tx)
   })
 
   it('Withdraw Remaining Rewards', async () => {
