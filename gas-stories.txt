@@ -3,18 +3,18 @@ Quest
 Claim
 ···························
 claim
-    142,100 1st claim
+    142,000 1st claim
 
 Start
 ···························
 startQuest
-     66,800 Start ERC20 quest
-     66,800 Start ERC20 quest
+     66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
 
 Withdraw
 ···························
 withdrawRemainingRewards
-     83,100 Withdraw remaining rewards from ERC20 quest
+     83,200 Withdraw remaining rewards from ERC20 quest
 
 QuestFactory
 =========================================================
@@ -27,8 +27,8 @@ mintReceipt
 Quest
 ···························
 createQuest
-    414,000 Create ERC20 quest
-    414,000 Create ERC20 quest
+    413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
 
 RewardAllowlist
 ···························
