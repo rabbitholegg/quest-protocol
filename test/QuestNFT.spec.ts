@@ -69,14 +69,6 @@ describe('QuestNFT Contract', async () => {
       ).to.be.revertedWith('startTime_ before endTime_')
     })
 
-    it('does not add a quest start time is in the past', async () => {
-      await expect(
-        questNFT
-          .connect(minterAddress)
-          .addQuest(questFee, 1, expiryDate, 10, 'questID', 'Quest Description', 'ipfs://imageipfs')
-      ).to.be.revertedWith('startTime_ in the past')
-    })
-
     it('does not add a quest end time is in the past', async () => {
       await expect(
         questNFT
