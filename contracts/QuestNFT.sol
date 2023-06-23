@@ -15,7 +15,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 
 /// @title QuestNFT
 /// @author RabbitHole.gg
-/// @notice This contract is the Erc721 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
+/// @notice This contract is the Erc1155 Quest Collection contract. It is the NFT that can be minted after a quest is completed.
 contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20 for IERC20;
