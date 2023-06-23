@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.16;
 
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
+import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
@@ -12,7 +12,7 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
-contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, IQuest {
+contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     QuestFactory public questFactoryContract;
     address public rewardToken;
@@ -58,7 +58,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
-        __Ownable_init();
+        _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
     }

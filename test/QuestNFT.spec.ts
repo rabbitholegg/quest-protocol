@@ -32,6 +32,7 @@ describe('QuestNFT Contract', async () => {
 
   describe('Deployment', () => {
     it('deploys and initializes the the 1155 correctly', async () => {
+      expect(await questNFT.owner()).to.equal(contractOwner.address)
       expect(await questNFT.collectionName()).to.equal('CollectionName')
       expect(await questNFT.minterAddress()).to.equal(minterAddress.address)
       expect(await questNFT.protocolFeeRecipient()).to.equal(royaltyRecipient.address)

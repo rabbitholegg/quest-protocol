@@ -5,7 +5,7 @@ import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC1155Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
 import {ERC1155SupplyUpgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import {Base64} from 'solady/src/utils/Base64.sol';
@@ -15,7 +15,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 /// @title QuestNFT
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc721 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
-contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
+contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, Ownable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
@@ -49,7 +49,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         collectionName = collectionName_;
         __ERC1155_init("");
         __ERC1155Supply_init();
-        __Ownable_init();
+        _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
     }
