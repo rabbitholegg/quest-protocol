@@ -10,6 +10,7 @@ import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cou
 import {IERC2981Upgradeable, IERC165Upgradeable} from '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {Base64} from 'solady/src/utils/Base64.sol';
+import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 /// @title QuestNFT
@@ -105,8 +106,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
         _mint(to_, quest.tokenId, 1, "");
 
-        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
-        require(success, 'protocol fee transfer failed');
+        SafeTransferLib.safeTransferETH(protocolFeeRecipient, quest.questFee);
     }
 
     function tokenIdFromQuestId(string memory questId_) public view returns (uint256) {
@@ -149,18 +149,15 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
             require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
         }
 
-        if (balance > 0) {
-            (bool success, ) = owner().call{value: balance}("");
-            require(success, 'withdraw remaining tokens failed');
-        }
+        if (balance > 0) SafeTransferLib.safeTransferETH(owner(), balance);
 
     }
 
     /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external nonReentrant {
-        uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
+        uint erc20Balance = SafeTransferLib.balanceOf(address(this));
+        if (erc20Balance > 0) SafeTransferLib.safeTransfer(owner(), erc20Balance);
     }
 
     /// @dev returns the token uri

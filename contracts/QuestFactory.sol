@@ -7,6 +7,7 @@ import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
+import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
@@ -324,8 +325,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(collectionAddress_);
         currentQuest.totalParticipants = data.totalParticipants;
 
-        (bool success, ) = payable(collectionAddress_).call{value: msg.value}("");
-        require(success, "QuestFactory: Failed to send coins to the QuestNFT contract");
+        SafeTransferLib.safeTransferETH(collectionAddress_, msg.value);
 
         emit QuestCreated(
             msg.sender,
@@ -535,13 +535,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
-            (bool changeSuccess, ) = msg.sender.call{value: change}("");
-            require(changeSuccess, "Failed to return change");
+            SafeTransferLib.safeTransferETH(msg.sender, change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
         // Send the mint fee to the mint fee recipient
-        (bool mintSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
-        require(mintSuccess, "Failed to send mint fee");
+        SafeTransferLib.safeTransferETH(getMintFeeRecipient(), mintFee);
     }
 
     // Receive function to receive ETH

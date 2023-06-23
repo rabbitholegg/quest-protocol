@@ -5,6 +5,7 @@ import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/Own
 import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
+import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
@@ -196,7 +197,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        IERC20(rewardToken).safeTransfer(sender_, amount_);
+        SafeTransferLib.safeTransfer(sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount
@@ -218,8 +219,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
             unclaimedTokens;
         hasWithdrawn = true;
 
-        IERC20(rewardToken).safeTransfer(owner(), nonClaimableTokens);
-        IERC20(rewardToken).safeTransfer(protocolFeeRecipient, this.protocolFee());
+        SafeTransferLib.safeTransfer(owner(), nonClaimableTokens);
+        SafeTransferLib.safeTransfer(protocolFeeRecipient, this.protocolFee());
     }
 
     /// @notice Function that calculates the protocol fee
@@ -257,7 +258,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         uint balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);
 
-        uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(msg.sender, erc20Balance);
+        uint erc20Balance = SafeTransferLib.balanceOf(address(this));
+        if (erc20Balance > 0) SafeTransferLib.safeTransfer(msg.sender, erc20Balance);
     }
 }
