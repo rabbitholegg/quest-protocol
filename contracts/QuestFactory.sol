@@ -10,7 +10,7 @@ import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
-import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+import {LibClone} from 'solady/src/utils/LibClone.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 
@@ -140,7 +140,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 discountTokenId_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
-        address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
+        address newQuest = LibClone.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
         emit QuestCreated(
             msg.sender,
             address(newQuest),
@@ -268,7 +268,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @return address the QuestNFT contract address
     function createCollection(string memory collectionName_) nonReentrant external returns (address) {
-        address payable newQuestNFT = payable(Clones.cloneDeterministic(questNFTAddress, keccak256(abi.encodePacked(msg.sender, collectionName_))));
+        address payable newQuestNFT = payable(LibClone.cloneDeterministic(questNFTAddress, keccak256(abi.encodePacked(msg.sender, collectionName_))));
 
         QuestNFTContract(newQuestNFT).initialize(
             protocolFeeRecipient,
