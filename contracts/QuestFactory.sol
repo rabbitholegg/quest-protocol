@@ -13,8 +13,6 @@ import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/acce
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
-// import console
-import "hardhat/console.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
