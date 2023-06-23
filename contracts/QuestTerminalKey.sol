@@ -8,8 +8,8 @@ import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import '@openzeppelin/contracts/utils/Base64.sol';
-import '@openzeppelin/contracts/utils/Strings.sol';
+import {Base64} from 'solady/src/utils/Base64.sol';
+import {LibString} from 'solady/src/utils/LibString.sol';
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract QuestTerminalKey is
@@ -26,8 +26,8 @@ contract QuestTerminalKey is
     event QuestFactoryAddressSet(address indexed questFactoryAddress);
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using Strings for uint256;
-    using Strings for uint16;
+    using LibString for uint256;
+    using LibString for uint16;
 
     // storage
     CountersUpgradeable.Counter private _tokenIds;

@@ -32,7 +32,7 @@ describe('Quest', async () => {
   let secondAddress: SignerWithAddress
   let minterAddress: SignerWithAddress
   let protocolFeeRecipient: SignerWithAddress
-  let questContract: Erc20Quest__factory
+  let questContract: Quest__factory
   let sampleERC20Contract: SampleERC20__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let deployedFactoryContract: QuestFactory

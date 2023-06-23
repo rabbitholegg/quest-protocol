@@ -8,7 +8,7 @@ import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {ECDSAUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
+import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
@@ -478,9 +478,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
-        return ECDSAUpgradeable.recover(messageDigest, signature_);
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
+        return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
