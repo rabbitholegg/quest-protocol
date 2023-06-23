@@ -8,7 +8,6 @@ import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
-import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {Base64} from 'solady/src/utils/Base64.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -18,7 +17,6 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 /// @notice This contract is the Erc721 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
 contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeERC20 for IERC20;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
     address public protocolFeeRecipient;
@@ -156,8 +154,8 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external nonReentrant {
-        uint erc20Balance = SafeTransferLib.balanceOf(address(this));
-        if (erc20Balance > 0) SafeTransferLib.safeTransfer(owner(), erc20Balance);
+        uint erc20Balance = SafeTransferLib.balanceOf(erc20Address_, address(this));
+        if (erc20Balance > 0) SafeTransferLib.safeTransfer(erc20Address_, owner(), erc20Balance);
     }
 
     /// @dev returns the token uri

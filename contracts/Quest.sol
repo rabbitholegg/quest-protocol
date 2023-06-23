@@ -2,7 +2,6 @@
 pragma solidity =0.8.16;
 
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import {IERC20, SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
@@ -14,8 +13,6 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, IQuest {
-    using SafeERC20 for IERC20;
-
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     QuestFactory public questFactoryContract;
     address public rewardToken;
@@ -84,7 +81,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (IERC20(rewardToken).balanceOf(address(this)) < this.totalTransferAmount())
+        if (SafeTransferLib.balanceOf(rewardToken, address(this)) < this.totalTransferAmount())
             revert TotalAmountExceedsBalance();
         queued = true;
         emit Queued(block.timestamp);
@@ -197,7 +194,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        SafeTransferLib.safeTransfer(sender_, amount_);
+        SafeTransferLib.safeTransfer(rewardToken, sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount
@@ -214,13 +211,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         require(!hasWithdrawn, 'Already withdrawn');
 
         uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
-        uint256 nonClaimableTokens = IERC20(rewardToken).balanceOf(address(this)) -
+        uint256 nonClaimableTokens = SafeTransferLib.balanceOf(rewardToken, address(this)) -
             this.protocolFee() -
             unclaimedTokens;
         hasWithdrawn = true;
 
-        SafeTransferLib.safeTransfer(owner(), nonClaimableTokens);
-        SafeTransferLib.safeTransfer(protocolFeeRecipient, this.protocolFee());
+        SafeTransferLib.safeTransfer(rewardToken, owner(), nonClaimableTokens);
+        SafeTransferLib.safeTransfer(rewardToken, protocolFeeRecipient, this.protocolFee());
     }
 
     /// @notice Function that calculates the protocol fee
@@ -258,7 +255,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgrad
         uint balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);
 
-        uint erc20Balance = SafeTransferLib.balanceOf(address(this));
-        if (erc20Balance > 0) SafeTransferLib.safeTransfer(msg.sender, erc20Balance);
+        uint erc20Balance = SafeTransferLib.balanceOf(erc20Address_, address(this));
+        if (erc20Balance > 0) SafeTransferLib.safeTransfer(erc20Address_, msg.sender, erc20Balance);
     }
 }

@@ -3,7 +3,6 @@ pragma solidity =0.8.16;
 pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
@@ -19,8 +18,6 @@ import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
-    using SafeERC20 for IERC20;
-
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
@@ -192,7 +189,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        IERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
+        SafeTransferLib.safeTransferFrom(rewardTokenAddress_, msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
         QuestContract(newQuest_).queue();
     }
 
