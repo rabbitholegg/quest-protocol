@@ -38,7 +38,7 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ---
 
-## Addressses
+## Addresses
 
 Mainnet, Optimism, Polygon, Arbitrum, and Sepolia:
 
