@@ -2,7 +2,8 @@
 pragma solidity =0.8.16;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC1155Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
+import {ERC1155SupplyUpgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
@@ -14,25 +15,26 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 
 /// @title QuestNFT
 /// @author RabbitHole.gg
-/// @notice This contract is the Erc721 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
-contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
+/// @notice This contract is the Erc1155 Quest Collection contract. It is the NFT that can be minted after a quest is completed.
+contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20 for IERC20;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
-
     address public protocolFeeRecipient;
     address public minterAddress;
-    uint256 public endTime;
-    uint256 public startTime;
-    uint256 public totalParticipants;
-    uint256 public questFee;
-    string public jsonSpecCID;
-    string public imageIPFSHash;
-    string public description;
-    string public questId;
-
-    event JsonSpecCIDSet(string cid);
+    string public collectionName;
+    struct QuestData {
+        uint256 startTime;
+        uint256 endTime;
+        uint256 totalParticipants;
+        uint256 questFee;
+        uint256 tokenId;
+        string description;
+        string imageIPFSHash;
+    }
+    mapping(string => QuestData) public quests; // questId => QuestData
+    mapping(uint256 => string) public tokenIdToQuestId; // tokenId => questId
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -40,48 +42,27 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     }
 
     function initialize(
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        string memory questId_,
-        uint256 questFee_,
         address protocolFeeRecipient_,
         address minterAddress_, // should always be the QuestFactory contract
-        string memory jsonSpecCID_,
-        string memory name_,
-        string memory symbol_,
-        string memory description_,
-        string memory imageIPFSHash_
+        string memory collectionName_
     ) external initializer {
-        require (endTime_ > block.timestamp, 'endTime_ in past');
-        require (startTime_ > block.timestamp, 'startTime_ in past');
-        require (endTime_ > startTime_, 'startTime_ before endTime_');
-        endTime = endTime_;
-        startTime = startTime_;
-        totalParticipants = totalParticipants_;
-        questId = questId_;
-        questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
-        jsonSpecCID = jsonSpecCID_;
         minterAddress = minterAddress_;
-        imageIPFSHash = imageIPFSHash_;
-        description = description_;
-        __ERC721_init(name_, symbol_);
+        collectionName = collectionName_;
+        __ERC1155_init("");
+        __ERC1155Supply_init();
         __Ownable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
     }
 
-    /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyAfterQuestEnd() {
-        require (block.timestamp > endTime, 'Quest has not ended');
-        _;
-    }
-
-    /// @notice Checks if quest has started from the start time
-    modifier onlyQuestBetweenStartEnd() {
-        require(block.timestamp > startTime, 'Quest not started');
-        require(block.timestamp < endTime, 'Quest ended');
+    /// @dev checks if the quest start time and end time are valid and the quest exists
+    /// @param questId_ the questId to check
+    modifier questChecks(string memory questId_) {
+        QuestData storage quest = quests[questId_];
+        require(quest.tokenId != 0, 'Quest does not exist');
+        require(block.timestamp > quest.startTime, 'Quest not started');
+        require(block.timestamp < quest.endTime, 'Quest ended');
         _;
     }
 
@@ -90,19 +71,53 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _;
     }
 
-    /// @dev set jsonSpecCID only if its empty
-    /// @param jsonSpecCID_ The jsonSpecCID to set
-    function setJsonSpecCID(string memory jsonSpecCID_) external onlyOwner {
-        require(bytes(jsonSpecCID_).length > 0, 'jsonSpecCID cannot be empty');
-        require(bytes(jsonSpecCID).length == 0, 'jsonSpecCID already set');
+    function addQuest(
+        uint256 questFee_,
+        uint256 startTime_,
+        uint256 endTime_,
+        uint256 totalParticipants_,
+        string memory questId_,
+        string memory description_,
+        string memory imageIPFSHash_
+    ) public onlyMinter returns (uint256) {
+        require (endTime_ > block.timestamp, 'endTime_ in the past');
+        require (endTime_ > startTime_, 'startTime_ before endTime_');
 
-        jsonSpecCID = jsonSpecCID_;
-        emit JsonSpecCIDSet(jsonSpecCID_);
+        _tokenIdCounter.increment();
+        QuestData storage quest = quests[questId_];
+        quest.startTime = startTime_;
+        quest.endTime = endTime_;
+        quest.totalParticipants = totalParticipants_;
+        quest.questFee = questFee_;
+        quest.imageIPFSHash = imageIPFSHash_;
+        quest.description = description_;
+        quest.tokenId = _tokenIdCounter.current();
+        tokenIdToQuestId[_tokenIdCounter.current()] = questId_;
+
+        return _tokenIdCounter.current();
+    }
+
+    function mint(address to_, string memory questId_)
+        public
+        onlyMinter questChecks(questId_) whenNotPaused nonReentrant
+    {
+        QuestData storage quest = quests[questId_];
+
+        _mint(to_, quest.tokenId, 1, "");
+
+        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
+        require(success, 'protocol fee transfer failed');
+    }
+
+    function tokenIdFromQuestId(string memory questId_) public view returns (uint256) {
+        QuestData storage quest = quests[questId_];
+        return quest.tokenId;
     }
 
     /// @dev The maximum amount of coins the quest needs for the protocol fee
-    function totalTransferAmount() external view returns (uint256) {
-        return questFee * totalParticipants;
+    function totalTransferAmount(string memory questId_) external view returns (uint256) {
+        QuestData storage quest = quests[questId_];
+        return quest.questFee * quest.totalParticipants;
     }
 
     /// @notice Pauses the Quest
@@ -117,26 +132,23 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         _unpause();
     }
 
-    function safeMint(address to_) public onlyMinter onlyQuestBetweenStartEnd whenNotPaused nonReentrant {
-        _tokenIdCounter.increment();
-        uint tokenId = _tokenIdCounter.current();
-        _safeMint(to_, tokenId);
-        (bool success, ) = protocolFeeRecipient.call{value: questFee}("");
-        require(success, 'protocol fee transfer failed');
-    }
-
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+    function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
         internal
         whenNotPaused
-        override
+        override(ERC1155Upgradeable, ERC1155SupplyUpgradeable)
     {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
     /// @dev Function that to withdraw the remaining coins in the contract to the owner
-    /// @notice This function can only be called after the quest end time
-    function withdrawRemainingCoins() external onlyAfterQuestEnd nonReentrant {
+    /// @notice This function can only be called after all quests have ended
+    function withdrawRemainingCoins() external nonReentrant {
         uint balance = address(this).balance;
+
+        for (uint256 i = 1; i <= _tokenIdCounter.current(); i++) {
+            require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
+        }
+
         if (balance > 0) {
             (bool success, ) = owner().call{value: balance}("");
             require(success, 'withdraw remaining tokens failed');
@@ -152,41 +164,38 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     }
 
     /// @dev returns the token uri
-    function tokenURI(uint256)
+    /// @param tokenId_ the token id
+    function uri(uint256 tokenId_)
         public
         view
-        override(ERC721Upgradeable)
+        override(ERC1155Upgradeable)
         returns (string memory)
     {
-        bytes memory dataURI = generateDataURI();
+        bytes memory dataURI = generateDataURI(tokenId_);
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
-    function generateDataURI() internal view virtual returns (bytes memory) {
+    function generateDataURI(uint256 tokenId_) internal view virtual returns (bytes memory) {
+        QuestData storage quest = quests[tokenIdToQuestId[tokenId_]];
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "',
-            name(),
+            collectionName,
             '",',
             '"description": "',
-            description,
+            quest.description,
             '",',
             '"image": "',
-            tokenImage(),
+            tokenImage(quest.imageIPFSHash),
             '"',
             '}'
         );
         return dataURI;
     }
 
-    function tokenImage() internal view virtual returns (string memory) {
-        return string(abi.encodePacked('ipfs://', imageIPFSHash));
-    }
-
-    /// @dev get the current token id
-    function getTokenId() public view returns (uint) {
-        return _tokenIdCounter.current();
+    function tokenImage(string memory imageIPFSHash_) internal view virtual returns (string memory) {
+        return string(abi.encodePacked('ipfs://', imageIPFSHash_));
     }
 
     /// @dev See {IERC165-royaltyInfo}
@@ -196,7 +205,7 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        require(_exists(tokenId_), 'Nonexistent token');
+        require(exists(tokenId_), 'Nonexistent token');
 
         uint256 royaltyPayment = (salePrice_ * 200) / 10_000; // 2% royalty
         return (owner(), royaltyPayment);
@@ -206,13 +215,11 @@ contract QuestNFT is Initializable, ERC721Upgradeable, PausableUpgradeable, Owna
     /// @param interfaceId_ the interface id
     function supportsInterface(
         bytes4 interfaceId_
-    ) public view virtual override(ERC721Upgradeable, IERC165Upgradeable) returns (bool) {
+    ) public view virtual override(ERC1155Upgradeable, IERC165Upgradeable) returns (bool) {
         return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 
-    // Receive function to receive ETH
+    // Functions to receive ETH
     receive() external payable {}
-
-    // Fallback function to receive ETH when other functions are not available
     fallback() external payable {}
 }

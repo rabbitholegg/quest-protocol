@@ -480,34 +480,134 @@ describe('QuestFactory', () => {
     })
   })
 
-  describe('createQuestNFT()', () => {
-    it('Should create a questNFT', async () => {
+  describe('createCollection()', () => {
+    it('Should create a quest NFT collection', async () => {
+      const tx = await deployedFactoryContract.createCollection('collectionName')
+      const receipt = await tx.wait()
+      let newQuestNFTAddress = ''
+
+      receipt.events.forEach((event) => {
+        if (event.event === 'QuestNFTCreated') {
+          newQuestNFTAddress = event.args.newQuestNFT
+        }
+      })
+      expect(await deployedFactoryContract.ownerCollectionsByOwner(owner.address)).to.eql([newQuestNFTAddress])
+      expect(await deployedFactoryContract.ownerCollections(owner.address, 0)).to.equal(newQuestNFTAddress)
+    })
+  })
+
+  describe('addQuestToCollection()', () => {
+    it('Should add a quest to a collection', async () => {
       const totalParticipants = 10
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+      await deployedFactoryContract.createCollection('collectionName')
+      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
 
-      const tx = await deployedFactoryContract.createQuestNFT(
-        expiryDate,
-        startDate,
-        totalParticipants,
-        'NFTQuestID',
-        'jsonSpecCid',
-        'NFT Name',
-        'NFTS',
-        'NFT Description',
-        'ImageipfsHash',
-        { value: transferAmount.toNumber() }
-      )
+      const tx = await deployedFactoryContract
+        .connect(owner)
+        .addQuestToCollection(
+          collectionAddress,
+          startDate,
+          expiryDate,
+          totalParticipants,
+          'NFTQuestID',
+          'NFT Description',
+          'ImageipfsHash',
+          { value: transferAmount.toNumber() }
+        )
       await tx.wait()
 
-      const questNFTAddress = await deployedFactoryContract.quests('NFTQuestID').then((res) => res.questAddress)
-      const deployedNFTQuest = await ethers.getContractAt('QuestNFT', questNFTAddress)
+      const deployedNFTQuest = await ethers.getContractAt('QuestNFT', collectionAddress)
 
-      expect(await deployedNFTQuest.startTime()).to.equal(startDate)
+      expect(await deployedNFTQuest.quests('NFTQuestID')).to.eql([
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
+        ethers.BigNumber.from(10),
+        ethers.BigNumber.from(nftQuestFee),
+        ethers.BigNumber.from(1),
+        'NFT Description',
+        'ImageipfsHash',
+      ])
       expect(await deployedNFTQuest.owner()).to.equal(owner.address)
-      expect(await deployedNFTQuest.jsonSpecCID()).to.equal('jsonSpecCid')
-      expect(await deployedNFTQuest.name()).to.equal('NFT Name')
-      expect(await deployedNFTQuest.symbol()).to.equal('NFTS')
       expect(await ethers.provider.getBalance(deployedNFTQuest.address)).to.eq(transferAmount)
+    })
+
+    it('Should revert when adding a quest to a collection with the same questid', async () => {
+      const totalParticipants = 10
+      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+      await deployedFactoryContract.createCollection('collectionName')
+      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
+
+      const tx = await deployedFactoryContract
+        .connect(owner)
+        .addQuestToCollection(
+          collectionAddress,
+          startDate,
+          expiryDate,
+          totalParticipants,
+          'NFTQuestID',
+          'NFT Description',
+          'ImageipfsHash',
+          { value: transferAmount.toNumber() }
+        )
+      await tx.wait()
+
+      await expect(
+        deployedFactoryContract
+          .connect(owner)
+          .addQuestToCollection(
+            collectionAddress,
+            startDate,
+            expiryDate,
+            totalParticipants,
+            'NFTQuestID',
+            'NFT Description',
+            'ImageipfsHash',
+            { value: transferAmount.toNumber() }
+          )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
+    })
+    it('Should revert when not passing the correct msg.value', async () => {
+      const totalParticipants = 10
+      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+      await deployedFactoryContract.createCollection('collectionName')
+      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
+
+      await expect(
+        deployedFactoryContract
+          .connect(owner)
+          .addQuestToCollection(
+            collectionAddress,
+            startDate,
+            expiryDate,
+            totalParticipants,
+            'NFTQuestID',
+            'NFT Description',
+            'ImageipfsHash',
+            { value: transferAmount.toNumber() - 1 }
+          )
+      ).to.be.revertedWith('QuestFactory: msg.value is not equal to the total quest fee')
+    })
+    it('Should revert when not passing the correct msg.value', async () => {
+      const totalParticipants = 10
+      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
+      await deployedFactoryContract.createCollection('collectionName')
+      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
+
+      await expect(
+        deployedFactoryContract
+          .connect(questUser)
+          .addQuestToCollection(
+            collectionAddress,
+            startDate,
+            expiryDate,
+            totalParticipants,
+            'NFTQuestID',
+            'NFT Description',
+            'ImageipfsHash',
+            { value: transferAmount.toNumber() }
+          )
+      ).to.be.revertedWith('QuestFactory: only the NFT quest owner can call this function')
     })
   })
 
@@ -516,42 +616,43 @@ describe('QuestFactory', () => {
     const totalParticipants = 10
     let messageHash: string
     let signature: string
-    let questNFTAddress: string
     let QuestNFT: QuestNFT
 
     beforeEach(async () => {
       const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
       messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), nftQuestId])
       signature = await wallet.signMessage(utils.arrayify(messageHash))
-      const tx = await deployedFactoryContract.createQuestNFT(
-        expiryDate,
+      await deployedFactoryContract.createCollection('collectionName')
+      const collectionAddresses = await deployedFactoryContract.ownerCollectionsByOwner(owner.address)
+      const collectionAddress = collectionAddresses[0]
+
+      const tx = await deployedFactoryContract.addQuestToCollection(
+        collectionAddress,
         startDate,
+        expiryDate,
         totalParticipants,
         nftQuestId,
-        'jsonSpecCid',
-        'NFT Name',
-        'NFTS',
         'NFT Description',
         'ImageipfsHash',
         { value: transferAmount.toNumber() }
       )
       await tx.wait()
-      questNFTAddress = (await deployedFactoryContract.quests(nftQuestId)).questAddress
 
-      QuestNFT = await ethers.getContractAt('QuestNFT', questNFTAddress)
+      QuestNFT = await ethers.getContractAt('QuestNFT', collectionAddress)
     })
 
     it('Should mint a QuestNFT', async () => {
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+      const tokenId = await QuestNFT.tokenIdFromQuestId(nftQuestId)
+      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
     })
 
     it('Should fail when trying to mint before quest time has started', async () => {
       await time.setNextBlockTimestamp(startDate - 1)
-      await expect(
-        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestNotStarted')
+      await expect(deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)).to.be.revertedWith(
+        'Quest not started'
+      )
     })
 
     it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
@@ -564,19 +665,20 @@ describe('QuestFactory', () => {
     it('Should fail when user tries to mint multiple times', async () => {
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+      const tokenId = await QuestNFT.tokenIdFromQuestId(nftQuestId)
+      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
 
       await expect(
         deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
       ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
-      expect(await QuestNFT.balanceOf(owner.address)).to.equal(1)
+      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
     })
 
     it('Should fail when trying to mint after quest time has passed', async () => {
       await time.setNextBlockTimestamp(expiryDate + 1)
-      await expect(
-        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
+      await expect(deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)).to.be.revertedWith(
+        'Quest ended'
+      )
     })
   })
 
