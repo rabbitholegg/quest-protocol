@@ -22,7 +22,7 @@ if (!gasConfig.gasReporter?.gasPrice) {
   throw new Error('gasReporter.gasPrice is not set')
 }
 
-const ETH_PRICE = 1500
+const ETH_PRICE = 1850 // current eth price in USD
 const GAS_PRICE = gasConfig.gasReporter.gasPrice
 
 let records: {

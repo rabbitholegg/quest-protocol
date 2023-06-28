@@ -17,7 +17,8 @@ describe('Collections', () => {
   let erc20Quest: Quest
   let tx: ContractTransaction
   const questId = 'quest-id'
-  const questId2 = 'quest-id-2'
+  const nftQuestId = 'nft-quest-id'
+  const totalParticipants = 1000
   let expiryDate
   let startDate
 
@@ -34,17 +35,12 @@ describe('Collections', () => {
 
     await createErc20Quest()
 
-    await ethers.provider.send('evm_increaseTime', [1000])
+    await time.setNextBlockTimestamp(startDate + 1)
 
     await startErc20Quest()
   })
 
-  afterEach(async () => {
-    await ethers.provider.send('evm_increaseTime', [-1000])
-  })
-
   const createErc20Quest = async () => {
-    const totalParticipants = 1000
     const rewardAmount = 10
 
     tx = await contracts.questFactory
@@ -85,12 +81,44 @@ describe('Collections', () => {
     await story('QuestFactory', 'Mint Receipt', 'mintReceipt', '2nd mint', tx)
   })
 
-  it('Withdraw Remaining Rewards', async () => {
-    await ethers.provider.send('evm_increaseTime', [10000])
+  it('Claim Rewards without a receipt', async () => {
+    let hash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
+    let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
+    tx = await questFactory.connect(firstAddress).claimRewards(questId, hash, signature)
+    await story('QuestFactory', 'Claim Rewards', 'claimRewards', '1st tx', tx)
+  })
 
+  it('Claim an NFT reward', async () => {
+    let hash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), nftQuestId])
+    let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
+
+    const transferAmount = await questFactory.totalQuestNFTFee(totalParticipants)
+    await questFactory.connect(firstAddress).createCollection('collectionName')
+    const collectionAddresses = await questFactory.ownerCollectionsByOwner(firstAddress.address)
+    const collectionAddress = collectionAddresses[0]
+
+    console.log('collectionAddress', collectionAddress)
+
+    await questFactory
+      .connect(firstAddress)
+      .addQuestToCollection(
+        collectionAddress,
+        startDate,
+        expiryDate,
+        totalParticipants,
+        nftQuestId,
+        'NFT Description',
+        'ImageipfsHash',
+        { value: transferAmount.toNumber() }
+      )
+
+    tx = await questFactory.connect(firstAddress).mintQuestNFT(nftQuestId, hash, signature)
+    await story('QuestFactory', 'Mint Quest NFT', 'mintQuestNFT', '1st tx', tx)
+  })
+
+  it('Withdraw Remaining Rewards', async () => {
+    await time.setNextBlockTimestamp(expiryDate + 1)
     tx = await erc20Quest.withdrawRemainingTokens()
     await story('Quest', 'Withdraw', 'withdrawRemainingRewards', 'Withdraw remaining rewards from ERC20 quest', tx)
-
-    await ethers.provider.send('evm_increaseTime', [-10000])
   })
 })

@@ -46,7 +46,7 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    gasPrice: 100,
+    gasPrice: 25, // gas price in gwei, can be found here: https://etherscan.io/gastracker
   },
   defender: {
     apiKey: process.env.DEFENDER_TEAM_API_KEY,

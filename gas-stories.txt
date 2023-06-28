@@ -10,6 +10,8 @@ Start
 startQuest
      66,900 Start ERC20 quest
      66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
 
 Withdraw
 ···························
@@ -18,6 +20,16 @@ withdrawRemainingRewards
 
 QuestFactory
 =========================================================
+Claim Rewards
+···························
+claimRewards
+    179,900 1st tx
+
+Mint Quest NFT
+···························
+mintQuestNFT
+    177,700 1st tx
+
 Mint Receipt
 ···························
 mintReceipt
@@ -29,10 +41,14 @@ Quest
 createQuest
     413,600 Create ERC20 quest
     413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
 
 RewardAllowlist
 ···························
 setRewardAllowlistAddress
+     53,600 Set the reward allowlist
+     53,600 Set the reward allowlist
      53,600 Set the reward allowlist
      53,600 Set the reward allowlist
 
