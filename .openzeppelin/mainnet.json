@@ -5,11 +5,11 @@
   },
   "proxies": [
     {
-      "address": "0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E",
+      "address": "0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab",
       "kind": "transparent"
     },
     {
-      "address": "0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab",
+      "address": "0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E",
       "kind": "transparent"
     }
   ],
@@ -1515,6 +1515,324 @@
           "t_uint8": {
             "label": "uint8",
             "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "8c3aba55312aa15a4e1b9c9d62abe84736b59aeabbdd68e7b16aefb9a86ef321": {
+      "address": "0x5E0af2ded0FD10b0990C0B57AF0D7F2Af877285B",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:23"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "contracts/OwnableUpgradeable.sol:95"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "label": "claimSignerAddress",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:30"
+          },
+          {
+            "label": "protocolFeeRecipient",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:31"
+          },
+          {
+            "label": "erc20QuestAddress",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:32"
+          },
+          {
+            "label": "erc1155QuestAddress",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:33"
+          },
+          {
+            "label": "quests",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)9916_storage)",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:34"
+          },
+          {
+            "label": "rabbitHoleReceiptContract",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_contract(RabbitHoleReceipt)13415",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:35"
+          },
+          {
+            "label": "rabbitHoleTicketsContract",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:36"
+          },
+          {
+            "label": "rewardAllowlist",
+            "offset": 0,
+            "slot": "208",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:37"
+          },
+          {
+            "label": "questFee",
+            "offset": 0,
+            "slot": "209",
+            "type": "t_uint16",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:38"
+          },
+          {
+            "label": "mintFee",
+            "offset": 0,
+            "slot": "210",
+            "type": "t_uint256",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:39"
+          },
+          {
+            "label": "mintFeeRecipient",
+            "offset": 0,
+            "slot": "211",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:40"
+          },
+          {
+            "label": "locked",
+            "offset": 0,
+            "slot": "212",
+            "type": "t_uint256",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:41"
+          },
+          {
+            "label": "questTerminalKeyContract",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_contract(QuestTerminalKey)12850",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:42"
+          },
+          {
+            "label": "nftQuestFee",
+            "offset": 0,
+            "slot": "214",
+            "type": "t_uint256",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:43"
+          },
+          {
+            "label": "questNFTAddress",
+            "offset": 0,
+            "slot": "215",
+            "type": "t_address",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:44"
+          },
+          {
+            "label": "ownerCollections",
+            "offset": 0,
+            "slot": "216",
+            "type": "t_mapping(t_address,t_array(t_address)dyn_storage)",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:66"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(QuestTerminalKey)12850": {
+            "label": "contract QuestTerminalKey",
+            "numberOfBytes": "20"
+          },
+          "t_contract(RabbitHoleReceipt)13415": {
+            "label": "contract RabbitHoleReceipt",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_address)dyn_storage)": {
+            "label": "mapping(address => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_struct(Quest)9916_storage)": {
+            "label": "mapping(string => struct QuestFactory.Quest)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Quest)9916_storage": {
+            "label": "struct QuestFactory.Quest",
+            "members": [
+              {
+                "label": "addressMinted",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "questAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "totalParticipants",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "numberMinted",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RoleData)34_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          },
+          "t_string_storage": {
+            "label": "string"
           }
         }
       }
