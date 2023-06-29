@@ -13,16 +13,16 @@ async function main() {
   const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
 
   // deploy new quest implementation
-  const erc20Quest = await Erc20Quest.deploy()
-  await erc20Quest.deployed()
-  console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
-  await hre.run('verify:verify', { address: erc20Quest.address })
+  // const erc20Quest = await Erc20Quest.deploy()
+  // await erc20Quest.deployed()
+  // console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
+  // await hre.run('verify:verify', { address: erc20Quest.address })
 
-  // deploy new quest nft implementation
-  const questNFT = await QuestNFT.deploy()
-  await questNFT.deployed()
-  console.log('deployed QuestNFT implementation to:', questNFT.address)
-  await hre.run('verify:verify', { address: questNFT.address })
+  // // deploy new quest nft implementation
+  // const questNFT = await QuestNFT.deploy()
+  // await questNFT.deployed()
+  // console.log('deployed QuestNFT implementation to:', questNFT.address)
+  // await hre.run('verify:verify', { address: questNFT.address })
 
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
