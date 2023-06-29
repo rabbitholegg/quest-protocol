@@ -18,6 +18,9 @@ import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+    using SafeTransferLib for address;
+    using LibClone for address;
+
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
         mapping(address => bool) addressMinted;
@@ -62,9 +65,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
-
-    using SafeTransferLib for address;
-    using LibClone for address;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}

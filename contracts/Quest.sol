@@ -13,6 +13,8 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
+    using SafeTransferLib for address;
+
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     QuestFactory public questFactoryContract;
     address public rewardToken;
@@ -28,8 +30,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
-
-    using SafeTransferLib for address;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
