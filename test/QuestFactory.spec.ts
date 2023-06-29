@@ -447,27 +447,6 @@ describe('QuestFactory', () => {
       ).to.be.revertedWith('Insufficient mint fee')
     })
 
-    it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
-      const requiredFee = 1000
-      const extraChange = 100
-      await erc20Quest.queue()
-      await deployedFactoryContract.setMintFee(requiredFee)
-      await time.setNextBlockTimestamp(startDate)
-      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
-
-      await expect(
-        deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature, {
-          value: requiredFee + extraChange,
-        })
-      )
-        .to.emit(deployedFactoryContract, 'ReceiptMinted')
-        .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
-        .withArgs(owner.address, extraChange)
-      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
-        balanceBefore.add(requiredFee)
-      )
-    })
-
     it('should not be able to mint a receipt NFT and then claim it with claimRewards for the same quest', async () => {
       await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate)
@@ -792,6 +771,27 @@ describe('QuestFactory', () => {
           value: requiredFee - 1,
         })
       ).to.be.revertedWith('Insufficient mint fee')
+    })
+
+    it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
+      const requiredFee = 1000
+      const extraChange = 100
+      await erc20Quest.queue()
+      await deployedFactoryContract.setMintFee(requiredFee)
+      await time.setNextBlockTimestamp(startDate)
+      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
+
+      await expect(
+        deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
+          value: requiredFee + extraChange,
+        })
+      )
+        .to.emit(deployedFactoryContract, 'QuestClaimed')
+        .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
+        .withArgs(questUser.address, extraChange)
+      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+        balanceBefore.add(requiredFee)
+      )
     })
   })
 })
