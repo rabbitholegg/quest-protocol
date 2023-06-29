@@ -34,6 +34,8 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     mapping(string => QuestData) public quests; // questId => QuestData
     mapping(uint256 => string) public tokenIdToQuestId; // tokenId => questId
 
+    using SafeTransferLib for address;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -103,7 +105,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
         _mint(to_, quest.tokenId, 1, "");
 
-        SafeTransferLib.safeTransferETH(protocolFeeRecipient, quest.questFee);
+        protocolFeeRecipient.safeTransferETH(quest.questFee);
     }
 
     function tokenIdFromQuestId(string memory questId_) public view returns (uint256) {
@@ -146,15 +148,15 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
             require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
         }
 
-        if (balance > 0) SafeTransferLib.safeTransferETH(owner(), balance);
+        if (balance > 0) owner().safeTransferETH(balance);
 
     }
 
     /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external nonReentrant {
-        uint erc20Balance = SafeTransferLib.balanceOf(erc20Address_, address(this));
-        if (erc20Balance > 0) SafeTransferLib.safeTransfer(erc20Address_, owner(), erc20Balance);
+        uint erc20Balance = erc20Address_.balanceOf(address(this));
+        if (erc20Balance > 0) erc20Address_.safeTransfer(owner(), erc20Balance);
     }
 
     /// @dev returns the token uri

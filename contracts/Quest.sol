@@ -29,6 +29,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
 
+    using SafeTransferLib for address;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -81,7 +83,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (SafeTransferLib.balanceOf(rewardToken, address(this)) < this.totalTransferAmount())
+        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount())
             revert TotalAmountExceedsBalance();
         queued = true;
         emit Queued(block.timestamp);
@@ -194,7 +196,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        SafeTransferLib.safeTransfer(rewardToken, sender_, amount_);
+        rewardToken.safeTransfer(sender_, amount_);
     }
 
     /// @notice Internal function that calculates the reward amount
@@ -211,13 +213,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         require(!hasWithdrawn, 'Already withdrawn');
 
         uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
-        uint256 nonClaimableTokens = SafeTransferLib.balanceOf(rewardToken, address(this)) -
+        uint256 nonClaimableTokens = rewardToken.balanceOf(address(this)) -
             this.protocolFee() -
             unclaimedTokens;
         hasWithdrawn = true;
 
-        SafeTransferLib.safeTransfer(rewardToken, owner(), nonClaimableTokens);
-        SafeTransferLib.safeTransfer(rewardToken, protocolFeeRecipient, this.protocolFee());
+        rewardToken.safeTransfer(owner(), nonClaimableTokens);
+        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
     }
 
     /// @notice Function that calculates the protocol fee
@@ -255,7 +257,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);
 
-        uint erc20Balance = SafeTransferLib.balanceOf(erc20Address_, address(this));
-        if (erc20Balance > 0) SafeTransferLib.safeTransfer(erc20Address_, msg.sender, erc20Balance);
+        uint erc20Balance = erc20Address_.balanceOf(address(this));
+        if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 }

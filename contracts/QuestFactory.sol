@@ -63,6 +63,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
     mapping(address => address[]) public ownerCollections;
 
+    using SafeTransferLib for address;
+    using LibClone for address;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -138,7 +141,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 discountTokenId_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
-        address newQuest = LibClone.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
         emit QuestCreated(
             msg.sender,
             address(newQuest),
@@ -189,7 +192,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        SafeTransferLib.safeTransferFrom(rewardTokenAddress_, msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
+        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
         QuestContract(newQuest_).queue();
     }
 
@@ -266,7 +269,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @return address the QuestNFT contract address
     function createCollection(string memory collectionName_) nonReentrant external returns (address) {
-        address payable newQuestNFT = payable(LibClone.cloneDeterministic(questNFTAddress, keccak256(abi.encodePacked(msg.sender, collectionName_))));
+        address payable newQuestNFT = payable(questNFTAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, collectionName_))));
 
         QuestNFTContract(newQuestNFT).initialize(
             protocolFeeRecipient,
@@ -322,7 +325,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(collectionAddress_);
         currentQuest.totalParticipants = data.totalParticipants;
 
-        SafeTransferLib.safeTransferETH(collectionAddress_, msg.value);
+        currentQuest.questAddress.safeTransferETH(msg.value);
 
         emit QuestCreated(
             msg.sender,
@@ -530,11 +533,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
-            SafeTransferLib.safeTransferETH(msg.sender, change);
+            msg.sender.safeTransferETH(change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
         // Send the mint fee to the mint fee recipient
-        SafeTransferLib.safeTransferETH(getMintFeeRecipient(), mintFee);
+        getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
     // Receive function to receive ETH
