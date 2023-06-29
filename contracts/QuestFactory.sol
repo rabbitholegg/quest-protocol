@@ -528,8 +528,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         rabbitHoleReceiptContract.mint(msg.sender, questId_);
 
         emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
-
-        if(mintFee > 0) processMintFee();
     }
 
     function processMintFee() private {
