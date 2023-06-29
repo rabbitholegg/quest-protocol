@@ -516,7 +516,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
         if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
         if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
