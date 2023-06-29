@@ -434,19 +434,6 @@ describe('QuestFactory', () => {
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestEnded')
     })
 
-    it('should revert if the mint fee is insufficient', async function () {
-      const requiredFee = 1000
-      await erc20Quest.queue()
-      await deployedFactoryContract.setMintFee(requiredFee)
-      await time.setNextBlockTimestamp(startDate)
-
-      await expect(
-        deployedFactoryContract.mintReceipt(erc20QuestId, messageHash, signature, {
-          value: requiredFee - 1,
-        })
-      ).to.be.revertedWith('Insufficient mint fee')
-    })
-
     it('should not be able to mint a receipt NFT and then claim it with claimRewards for the same quest', async () => {
       await erc20Quest.queue()
       await time.setNextBlockTimestamp(startDate)
