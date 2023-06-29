@@ -200,8 +200,9 @@ describe('Quest', async () => {
 
   describe('setJsonSpecCID()', () => {
     it('should only allow the owner to set', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).setJsonSpecCID('cidhere')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+      await expect(deployedQuestContract.connect(firstAddress).setJsonSpecCID('cidhere')).to.be.revertedWithCustomError(
+        questContract,
+        'Unauthorized'
       )
     })
 
@@ -229,8 +230,9 @@ describe('Quest', async () => {
 
   describe('queue()', () => {
     it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+      await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWithCustomError(
+        questContract,
+        'Unauthorized'
       )
     })
 
@@ -243,8 +245,9 @@ describe('Quest', async () => {
 
   describe('pause()', () => {
     it('should only allow the owner to pause', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).pause()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+      await expect(deployedQuestContract.connect(firstAddress).pause()).to.be.revertedWithCustomError(
+        questContract,
+        'Unauthorized'
       )
     })
 
@@ -259,8 +262,9 @@ describe('Quest', async () => {
 
   describe('unPause()', () => {
     it('should only allow the owner to pause', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).unPause()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+      await expect(deployedQuestContract.connect(firstAddress).unPause()).to.be.revertedWithCustomError(
+        questContract,
+        'Unauthorized'
       )
     })
 
