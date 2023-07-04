@@ -13,8 +13,9 @@ import {QuestFactory} from './QuestFactory.sol';
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens
 contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownable {
+    using SafeTransferLib for address;
+
     QuestFactory public questFactoryContract;
-    bool public hasWithdrawn;
     bool public queued;
     address public protocolFeeRecipient;
     address public rewardToken;
@@ -62,7 +63,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
         questId = questId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
         questFee = questFee_;
-        hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
         _initializeOwner(msg.sender);
         __Pausable_init();
@@ -123,7 +123,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
     function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
-        SafeTransferLib.safeTransferETH(protocolFeeRecipient, questFee);
+        protocolFeeRecipient.safeTransferETH(questFee);
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
@@ -143,11 +143,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
     /// @dev Function that transfers all 1155 tokens in the contract to the owner
     /// @notice This function can only be called after the quest end time
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
-        require(!hasWithdrawn, 'Already withdrawn');
-
-        // TODO: not sure if this is needed
-        hasWithdrawn = true;
-
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
     }
 }
