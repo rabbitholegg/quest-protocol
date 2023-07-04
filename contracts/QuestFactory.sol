@@ -265,85 +265,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    /// @dev Create an ERC1155 QuestNFT collection
-    /// @param collectionName_ The collection name of the 1155 NFT contract
-    /// @return address the QuestNFT contract address
-    function createCollection(string memory collectionName_) nonReentrant external returns (address) {
-        address payable newQuestNFT = payable(questNFTAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, collectionName_))));
-
-        QuestNFTContract(newQuestNFT).initialize(
-            protocolFeeRecipient,
-            address(this),
-            collectionName_
-        );
-        QuestNFTContract(newQuestNFT).transferOwnership(msg.sender);
-
-        ownerCollections[msg.sender].push(newQuestNFT);
-
-        emit QuestNFTCreated(
-            address(newQuestNFT),
-            msg.sender,
-            collectionName_
-        );
-
-        return newQuestNFT;
-    }
-
-    /// @dev Add a quest to a QuestNFT collection. The function will transfer the total questFee amount to the QuestNFT
-    /// @param collectionAddress_ The address of the QuestNFT collection
-    /// @param startTime_ The start time of the quest
-    /// @param endTime_ The end time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param questId_ The id of the quest
-    /// @param description_ The description of the quest
-    /// @param imageIPFSHash_ The IPFS hash of the image for the quest
-    function addQuestToCollection(
-        address payable collectionAddress_,
-        uint256 startTime_,
-        uint256 endTime_,
-        uint256 totalParticipants_,
-        string memory questId_,
-        string memory description_,
-        string memory imageIPFSHash_
-    ) external payable nonReentrant {
-        QuestNFTData memory data = QuestNFTData({
-            startTime: startTime_,
-            endTime: endTime_,
-            totalParticipants: totalParticipants_,
-            questId: questId_,
-            description: description_,
-            imageIPFSHash: imageIPFSHash_
-        });
-
-        Quest storage currentQuest = quests[data.questId];
-        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        require(msg.value >= totalQuestNFTFee(data.totalParticipants), "QuestFactory: msg.value is not equal to the total quest fee");
-        require(msg.sender == QuestNFTContract(collectionAddress_).owner(), "QuestFactory: only the NFT quest owner can call this function");
-
-        QuestNFTContract(collectionAddress_).addQuest(nftQuestFee, data.startTime, data.endTime, data.totalParticipants, data.questId, data.description, data.imageIPFSHash);
-
-        currentQuest.questAddress = address(collectionAddress_);
-        currentQuest.totalParticipants = data.totalParticipants;
-
-        currentQuest.questAddress.safeTransferETH(msg.value);
-
-        emit QuestCreated(
-            msg.sender,
-            collectionAddress_,
-            data.questId,
-            "nft",
-            address(0), // rewardTokenAddress
-            data.endTime,
-            data.startTime,
-            data.totalParticipants,
-            1
-        );
-    }
-
-    function ownerCollectionsByOwner(address owner_) external view returns (address[] memory) {
-        return ownerCollections[owner_];
-    }
-
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
         return nftQuestFee * totalParticipants_;
     }
@@ -482,6 +403,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
+    /// @dev claim rewards for a quest
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
         QuestContract questContract_ = QuestContract(currentQuest.questAddress);
@@ -496,20 +421,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if(mintFee > 0) processMintFee();
 
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
-    }
-
-    /// @dev mint a QuestNFT.
-    /// @notice this contract must be set as Minter on the QuestNFT
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function mintQuestNFT(string memory questId_, bytes32 hash_, bytes memory signature_) external nonReentrant claimChecks(questId_, hash_, signature_) {
-        Quest storage currentQuest = quests[questId_];
-
-        currentQuest.addressMinted[msg.sender] = true;
-        ++currentQuest.numberMinted;
-        QuestNFTContract(payable(currentQuest.questAddress)).mint(msg.sender, questId_);
-        emit QuestNFTMinted(msg.sender, currentQuest.questAddress, QuestNFTContract(payable(currentQuest.questAddress)).tokenIdFromQuestId(questId_), questId_);
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
