@@ -121,8 +121,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
     function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
-        _transferRewards(account_, 1);
         redeemedTokens = redeemedTokens + 1;
+        _transferRewards(account_, 1);
         SafeTransferLib.safeTransferETH(protocolFeeRecipient, questFee);
         emit ClaimedSingle(account_, rewardToken, 1);
     }
