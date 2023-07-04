@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.18;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {ERC1155Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
