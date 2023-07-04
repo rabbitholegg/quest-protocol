@@ -22,7 +22,7 @@ if (!gasConfig.gasReporter?.gasPrice) {
   throw new Error('gasReporter.gasPrice is not set')
 }
 
-const ETH_PRICE = 1500
+const ETH_PRICE = 1850 // current eth price in USD
 const GAS_PRICE = gasConfig.gasReporter.gasPrice
 
 let records: {
@@ -36,7 +36,7 @@ let records: {
 let resultsLog = ''
 
 export async function story(
-  contract: 'QuestFactory' | 'Erc20Quest' | 'Erc1155Quest' | 'RabbitHoleReceipt' | 'ReceiptRenderer',
+  contract: 'QuestFactory' | 'Quest' | 'QuestNFT' | 'QuestTerminalKey' | 'ReceiptRenderer',
   category: string,
   func: string,
   description: string,

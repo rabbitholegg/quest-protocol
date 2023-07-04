@@ -1,30 +1,32 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { ethers, upgrades } from 'hardhat'
+import { upgrades } from 'hardhat'
 import {
+  Quest,
+  Quest__factory,
   QuestFactory,
   QuestFactory__factory,
-  Erc20Quest,
-  Erc20Quest__factory,
-  Erc1155Quest,
-  Erc1155Quest__factory,
-  SampleERC20,
-  SampleERC20__factory,
-  SampleErc1155,
-  SampleErc1155__factory,
+  QuestNFT,
+  QuestNFT__factory,
+  QuestTerminalKey,
+  QuestTerminalKey__factory,
   RabbitHoleReceipt,
   RabbitHoleReceipt__factory,
   ReceiptRenderer,
   ReceiptRenderer__factory,
+  SampleERC20,
+  SampleERC20__factory,
 } from '../../typechain-types'
 
 export type TestContracts = {
+  quest: Quest
   questFactory: QuestFactory
+  questNFT: QuestNFT
+  questTerminalKey: QuestTerminalKey
   rabbitHoleReceipt: RabbitHoleReceipt
   receiptRenderer: ReceiptRenderer
 
   // sample contracts for testing
   sampleErc20: SampleERC20
-  sampleErc1155: SampleErc1155
 }
 
 export async function deployAll(
@@ -33,23 +35,32 @@ export async function deployAll(
 ): Promise<TestContracts> {
   // upgrades.silenceWarnings()
   const receiptRenderer = await deployReceiptRenderer({ deployer })
+  const sampleErc20 = await deploySampleErc20({ deployer })
+  const quest = await deployQuest({ deployer })
+  const questNFT = await deployQuestNFT({ deployer })
+  const questTerminalKey = await deployQuestTerminalKey({ deployer })
   const rabbitHoleReceipt = await deployRabbitHoleReceipt({ deployer, receiptRendererAddress: receiptRenderer.address })
   const questFactory = await deployQuestFactory({
     deployer,
     claimAddressSigner,
     receiptAddress: rabbitHoleReceipt.address,
+    questAddress: quest.address,
+    questTerminalKeyAddress: questTerminalKey.address,
+    questNFTAddress: questNFT.address,
   })
-  const sampleErc20 = await deploySampleErc20({ deployer })
-  const sampleErc1155 = await deploySampleErc1155({ deployer })
-
-  // await questFactory.setRewardAllowlistAddress(sampleErc20.address, true)
+  await rabbitHoleReceipt.setQuestFactory(questFactory.address)
+  await rabbitHoleReceipt.setMinterAddress(questFactory.address)
+  await questTerminalKey.setQuestFactoryAddress(questFactory.address)
+  await questTerminalKey.setMinterAddress(questFactory.address)
 
   return {
+    quest,
     questFactory,
+    questNFT,
+    questTerminalKey,
     rabbitHoleReceipt,
     receiptRenderer,
     sampleErc20,
-    sampleErc1155,
   }
 }
 
@@ -57,6 +68,20 @@ export async function deployReceiptRenderer({ deployer }: { deployer: SignerWith
   const ReceiptRenderer = new ReceiptRenderer__factory(deployer)
   const receiptRenderer = await ReceiptRenderer.deploy()
   return receiptRenderer
+}
+
+export async function deployQuestTerminalKey({ deployer }: { deployer: SignerWithAddress }) {
+  const QuestTerminalKey = new QuestTerminalKey__factory(deployer)
+  const questTerminalKey = (await upgrades.deployProxy(QuestTerminalKey, [
+    deployer.address,
+    deployer.address,
+    deployer.address,
+    100,
+    deployer.address,
+    'imageIPFSHash',
+    'animationUrlIPFSHash',
+  ])) as QuestTerminalKey
+  return questTerminalKey
 }
 
 export async function deployRabbitHoleReceipt({
@@ -72,6 +97,7 @@ export async function deployRabbitHoleReceipt({
     deployer.address,
     deployer.address,
     10,
+    deployer.address,
   ])) as RabbitHoleReceipt
   return rabbitHoleReceipt
 }
@@ -80,28 +106,45 @@ export async function deployQuestFactory({
   deployer,
   claimAddressSigner,
   receiptAddress,
+  questAddress,
+  questTerminalKeyAddress,
+  questNFTAddress,
 }: {
   deployer: SignerWithAddress
   claimAddressSigner: SignerWithAddress
   receiptAddress: string
+  questAddress: string
+  questTerminalKeyAddress: string
+  questNFTAddress: string
 }) {
   const QuestFactory = new QuestFactory__factory(deployer)
   const questFactory = (await upgrades.deployProxy(QuestFactory, [
     claimAddressSigner.address,
     receiptAddress,
     deployer.address,
+    questAddress,
+    deployer.address,
+    questTerminalKeyAddress,
+    questNFTAddress,
+    100,
   ])) as QuestFactory
   return questFactory
+}
+
+export async function deployQuest({ deployer }: { deployer: SignerWithAddress }) {
+  const Quest = new Quest__factory(deployer)
+  const quest = await Quest.deploy()
+  return quest
+}
+
+export async function deployQuestNFT({ deployer }: { deployer: SignerWithAddress }) {
+  const QuestNFT = new QuestNFT__factory(deployer)
+  const questNFT = await QuestNFT.deploy()
+  return questNFT
 }
 
 export async function deploySampleErc20({ deployer }: { deployer: SignerWithAddress }) {
   const SampleERC20 = new SampleERC20__factory(deployer)
   const sampleERC20 = await SampleERC20.deploy('RewardToken', 'RTC', 1000000, deployer.address)
   return sampleERC20
-}
-
-export async function deploySampleErc1155({ deployer }: { deployer: SignerWithAddress }) {
-  const SampleErc1155 = new SampleErc1155__factory(deployer)
-  const sampleErc1155 = await SampleErc1155.deploy()
-  return sampleErc1155
 }

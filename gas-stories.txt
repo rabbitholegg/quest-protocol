@@ -1,56 +1,54 @@
-Erc1155Quest
-=========================================================
-Start
-···························
-startQuest
-     32,000 Start ERC1155 quest
-     32,000 Start ERC1155 quest
-
-Withdraw
-···························
-withdrawRemainingRewards
-     38,100 Withdraw remaining rewards from ERC1155 quest
-
-Erc20Quest
+Quest
 =========================================================
 Claim
 ···························
 claim
-    126,600 1st claim
+    142,000 1st claim
 
 Start
 ···························
 startQuest
-     32,400 Start ERC20 quest
-     32,400 Start ERC20 quest
+     66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
+     66,900 Start ERC20 quest
 
 Withdraw
 ···························
-withdrawFee
-     48,300 Withdraw fee from ERC20 quest
-
 withdrawRemainingRewards
-     58,000 Withdraw remaining rewards from ERC20 quest
+     83,200 Withdraw remaining rewards from ERC20 quest
 
 QuestFactory
 =========================================================
+Claim Rewards
+···························
+claimRewards
+    179,900 1st tx
+
+Mint Quest NFT
+···························
+mintQuestNFT
+    177,700 1st tx
+
 Mint Receipt
 ···························
 mintReceipt
-    288,100 1st mint
-    276,600 2st mint
+    312,400 1st mint
+    281,000 2nd mint
 
 Quest
 ···························
 createQuest
-  1,341,200 Create ERC1155 quest
-  1,341,200 Create ERC1155 quest
-  1,483,600 Create ERC20 quest
-  1,483,600 Create ERC20 quest
+    413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
+    413,600 Create ERC20 quest
 
 RewardAllowlist
 ···························
 setRewardAllowlistAddress
-     53,700 Set the reward allowlist
-     53,700 Set the reward allowlist
+     53,600 Set the reward allowlist
+     53,600 Set the reward allowlist
+     53,600 Set the reward allowlist
+     53,600 Set the reward allowlist
 

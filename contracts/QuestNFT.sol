@@ -5,20 +5,18 @@ import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC1155Upgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
 import {ERC1155SupplyUpgradeable} from '@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {OwnableUpgradeable} from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
-import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {Base64} from '@openzeppelin/contracts/utils/Base64.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {Base64} from 'solady/src/utils/Base64.sol';
+import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 /// @title QuestNFT
 /// @author RabbitHole.gg
-/// @notice This contract is the Erc1155 Quest Collection contract. It is the NFT that can be minted after a quest is completed.
-contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, OwnableUpgradeable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
+/// @notice This contract is the Erc1155 Quest Completion contract. It is the NFT that can be minted after a quest is completed.
+contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable, PausableUpgradeable, Ownable, IERC2981Upgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeERC20 for IERC20;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
     address public protocolFeeRecipient;
@@ -36,6 +34,8 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
     mapping(string => QuestData) public quests; // questId => QuestData
     mapping(uint256 => string) public tokenIdToQuestId; // tokenId => questId
 
+    using SafeTransferLib for address;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -51,7 +51,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
         collectionName = collectionName_;
         __ERC1155_init("");
         __ERC1155Supply_init();
-        __Ownable_init();
+        _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
     }
@@ -105,8 +105,7 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
 
         _mint(to_, quest.tokenId, 1, "");
 
-        (bool success, ) = protocolFeeRecipient.call{value: quest.questFee}("");
-        require(success, 'protocol fee transfer failed');
+        protocolFeeRecipient.safeTransferETH(quest.questFee);
     }
 
     function tokenIdFromQuestId(string memory questId_) public view returns (uint256) {
@@ -149,18 +148,15 @@ contract QuestNFT is Initializable, ERC1155Upgradeable, ERC1155SupplyUpgradeable
             require(quests[tokenIdToQuestId[i]].endTime < block.timestamp, 'Not all Quests have ended');
         }
 
-        if (balance > 0) {
-            (bool success, ) = owner().call{value: balance}("");
-            require(success, 'withdraw remaining tokens failed');
-        }
+        if (balance > 0) owner().safeTransferETH(balance);
 
     }
 
     /// @dev saftey hatch function to transfer tokens sent to the contract to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external nonReentrant {
-        uint erc20Balance = IERC20(erc20Address_).balanceOf(address(this));
-        if (erc20Balance > 0) IERC20(erc20Address_).safeTransfer(owner(), erc20Balance);
+        uint erc20Balance = erc20Address_.balanceOf(address(this));
+        if (erc20Balance > 0) erc20Address_.safeTransfer(owner(), erc20Balance);
     }
 
     /// @dev returns the token uri

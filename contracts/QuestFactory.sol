@@ -3,14 +3,14 @@ pragma solidity =0.8.16;
 pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import {ECDSA} from 'solady/src/utils/ECDSA.sol';
+import {LibClone} from 'solady/src/utils/LibClone.sol';
+import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {SafeERC20, IERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import {ECDSAUpgradeable} from '@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol';
-import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
-import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 
@@ -18,7 +18,8 @@ import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
-    using SafeERC20 for IERC20;
+    using SafeTransferLib for address;
+    using LibClone for address;
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -140,7 +141,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 discountTokenId_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
-        address newQuest = Clones.cloneDeterministic(erc20QuestAddress, keccak256(abi.encodePacked(msg.sender, questId_)));
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
         emit QuestCreated(
             msg.sender,
             address(newQuest),
@@ -191,7 +192,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        IERC20(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
+        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
         QuestContract(newQuest_).queue();
     }
 
@@ -268,7 +269,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param collectionName_ The collection name of the 1155 NFT contract
     /// @return address the QuestNFT contract address
     function createCollection(string memory collectionName_) nonReentrant external returns (address) {
-        address payable newQuestNFT = payable(Clones.cloneDeterministic(questNFTAddress, keccak256(abi.encodePacked(msg.sender, collectionName_))));
+        address payable newQuestNFT = payable(questNFTAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, collectionName_))));
 
         QuestNFTContract(newQuestNFT).initialize(
             protocolFeeRecipient,
@@ -324,8 +325,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(collectionAddress_);
         currentQuest.totalParticipants = data.totalParticipants;
 
-        (bool success, ) = payable(collectionAddress_).call{value: msg.value}("");
-        require(success, "QuestFactory: Failed to send coins to the QuestNFT contract");
+        currentQuest.questAddress.safeTransferETH(msg.value);
 
         emit QuestCreated(
             msg.sender,
@@ -478,9 +478,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes memory signature_) public pure returns (address) {
-        bytes32 messageDigest = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', hash_));
-        return ECDSAUpgradeable.recover(messageDigest, signature_);
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
+        return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
@@ -534,13 +533,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
-            (bool changeSuccess, ) = msg.sender.call{value: change}("");
-            require(changeSuccess, "Failed to return change");
+            msg.sender.safeTransferETH(change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
         // Send the mint fee to the mint fee recipient
-        (bool mintSuccess, ) = getMintFeeRecipient().call{value: mintFee}("");
-        require(mintSuccess, "Failed to send mint fee");
+        getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
     // Receive function to receive ETH
