@@ -43,14 +43,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     QuestTerminalKey private questTerminalKeyContract;
     uint public nftQuestFee;
     address public questNFTAddress;
-    struct QuestNFTData {
-        uint256 startTime;
-        uint256 endTime;
-        uint256 totalParticipants;
-        string questId;
-        string description;
-        string imageIPFSHash;
-    }
     struct QuestData {
         address questAddress;
         address rewardToken;
@@ -74,21 +66,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address rabbitHoleReceiptContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
+        address payable erc1155QuestAddress_,
         address ownerAddress_,
         address questTerminalKeyAddress_,
-        address payable questNFTAddress_,
         uint nftQuestFee_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
+        questFee = 2_000; // in BIPS
+        locked = 1;
         claimSignerAddress = claimSignerAddress_;
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
-        questFee = 2_000; // in BIPS
         erc20QuestAddress = erc20QuestAddress_;
-        locked = 1;
+        erc1155QuestAddress = erc1155QuestAddress_;
         questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
-        questNFTAddress = questNFTAddress_;
         nftQuestFee = nftQuestFee_;
     }
 
@@ -275,6 +267,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         erc20QuestAddress = erc20QuestAddress_;
     }
 
+    /// @dev set erc1155QuestAddress
+    /// @param erc1155QuestAddress_ The address of the erc1155 quest
+    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+        erc1155QuestAddress = erc1155QuestAddress_;
+    }
+
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
     function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
@@ -308,12 +306,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
     function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
         rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-    }
-
-    /// @dev set the questNFT Address
-    /// @param questNFTAddress_ The address of the questNFT
-    function setQuestNFTAddress(address questNFTAddress_) external onlyOwner nonZeroAddress(questNFTAddress_) {
-        questNFTAddress = questNFTAddress_;
     }
 
     /// @dev set the nftQuestFee

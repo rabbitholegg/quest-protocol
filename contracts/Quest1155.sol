@@ -11,7 +11,8 @@ import {QuestFactory} from './QuestFactory.sol';
 
 /// @title Quest
 /// @author RabbitHole.gg
-/// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens
+/// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens.
+/// @dev This contract will not work with RabbitHoleReceipt
 contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownable {
     using SafeTransferLib for address;
 
@@ -19,12 +20,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
     bool public queued;
     address public protocolFeeRecipient;
     address public rewardToken;
-    uint256 public endTime;
-    uint256 public startTime;
-    uint256 public totalParticipants;
-    uint256 public tokenId;
-    uint256 public redeemedTokens;
-    string public questId;
+    uint public endTime;
+    uint public startTime;
+    uint public totalParticipants;
+    uint public tokenId;
+    uint public redeemedTokens;
     uint16 public questFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -40,16 +40,15 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
     error ClaimWindowNotStarted();
     error NotQuestFactory();
 
-    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
+    event ClaimedSingle(address indexed account, address rewardAddress, uint amount);
     event Queued(uint timestamp);
 
     function initialize(
         address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 tokenId_,
-        string memory questId_,
+        uint endTime_,
+        uint startTime_,
+        uint totalParticipants_,
+        uint tokenId_,
         uint16 questFee_,
         address protocolFeeRecipient_
     ) external initializer {
@@ -60,7 +59,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
         rewardToken = rewardTokenAddress_;
         totalParticipants = totalParticipants_;
         tokenId = tokenId_;
-        questId = questId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
@@ -129,19 +127,19 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuard, PausableUpgradeable, Ownab
 
     /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    function maxProtocolReward() external view returns (uint256) {
+    function maxProtocolReward() external view returns (uint) {
         return (totalParticipants * questFee);
     }
 
-    /// @notice Internal function that transfers the rewards
+    /// @notice Internal function that transfers rewards from this contract
     /// @param to_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(address to_, uint256 amount_) internal {
+    function _transferRewards(address to_, uint amount_) internal {
         IERC1155(rewardToken).safeTransferFrom(address(this), to_, tokenId, amount_, '0x00');
     }
 
     /// @dev Function that transfers all 1155 tokens in the contract to the owner
-    /// @notice This function can only be called after the quest end time
+    /// @notice This function can only be called after the quest end time.
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
     }
