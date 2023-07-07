@@ -36,7 +36,7 @@ let records: {
 let resultsLog = ''
 
 export async function story(
-  contract: 'QuestFactory' | 'Quest' | 'QuestNFT' | 'QuestTerminalKey' | 'ReceiptRenderer',
+  contract: 'QuestFactory' | 'Quest' | 'Quest1155' | 'QuestTerminalKey' | 'ReceiptRenderer',
   category: string,
   func: string,
   description: string,

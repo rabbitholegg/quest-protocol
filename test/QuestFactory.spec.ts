@@ -5,26 +5,27 @@ import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Quest,
   SampleERC20,
+  SampleERC1155,
   QuestFactory,
   QuestTerminalKey,
-  QuestNFT,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
   QuestTerminalKey__factory,
-  QuestNFT__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
+  SampleERC1155__factory,
 } from '../typechain-types'
 import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
+  let deployedSampleErc1155Contract: SampleERC1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
   let deployedQuestTerminalKeyContract: QuestTerminalKey
-  let deployedQuestNFTContract: QuestNFT
   let deployedErc20Quest: Quest
+  let deployedErc1155Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
   const rewardAmount = 10
@@ -38,11 +39,11 @@ describe('QuestFactory', () => {
 
   let questFactoryContract: QuestFactory__factory
   let questTerminalKeyContract: QuestTerminalKey__factory
-  let questNFTContract: QuestNFT__factory
-  let questTerminalKey: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
+  let erc1155QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
+  let sampleERC1155Contract: SampleERC1155__factory
   let wallet: Wallet
 
   beforeEach(async () => {
@@ -55,19 +56,21 @@ describe('QuestFactory', () => {
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
-    questNFTContract = await ethers.getContractFactory('QuestNFT')
     erc20QuestContract = await ethers.getContractFactory('Quest')
+    erc1155QuestContract = await ethers.getContractFactory('Quest1155')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+    sampleERC1155Contract = await ethers.getContractFactory('SampleERC1155')
 
     await deploySampleErc20Contract()
+    await deploySampleErc1155Contract()
     await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
     await deployQuestTerminalKey()
   })
 
   const deployQuestTerminalKey = async () => {
-    deployedQuestTerminalKeyContract = await upgrades.deployProxy(questTerminalKeyContract, [
+    deployedQuestTerminalKeyContract = (await upgrades.deployProxy(questTerminalKeyContract, [
       royaltyRecipient.address,
       protocolRecipient.address,
       deployedFactoryContract.address,
@@ -75,7 +78,7 @@ describe('QuestFactory', () => {
       owner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
       'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
-    ])
+    ])) as QuestTerminalKey
 
     deployedFactoryContract.setQuestTerminalKeyContract(deployedQuestTerminalKeyContract.address)
   }
@@ -83,17 +86,17 @@ describe('QuestFactory', () => {
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
     await deployedErc20Quest.deployed()
-    deployedQuestNFTContract = await questNFTContract.deploy()
-    await deployedQuestNFTContract.deployed()
+    deployedErc1155Quest = await erc1155QuestContract.deploy()
+    await deployedErc1155Quest.deployed()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
+      deployedErc1155Quest.address,
       owner.address,
       owner.address, // this will become the questTerminalKey contract
-      deployedQuestNFTContract.address,
       nftQuestFee,
     ])) as QuestFactory
 
@@ -103,6 +106,11 @@ describe('QuestFactory', () => {
   const deploySampleErc20Contract = async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', '1000000000', owner.address)
     await deployedSampleErc20Contract.deployed()
+  }
+
+  const deploySampleErc1155Contract = async () => {
+    deployedSampleErc1155Contract = await sampleERC1155Contract.deploy()
+    await deployedSampleErc1155Contract.deployed()
   }
 
   const deployRabbitHoleReceiptContract = async () => {
@@ -446,7 +454,46 @@ describe('QuestFactory', () => {
     })
   })
 
-  describe('create1155QuestAndQueue()', () => {})
+  describe('create1155QuestAndQueue()', () => {
+    const erc1155QuestId = 'erc1155'
+    const totalParticipants = 10
+
+    it('Slould revert when msg.value is less than questFee', async () => {
+      await expect(
+        deployedFactoryContract.create1155QuestAndQueue(
+          deployedSampleErc1155Contract.address,
+          expiryDate,
+          startDate,
+          totalParticipants,
+          1,
+          erc1155QuestId
+        )
+      ).to.be.revertedWithCustomError(questFactoryContract, 'MsgValueLessThanQuestNFTFee')
+    })
+
+    it('Should create a new 1155 quest and queue it', async () => {
+      deployedSampleErc1155Contract.batchMint(owner.address, [1], [10])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        totalParticipants,
+        1,
+        erc1155QuestId,
+        { value: nftQuestFee * totalParticipants }
+      )
+
+      const questAddress = (await deployedFactoryContract.quests(erc1155QuestId)).questAddress
+      const quest = await ethers.getContractAt('Quest1155', questAddress)
+      expect(await quest.totalParticipants()).to.equal(totalParticipants)
+      expect(await quest.queued()).to.equal(true)
+      expect(await quest.owner()).to.equal(owner.address)
+      expect(await ethers.provider.getBalance(questAddress)).to.equal(nftQuestFee * totalParticipants)
+      expect(await deployedSampleErc1155Contract.balanceOf(questAddress, 1)).to.equal(10)
+    })
+  })
 
   describe('questData()', () => {
     const erc20QuestId = 'abc123'
