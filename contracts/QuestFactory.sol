@@ -4,15 +4,17 @@ pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
+import {IQuestUniversal} from './interfaces/IQuestUniversal.sol';
 import {Quest as QuestContract} from './Quest.sol';
+import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
-import {QuestNFT as QuestNFTContract} from "./QuestNFT.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -109,7 +111,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
-    /// @dev Create an erc20 quest, only accounts with the CREATE_QUEST_ROLE can create quests
     modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
@@ -253,6 +254,61 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
         if(bytes(jsonSpecCID).length > 0) QuestContract(newQuest).setJsonSpecCID(jsonSpecCID);
         QuestContract(newQuest).transferOwnership(msg.sender);
+
+        return newQuest;
+    }
+
+    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
+    /// @param questId_ The id of the quest
+    /// @return address the quest contract address
+    function create1155QuestAndQueue(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_
+    ) external payable nonReentrant returns (address) {
+        Quest storage currentQuest = quests[questId_];
+
+        if (msg.value < totalQuestNFTFee(totalParticipants_)) revert MsgValueLessThanQuestNFTFee();
+        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
+
+        address payable newQuest = payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+        currentQuest.questAddress = address(newQuest);
+        currentQuest.totalParticipants = totalParticipants_;
+        currentQuest.questAddress.safeTransferETH(msg.value);
+
+        Quest1155Contract(newQuest).initialize(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            tokenId_,
+            nftQuestFee,
+            protocolFeeRecipient
+        );
+
+        IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, '0x00');
+        Quest1155Contract(newQuest).queue();
+        Quest1155Contract(newQuest).transferOwnership(msg.sender);
+
+        emit QuestCreated(
+            msg.sender,
+            address(newQuest),
+            questId_,
+            "erc1155",
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            tokenId_
+        );
 
         return newQuest;
     }
@@ -401,7 +457,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        QuestContract questContract_ = QuestContract(currentQuest.questAddress);
+        IQuestUniversal questContract_ = IQuestUniversal(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
