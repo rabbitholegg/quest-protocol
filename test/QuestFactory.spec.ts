@@ -529,6 +529,7 @@ describe('QuestFactory', () => {
 
   describe('claimRewards()', () => {
     const erc20QuestId = 'rewardQuestId'
+    const erc1155QuestId = 'erc1155Id'
     const maxTotalRewards = totalRewards * rewardAmount
     const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
     const transferAmount = maxTotalRewards + maxProtocolReward
@@ -568,6 +569,30 @@ describe('QuestFactory', () => {
       await time.setNextBlockTimestamp(startDate)
       await deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(questUser.address)).to.equal(rewardAmount)
+    })
+
+    it('Should claim rewards from a 1155 Quest', async () => {
+      const NFTTokenId = 99
+      const maxParticipants = 10
+      messageHash = utils.solidityKeccak256(['address', 'string'], [questUser.address.toLowerCase(), erc1155QuestId])
+      signature = await wallet.signMessage(utils.arrayify(messageHash))
+      deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        maxParticipants,
+        NFTTokenId,
+        erc1155QuestId,
+        { value: nftQuestFee * maxParticipants }
+      )
+      await time.setNextBlockTimestamp(startDate)
+
+      await deployedFactoryContract.connect(questUser).claimRewards(erc1155QuestId, messageHash, signature)
+
+      expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
     })
 
     it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
