@@ -7,9 +7,11 @@ import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/acce
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
+import {LibString} from 'solady/src/utils/LibString.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
-import {IQuestUniversal} from './interfaces/IQuestUniversal.sol';
+import {IQuest} from './interfaces/IQuest.sol';
+import {IQuest1155} from './interfaces/IQuest1155.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
@@ -22,6 +24,7 @@ import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeTransferLib for address;
     using LibClone for address;
+    using LibString for string;
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -29,6 +32,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address questAddress;
         uint totalParticipants;
         uint numberMinted;
+        string questType;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -149,6 +153,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
+        currentQuest.questType = "erc20";
 
         if(discountTokenId_ == 0){
             protocolFee = questFee;
@@ -283,6 +288,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
+        currentQuest.questType = "erc1155";
 
         Quest1155Contract(newQuest).initialize(
             rewardTokenAddress_,
@@ -457,7 +463,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
         Quest storage currentQuest = quests[questId_];
-        IQuestUniversal questContract_ = IQuestUniversal(currentQuest.questAddress);
+        IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
@@ -469,6 +475,26 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if(mintFee > 0) processMintFee();
 
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+    }
+
+    /// @dev claim rewards for a quest
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+        Quest storage currentQuest = quests[questId_];
+        IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
+        if (!questContract_.queued()) revert QuestNotQueued();
+        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
+        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
+
+        currentQuest.addressMinted[msg.sender] = true;
+        ++currentQuest.numberMinted;
+        questContract_.singleClaim(msg.sender);
+
+        if(mintFee > 0) processMintFee();
+
+        emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
     }
 
     /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract

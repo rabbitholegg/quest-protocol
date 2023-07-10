@@ -30,6 +30,17 @@ interface IQuestFactory {
         uint totalParticipants,
         uint rewardAmountOrTokenId
     );
+     event Quest1155Created(
+        address indexed creator,
+        address indexed contractAddress,
+        string questId,
+        string contractType,
+        address rewardTokenAddress,
+        uint endTime,
+        uint startTime,
+        uint totalParticipants,
+        uint rewardAmountOrTokenId
+    );
     event ReceiptMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
     event QuestNFTMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
     event MintFeeSet(uint percent);
