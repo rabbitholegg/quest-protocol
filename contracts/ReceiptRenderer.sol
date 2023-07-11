@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.18;
 
 import {Base64} from 'solady/src/utils/Base64.sol';

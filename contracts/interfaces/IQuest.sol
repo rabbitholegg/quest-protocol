@@ -1,8 +1,6 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.18;
 
-// TODO clean this whole thing up
-// Allows anyone to claim a token if they exist in a merkle root.
 interface IQuest {
     event Claimed(address indexed account, address rewardAddress, uint256 amount);
     event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
