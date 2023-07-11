@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 pragma experimental ABIEncoderV2;
 
@@ -132,7 +132,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         revert Deprecated();
     }
 
-    function createQuestInternal(
+    function createERC20QuestInternal(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -215,7 +215,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory, // was contractType_ , currently deprecated.
         string memory questId_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createQuestInternal(
+        address newQuest = createERC20QuestInternal(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -250,7 +250,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory jsonSpecCID,
         uint256 discountTokenId_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createQuestInternal(
+        address newQuest = createERC20QuestInternal(
             rewardTokenAddress_,
             endTime_,
             startTime_,

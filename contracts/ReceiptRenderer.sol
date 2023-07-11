@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
 import {Base64} from 'solady/src/utils/Base64.sol';

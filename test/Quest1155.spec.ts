@@ -128,7 +128,7 @@ describe('Quest1155 Contract', async () => {
   })
 
   describe('withdrawRemainingTokens', () => {
-    it('should revert if the contract is still queued', async () => {
+    it('should revert if the contract is not queued', async () => {
       await expect(quest1155.withdrawRemainingTokens()).to.be.revertedWithCustomError(quest1155, 'NotQueued')
     })
 
