@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-interface IQuest {
-startTime
-endTime
-singleClaim
-
-rewardToken
-rewardAmountInWei
-
-    function isClaimed(uint256 tokenId_) external view returns (bool);
-
+interface IQuest1155 {
+    function singleClaim(address account) external;
+    function queued() external view returns (bool);
+    function startTime() external view returns (uint256);
+    function endTime() external view returns (uint256);
+    function rewardToken() external view returns (address);
+    function tokenId() external view returns (uint256);
 }

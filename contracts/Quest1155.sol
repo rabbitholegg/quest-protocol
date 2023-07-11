@@ -134,12 +134,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         return (totalParticipants * questFee);
     }
 
-    /// @notice Function to match the interface of the ERC20Quest for the QuestClaimed event
-    /// @return The tokenId
-    function rewardAmountInWei() external view returns (uint) {
-        return tokenId;
-    }
-
     /// @dev Function that transfers all 1155 tokens and ETH in the contract to the owner
     /// @notice This function can only be called after the quest end time.
     function withdrawRemainingTokens() external nonReentrant onlyQueued onlyEnded {
