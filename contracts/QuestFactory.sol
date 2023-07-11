@@ -512,23 +512,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit QuestNFTMinted(msg.sender, currentQuest.questAddress, QuestNFTContract(payable(currentQuest.questAddress)).tokenIdFromQuestId(questId_), questId_);
     }
 
-    /// @dev mint a RabbitHole Receipt. Note: this contract must be set as Minter on the receipt contract
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function mintReceipt(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant claimChecks(questId_, hash_, signature_) {
-        Quest storage currentQuest = quests[questId_];
-        if (!QuestContract(currentQuest.questAddress).queued()) revert QuestNotQueued();
-        if (block.timestamp < QuestContract(currentQuest.questAddress).startTime()) revert QuestNotStarted();
-        if (block.timestamp > QuestContract(currentQuest.questAddress).endTime()) revert QuestEnded();
-
-        currentQuest.addressMinted[msg.sender] = true;
-        ++currentQuest.numberMinted;
-        rabbitHoleReceiptContract.mint(msg.sender, questId_);
-
-        emit ReceiptMinted(msg.sender, quests[questId_].questAddress, rabbitHoleReceiptContract.getTokenId(), questId_);
-    }
-
     function processMintFee() private {
         uint change = msg.value - mintFee;
         if (change > 0) {

@@ -378,15 +378,12 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from owner', async () => {
-      await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
       await deployedQuestContract.queue()
-
       await time.setNextBlockTimestamp(startDate + 1)
-      await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
-      await deployedQuestContract.connect(firstAddress).claim()
+      await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
 
-      await time.setNextBlockTimestamp(expiryDate + 1000)
+      await time.setNextBlockTimestamp(expiryDate + 1)
       await deployedQuestContract.withdrawRemainingTokens()
 
       const receiptRedeemers = (await deployedQuestContract.receiptRedeemers()).toNumber()
@@ -404,41 +401,26 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from protocolFeeRecipient', async () => {
-      await deployedRabbitholeReceiptContract.setMinterAddress(deployedFactoryContract.address)
       await deployedQuestContract.queue()
-
       await time.setNextBlockTimestamp(startDate + 1)
-      await deployedFactoryContract.connect(firstAddress).mintReceipt(questId, messageHash, signature)
-      const secondMessageHash = utils.solidityKeccak256(
-        ['address', 'string'],
-        [secondAddress.address.toLowerCase(), questId]
-      )
-      const secondSignature = await wallet.signMessage(utils.arrayify(secondMessageHash))
-      await deployedFactoryContract.connect(secondAddress).mintReceipt(questId, secondMessageHash, secondSignature)
-      await time.setNextBlockTimestamp(expiryDate + 1)
-      await deployedQuestContract.connect(firstAddress).claim()
+      await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
 
-      await time.setNextBlockTimestamp(expiryDate + 2)
+      await time.setNextBlockTimestamp(expiryDate + 1)
       await deployedQuestContract.connect(protocolFeeRecipient).withdrawRemainingTokens()
 
       const receiptRedeemers = (await deployedQuestContract.receiptRedeemers()).toNumber()
-      expect(receiptRedeemers).to.equal(2)
+      expect(receiptRedeemers).to.equal(1)
 
       const protocolFee = (await deployedQuestContract.protocolFee()).toNumber()
-      expect(protocolFee).to.equal(400) // 2 * 1000 * (2000 / 10000) = 400
+      expect(protocolFee).to.equal(200) // 1 * 1000 * (2000 / 10000) = 200
 
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
+      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(0)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
         totalRewardsPlusFee - receiptRedeemers * rewardAmount - protocolFee
       )
 
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee)
-
-      await expect(deployedQuestContract.connect(protocolFeeRecipient).withdrawRemainingTokens()).to.be.revertedWith(
-        'Already withdrawn'
-      )
-      expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(rewardAmount)
     })
   })
 
