@@ -18,6 +18,7 @@ interface IQuestFactory {
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
     error MsgValueLessThanQuestNFTFee();
+    error Deprecated();
 
     event QuestCreated(
         address indexed creator,
