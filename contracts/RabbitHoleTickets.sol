@@ -98,19 +98,18 @@ contract RabbitHoleTickets is
     }
 
     /// @dev returns the token uri
-    /// @param tokenId_ the token id
-    function uri(uint256 tokenId_)
+    function uri(uint256)
         public
         view
         override(ERC1155)
         returns (string memory)
     {
-        bytes memory dataURI = generateDataURI(tokenId_);
+        bytes memory dataURI = generateDataURI();
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
-    function generateDataURI(uint256 tokenId_) internal view virtual returns (bytes memory) {
+    function generateDataURI() internal view virtual returns (bytes memory) {
         bytes memory dataURI = abi.encodePacked(
             '{',
             '"name": "',
