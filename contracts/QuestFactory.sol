@@ -328,18 +328,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest1155Contract(newQuest).transferOwnership(msg.sender);
 
         if (bytes(actionSpec_).length > 0) {
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                "erc20",
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                tokenId_
-            );
-       } else {
             emit QuestCreatedWithAction(
                 msg.sender,
                 address(newQuest),
@@ -351,6 +339,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 totalParticipants_,
                 tokenId_,
                 actionSpec_
+            );
+        } else {
+            emit QuestCreated(
+                msg.sender,
+                address(newQuest),
+                questId_,
+                "erc20",
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_
             );
         }
 
