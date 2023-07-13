@@ -19,10 +19,10 @@ async function main() {
   // await hre.run('verify:verify', { address: erc20Quest.address })
 
   // deploy new 1155 quest implementation
-  const erc1155Quest = await Erc1155Quest.deploy()
-  await erc1155Quest.deployed()
-  console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
-  await hre.run('verify:verify', { address: erc1155Quest.address })
+  // const erc1155Quest = await Erc1155Quest.deploy()
+  // await erc1155Quest.deployed()
+  // console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
+  // await hre.run('verify:verify', { address: erc1155Quest.address })
 
   // // deploy new quest nft implementation
   // const questNFT = await QuestNFT.deploy()
@@ -34,12 +34,12 @@ async function main() {
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
-  // await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
-  // const questFactoryImp = await QuestFactory.deploy()
-  // await questFactoryImp.deployed()
-  // console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
-  // await hre.run('verify:verify', { address: questFactoryImp.address })
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
+  const questFactoryImp = await QuestFactory.deploy()
+  await questFactoryImp.deployed()
+  console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
+  await hre.run('verify:verify', { address: questFactoryImp.address })
 
   // Validates and deploys a new implementation contract for RabbitHoleReceipt
   // await hre.upgrades.forceImport(rabbitHoleReceiptAddress, RabbitHoleReceipt)
