@@ -65,16 +65,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         __ReentrancyGuard_init();
     }
 
-    /// @dev set jsonSpecCID only if its empty
-    /// @param jsonSpecCID_ The jsonSpecCID to set
-    function setJsonSpecCID(string memory jsonSpecCID_) external onlyOwner {
-        require(bytes(jsonSpecCID_).length > 0, 'jsonSpecCID cannot be empty');
-        require(bytes(jsonSpecCID).length == 0, 'jsonSpecCID already set');
-
-        jsonSpecCID = jsonSpecCID_;
-        emit JsonSpecCIDSet(jsonSpecCID_);
-    }
-
     /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
     function totalTransferAmount() external view returns (uint256) {
         return this.maxTotalRewards() + this.maxProtocolReward();

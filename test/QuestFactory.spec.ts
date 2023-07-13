@@ -248,25 +248,55 @@ describe('QuestFactory', () => {
       // approve the quest factory to spend the reward token
       await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
 
-      const tx = await deployedFactoryContract.createQuestAndQueue(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        rewardAmount,
-        erc20QuestId,
-        'jsonSpecCid',
-        0
-      )
+      await expect(
+        deployedFactoryContract.createQuestAndQueue(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          rewardAmount,
+          erc20QuestId,
+          '',
+          0
+        )
+      ).to.emit(deployedFactoryContract, 'QuestCreated')
 
-      await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
       const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
       expect(await deployedErc20Quest.startTime()).to.equal(startDate)
       expect(await deployedErc20Quest.owner()).to.equal(owner.address)
 
       expect(await deployedErc20Quest.queued()).to.equal(true)
-      expect(await deployedErc20Quest.jsonSpecCID()).to.equal('jsonSpecCid')
+      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
+    })
+
+    it('createQuestAndQueue should create a new quest and start it with an actionSpec', async () => {
+      const maxTotalRewards = totalRewards * rewardAmount
+      const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
+      const transferAmount = maxTotalRewards + maxProtocolReward
+
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+
+      await expect(
+        deployedFactoryContract.createQuestAndQueue(
+          deployedSampleErc20Contract.address,
+          expiryDate,
+          startDate,
+          totalRewards,
+          rewardAmount,
+          erc20QuestId,
+          'actionSpecJSON',
+          0
+        )
+      ).to.emit(deployedFactoryContract, 'QuestCreatedWithAction')
+
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
+      expect(await deployedErc20Quest.startTime()).to.equal(startDate)
+      expect(await deployedErc20Quest.owner()).to.equal(owner.address)
+
+      expect(await deployedErc20Quest.queued()).to.equal(true)
       expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
     })
 
