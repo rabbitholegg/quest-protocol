@@ -549,6 +549,7 @@ describe('QuestFactory', () => {
         maxParticipants,
         NFTTokenId,
         erc1155QuestId,
+        '',
         { value: nftQuestFee * maxParticipants }
       )
       await time.setNextBlockTimestamp(startDate)

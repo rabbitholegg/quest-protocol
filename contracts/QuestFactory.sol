@@ -299,7 +299,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        string memory questId_
+        string memory questId_,
+        string memory actionSpec_
     ) external payable nonReentrant returns (address) {
         Quest storage currentQuest = quests[questId_];
 
@@ -326,7 +327,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest1155Contract(newQuest).queue();
         Quest1155Contract(newQuest).transferOwnership(msg.sender);
 
-        emit QuestCreated(
+        emit QuestCreatedWithAction(
             msg.sender,
             address(newQuest),
             questId_,
@@ -335,7 +336,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             endTime_,
             startTime_,
             totalParticipants_,
-            tokenId_
+            tokenId_,
+            actionSpec_
         );
 
         return newQuest;
