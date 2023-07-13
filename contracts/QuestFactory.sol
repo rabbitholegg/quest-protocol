@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.8.16;
+pragma solidity ^0.8.16;
 pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
@@ -138,21 +138,38 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory questId_,
-        uint256 discountTokenId_
+        uint256 discountTokenId_,
+        string memory actionSpec_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
         address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
-        emit QuestCreated(
-            msg.sender,
-            address(newQuest),
-            questId_,
-            "erc20",
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_
-        );
+
+        if (bytes(actionSpec_).length > 0) {
+            emit QuestCreatedWithAction(
+                msg.sender,
+                address(newQuest),
+                questId_,
+                "erc20",
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                actionSpec_
+            );
+       } else {
+            emit QuestCreated(
+                msg.sender,
+                address(newQuest),
+                questId_,
+                "erc20",
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_
+            );
+        }
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
@@ -220,7 +237,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            0
+            0,
+            ""
         );
 
         QuestContract(newQuest).transferOwnership(msg.sender);
@@ -235,7 +253,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
-    /// @param jsonSpecCID The CID of the JSON spec for the quest
+    /// @param actionSpec_ The JSON action spec for the quest
     /// @param discountTokenId_ The id of the discount token
     /// @return address the quest contract address
     function createQuestAndQueue(
@@ -245,7 +263,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory questId_,
-        string memory jsonSpecCID,
+        string memory actionSpec_,
         uint256 discountTokenId_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createQuestInternal(
@@ -255,11 +273,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            discountTokenId_
+            discountTokenId_,
+            actionSpec_
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        if(bytes(jsonSpecCID).length > 0) QuestContract(newQuest).setJsonSpecCID(jsonSpecCID);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
