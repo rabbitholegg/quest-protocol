@@ -455,6 +455,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function questData(string memory questId_) external view returns (QuestData memory) {
         Quest storage thisQuest = quests[questId_];
         QuestContract questContract = QuestContract(thisQuest.questAddress);
+        uint rewardAmountOrTokenId;
+        bool hasWithdrawn;
+
+        if(thisQuest.questType.eq("erc1155")) {
+            rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
+        }else{
+            rewardAmountOrTokenId = questContract.rewardAmountInWei();
+            hasWithdrawn = questContract.hasWithdrawn();
+        }
 
         QuestData memory data = QuestData(
             thisQuest.questAddress,
@@ -466,8 +475,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questContract.totalParticipants(),
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
-            questContract.rewardAmountInWei(),
-            questContract.hasWithdrawn()
+            rewardAmountOrTokenId,
+            hasWithdrawn
         );
 
         return data;

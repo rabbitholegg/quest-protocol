@@ -397,8 +397,9 @@ describe('QuestFactory', () => {
 
   describe('questData()', () => {
     const erc20QuestId = 'abc123'
+    const erc1155QuestId = 'def456'
 
-    it('Should return the correct quest data', async () => {
+    it('Should return the correct quest data for erc20 quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
       await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
@@ -422,6 +423,47 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
+        false,
+      ])
+    })
+
+    it('Should return the correct quest data for erc1155 quest', async () => {
+      const NFTTokenId = 99
+      const maxParticipants = 10
+      const messageHash = utils.solidityKeccak256(
+        ['address', 'string'],
+        [questUser.address.toLowerCase(), erc1155QuestId]
+      )
+      const signature = await wallet.signMessage(utils.arrayify(messageHash))
+      deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        maxParticipants,
+        NFTTokenId,
+        erc1155QuestId,
+        '',
+        { value: nftQuestFee * maxParticipants }
+      )
+      await time.setNextBlockTimestamp(startDate)
+      await deployedFactoryContract.connect(questUser).claim1155Rewards(erc1155QuestId, messageHash, signature)
+
+      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
+      const questData = await deployedFactoryContract.questData(erc1155QuestId)
+      expect(questData).to.eql([
+        questAddress,
+        deployedSampleErc1155Contract.address,
+        true,
+        nftQuestFee,
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
+        ethers.BigNumber.from(maxParticipants),
+        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(NFTTokenId),
         false,
       ])
     })
