@@ -397,7 +397,7 @@ describe('QuestFactory', () => {
 
   describe('questData()', () => {
     const erc20QuestId = 'abc123'
-    const erc1155QuestId = 'def456'
+    const erc1155QuestId = '803e60d8-7c16-4ce5-8063-f9e284644bcd'
 
     it('Should return the correct quest data for erc20 quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
@@ -416,7 +416,7 @@ describe('QuestFactory', () => {
         questAddress,
         deployedSampleErc20Contract.address,
         false,
-        2000, // questFee
+        '2000', // questFee
         ethers.BigNumber.from(startDate),
         ethers.BigNumber.from(expiryDate),
         ethers.BigNumber.from(totalRewards),
@@ -457,7 +457,7 @@ describe('QuestFactory', () => {
         questAddress,
         deployedSampleErc1155Contract.address,
         true,
-        nftQuestFee,
+        nftQuestFee.toString(),
         ethers.BigNumber.from(startDate),
         ethers.BigNumber.from(expiryDate),
         ethers.BigNumber.from(maxParticipants),

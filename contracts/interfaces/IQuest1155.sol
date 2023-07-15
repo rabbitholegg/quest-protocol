@@ -8,4 +8,5 @@ interface IQuest1155 {
     function endTime() external view returns (uint256);
     function rewardToken() external view returns (address);
     function tokenId() external view returns (uint256);
+    function questFee() external view returns (uint256);
 }

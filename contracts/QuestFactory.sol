@@ -25,6 +25,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     using SafeTransferLib for address;
     using LibClone for address;
     using LibString for string;
+    using LibString for uint256;
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
     struct Quest {
@@ -53,7 +54,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address questAddress;
         address rewardToken;
         bool queued;
-        uint16 questFee;
+        string questFee;
         uint startTime;
         uint endTime;
         uint totalParticipants;
@@ -456,20 +457,23 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest storage thisQuest = quests[questId_];
         QuestContract questContract = QuestContract(thisQuest.questAddress);
         uint rewardAmountOrTokenId;
+        string memory castedQuestFee;
         bool hasWithdrawn;
 
         if(thisQuest.questType.eq("erc1155")) {
             rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
+            castedQuestFee = IQuest1155(thisQuest.questAddress).questFee().toString();
         }else{
             rewardAmountOrTokenId = questContract.rewardAmountInWei();
             hasWithdrawn = questContract.hasWithdrawn();
+            castedQuestFee = uint(questContract.questFee()).toString();
         }
 
         QuestData memory data = QuestData(
             thisQuest.questAddress,
             questContract.rewardToken(),
             questContract.queued(),
-            questContract.questFee(),
+            castedQuestFee,
             questContract.startTime(),
             questContract.endTime(),
             questContract.totalParticipants(),
