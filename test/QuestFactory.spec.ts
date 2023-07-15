@@ -416,7 +416,7 @@ describe('QuestFactory', () => {
         questAddress,
         deployedSampleErc20Contract.address,
         false,
-        '2000', // questFee
+        2000, // questFee
         ethers.BigNumber.from(startDate),
         ethers.BigNumber.from(expiryDate),
         ethers.BigNumber.from(totalRewards),
@@ -457,7 +457,7 @@ describe('QuestFactory', () => {
         questAddress,
         deployedSampleErc1155Contract.address,
         true,
-        nftQuestFee.toString(),
+        0, //always zero for erc1155
         ethers.BigNumber.from(startDate),
         ethers.BigNumber.from(expiryDate),
         ethers.BigNumber.from(maxParticipants),

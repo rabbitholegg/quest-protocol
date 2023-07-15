@@ -54,7 +54,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address questAddress;
         address rewardToken;
         bool queued;
-        string questFee;
+        uint16 questFee;
         uint startTime;
         uint endTime;
         uint totalParticipants;
@@ -457,23 +457,22 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         Quest storage thisQuest = quests[questId_];
         QuestContract questContract = QuestContract(thisQuest.questAddress);
         uint rewardAmountOrTokenId;
-        string memory castedQuestFee;
+        uint16 erc20QuestFee;
         bool hasWithdrawn;
 
         if(thisQuest.questType.eq("erc1155")) {
             rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
-            castedQuestFee = IQuest1155(thisQuest.questAddress).questFee().toString();
         }else{
             rewardAmountOrTokenId = questContract.rewardAmountInWei();
             hasWithdrawn = questContract.hasWithdrawn();
-            castedQuestFee = uint(questContract.questFee()).toString();
+            erc20QuestFee = questContract.questFee();
         }
 
         QuestData memory data = QuestData(
             thisQuest.questAddress,
             questContract.rewardToken(),
             questContract.queued(),
-            castedQuestFee,
+            erc20QuestFee,
             questContract.startTime(),
             questContract.endTime(),
             questContract.totalParticipants(),
