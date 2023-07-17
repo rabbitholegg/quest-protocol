@@ -18,6 +18,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     QuestFactory public questFactoryContract;
     bool public queued;
+    bool public hasWithdrawn;
     address public protocolFeeRecipient;
     address public rewardToken;
     uint public endTime;
@@ -41,6 +42,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     error NotQueued();
     error NotQuestFactory();
     error QuestEnded();
+    error AlreadyWithdrawn();
 
     event ClaimedSingle(address indexed account, address rewardAddress, uint amount);
     event Queued(uint timestamp);
@@ -137,6 +139,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @dev Function that transfers all 1155 tokens and ETH in the contract to the owner
     /// @notice This function can only be called after the quest end time.
     function withdrawRemainingTokens() external nonReentrant onlyQueued onlyEnded {
+        if (hasWithdrawn) revert AlreadyWithdrawn();
+
+        hasWithdrawn = true;
+
         owner().safeTransferETH(address(this).balance);
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
     }

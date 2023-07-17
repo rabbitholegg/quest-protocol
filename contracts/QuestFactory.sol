@@ -60,7 +60,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         uint redeemedTokens;
-        uint rewardAmountInWei;
+        uint rewardAmountOrTokenId;
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
@@ -458,13 +458,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         QuestContract questContract = QuestContract(thisQuest.questAddress);
         uint rewardAmountOrTokenId;
         uint16 erc20QuestFee;
-        bool hasWithdrawn;
 
         if(thisQuest.questType.eq("erc1155")) {
             rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
         }else{
             rewardAmountOrTokenId = questContract.rewardAmountInWei();
-            hasWithdrawn = questContract.hasWithdrawn();
             erc20QuestFee = questContract.questFee();
         }
 
@@ -479,7 +477,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            hasWithdrawn
+            questContract.hasWithdrawn()
         );
 
         return data;
