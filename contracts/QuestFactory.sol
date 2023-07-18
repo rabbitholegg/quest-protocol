@@ -346,7 +346,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 msg.sender,
                 address(newQuest),
                 questId_,
-                "erc20",
+                "erc1155",
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
