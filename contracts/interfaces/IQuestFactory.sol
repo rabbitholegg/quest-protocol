@@ -17,6 +17,7 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
+    error ReferralFeeTooHigh();
 
     event QuestCreated(
         address indexed creator,
@@ -43,11 +44,13 @@ interface IQuestFactory {
     );
     event ReceiptMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
     event QuestNFTMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
-    event MintFeeSet(uint percent);
+    event MintFeeSet(uint amount);
+    event ReferralFeeSet(uint16 percent);
     event ExtraMintFeeReturned(address indexed recipient, uint amount);
     event NftQuestFeeSet(uint fee);
     event QuestNFTCreated(address indexed newQuestNFT, address questCreator, string collectionName);
     event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei);
+    event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei, address referrer);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

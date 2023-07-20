@@ -65,6 +65,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
+    uint16 public referralFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -77,7 +78,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address ownerAddress_,
         address questTerminalKeyAddress_,
         address payable questNFTAddress_,
-        uint nftQuestFee_
+        uint nftQuestFee_,
+        uint16 referralFee_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -90,6 +92,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
         questNFTAddress = questNFTAddress_;
         nftQuestFee = nftQuestFee_;
+        referralFee = referralFee_;
     }
 
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
@@ -108,6 +111,16 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
         if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        _;
+    }
+
+    modifier claimChecksWithRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
+        Quest storage currentQuest = quests[questId_];
+
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
+        if (keccak256(abi.encodePacked(msg.sender, questId_, ref_)) != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
@@ -420,6 +433,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit NftQuestFeeSet(nftQuestFee_);
     }
 
+    /// @dev set the referral fee
+    /// @param referralFee_ The value of the referralFee
+    function setReferralFee(uint16 referralFee_) external onlyOwner {
+        if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
+        referralFee = referralFee_;
+        emit ReferralFeeSet(referralFee_);
+    }
+
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
@@ -516,6 +537,27 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
     }
 
+    /// @dev claim rewards with a referral address
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecksWithRef(questId_, hash_, signature_, ref_) {
+        Quest storage currentQuest = quests[questId_];
+        QuestContract questContract_ = QuestContract(currentQuest.questAddress);
+        if (!questContract_.queued()) revert QuestNotQueued();
+        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
+        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
+
+        currentQuest.addressMinted[msg.sender] = true;
+        ++currentQuest.numberMinted;
+        questContract_.singleClaim(msg.sender);
+
+        if(mintFee > 0) processMintFee(ref_);
+
+        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_);
+    }
+
     /// @dev mint a QuestNFT.
     /// @notice this contract must be set as Minter on the QuestNFT
     /// @param questId_ The id of the quest
@@ -531,14 +573,24 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function processMintFee() private {
+        processExtraFee();
+        getMintFeeRecipient().safeTransferETH(mintFee);
+    }
+
+    function processMintFee(address ref_) private {
+        processExtraFee();
+        uint referralAmount = (mintFee * referralFee) / 10_000;
+        ref_.safeTransferETH(referralAmount);
+        getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
+    }
+
+    function processExtraFee() private {
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
             msg.sender.safeTransferETH(change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
-        // Send the mint fee to the mint fee recipient
-        getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
     // Receive function to receive ETH
