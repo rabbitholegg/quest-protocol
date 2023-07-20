@@ -5,26 +5,27 @@ import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Quest,
   SampleERC20,
+  SampleERC1155,
   QuestFactory,
   QuestTerminalKey,
-  QuestNFT,
   RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
   QuestTerminalKey__factory,
-  QuestNFT__factory,
   RabbitHoleReceipt__factory,
   SampleERC20__factory,
+  SampleERC1155__factory,
 } from '../typechain-types'
 import { Wallet, utils, constants } from 'ethers'
 
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
+  let deployedSampleErc1155Contract: SampleERC1155
   let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
   let deployedQuestTerminalKeyContract: QuestTerminalKey
-  let deployedQuestNFTContract: QuestNFT
   let deployedErc20Quest: Quest
+  let deployedErc1155Quest: Quest
   let expiryDate: number, startDate: number
   const totalRewards = 1000
   const rewardAmount = 10
@@ -38,11 +39,11 @@ describe('QuestFactory', () => {
 
   let questFactoryContract: QuestFactory__factory
   let questTerminalKeyContract: QuestTerminalKey__factory
-  let questNFTContract: QuestNFT__factory
-  let questTerminalKey: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
+  let erc1155QuestContract: Quest__factory
   let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
+  let sampleERC1155Contract: SampleERC1155__factory
   let wallet: Wallet
 
   beforeEach(async () => {
@@ -55,19 +56,21 @@ describe('QuestFactory', () => {
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
-    questNFTContract = await ethers.getContractFactory('QuestNFT')
     erc20QuestContract = await ethers.getContractFactory('Quest')
+    erc1155QuestContract = await ethers.getContractFactory('Quest1155')
     rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
+    sampleERC1155Contract = await ethers.getContractFactory('SampleERC1155')
 
     await deploySampleErc20Contract()
+    await deploySampleErc1155Contract()
     await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
     await deployQuestTerminalKey()
   })
 
   const deployQuestTerminalKey = async () => {
-    deployedQuestTerminalKeyContract = await upgrades.deployProxy(questTerminalKeyContract, [
+    deployedQuestTerminalKeyContract = (await upgrades.deployProxy(questTerminalKeyContract, [
       royaltyRecipient.address,
       protocolRecipient.address,
       deployedFactoryContract.address,
@@ -75,7 +78,7 @@ describe('QuestFactory', () => {
       owner.address,
       'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
       'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
-    ])
+    ])) as QuestTerminalKey
 
     deployedFactoryContract.setQuestTerminalKeyContract(deployedQuestTerminalKeyContract.address)
   }
@@ -83,17 +86,17 @@ describe('QuestFactory', () => {
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
     await deployedErc20Quest.deployed()
-    deployedQuestNFTContract = await questNFTContract.deploy()
-    await deployedQuestNFTContract.deployed()
+    deployedErc1155Quest = await erc1155QuestContract.deploy()
+    await deployedErc1155Quest.deployed()
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
       deployedRabbitHoleReceiptContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
+      deployedErc1155Quest.address,
       owner.address,
       owner.address, // this will become the questTerminalKey contract
-      deployedQuestNFTContract.address,
       nftQuestFee,
     ])) as QuestFactory
 
@@ -103,6 +106,11 @@ describe('QuestFactory', () => {
   const deploySampleErc20Contract = async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy('RewardToken', 'RTC', '1000000000', owner.address)
     await deployedSampleErc20Contract.deployed()
+  }
+
+  const deploySampleErc1155Contract = async () => {
+    deployedSampleErc1155Contract = await sampleERC1155Contract.deploy()
+    await deployedSampleErc1155Contract.deployed()
   }
 
   const deployRabbitHoleReceiptContract = async () => {
@@ -387,212 +395,11 @@ describe('QuestFactory', () => {
     })
   })
 
-  describe('createCollection()', () => {
-    it('Should create a quest NFT collection', async () => {
-      const tx = await deployedFactoryContract.createCollection('collectionName')
-      const receipt = await tx.wait()
-      let newQuestNFTAddress = ''
-
-      receipt.events.forEach((event) => {
-        if (event.event === 'QuestNFTCreated') {
-          newQuestNFTAddress = event.args.newQuestNFT
-        }
-      })
-      expect(await deployedFactoryContract.ownerCollectionsByOwner(owner.address)).to.eql([newQuestNFTAddress])
-      expect(await deployedFactoryContract.ownerCollections(owner.address, 0)).to.equal(newQuestNFTAddress)
-    })
-  })
-
-  describe('addQuestToCollection()', () => {
-    it('Should add a quest to a collection', async () => {
-      const totalParticipants = 10
-      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createCollection('collectionName')
-      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
-
-      const tx = await deployedFactoryContract
-        .connect(owner)
-        .addQuestToCollection(
-          collectionAddress,
-          startDate,
-          expiryDate,
-          totalParticipants,
-          'NFTQuestID',
-          'NFT Description',
-          'ImageipfsHash',
-          { value: transferAmount.toNumber() }
-        )
-      await tx.wait()
-
-      const deployedNFTQuest = await ethers.getContractAt('QuestNFT', collectionAddress)
-
-      expect(await deployedNFTQuest.quests('NFTQuestID')).to.eql([
-        ethers.BigNumber.from(startDate),
-        ethers.BigNumber.from(expiryDate),
-        ethers.BigNumber.from(10),
-        ethers.BigNumber.from(nftQuestFee),
-        ethers.BigNumber.from(1),
-        'NFT Description',
-        'ImageipfsHash',
-      ])
-      expect(await deployedNFTQuest.owner()).to.equal(owner.address)
-      expect(await ethers.provider.getBalance(deployedNFTQuest.address)).to.eq(transferAmount)
-    })
-
-    it('Should revert when adding a quest to a collection with the same questid', async () => {
-      const totalParticipants = 10
-      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createCollection('collectionName')
-      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
-
-      const tx = await deployedFactoryContract
-        .connect(owner)
-        .addQuestToCollection(
-          collectionAddress,
-          startDate,
-          expiryDate,
-          totalParticipants,
-          'NFTQuestID',
-          'NFT Description',
-          'ImageipfsHash',
-          { value: transferAmount.toNumber() }
-        )
-      await tx.wait()
-
-      await expect(
-        deployedFactoryContract
-          .connect(owner)
-          .addQuestToCollection(
-            collectionAddress,
-            startDate,
-            expiryDate,
-            totalParticipants,
-            'NFTQuestID',
-            'NFT Description',
-            'ImageipfsHash',
-            { value: transferAmount.toNumber() }
-          )
-      ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
-    })
-    it('Should revert when not passing the correct msg.value', async () => {
-      const totalParticipants = 10
-      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createCollection('collectionName')
-      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
-
-      await expect(
-        deployedFactoryContract
-          .connect(owner)
-          .addQuestToCollection(
-            collectionAddress,
-            startDate,
-            expiryDate,
-            totalParticipants,
-            'NFTQuestID',
-            'NFT Description',
-            'ImageipfsHash',
-            { value: transferAmount.toNumber() - 1 }
-          )
-      ).to.be.revertedWith('QuestFactory: msg.value is not equal to the total quest fee')
-    })
-    it('Should revert when not passing the correct msg.value', async () => {
-      const totalParticipants = 10
-      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      await deployedFactoryContract.createCollection('collectionName')
-      const collectionAddress = await deployedFactoryContract.ownerCollections(owner.address, 0)
-
-      await expect(
-        deployedFactoryContract
-          .connect(questUser)
-          .addQuestToCollection(
-            collectionAddress,
-            startDate,
-            expiryDate,
-            totalParticipants,
-            'NFTQuestID',
-            'NFT Description',
-            'ImageipfsHash',
-            { value: transferAmount.toNumber() }
-          )
-      ).to.be.revertedWith('QuestFactory: only the NFT quest owner can call this function')
-    })
-  })
-
-  describe('mintQuestNFT()', () => {
-    const nftQuestId = 'NftQuestId'
-    const totalParticipants = 10
-    let messageHash: string
-    let signature: string
-    let QuestNFT: QuestNFT
-
-    beforeEach(async () => {
-      const transferAmount = await deployedFactoryContract.totalQuestNFTFee(totalParticipants)
-      messageHash = utils.solidityKeccak256(['address', 'string'], [owner.address.toLowerCase(), nftQuestId])
-      signature = await wallet.signMessage(utils.arrayify(messageHash))
-      await deployedFactoryContract.createCollection('collectionName')
-      const collectionAddresses = await deployedFactoryContract.ownerCollectionsByOwner(owner.address)
-      const collectionAddress = collectionAddresses[0]
-
-      const tx = await deployedFactoryContract.addQuestToCollection(
-        collectionAddress,
-        startDate,
-        expiryDate,
-        totalParticipants,
-        nftQuestId,
-        'NFT Description',
-        'ImageipfsHash',
-        { value: transferAmount.toNumber() }
-      )
-      await tx.wait()
-
-      QuestNFT = await ethers.getContractAt('QuestNFT', collectionAddress)
-    })
-
-    it('Should mint a QuestNFT', async () => {
-      await time.setNextBlockTimestamp(startDate + 1)
-      await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      const tokenId = await QuestNFT.tokenIdFromQuestId(nftQuestId)
-      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
-    })
-
-    it('Should fail when trying to mint before quest time has started', async () => {
-      await time.setNextBlockTimestamp(startDate - 1)
-      await expect(deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)).to.be.revertedWith(
-        'Quest not started'
-      )
-    })
-
-    it('Should fail if user tries to use a hash + signature that is not tied to them', async () => {
-      await time.setNextBlockTimestamp(startDate)
-      await expect(
-        deployedFactoryContract.connect(royaltyRecipient).mintQuestNFT(nftQuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidHash')
-    })
-
-    it('Should fail when user tries to mint multiple times', async () => {
-      await time.setNextBlockTimestamp(startDate + 1)
-      await deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      const tokenId = await QuestNFT.tokenIdFromQuestId(nftQuestId)
-      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
-
-      await expect(
-        deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)
-      ).to.be.revertedWithCustomError(questFactoryContract, 'AddressAlreadyMinted')
-      expect(await QuestNFT.balanceOf(owner.address, tokenId)).to.equal(1)
-    })
-
-    it('Should fail when trying to mint after quest time has passed', async () => {
-      await time.setNextBlockTimestamp(expiryDate + 1)
-      await expect(deployedFactoryContract.mintQuestNFT(nftQuestId, messageHash, signature)).to.be.revertedWith(
-        'Quest ended'
-      )
-    })
-  })
-
   describe('questData()', () => {
     const erc20QuestId = 'abc123'
+    const erc1155QuestId = '803e60d8-7c16-4ce5-8063-f9e284644bcd'
 
-    it('Should return the correct quest data', async () => {
+    it('Should return the correct quest data for erc20 quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
       await deployedFactoryContract.createQuest(
         deployedSampleErc20Contract.address,
@@ -616,6 +423,47 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
+        false,
+      ])
+    })
+
+    it('Should return the correct quest data for erc1155 quest', async () => {
+      const NFTTokenId = 99
+      const maxParticipants = 10
+      const messageHash = utils.solidityKeccak256(
+        ['address', 'string'],
+        [questUser.address.toLowerCase(), erc1155QuestId]
+      )
+      const signature = await wallet.signMessage(utils.arrayify(messageHash))
+      deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        maxParticipants,
+        NFTTokenId,
+        erc1155QuestId,
+        '',
+        { value: nftQuestFee * maxParticipants }
+      )
+      await time.setNextBlockTimestamp(startDate)
+      await deployedFactoryContract.connect(questUser).claim1155Rewards(erc1155QuestId, messageHash, signature)
+
+      const questAddress = await deployedFactoryContract.quests(erc1155QuestId).then((res) => res.questAddress)
+      const questData = await deployedFactoryContract.questData(erc1155QuestId)
+      expect(questData).to.eql([
+        questAddress,
+        deployedSampleErc1155Contract.address,
+        true,
+        0, //always zero for erc1155
+        ethers.BigNumber.from(startDate),
+        ethers.BigNumber.from(expiryDate),
+        ethers.BigNumber.from(maxParticipants),
+        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(NFTTokenId),
         false,
       ])
     })
@@ -720,6 +568,37 @@ describe('QuestFactory', () => {
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
         balanceBefore.add(requiredFee)
       )
+    })
+  })
+
+  describe('claim1155Rewards()', () => {
+    it('Should claim rewards from a 1155 Quest', async () => {
+      const NFTTokenId = 99
+      const maxParticipants = 10
+      const erc1155QuestId = 'erc1155Id'
+      const messageHash = utils.solidityKeccak256(
+        ['address', 'string'],
+        [questUser.address.toLowerCase(), erc1155QuestId]
+      )
+      const signature = await wallet.signMessage(utils.arrayify(messageHash))
+      deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        maxParticipants,
+        NFTTokenId,
+        erc1155QuestId,
+        '',
+        { value: nftQuestFee * maxParticipants }
+      )
+      await time.setNextBlockTimestamp(startDate)
+
+      await deployedFactoryContract.connect(questUser).claim1155Rewards(erc1155QuestId, messageHash, signature)
+
+      expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
     })
   })
 })

@@ -94,9 +94,9 @@ describe('Quest', async () => {
       deployedRabbitholeReceiptContract.address,
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
+      ethers.constants.AddressZero, // as a placeholder, would be the Quest1155 NFT contract
       owner.address,
       ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
-      ethers.constants.AddressZero, // as a placeholder would be the questNFTAddress
       100, // the nftQuestFee
     ])) as QuestFactory
   }
@@ -407,7 +407,6 @@ describe('Quest', async () => {
       })
       const signer = await ethers.getSigner(deployedFactoryContract.address)
       await firstAddress.sendTransaction({ to: signer.address, value: ethers.utils.parseEther('1') })
-      // console.log('getBalance', await ethers.provider.getBalance(signer.address))
 
       await deployedQuestContract.connect(signer).singleClaim(owner.address)
 
