@@ -7,7 +7,7 @@ async function main() {
   const questTerminalKeyAddress = '0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab' // production everywhere
   const rabbitHoleReceiptAddress = '0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E' // production everywhere
   const Erc20Quest = await ethers.getContractFactory('Quest')
-  const QuestNFT = await ethers.getContractFactory('QuestNFT')
+  const Erc1155Quest = await ethers.getContractFactory('Quest1155')
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
   const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
   const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
@@ -17,6 +17,12 @@ async function main() {
   // await erc20Quest.deployed()
   // console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
   // await hre.run('verify:verify', { address: erc20Quest.address })
+
+  // deploy new 1155 quest implementation
+  // const erc1155Quest = await Erc1155Quest.deploy()
+  // await erc1155Quest.deployed()
+  // console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
+  // await hre.run('verify:verify', { address: erc1155Quest.address })
 
   // // deploy new quest nft implementation
   // const questNFT = await QuestNFT.deploy()
