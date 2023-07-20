@@ -539,7 +539,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param ref_ The referral address
     function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
-        QuestContract questContract_ = QuestContract(currentQuest.questAddress);
+        IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
