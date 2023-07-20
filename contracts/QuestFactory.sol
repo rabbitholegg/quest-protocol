@@ -529,7 +529,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        this.claimRewardsRef(questId_, hash_, signature_, address(0));
+        claimRewardsRef(questId_, hash_, signature_, address(0));
     }
 
     /// @dev claim rewards with a referral address
@@ -537,7 +537,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
-    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) public payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -562,14 +562,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        this.claim1155RewardsRef(questId_, hash_, signature_, address(0));
+        claim1155RewardsRef(questId_, hash_, signature_, address(0));
     }
 
     /// @dev claim rewards for a quest with a referral address
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) public payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
