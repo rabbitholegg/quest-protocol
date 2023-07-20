@@ -31,6 +31,7 @@ describe('QuestFactory', () => {
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const nftQuestFee = 100
+  const referralFee = 5000 // 50%
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
@@ -98,6 +99,7 @@ describe('QuestFactory', () => {
       owner.address,
       owner.address, // this will become the questTerminalKey contract
       nftQuestFee,
+      referralFee,
     ])) as QuestFactory
 
     await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)

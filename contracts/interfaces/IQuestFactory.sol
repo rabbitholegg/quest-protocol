@@ -63,8 +63,9 @@ interface IQuestFactory {
     event NftQuestFeeSet(uint fee);
     event QuestNFTCreated(address indexed newQuestNFT, address questCreator, string collectionName);
     event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei);
-    event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei, address referrer);
+    event QuestClaimedRef(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei, address referrer);
     event Quest1155Claimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId);
+    event Quest1155ClaimedRef(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId, address referrer);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

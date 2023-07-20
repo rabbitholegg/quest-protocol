@@ -98,6 +98,7 @@ describe('Quest', async () => {
       owner.address,
       ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
       100, // the nftQuestFee
+      5000, // referralFee
     ])) as QuestFactory
   }
 

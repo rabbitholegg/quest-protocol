@@ -17,6 +17,8 @@ import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
+// import console
+import "hardhat/console.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -104,22 +106,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
-    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_) {
+    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
         Quest storage currentQuest = quests[questId_];
+        bytes32 encodedHash;
+        if (ref_ == address(0)){
+            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_));
+        }else{
+            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_, ref_));
+        }
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        _;
-    }
-
-    modifier claimChecksWithRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
-        Quest storage currentQuest = quests[questId_];
-
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (keccak256(abi.encodePacked(msg.sender, questId_, ref_)) != hash_) revert InvalidHash();
+        if (encodedHash != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
@@ -530,20 +528,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
-        Quest storage currentQuest = quests[questId_];
-        IQuest questContract_ = IQuest(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
-
-        currentQuest.addressMinted[msg.sender] = true;
-        ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
-
-        if(mintFee > 0) processMintFee();
-
-        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        this.claimRewardsRef(questId_, hash_, signature_, address(0));
     }
 
     /// @dev claim rewards with a referral address
@@ -551,7 +537,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecksWithRef(questId_, hash_, signature_, ref_) {
+    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         QuestContract questContract_ = QuestContract(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -564,14 +550,26 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         if(mintFee > 0) processMintFee(ref_);
 
-        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_);
+        if(ref_ == address(0)){
+            emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+        }else{
+            emit QuestClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_);
+        }
     }
 
     /// @dev claim rewards for a quest
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        this.claim1155RewardsRef(questId_, hash_, signature_, address(0));
+    }
+
+    /// @dev claim rewards for a quest with a referral address
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -582,18 +580,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee();
+        if(mintFee > 0) processMintFee(ref_);
 
-        emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
-    }
-
-    function processMintFee() private {
-        processExtraFee();
-        getMintFeeRecipient().safeTransferETH(mintFee);
+        if(ref_ == address(0)){
+            emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
+        }else{
+            emit Quest1155ClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_);
+        }
     }
 
     function processMintFee(address ref_) private {
         processExtraFee();
+        if (ref_ == address(0)) {
+            getMintFeeRecipient().safeTransferETH(mintFee);
+            return;
+        }
         uint referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
         getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
