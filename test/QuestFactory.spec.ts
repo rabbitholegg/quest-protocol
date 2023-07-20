@@ -37,6 +37,7 @@ describe('QuestFactory', () => {
   let protocolRecipient: SignerWithAddress
   let mintFeeRecipient: SignerWithAddress
   let questUser: SignerWithAddress
+  let affiliate: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
   let questTerminalKeyContract: QuestTerminalKey__factory
@@ -48,7 +49,7 @@ describe('QuestFactory', () => {
   let wallet: Wallet
 
   beforeEach(async () => {
-    ;[owner, royaltyRecipient, protocolRecipient, mintFeeRecipient, questUser] = await ethers.getSigners()
+    ;[owner, royaltyRecipient, protocolRecipient, mintFeeRecipient, questUser, affiliate] = await ethers.getSigners()
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
@@ -570,6 +571,38 @@ describe('QuestFactory', () => {
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
         balanceBefore.add(requiredFee)
       )
+    })
+
+    // todo fix exact numbers
+    it('should transfer referral fee percentage of mintFee to referral', async function () {
+      messageHash = utils.solidityKeccak256(
+        ['address', 'string', 'address'],
+        [questUser.address.toLowerCase(), erc20QuestId, affiliate.address]
+      )
+      signature = await wallet.signMessage(utils.arrayify(messageHash))
+      const requiredFee = 1000
+      const extraChange = 100
+      const referralAmount = (requiredFee * referralFee) / 10_000
+      await erc20Quest.queue()
+      await deployedFactoryContract.setMintFee(requiredFee)
+      await time.setNextBlockTimestamp(startDate)
+      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
+      const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
+
+      await expect(
+        deployedFactoryContract
+          .connect(questUser)
+          .claimRewardsRef(erc20QuestId, messageHash, signature, affiliate.address, {
+            value: requiredFee + extraChange,
+          })
+      )
+        .to.emit(deployedFactoryContract, 'QuestClaimedRef')
+        .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
+        .withArgs(questUser.address, extraChange)
+      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+        balanceBefore.add(requiredFee - referralAmount)
+      )
+      expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
     })
   })
 
