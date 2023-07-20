@@ -64,6 +64,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
+    mapping(address => NFTQuestFees) public NFTQuestFeeList;
+    struct NFTQuestFees {
+        uint256 fee;
+        bool exists;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -320,7 +325,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             tokenId_,
-            nftQuestFee,
+            getNFTQuestFee(msg.sender),
             protocolFeeRecipient
         );
 
@@ -359,7 +364,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
-        return nftQuestFee * totalParticipants_;
+        return totalParticipants_ * getNFTQuestFee(msg.sender);
+    }
+
+    function getNFTQuestFee(address _address) public view returns (uint256) {
+        return NFTQuestFeeList[_address].exists ? NFTQuestFeeList[_address].fee : nftQuestFee;
     }
 
     /// @dev set erc20QuestAddress
@@ -554,6 +563,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
         // Send the mint fee to the mint fee recipient
         getMintFeeRecipient().safeTransferETH(mintFee);
+    }
+
+    function setNFTQuestFeeList(address[] calldata toAddAddresses, uint[] calldata fees) external onlyOwner
+    {
+        for (uint i = 0; i < toAddAddresses.length; i++) {
+            NFTQuestFeeList[toAddAddresses[i]] = NFTQuestFees(fees[i], true);
+        }
     }
 
     // Receive function to receive ETH
