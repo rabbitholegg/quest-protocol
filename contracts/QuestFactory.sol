@@ -77,7 +77,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address payable erc1155QuestAddress_,
         address ownerAddress_,
         address questTerminalKeyAddress_,
-        address payable questNFTAddress_,
         uint nftQuestFee_,
         uint16 referralFee_
     ) external initializer {
@@ -568,8 +567,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_);
     }
 
-    /// @dev mint a QuestNFT.
-    /// @notice this contract must be set as Minter on the QuestNFT
     /// @dev claim rewards for a quest
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
