@@ -17,8 +17,6 @@ import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
 import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
-// import console
-import "hardhat/console.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
