@@ -64,8 +64,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
-    mapping(address => nftQuestFees) public nftQuestFeeList;
-    struct nftQuestFees {
+    mapping(address => NftQuestFees) public nftQuestFeeList;
+    struct NftQuestFees {
         uint256 fee;
         bool exists;
     }
@@ -568,7 +568,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function setNftQuestFeeList(address[] calldata toAddAddresses, uint[] calldata fees) external onlyOwner
     {
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            nftQuestFeeList[toAddAddresses[i]] = nftQuestFees(fees[i], true);
+            nftQuestFeeList[toAddAddresses[i]] = NftQuestFees(fees[i], true);
         }
         emit NftQuestFeeListSet(toAddAddresses, fees);
     }
