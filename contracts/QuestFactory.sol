@@ -325,7 +325,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             tokenId_,
-            getNFTQuestFee(msg.sender),
+            getNftQuestFee(msg.sender),
             protocolFeeRecipient
         );
 
@@ -364,10 +364,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
-        return totalParticipants_ * getNFTQuestFee(msg.sender);
+        return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
-    function getNFTQuestFee(address _address) public view returns (uint256) {
+    function getNftQuestFee(address _address) public view returns (uint256) {
         return nftQuestFeeList[_address].exists ? nftQuestFeeList[_address].fee : nftQuestFee;
     }
 
