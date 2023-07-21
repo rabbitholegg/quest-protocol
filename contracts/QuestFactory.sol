@@ -129,8 +129,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
-    modifier nonZeroAddress(address _address) {
-        if (_address == address(0)) revert ZeroAddressNotAllowed();
+    modifier nonZeroAddress(address address_) {
+        if (address_ == address(0)) revert ZeroAddressNotAllowed();
         _;
     }
 
@@ -367,8 +367,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
-    function getNftQuestFee(address _address) public view returns (uint256) {
-        return nftQuestFeeList[_address].exists ? nftQuestFeeList[_address].fee : nftQuestFee;
+    function getNftQuestFee(address address_) public view returns (uint256) {
+        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
     /// @dev set erc20QuestAddress
@@ -565,12 +565,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
-    function setNftQuestFeeList(address[] calldata toAddAddresses, uint[] calldata fees) external onlyOwner
+    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external onlyOwner
     {
-        for (uint i = 0; i < toAddAddresses.length; i++) {
-            nftQuestFeeList[toAddAddresses[i]] = NftQuestFees(fees[i], true);
+        for (uint i = 0; i < toAddAddresses_.length; i++) {
+            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
         }
-        emit NftQuestFeeListSet(toAddAddresses, fees);
+        emit NftQuestFeeListSet(toAddAddresses_, fees_);
     }
 
     // Receive function to receive ETH
