@@ -600,5 +600,35 @@ describe('QuestFactory', () => {
 
       expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
     })
+
+    it('Should claim rewards from a 1155 Quest with zero nftQuestFee', async () => {
+      const NFTTokenId = 99
+      const maxParticipants = 10
+      const erc1155QuestId = 'erc1155Id'
+      const messageHash = utils.solidityKeccak256(
+        ['address', 'string'],
+        [questUser.address.toLowerCase(), erc1155QuestId]
+      )
+      const signature = await wallet.signMessage(utils.arrayify(messageHash))
+      deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+      deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+      await deployedFactoryContract.setNftQuestFeeList([owner.address], [0])
+
+      await deployedFactoryContract.create1155QuestAndQueue(
+        deployedSampleErc1155Contract.address,
+        expiryDate,
+        startDate,
+        maxParticipants,
+        NFTTokenId,
+        erc1155QuestId,
+        ''
+      )
+      await time.setNextBlockTimestamp(startDate)
+
+      await deployedFactoryContract.connect(questUser).claim1155Rewards(erc1155QuestId, messageHash, signature)
+
+      expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
+    })
   })
 })

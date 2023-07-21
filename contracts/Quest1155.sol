@@ -126,7 +126,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     function singleClaim(address account_) external virtual nonReentrant whenNotPaused whenNotEnded onlyStarted onlyQueued onlyQuestFactory {
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
-        protocolFeeRecipient.safeTransferETH(questFee);
+        if(questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
