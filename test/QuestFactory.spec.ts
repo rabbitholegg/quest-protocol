@@ -601,7 +601,7 @@ describe('QuestFactory', () => {
       expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
     })
 
-    it('Should claim rewards from a 1155 Quest with zero questFee', async () => {
+    it('Should claim rewards from a 1155 Quest with zero nftQuestFee', async () => {
       const NFTTokenId = 99
       const maxParticipants = 10
       const erc1155QuestId = 'erc1155Id'
@@ -613,7 +613,7 @@ describe('QuestFactory', () => {
       deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
       deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
 
-      await deployedFactoryContract.setNFTQuestFeeList([owner.address], [0])
+      await deployedFactoryContract.setNftQuestFeeList([owner.address], [0])
 
       await deployedFactoryContract.create1155QuestAndQueue(
         deployedSampleErc1155Contract.address,

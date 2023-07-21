@@ -64,8 +64,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
-    mapping(address => NFTQuestFees) public NFTQuestFeeList;
-    struct NFTQuestFees {
+    mapping(address => nftQuestFees) public nftQuestFeeList;
+    struct nftQuestFees {
         uint256 fee;
         bool exists;
     }
@@ -368,7 +368,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function getNFTQuestFee(address _address) public view returns (uint256) {
-        return NFTQuestFeeList[_address].exists ? NFTQuestFeeList[_address].fee : nftQuestFee;
+        return nftQuestFeeList[_address].exists ? nftQuestFeeList[_address].fee : nftQuestFee;
     }
 
     /// @dev set erc20QuestAddress
@@ -565,11 +565,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
-    function setNFTQuestFeeList(address[] calldata toAddAddresses, uint[] calldata fees) external onlyOwner
+    function setNftQuestFeeList(address[] calldata toAddAddresses, uint[] calldata fees) external onlyOwner
     {
         for (uint i = 0; i < toAddAddresses.length; i++) {
-            NFTQuestFeeList[toAddAddresses[i]] = NFTQuestFees(fees[i], true);
+            nftQuestFeeList[toAddAddresses[i]] = nftQuestFees(fees[i], true);
         }
+        emit NftQuestFeeListSet(toAddAddresses, fees);
     }
 
     // Receive function to receive ETH
