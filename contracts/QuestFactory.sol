@@ -551,7 +551,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if(ref_ == address(0)){
             emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
         }else{
-            emit QuestClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_);
+            emit QuestClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee);
         }
     }
 

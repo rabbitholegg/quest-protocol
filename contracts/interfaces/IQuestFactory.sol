@@ -65,7 +65,7 @@ interface IQuestFactory {
     event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei);
     event QuestClaimedRef(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei, address referrer);
     event Quest1155Claimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId);
-    event Quest1155ClaimedRef(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId, address referrer);
+    event Quest1155ClaimedRef(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId, address referrer, uint16 referralFee);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }
