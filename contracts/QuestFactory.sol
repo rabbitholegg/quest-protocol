@@ -64,6 +64,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool hasWithdrawn;
     }
     mapping(address => address[]) public ownerCollections;
+    mapping(address => NftQuestFees) public nftQuestFeeList;
+    struct NftQuestFees {
+        uint256 fee;
+        bool exists;
+    }
     uint16 public referralFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -133,8 +138,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
-    modifier nonZeroAddress(address _address) {
-        if (_address == address(0)) revert ZeroAddressNotAllowed();
+    modifier nonZeroAddress(address address_) {
+        if (address_ == address(0)) revert ZeroAddressNotAllowed();
         _;
     }
 
@@ -329,7 +334,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             startTime_,
             totalParticipants_,
             tokenId_,
-            nftQuestFee,
+            getNftQuestFee(msg.sender),
             protocolFeeRecipient
         );
 
@@ -368,7 +373,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function totalQuestNFTFee(uint totalParticipants_) public view returns (uint256) {
-        return nftQuestFee * totalParticipants_;
+        return totalParticipants_ * getNftQuestFee(msg.sender);
+    }
+
+    function getNftQuestFee(address address_) public view returns (uint256) {
+        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
     /// @dev set erc20QuestAddress
@@ -605,6 +614,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             msg.sender.safeTransferETH(change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
+    }
+
+    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external onlyOwner
+    {
+        for (uint i = 0; i < toAddAddresses_.length; i++) {
+            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
+        }
+        emit NftQuestFeeListSet(toAddAddresses_, fees_);
     }
 
     // Receive function to receive ETH

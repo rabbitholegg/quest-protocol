@@ -119,6 +119,31 @@ describe('Quest1155 Contract', async () => {
       )
       expect(await sampleERC1155.balanceOf(firstAddress.address, 1)).to.eq(1)
     })
+
+    it('should work when questFee is 0', async () => {
+      const Quest1155 = await ethers.getContractFactory('Quest1155')
+      const quest1155NoFee = await upgrades.deployProxy(Quest1155, [
+        sampleERC1155.address,
+        expiryDate,
+        startDate,
+        totalParticipants,
+        tokenId,
+        0, // questFee
+        protocolFeeRecipient.address,
+      ])
+
+      await time.increaseTo(startDate)
+      sampleERC1155.batchMint(firstAddress.address, [1], [10])
+      await sampleERC1155
+        .connect(firstAddress)
+        .safeTransferFrom(firstAddress.address, quest1155NoFee.address, 1, 10, [])
+      await quest1155NoFee.queue()
+      const protocolFeeRecipientOGBalance = await protocolFeeRecipient.getBalance()
+      await quest1155NoFee.singleClaim(firstAddress.address)
+
+      expect(await protocolFeeRecipient.getBalance()).to.eq(protocolFeeRecipientOGBalance) // recieve no eth because questFee is 0
+      expect(await sampleERC1155.balanceOf(firstAddress.address, 1)).to.eq(1)
+    })
   })
 
   describe('maxProtocolReward', () => {
@@ -152,6 +177,20 @@ describe('Quest1155 Contract', async () => {
 
       expect(await contractOwner.getBalance()).to.eq(ethers.BigNumber.from(1000).add(contractOwnerOGBalance))
       expect(await sampleERC1155.balanceOf(contractOwner.address, 1)).to.eq(10)
+    })
+
+    it('should revert if called twice', async () => {
+      sampleERC1155.batchMint(firstAddress.address, [1], [10])
+      await sampleERC1155.connect(firstAddress).safeTransferFrom(firstAddress.address, quest1155.address, 1, 10, [])
+      await firstAddress.sendTransaction({ to: quest1155.address, value: 1000 })
+      await quest1155.queue()
+      await time.increaseTo(expiryDate + 1)
+      await quest1155.connect(firstAddress).withdrawRemainingTokens()
+
+      await expect(quest1155.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWithCustomError(
+        quest1155,
+        'AlreadyWithdrawn'
+      )
     })
   })
 })
