@@ -24,17 +24,11 @@ async function main() {
   // console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
   // await hre.run('verify:verify', { address: erc1155Quest.address })
 
-  // // deploy new quest nft implementation
-  // const questNFT = await QuestNFT.deploy()
-  // await questNFT.deployed()
-  // console.log('deployed QuestNFT implementation to:', questNFT.address)
-  // await hre.run('verify:verify', { address: questNFT.address })
-
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
   const questFactoryImp = await QuestFactory.deploy()
   await questFactoryImp.deployed()
