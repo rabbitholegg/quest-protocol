@@ -573,8 +573,7 @@ describe('QuestFactory', () => {
       )
     })
 
-    // todo fix exact numbers
-    it('should transfer referral fee percentage of mintFee to referral', async function () {
+    it('should transfer referral fee percentage of mintFee to referral on erc20 quest', async function () {
       messageHash = utils.solidityKeccak256(
         ['address', 'string', 'address'],
         [questUser.address.toLowerCase(), erc20QuestId, affiliate.address]
@@ -586,21 +585,22 @@ describe('QuestFactory', () => {
       await erc20Quest.queue()
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
-      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
+      const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
+        deployedFactoryContract.getMintFeeRecipient()
+      )
       const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
 
       await expect(
-        deployedFactoryContract
-          .connect(questUser)
-          .claimRewardsRef(erc20QuestId, messageHash, signature, affiliate.address, {
-            value: requiredFee + extraChange,
-          })
+        deployedFactoryContract.connect(questUser).claim(erc20QuestId, messageHash, signature, affiliate.address, {
+          value: requiredFee + extraChange,
+        })
       )
-        .to.emit(deployedFactoryContract, 'QuestClaimedRef')
+        .to.emit(deployedFactoryContract, 'QuestClaimed')
+        .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
-        balanceBefore.add(requiredFee - referralAmount)
+        mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
       )
       expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
     })
@@ -634,6 +634,55 @@ describe('QuestFactory', () => {
       await deployedFactoryContract.connect(questUser).claim1155Rewards(erc1155QuestId, messageHash, signature)
 
       expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
+    })
+
+    it('should claim rewards from a 1155 Quest with a referral', async () => {
+      it('Should claim rewards from a 1155 Quest', async () => {
+        const NFTTokenId = 99
+        const maxParticipants = 10
+        const erc1155QuestId = 'erc1155Id'
+        const requiredFee = 1000
+        const referralAmount = (requiredFee * referralFee) / 10_000
+        await deployedFactoryContract.setMintFee(requiredFee)
+        const messageHash = utils.solidityKeccak256(
+          ['address', 'string'],
+          [questUser.address.toLowerCase(), erc1155QuestId]
+        )
+        const signature = await wallet.signMessage(utils.arrayify(messageHash))
+        deployedSampleErc1155Contract.batchMint(owner.address, [NFTTokenId], [maxParticipants])
+        deployedSampleErc1155Contract.setApprovalForAll(deployedFactoryContract.address, true)
+
+        await deployedFactoryContract.create1155QuestAndQueue(
+          deployedSampleErc1155Contract.address,
+          expiryDate,
+          startDate,
+          maxParticipants,
+          NFTTokenId,
+          erc1155QuestId,
+          '',
+          { value: nftQuestFee * maxParticipants }
+        )
+        await time.setNextBlockTimestamp(startDate)
+        const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
+          deployedFactoryContract.getMintFeeRecipient()
+        )
+        const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
+
+        await expect(
+          deployedFactoryContract.connect(questUser).claim(erc1155QuestId, messageHash, signature, affiliate.address, {
+            value: requiredFee,
+          })
+        )
+          .to.emit(deployedFactoryContract, 'Quest1155Claimed')
+          .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
+
+        expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+          mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
+        )
+        expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
+
+        expect(await deployedSampleErc1155Contract.balanceOf(questUser.address, NFTTokenId)).to.equal(1)
+      })
     })
 
     it('Should claim rewards from a 1155 Quest with zero nftQuestFee', async () => {

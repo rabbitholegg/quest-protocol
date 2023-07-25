@@ -531,6 +531,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
+    /// @dev universal claim function for all quest types
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
+        if (quests[questId_].questType.eq("erc20")) {
+            claimRewardsRef(questId_, hash_, signature_, ref_);
+        } else if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(questId_, hash_, signature_, ref_);
+        } else {
+            revert QuestTypeNotSupported();
+        }
+    }
+
     /// @dev claim rewards for a quest
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
@@ -544,7 +559,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
-    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) public payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -557,10 +572,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         if(mintFee > 0) processMintFee(ref_);
 
-        if(ref_ == address(0)){
-            emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
-        }else{
-            emit QuestClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee);
+        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+
+        if(ref_ != address(0)) {
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee);
         }
     }
 
@@ -576,7 +591,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) public payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -589,10 +604,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         if(mintFee > 0) processMintFee(ref_);
 
-        if(ref_ == address(0)){
-            emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
-        }else{
-            emit Quest1155ClaimedRef(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_);
+        emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
+
+        if(ref_ != address(0)) {
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_, referralFee);
         }
     }
 
