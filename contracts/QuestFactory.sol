@@ -612,7 +612,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function processMintFee(address ref_) private {
-        processExtraFee();
+        returnChange();
         if (ref_ == address(0)) {
             getMintFeeRecipient().safeTransferETH(mintFee);
             return;
@@ -622,7 +622,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
     }
 
-    function processExtraFee() private {
+    function returnChange() private {
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
