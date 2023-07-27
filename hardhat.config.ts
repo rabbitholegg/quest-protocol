@@ -2,13 +2,18 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
-require('hardhat-deploy')
+// require('hardhat-deploy') // comment out when doing zksync deploy or verify
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
 import '@nomiclabs/hardhat-ethers'
-import '@nomicfoundation/hardhat-toolbox'
-import '@openzeppelin/hardhat-upgrades'
+// import '@nomicfoundation/hardhat-toolbox' // comment out when doing zksync deploy or verify
+// import '@openzeppelin/hardhat-upgrades' // comment out when doing zksync deploy or verify
 import '@openzeppelin/hardhat-defender'
+
+import '@matterlabs/hardhat-zksync-solc'
+import '@matterlabs/hardhat-zksync-deploy'
+import '@matterlabs/hardhat-zksync-upgradable'
+import '@matterlabs/hardhat-zksync-verify'
 
 const config: HardhatUserConfig = {
   namedAccounts: {
@@ -73,6 +78,10 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  zksolc: {
+    version: 'latest',
+    settings: {},
   },
   etherscan: {
     apiKey: {
@@ -171,6 +180,19 @@ const config: HardhatUserConfig = {
           apiKey: process.env.OPT_ETHERSCAN_API_KEY,
         },
       },
+    },
+    zkSyncTestnet: {
+      url: 'https://zksync2-testnet.zksync.dev',
+      ethNetwork: 'goerli',
+      zksync: true,
+      allowUnlimitedContractSize: true,
+    },
+    zkSyncMainnet: {
+      url: 'https://zksync2-mainnet.zksync.io',
+      ethNetwork: 'mainnet',
+      zksync: true,
+      allowUnlimitedContractSize: true,
+      verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
 }
