@@ -12,3 +12,6 @@ typechain-types/
 
 coverage
 coverage/
+
+artifacts-zk
+cache-zk
