@@ -34,7 +34,7 @@ async function deploy(contractName: string, initializerArgs: any[]) {
 
 async function main() {
   await deployProxy('QuestFactory', [
-    '0x94c3e5e801830dD65CD786F2fe37e79c65DF4148', // claimSignerAddress_
+    '0x22890b38D6ab6090e5123DB7497f4bCE7062929F', // claimSignerAddress_
     '0x0000000000000000000000000000000000000000', // rabbitHoleReceiptContract_
     '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c', // protocolFeeRecipient_
     '0x043020B85eb76f5f829a96e2d90fCA3A7bc080db', // erc20QuestAddress_
