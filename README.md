@@ -49,6 +49,18 @@ Mainnet, Optimism, Polygon, Arbitrum, and Sepolia:
 |Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 |RabbitHole Tickets|0x0D380362762B0cf375227037f2217f59A4eC4b9E|
 
+ZKSync Testnet:
+|Contract Name|Address|
+|-------------|-------|
+|Quest Factory|0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7|
+|RabbitHole Tickets|0x651c7fBBaC1fA3a8937377C4879Ca99C11F1261c|
+
+ZKSync:
+|Contract Name|Address|
+|-------------|-------|
+|Quest Factory|0x0|
+|RabbitHole Tickets|0x0|
+
 ---
 
 ## Contracts
