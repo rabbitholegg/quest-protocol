@@ -28,7 +28,7 @@ async function main() {
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
   const questFactoryImp = await QuestFactory.deploy()
   await questFactoryImp.deployed()
