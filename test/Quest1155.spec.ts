@@ -166,7 +166,7 @@ describe('Quest1155 Contract', async () => {
       await expect(quest1155.withdrawRemainingTokens()).to.be.revertedWithCustomError(quest1155, 'NotEnded')
     })
 
-    it('should send all ETH and 1155 tokens in the contract to the contrnact owner', async () => {
+    it('should send all ETH and 1155 tokens in the contract to the contract owner', async () => {
       sampleERC1155.batchMint(firstAddress.address, [1], [10])
       await sampleERC1155.connect(firstAddress).safeTransferFrom(firstAddress.address, quest1155.address, 1, 10, [])
       await firstAddress.sendTransaction({ to: quest1155.address, value: 1000 })

@@ -3,24 +3,20 @@ Quest
 Withdraw
 ···························
 withdrawRemainingRewards
-     83,300 Withdraw remaining rewards from ERC20 quest
+     82,900 Withdraw remaining rewards from ERC20 quest
 
 QuestFactory
 =========================================================
 Claim Rewards
 ···························
 claimRewards
-    179,900 claim rewards
-
-Mint Quest NFT
-···························
-mintQuestNFT
-    177,800 mint a quest nft
+    179,800 claim rewards
+    208,800 claim rewards with referral
 
 Quest
 ···························
 createQuestAndQueue
-    500,900 with 1 action actionSpec
-    669,700 with 10 action actionSpec
-    482,100 with blank actionSpec
+    521,000 with 1 action actionSpec
+    689,800 with 10 action actionSpec
+    502,200 with blank actionSpec
 

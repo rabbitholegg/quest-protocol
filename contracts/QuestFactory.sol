@@ -69,6 +69,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 fee;
         bool exists;
     }
+    uint16 public referralFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -81,7 +82,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address payable erc1155QuestAddress_,
         address ownerAddress_,
         address questTerminalKeyAddress_,
-        uint nftQuestFee_
+        uint nftQuestFee_,
+        uint16 referralFee_
     ) external initializer {
         __Ownable_init(ownerAddress_);
         __AccessControl_init();
@@ -94,6 +96,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         erc1155QuestAddress = erc1155QuestAddress_;
         questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
         nftQuestFee = nftQuestFee_;
+        referralFee = referralFee_;
     }
 
     /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
@@ -106,12 +109,18 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         locked = 1;
     }
 
-    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_) {
+    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
         Quest storage currentQuest = quests[questId_];
+        bytes32 encodedHash;
+        if (ref_ == address(0)){
+            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_));
+        }else{
+            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_, ref_));
+        }
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (keccak256(abi.encodePacked(msg.sender, questId_)) != hash_) revert InvalidHash();
+        if (encodedHash != hash_) revert InvalidHash();
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
@@ -425,6 +434,14 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit NftQuestFeeSet(nftQuestFee_);
     }
 
+    /// @dev set the referral fee
+    /// @param referralFee_ The value of the referralFee
+    function setReferralFee(uint16 referralFee_) external onlyOwner {
+        if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
+        referralFee = referralFee_;
+        emit ReferralFeeSet(referralFee_);
+    }
+
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
@@ -514,11 +531,35 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
+    /// @dev universal claim function for all quest types
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
+        if (quests[questId_].questType.eq("erc20")) {
+            claimRewardsRef(questId_, hash_, signature_, ref_);
+        } else if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(questId_, hash_, signature_, ref_);
+        } else {
+            revert QuestTypeNotSupported();
+        }
+    }
+
     /// @dev claim rewards for a quest
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        claimRewardsRef(questId_, hash_, signature_, address(0));
+    }
+
+    /// @dev claim rewards with a referral address
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -529,16 +570,28 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee();
+        if(mintFee > 0) processMintFee(ref_);
 
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+
+        if(ref_ != address(0)) {
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee);
+        }
     }
 
     /// @dev claim rewards for a quest
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_) {
+    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        claim1155RewardsRef(questId_, hash_, signature_, address(0));
+    }
+
+    /// @dev claim rewards for a quest with a referral address
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -549,20 +602,33 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee();
+        if(mintFee > 0) processMintFee(ref_);
 
         emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
+
+        if(ref_ != address(0)) {
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_, referralFee);
+        }
     }
 
-    function processMintFee() private {
+    function processMintFee(address ref_) private {
+        returnChange();
+        if (ref_ == address(0)) {
+            getMintFeeRecipient().safeTransferETH(mintFee);
+            return;
+        }
+        uint referralAmount = (mintFee * referralFee) / 10_000;
+        ref_.safeTransferETH(referralAmount);
+        getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
+    }
+
+    function returnChange() private {
         uint change = msg.value - mintFee;
         if (change > 0) {
             // Refund any excess payment
             msg.sender.safeTransferETH(change);
             emit ExtraMintFeeReturned(msg.sender, change);
         }
-        // Send the mint fee to the mint fee recipient
-        getMintFeeRecipient().safeTransferETH(mintFee);
     }
 
     function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external onlyOwner

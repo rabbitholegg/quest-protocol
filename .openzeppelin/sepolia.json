@@ -6719,8 +6719,8 @@
         }
       }
     },
-    "5fdf92b850964afb990717730406ae6705aafa68a16f72abea26a4d9a4097582": {
-      "address": "0x9Dc819C478c110052f37bBDd6D61005089027155",
+    "14d847d58e96da44f2453017a1d9d58ca6270252b1769496381a8fc50a579d41": {
+      "address": "0x6615C63B44987BE0C4c6676873977c056aC5c9E6",
       "layout": {
         "solcVersion": "0.8.18",
         "storage": [
@@ -6833,7 +6833,7 @@
             "label": "rabbitHoleReceiptContract",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(RabbitHoleReceipt)9149",
+            "type": "t_contract(RabbitHoleReceipt)9399",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:43"
           },
@@ -6889,7 +6889,7 @@
             "label": "questTerminalKeyContract",
             "offset": 0,
             "slot": "213",
-            "type": "t_contract(QuestTerminalKey)8584",
+            "type": "t_contract(QuestTerminalKey)8834",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:50"
           },
@@ -6924,6 +6924,14 @@
             "type": "t_mapping(t_address,t_struct(NftQuestFees)6417_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:67"
+          },
+          {
+            "label": "referralFee",
+            "offset": 0,
+            "slot": "218",
+            "type": "t_uint16",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:72"
           }
         ],
         "types": {
@@ -6951,11 +6959,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(QuestTerminalKey)8584": {
+          "t_contract(QuestTerminalKey)8834": {
             "label": "contract QuestTerminalKey",
             "numberOfBytes": "20"
           },
-          "t_contract(RabbitHoleReceipt)9149": {
+          "t_contract(RabbitHoleReceipt)9399": {
             "label": "contract RabbitHoleReceipt",
             "numberOfBytes": "20"
           },
