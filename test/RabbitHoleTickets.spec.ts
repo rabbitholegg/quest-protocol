@@ -20,6 +20,7 @@ describe('RabbitholeTickets Contract', async () => {
       10,
       contractOwner.address,
       'cid',
+      'animationUrlCid',
     ])
   })
 
@@ -68,6 +69,7 @@ describe('RabbitholeTickets Contract', async () => {
         name: 'RabbitHole Ticket',
         description: 'RabbitHole Tickets',
         image: 'ipfs://cid',
+        animation_url: 'ipfs://animationUrlCid',
       }
 
       expect(JSON.parse(metadata)).to.eql(expectedMetada)
