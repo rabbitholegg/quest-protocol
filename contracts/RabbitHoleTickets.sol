@@ -23,6 +23,7 @@ contract RabbitHoleTickets is
     address public minterAddress;
     uint public royaltyFee;
     string public imageIPFSCID;
+    string public animationUrlIPFSCID;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -34,13 +35,15 @@ contract RabbitHoleTickets is
         address minterAddress_,
         uint royaltyFee_,
         address owner_,
-        string memory imageIPFSCID_
+        string memory imageIPFSCID_,
+        string memory animationUrlIPFSCID_
     ) external initializer {
         _initializeOwner(owner_);
         royaltyRecipient = royaltyRecipient_;
         minterAddress = minterAddress_;
         royaltyFee = royaltyFee_;
         imageIPFSCID = imageIPFSCID_;
+        animationUrlIPFSCID = animationUrlIPFSCID_;
     }
 
     modifier onlyMinter() {
@@ -52,6 +55,12 @@ contract RabbitHoleTickets is
     /// @param imageIPFSCID_ the image IPFS CID
     function setImageIPFSCID(string memory imageIPFSCID_) external onlyOwner {
         imageIPFSCID = imageIPFSCID_;
+    }
+
+    /// @dev set the animation url IPFS CID
+    /// @param animationUrlIPFSCID_ the animation url IPFS CID
+    function setAnimationUrlIPFSCID(string memory animationUrlIPFSCID_) external onlyOwner {
+        animationUrlIPFSCID = animationUrlIPFSCID_;
     }
 
     /// @dev set the royalty recipient
@@ -120,6 +129,9 @@ contract RabbitHoleTickets is
             '",',
             '"image": "',
             tokenImage(imageIPFSCID),
+            '",',
+            '"animation_url": "',
+            animationUrl(animationUrlIPFSCID),
             '"',
             '}'
         );
@@ -128,6 +140,13 @@ contract RabbitHoleTickets is
 
     function tokenImage(string memory imageIPFSCID_) internal view virtual returns (string memory) {
         return string(abi.encodePacked('ipfs://', imageIPFSCID_));
+    }
+
+    function animationUrl(string memory animationUrlIPFSCID_) internal view virtual returns (string memory) {
+        if (bytes(animationUrlIPFSCID_).length == 0) {
+            return '';
+        }
+        return string(abi.encodePacked('ipfs://', animationUrlIPFSCID_));
     }
 
     /// @dev See {IERC165-royaltyInfo}

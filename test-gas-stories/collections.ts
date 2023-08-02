@@ -7,7 +7,7 @@ import { story } from './gas-stories'
 import {
   Quest,
   QuestFactory,
-  QuestNFT,
+  Quest1155,
   QuestTerminalKey,
   RabbitHoleReceipt,
   ReceiptRenderer,
@@ -27,8 +27,7 @@ describe('Collections', () => {
   let tx: ContractTransaction
   let createQuestAndQuestTx: ContractTransaction
   const questId = 'quest-id'
-  const nftQuestId = 'nft-quest-id'
-  const totalParticipants = 1000
+  const requiredFee = 100
   let expiryDate
   let startDate
 
@@ -75,6 +74,20 @@ describe('Collections', () => {
     let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
     tx = await questFactory.connect(firstAddress).claimRewards(questId, hash, signature)
     await story('QuestFactory', 'Claim Rewards', 'claimRewards', 'claim rewards', tx)
+  })
+
+  it('Claim Rewards with a referral and a mint fee', async () => {
+    await createQuestAndQuestTx.wait()
+    let hash = utils.solidityKeccak256(
+      ['address', 'string', 'address'],
+      [firstAddress.address.toLowerCase(), questId, secondAddress.address.toLowerCase()]
+    )
+    let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
+    await questFactory.setMintFee(requiredFee)
+    tx = await questFactory
+      .connect(firstAddress)
+      .claim(questId, hash, signature, secondAddress.address, { value: requiredFee })
+    await story('QuestFactory', 'Claim Rewards', 'claimRewards', 'claim rewards with referral', tx)
   })
 
   it('Create quest and queue', async () => {
@@ -554,33 +567,6 @@ describe('Collections', () => {
       0
     )
     await story('QuestFactory', 'Quest', 'createQuestAndQueue', 'with 1 action actionSpec', tx)
-  })
-
-  it('Claim an NFT reward', async () => {
-    await createQuestAndQuestTx.wait()
-    let hash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), nftQuestId])
-    let signature = await claimAddressSigner.signMessage(utils.arrayify(hash))
-
-    const transferAmount = await questFactory.totalQuestNFTFee(totalParticipants)
-    await questFactory.connect(firstAddress).createCollection('collectionName')
-    const collectionAddresses = await questFactory.ownerCollectionsByOwner(firstAddress.address)
-    const collectionAddress = collectionAddresses[0]
-
-    await questFactory
-      .connect(firstAddress)
-      .addQuestToCollection(
-        collectionAddress,
-        startDate,
-        expiryDate,
-        totalParticipants,
-        nftQuestId,
-        'NFT Description',
-        'ImageipfsHash',
-        { value: transferAmount.toNumber() }
-      )
-
-    tx = await questFactory.connect(firstAddress).mintQuestNFT(nftQuestId, hash, signature)
-    await story('QuestFactory', 'Mint Quest NFT', 'mintQuestNFT', 'mint a quest nft', tx)
   })
 
   it('Withdraw Remaining Rewards', async () => {

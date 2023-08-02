@@ -23,6 +23,10 @@
     {
       "address": "0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E",
       "kind": "transparent"
+    },
+    {
+      "address": "0x0D380362762B0cf375227037f2217f59A4eC4b9E",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -6719,8 +6723,8 @@
         }
       }
     },
-    "5fdf92b850964afb990717730406ae6705aafa68a16f72abea26a4d9a4097582": {
-      "address": "0x9Dc819C478c110052f37bBDd6D61005089027155",
+    "14d847d58e96da44f2453017a1d9d58ca6270252b1769496381a8fc50a579d41": {
+      "address": "0x6615C63B44987BE0C4c6676873977c056aC5c9E6",
       "layout": {
         "solcVersion": "0.8.18",
         "storage": [
@@ -6833,7 +6837,7 @@
             "label": "rabbitHoleReceiptContract",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(RabbitHoleReceipt)9149",
+            "type": "t_contract(RabbitHoleReceipt)9399",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:43"
           },
@@ -6889,7 +6893,7 @@
             "label": "questTerminalKeyContract",
             "offset": 0,
             "slot": "213",
-            "type": "t_contract(QuestTerminalKey)8584",
+            "type": "t_contract(QuestTerminalKey)8834",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:50"
           },
@@ -6924,6 +6928,14 @@
             "type": "t_mapping(t_address,t_struct(NftQuestFees)6417_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:67"
+          },
+          {
+            "label": "referralFee",
+            "offset": 0,
+            "slot": "218",
+            "type": "t_uint16",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:72"
           }
         ],
         "types": {
@@ -6951,11 +6963,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(QuestTerminalKey)8584": {
+          "t_contract(QuestTerminalKey)8834": {
             "label": "contract QuestTerminalKey",
             "numberOfBytes": "20"
           },
-          "t_contract(RabbitHoleReceipt)9149": {
+          "t_contract(RabbitHoleReceipt)9399": {
             "label": "contract RabbitHoleReceipt",
             "numberOfBytes": "20"
           },
@@ -7062,6 +7074,93 @@
           "t_uint16": {
             "label": "uint16",
             "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "759c421e4463b62a585204f8babeca300e68f352b883c698aa890549f636f953": {
+      "address": "0xb7a10231B968ee4fD13200F7B8dC7b5Cc37436C0",
+      "layout": {
+        "solcVersion": "0.8.18",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "royaltyRecipient",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:22"
+          },
+          {
+            "label": "minterAddress",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:23"
+          },
+          {
+            "label": "royaltyFee",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:24"
+          },
+          {
+            "label": "imageIPFSCID",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_string_storage",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:25"
+          },
+          {
+            "label": "animationUrlIPFSCID",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_string_storage",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:26"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
           },
           "t_uint256": {
             "label": "uint256",

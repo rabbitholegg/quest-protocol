@@ -17,8 +17,10 @@ interface IQuestFactory {
     error QuestTypeInvalid();
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
+    error ReferralFeeTooHigh();
     error MsgValueLessThanQuestNFTFee();
     error Deprecated();
+    error QuestTypeNotSupported();
 
     event QuestCreated(
         address indexed creator,
@@ -56,11 +58,13 @@ interface IQuestFactory {
     );
     event ReceiptMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
     event QuestNFTMinted(address indexed recipient, address indexed questAddress, uint indexed tokenId, string questId);
-    event MintFeeSet(uint percent);
+    event MintFeeSet(uint amount);
+    event ReferralFeeSet(uint16 percent);
     event ExtraMintFeeReturned(address indexed recipient, uint amount);
     event NftQuestFeeSet(uint fee);
     event QuestNFTCreated(address indexed newQuestNFT, address questCreator, string collectionName);
     event QuestClaimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWei);
+    event QuestClaimedReferred(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWeiOrTokenId, address referrer, uint16 referralFee);
     event Quest1155Claimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId);
     event NftQuestFeeListSet(address[] addresses, uint[] fees);
 
