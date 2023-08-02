@@ -1,25 +1,25 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x1faD3eA35C73107746B5DA88BA043c8EDedC6C7e",
-    "txHash": "0x9a5eb5e1762c8771af264c24eec01ded4526f72d79b9232ae3b4ad1567d461e9"
+    "address": "0x2180ff602372468EDe039BD0e36B5D026ddbd515",
+    "txHash": "0xbf02494e1340041ff9575f539c8cf9e8085dadf30234ad546ceff05dccead043"
   },
   "proxies": [
     {
-      "address": "0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7",
-      "txHash": "0x16cab3f352bd7e679df5fdab7d99be63e53222e136ab5c18f403be0426882a1f",
+      "address": "0x1faD3eA35C73107746B5DA88BA043c8EDedC6C7e",
+      "txHash": "0x5b4c39168454eba3e8d0833d0f3a4fc108eaef9e592cadece68a93b04fcd471d",
       "kind": "transparent"
     },
     {
-      "address": "0x651c7fBBaC1fA3a8937377C4879Ca99C11F1261c",
-      "txHash": "0x6fcb61f594fc4b6e135d8c771c7038dfe787a37e6f2ef62784a06c961be40910",
+      "address": "0xb5B5a3009329D92B15d2e62b4d008557710707Bf",
+      "txHash": "0x4f5df24bc1d4f4a2d8d817fdb8ebfff4fec766f120e5c787ce93e718d5d145ae",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "fce6eaa6719f186f370b95ddc5d2b0ec2094841c0210e559889225af98f34d98": {
-      "address": "0x2180ff602372468EDe039BD0e36B5D026ddbd515",
-      "txHash": "0x62410bd25e8ecf2e75b001b3bd61cff39b6b1b649f37d5392ced0c09ad72f45a",
+    "8d3cf52f3035ec832873a6c19108830ccf3263e012e42696fe2a55c44178728b": {
+      "address": "0xAe36874770Ac3e6007114CbeEe6A0FD9fFbF2164",
+      "txHash": "0x604cb2362bedde6aa60762e6f2e29de8ea27707325375229705bc5d15119d13f",
       "layout": {
         "solcVersion": "0.8.18",
         "storage": [
@@ -124,7 +124,7 @@
             "label": "quests",
             "offset": 0,
             "slot": "205",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)7697_storage)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)6342_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:42"
           },
@@ -132,7 +132,7 @@
             "label": "rabbitHoleReceiptContract",
             "offset": 0,
             "slot": "206",
-            "type": "t_contract(RabbitHoleReceipt)10504",
+            "type": "t_contract(RabbitHoleReceipt)9399",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:43"
           },
@@ -188,7 +188,7 @@
             "label": "questTerminalKeyContract",
             "offset": 0,
             "slot": "213",
-            "type": "t_contract(QuestTerminalKey)9939",
+            "type": "t_contract(QuestTerminalKey)8834",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:50"
           },
@@ -220,9 +220,17 @@
             "label": "nftQuestFeeList",
             "offset": 0,
             "slot": "217",
-            "type": "t_mapping(t_address,t_struct(NftQuestFees)7772_storage)",
+            "type": "t_mapping(t_address,t_struct(NftQuestFees)6417_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:67"
+          },
+          {
+            "label": "referralFee",
+            "offset": 0,
+            "slot": "218",
+            "type": "t_uint16",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:72"
           }
         ],
         "types": {
@@ -250,11 +258,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(QuestTerminalKey)9939": {
+          "t_contract(QuestTerminalKey)8834": {
             "label": "contract QuestTerminalKey",
             "numberOfBytes": "20"
           },
-          "t_contract(RabbitHoleReceipt)10504": {
+          "t_contract(RabbitHoleReceipt)9399": {
             "label": "contract RabbitHoleReceipt",
             "numberOfBytes": "20"
           },
@@ -266,7 +274,7 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(NftQuestFees)7772_storage)": {
+          "t_mapping(t_address,t_struct(NftQuestFees)6417_storage)": {
             "label": "mapping(address => struct QuestFactory.NftQuestFees)",
             "numberOfBytes": "32"
           },
@@ -274,7 +282,7 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(Quest)7697_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(Quest)6342_storage)": {
             "label": "mapping(string => struct QuestFactory.Quest)",
             "numberOfBytes": "32"
           },
@@ -286,7 +294,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(NftQuestFees)7772_storage": {
+          "t_struct(NftQuestFees)6417_storage": {
             "label": "struct QuestFactory.NftQuestFees",
             "members": [
               {
@@ -304,7 +312,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Quest)7697_storage": {
+          "t_struct(Quest)6342_storage": {
             "label": "struct QuestFactory.Quest",
             "members": [
               {
@@ -373,89 +381,9 @@
         }
       }
     },
-    "97246c4ba2c59708ecd526c1bfac2741687de99b7d3f76bd61536159d6d1adeb": {
-      "address": "0xb5B5a3009329D92B15d2e62b4d008557710707Bf",
-      "txHash": "0xdeab68904083ba35e4dae9221b7235ab5d76edcab52cb6c90f49f286d58dc709",
-      "layout": {
-        "solcVersion": "0.8.18",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
-          },
-          {
-            "label": "royaltyRecipient",
-            "offset": 2,
-            "slot": "0",
-            "type": "t_address",
-            "contract": "RabbitHoleTickets",
-            "src": "contracts/RabbitHoleTickets.sol:22"
-          },
-          {
-            "label": "minterAddress",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_address",
-            "contract": "RabbitHoleTickets",
-            "src": "contracts/RabbitHoleTickets.sol:23"
-          },
-          {
-            "label": "royaltyFee",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_uint256",
-            "contract": "RabbitHoleTickets",
-            "src": "contracts/RabbitHoleTickets.sol:24"
-          },
-          {
-            "label": "imageIPFSCID",
-            "offset": 0,
-            "slot": "3",
-            "type": "t_string_storage",
-            "contract": "RabbitHoleTickets",
-            "src": "contracts/RabbitHoleTickets.sol:25"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_string_storage": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
     "95c90f2bfaa2fe92c5e8a68bcbac8ee2cf5d28b6e54239616d0262ecba6312fc": {
-      "address": "0x23567523f3D14DD191511073E2E36AF8D65b856e",
-      "txHash": "0xa11acc595227d67383da8606e7c6571b3d0ab245cd14395f424583bd820122aa",
+      "address": "0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7",
+      "txHash": "0x1dc5c3669ad94c5a72a44cc0de69deb2f73afb7f83544b05ca32d4ed2514ca67",
       "layout": {
         "solcVersion": "0.8.18",
         "storage": [

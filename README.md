@@ -55,11 +55,11 @@ ZKSync Testnet:
 |Quest Factory|0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7|
 |RabbitHole Tickets|0x651c7fBBaC1fA3a8937377C4879Ca99C11F1261c|
 
-ZKSync:
+ZKSync Mainnet:
 |Contract Name|Address|
 |-------------|-------|
-|Quest Factory|0x0|
-|RabbitHole Tickets|0x0|
+|Quest Factory|0x1faD3eA35C73107746B5DA88BA043c8EDedC6C7e|
+|RabbitHole Tickets|0xb5B5a3009329D92B15d2e62b4d008557710707Bf|
 
 ---
 
