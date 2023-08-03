@@ -6,7 +6,7 @@ wrangler.toml
 artifacts/
 cache/
 .env
-.yarn-error.log
+yarn-error.log
 .idea
 typechain-types/
 
