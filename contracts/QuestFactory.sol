@@ -575,7 +575,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
 
         if(ref_ != address(0)) {
-            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee);
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee, mintFee);
         }
     }
 
@@ -607,7 +607,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
 
         if(ref_ != address(0)) {
-            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_, referralFee);
+            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_, referralFee, mintFee);
         }
     }
 
