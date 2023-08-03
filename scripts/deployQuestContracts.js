@@ -30,12 +30,12 @@ async function main() {
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
-  // await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
-  // const questFactoryImp = await QuestFactory.deploy()
-  // await questFactoryImp.deployed()
-  // console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
-  // await hre.run('verify:verify', { address: questFactoryImp.address })
+  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
+  const questFactoryImp = await QuestFactory.deploy()
+  await questFactoryImp.deployed()
+  console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
+  await hre.run('verify:verify', { address: questFactoryImp.address })
 
   // Validates and deploys a new implementation contract for RabbitHoleReceipt
   // await hre.upgrades.forceImport(rabbitHoleReceiptAddress, RabbitHoleReceipt)
@@ -54,12 +54,12 @@ async function main() {
   // await hre.run('verify:verify', { address: QTKImp.address })
 
   // validates and deploys a new implementation contract for RabbitHoleTickets
-  await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  const RHTImp = await RabbitHoleTickets.deploy()
-  await RHTImp.deployed()
-  console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
-  await hre.run('verify:verify', { address: RHTImp.address })
+  // await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  // await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  // const RHTImp = await RabbitHoleTickets.deploy()
+  // await RHTImp.deployed()
+  // console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
+  // await hre.run('verify:verify', { address: RHTImp.address })
 }
 
 main()
