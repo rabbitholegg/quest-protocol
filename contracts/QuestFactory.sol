@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
-import {IERC1155} from 'openzeppelin-contracts/contracts/token/ERC1155/IERC1155.sol';
+import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
 import {LibString} from 'solady/src/utils/LibString.sol';
@@ -34,7 +34,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         string questType;
-        uint40 durationTotal;
+        uint40 duratiootal;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -192,7 +192,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         if(durationTotal_ > 0){
-            currentQuest.durationTotal = durationTotal_;
+            currentQuest.duratiootal = durationTotal_;
             currentQuest.questType = "erc20_stream";
         }else{
             currentQuest.questType = "erc20";

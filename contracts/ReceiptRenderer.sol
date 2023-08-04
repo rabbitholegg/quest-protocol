@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import {Base64} from 'solady/src/utils/Base64.sol';
 import {LibString} from 'solady/src/utils/LibString.sol';
-import 'openzeppelin-contracts/contracts/token/ERC20/ERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 
 /// @title ReceiptRenderer
 /// @author RabbitHole.gg
