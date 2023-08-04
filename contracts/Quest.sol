@@ -38,7 +38,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
-    uint40 public duration_total;
+    uint40 public durationTotal;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -55,7 +55,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         address receiptContractAddress_,
         uint16 questFee_,
         address protocolFeeRecipient_,
-        uint40 duration_total_
+        uint40 durationTotal_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -70,7 +70,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
-        duration_total = duration_total_;
+        durationTotal = durationTotal_;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -153,6 +153,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Allows user to claim the rewards entitled to them
     /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
+    /// @dev this is depricated, use singleClaim instead
     function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
         uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
 
@@ -197,7 +198,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        rewardToken.safeTransfer(sender_, amount_);
+        if(durationTotal > 0) {
+            createLockupLinearStream(amount_, sender_);
+        } else {
+            rewardToken.safeTransfer(sender_, amount_);
+        }
     }
 
     /// @notice Internal function that calculates the reward amount
@@ -262,22 +267,22 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 
-    function createLockupLinearStream(uint256 totalAmount) internal returns (uint256 streamId) {
+    function createLockupLinearStream(uint256 totalAmount_, address recepient_) internal returns (uint256 streamId) {
         // Approve the Sablier contract to spend reward tokens
-        rewardToken.safeApprove(address(lockupLinear), totalAmount);
+        rewardToken.safeApprove(address(lockupLinear), totalAmount_);
 
         // Declare the params struct
         LockupLinear.CreateWithDurations memory params;
 
         // Declare the function parameters
         params.sender = msg.sender; // The sender will be able to cancel the stream
-        params.recipient = address(0xcafe); // The recipient of the streamed assets
-        params.totalAmount = uint128(totalAmount); // Total amount is the amount inclusive of all fees
+        params.recipient = recepient_; // The recipient of the streamed assets
+        params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
         params.asset = IERC20(rewardToken); // The streaming asset
         params.cancelable = true; // Whether the stream will be cancelable or not
         params.durations = LockupLinear.Durations({
-            cliff: 4 weeks, // Assets will be unlocked only after 4 weeks
-            total: 52 weeks // Setting a total duration of ~1 year
+            cliff: 0,
+            total: durationTotal
          });
         params.broker = Broker(address(0), ud60x18(0)); // Optional parameter for charging a fee
 

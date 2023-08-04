@@ -34,7 +34,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         string questType;
-        uint40 duration_total;
+        uint40 durationTotal;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -157,7 +157,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory questId_,
         uint256 discountTokenId_,
         string memory actionSpec_,
-        uint40 duration_total_
+        uint40 durationTotal_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
         address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
@@ -191,8 +191,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
-        if(duration_total_ > 0){
-            currentQuest.duration_total = duration_total_;
+        if(durationTotal_ > 0){
+            currentQuest.durationTotal = durationTotal_;
             currentQuest.questType = "erc20_stream";
         }else{
             currentQuest.questType = "erc20";
@@ -214,7 +214,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             address(rabbitHoleReceiptContract),
             protocolFee,
             protocolFeeRecipient,
-            duration_total_
+            durationTotal_
         );
 
         return newQuest;
@@ -281,7 +281,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
     /// @param discountTokenId_ The id of the discount token
-    /// @param duration_total_ The duration of the sablier stream
+    /// @param durationTotal_ The duration of the sablier stream
     /// @return address the quest contract address
     function createSablierQuest(
         address rewardTokenAddress_,
@@ -292,7 +292,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         string memory questId_,
         string memory actionSpec_,
         uint256 discountTokenId_,
-        uint40 duration_total_
+        uint40 durationTotal_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
             rewardTokenAddress_,
@@ -303,7 +303,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questId_,
             discountTokenId_,
             actionSpec_,
-            duration_total_
+            durationTotal_
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
