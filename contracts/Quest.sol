@@ -9,11 +9,19 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
+import { ISablierV2LockupLinear } from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
+import { ud60x18 } from "@sablier/v2-core/src/types/Math.sol";
+import { Broker, LockupLinear } from "@sablier/v2-core/src/types/DataTypes.sol";
+import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
+
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
+
+    // todo pass this in, this address is different per network
+    ISablierV2LockupLinear public constant lockupLinear = ISablierV2LockupLinear(0xA4fc358455Febe425536fd1878bE67FfDBDEC59a);
 
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     QuestFactory public questFactoryContract;
@@ -30,6 +38,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
+    uint40 public duration_total;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -45,7 +54,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         string memory questId_,
         address receiptContractAddress_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        uint40 duration_total_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -60,6 +70,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
+        duration_total = duration_total_;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -249,5 +260,28 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         uint erc20Balance = erc20Address_.balanceOf(address(this));
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
+    }
+
+    function createLockupLinearStream(uint256 totalAmount) internal returns (uint256 streamId) {
+        // Approve the Sablier contract to spend reward tokens
+        rewardToken.safeApprove(address(lockupLinear), totalAmount);
+
+        // Declare the params struct
+        LockupLinear.CreateWithDurations memory params;
+
+        // Declare the function parameters
+        params.sender = msg.sender; // The sender will be able to cancel the stream
+        params.recipient = address(0xcafe); // The recipient of the streamed assets
+        params.totalAmount = uint128(totalAmount); // Total amount is the amount inclusive of all fees
+        params.asset = IERC20(rewardToken); // The streaming asset
+        params.cancelable = true; // Whether the stream will be cancelable or not
+        params.durations = LockupLinear.Durations({
+            cliff: 4 weeks, // Assets will be unlocked only after 4 weeks
+            total: 52 weeks // Setting a total duration of ~1 year
+         });
+        params.broker = Broker(address(0), ud60x18(0)); // Optional parameter for charging a fee
+
+        // Create the Sablier stream using a function that sets the start time to `block.timestamp`
+        streamId = lockupLinear.createWithDurations(params);
     }
 }

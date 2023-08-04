@@ -34,6 +34,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         string questType;
+        uint40 duration_total;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -155,7 +156,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         uint256 discountTokenId_,
-        string memory actionSpec_
+        string memory actionSpec_,
+        uint40 duration_total_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
         address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
@@ -189,7 +191,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
-        currentQuest.questType = "erc20";
+        if(duration_total_ > 0){
+            currentQuest.duration_total = duration_total_;
+            currentQuest.questType = "erc20_stream";
+        }else{
+            currentQuest.questType = "erc20";
+        }
 
         if(discountTokenId_ == 0){
             protocolFee = questFee;
@@ -206,7 +213,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questId_,
             address(rabbitHoleReceiptContract),
             protocolFee,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            duration_total_
         );
 
         return newQuest;
@@ -255,9 +263,50 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             0,
-            ""
+            "",
+            0
         );
 
+        QuestContract(newQuest).transferOwnership(msg.sender);
+
+        return newQuest;
+    }
+
+    /// @dev Create an erc20 with a sablier stream reward quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionSpec_ The JSON action spec for the quest
+    /// @param discountTokenId_ The id of the discount token
+    /// @param duration_total_ The duration of the sablier stream
+    /// @return address the quest contract address
+    function createSablierQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionSpec_,
+        uint256 discountTokenId_,
+        uint40 duration_total_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createERC20QuestInternal(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            discountTokenId_,
+            actionSpec_,
+            duration_total_
+        );
+
+        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
@@ -291,7 +340,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             discountTokenId_,
-            actionSpec_
+            actionSpec_,
+            0
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
