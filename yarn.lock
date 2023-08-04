@@ -607,6 +607,13 @@
     deep-eql "^4.0.1"
     ordinal "^1.0.3"
 
+"@nomicfoundation/hardhat-foundry@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-foundry/-/hardhat-foundry-1.0.2.tgz#281627e4872bba47c1cd4fcf47fff2259df8d5c6"
+  integrity sha512-NbOrtIKcss51h+1h/TaZkCxOn9KaGbLd6/l75V4X7oDhonGmMWevwrKTNMHC90wCATDkV+B37jmn3fGbWCs+Vg==
+  dependencies:
+    chalk "^2.4.2"
+
 "@nomicfoundation/hardhat-network-helpers@^1.0.8":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-network-helpers/-/hardhat-network-helpers-1.0.8.tgz#e4fe1be93e8a65508c46d73c41fa26c7e9f84931"
@@ -756,7 +763,7 @@
     proper-lockfile "^4.1.1"
     solidity-ast "^0.4.15"
 
-"@prb/math@4.0.1":
+"@prb/math@4.0.1", "@prb/math@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@prb/math/-/math-4.0.1.tgz#bc90277f4f1c085c973f502455bf12c2b3b67666"
   integrity sha512-ANTz2KMV+dMdZ57mWgDTR6jZo5uQzUczQEHCxd7CvJZZ9yafnfPhUUILHvvigIOZ85fZbTPVkC8YoRG1z5Qf7g==

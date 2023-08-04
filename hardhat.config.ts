@@ -5,8 +5,9 @@ require('dotenv').config()
 require('hardhat-deploy')
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-import '@nomiclabs/hardhat-ethers'
+import '@nomicfoundation/hardhat-foundry'
 import '@nomicfoundation/hardhat-toolbox'
+import '@nomiclabs/hardhat-ethers'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 
