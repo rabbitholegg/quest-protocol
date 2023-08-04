@@ -1,0 +1,1653 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AlreadyClaimed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AmountExceedsBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ClaimWindowNotStarted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EndTimeInPast",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EndTimeLessThanOrEqualToStartTime",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MustImplementInChild",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoTokensToClaim",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoWithdrawDuringClaim",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotQuestFactory",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotStarted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TotalAmountExceedsBalance",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Claimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ClaimedSingle",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "cid",
+          "type": "string"
+        }
+      ],
+      "name": "JsonSpecCIDSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "Queued",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "endTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRewardAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRewardToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId_",
+          "type": "uint256"
+        }
+      ],
+      "name": "isClaimed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "queued",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardAmountInWei",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "singleClaim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "startTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "endTime()": "3197cbb6",
+    "getRewardAmount()": "09a69f57",
+    "getRewardToken()": "69940d79",
+    "isClaimed(uint256)": "9e34070f",
+    "queued()": "16049ddf",
+    "rewardAmountInWei()": "69d2dc05",
+    "rewardToken()": "f7c618c1",
+    "singleClaim(address)": "7282a4aa",
+    "startTime()": "78e97925"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"AlreadyClaimed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AmountExceedsBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ClaimWindowNotStarted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EndTimeInPast\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EndTimeLessThanOrEqualToStartTime\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MustImplementInChild\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoTokensToClaim\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoWithdrawDuringClaim\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotQuestFactory\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotStarted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TotalAmountExceedsBalance\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ClaimedSingle\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"cid\",\"type\":\"string\"}],\"name\":\"JsonSpecCIDSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"Queued\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"endTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId_\",\"type\":\"uint256\"}],\"name\":\"isClaimed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"queued\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rewardAmountInWei\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rewardToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"singleClaim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/interfaces/IQuest.sol\":\"IQuest\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@prb/math/=lib/prb-math/src/\",\":@sablier/v2-core/=lib/v2-core/src/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/v2-core/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts/=lib/v2-core/lib/openzeppelin-contracts/\",\":prb-math/=lib/prb-math/src/\",\":prb-test/=lib/prb-math/lib/prb-test/src/\",\":solady/=node_modules/solady/\",\":solarray/=lib/v2-core/lib/solarray/src/\",\":solmate/=node_modules/solmate/\",\":v2-core/=lib/v2-core/\",\"lib/prb-math:@prb/test/=lib/prb-math/lib/prb-test/src/\",\"lib/v2-core:@openzeppelin/contracts/=lib/v2-core/lib/openzeppelin-contracts/contracts/\",\"lib/v2-core:openzeppelin/=lib/v2-core/lib/openzeppelin-contracts/contracts/\"]},\"sources\":{\"contracts/interfaces/IQuest.sol\":{\"keccak256\":\"0x888b32e1d1b849b2a9efa78d9baf83b75386b846b3af690542db50723683cbbb\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://4cd155de5d347df0397dd570ffe9c57d225d5c821f4aa1719d598846fed989ab\",\"dweb:/ipfs/QmTRUxKiEESMkTDzxra5w7wgZgCk8juhPEoUAEgzfK75mz\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "AlreadyClaimed"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "AmountExceedsBalance"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "ClaimWindowNotStarted"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "EndTimeInPast"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "EndTimeLessThanOrEqualToStartTime"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "MustImplementInChild"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "NoTokensToClaim"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "NoWithdrawDuringClaim"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "NotQuestFactory"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "NotStarted"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "TotalAmountExceedsBalance"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "rewardAddress",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "Claimed",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "rewardAddress",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "ClaimedSingle",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "cid",
+              "type": "string",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "JsonSpecCIDSet",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "Queued",
+          "anonymous": false
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "endTime",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getRewardAmount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getRewardToken",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId_",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "isClaimed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "queued",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "rewardAmountInWei",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "rewardToken",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "singleClaim"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "startTime",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "@openzeppelin/=node_modules/@openzeppelin/",
+        "@prb/math/=lib/prb-math/src/",
+        "@sablier/v2-core/=lib/v2-core/src/",
+        "ds-test/=lib/forge-std/lib/ds-test/src/",
+        "erc4626-tests/=lib/v2-core/lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+        "forge-std/=lib/forge-std/src/",
+        "hardhat-deploy/=node_modules/hardhat-deploy/",
+        "hardhat/=node_modules/hardhat/",
+        "openzeppelin-contracts/=lib/v2-core/lib/openzeppelin-contracts/",
+        "prb-math/=lib/prb-math/src/",
+        "prb-test/=lib/prb-math/lib/prb-test/src/",
+        "solady/=node_modules/solady/",
+        "solarray/=lib/v2-core/lib/solarray/src/",
+        "solmate/=node_modules/solmate/",
+        "v2-core/=lib/v2-core/",
+        "lib/prb-math:@prb/test/=lib/prb-math/lib/prb-test/src/",
+        "lib/v2-core:@openzeppelin/contracts/=lib/v2-core/lib/openzeppelin-contracts/contracts/",
+        "lib/v2-core:openzeppelin/=lib/v2-core/lib/openzeppelin-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/interfaces/IQuest.sol": "IQuest"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/interfaces/IQuest.sol": {
+        "keccak256": "0x888b32e1d1b849b2a9efa78d9baf83b75386b846b3af690542db50723683cbbb",
+        "urls": [
+          "bzz-raw://4cd155de5d347df0397dd570ffe9c57d225d5c821f4aa1719d598846fed989ab",
+          "dweb:/ipfs/QmTRUxKiEESMkTDzxra5w7wgZgCk8juhPEoUAEgzfK75mz"
+        ],
+        "license": "UNLICENSED"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/interfaces/IQuest.sol",
+    "id": 5783,
+    "exportedSymbols": {
+      "IQuest": [
+        5782
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:1196:8",
+    "nodes": [
+      {
+        "id": 5688,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:8",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".18"
+        ]
+      },
+      {
+        "id": 5782,
+        "nodeType": "ContractDefinition",
+        "src": "65:1169:8",
+        "nodes": [
+          {
+            "id": 5696,
+            "nodeType": "EventDefinition",
+            "src": "88:78:8",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "f7a40077ff7a04c7e61f6f26fb13774259ddf1b6bce9ecf26a8276cdd3992683",
+            "name": "Claimed",
+            "nameLocation": "94:7:8",
+            "parameters": {
+              "id": 5695,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5690,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nameLocation": "118:7:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5696,
+                  "src": "102:23:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5689,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "102:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5692,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAddress",
+                  "nameLocation": "135:13:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5696,
+                  "src": "127:21:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5691,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "127:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5694,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "158:6:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5696,
+                  "src": "150:14:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5693,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "150:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "101:64:8"
+            }
+          },
+          {
+            "id": 5704,
+            "nodeType": "EventDefinition",
+            "src": "171:84:8",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "b436a00ffcb828bdee3eba840ca0936b461b32cbc7a7fc65fd3c85e4843d83ed",
+            "name": "ClaimedSingle",
+            "nameLocation": "177:13:8",
+            "parameters": {
+              "id": 5703,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5698,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nameLocation": "207:7:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5704,
+                  "src": "191:23:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5697,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "191:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5700,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAddress",
+                  "nameLocation": "224:13:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5704,
+                  "src": "216:21:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5699,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "216:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5702,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "247:6:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5704,
+                  "src": "239:14:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5701,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "239:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "190:64:8"
+            }
+          },
+          {
+            "id": 5708,
+            "nodeType": "EventDefinition",
+            "src": "260:29:8",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "2dba1d9e78f3192742fc9d510383d669fe8a4fa03d039bd7382ef67119078af7",
+            "name": "Queued",
+            "nameLocation": "266:6:8",
+            "parameters": {
+              "id": 5707,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5706,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "timestamp",
+                  "nameLocation": "278:9:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5708,
+                  "src": "273:14:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5705,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "273:4:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "272:16:8"
+            }
+          },
+          {
+            "id": 5712,
+            "nodeType": "EventDefinition",
+            "src": "294:33:8",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "0e6336c42a8496503a4654486b7764ef96a62c9fb7791fd786d7fc24728d7615",
+            "name": "JsonSpecCIDSet",
+            "nameLocation": "300:14:8",
+            "parameters": {
+              "id": 5711,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5710,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "cid",
+                  "nameLocation": "322:3:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5712,
+                  "src": "315:10:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5709,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "315:6:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "314:12:8"
+            }
+          },
+          {
+            "id": 5714,
+            "nodeType": "ErrorDefinition",
+            "src": "333:23:8",
+            "nodes": [],
+            "errorSelector": "646cf558",
+            "name": "AlreadyClaimed",
+            "nameLocation": "339:14:8",
+            "parameters": {
+              "id": 5713,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "353:2:8"
+            }
+          },
+          {
+            "id": 5716,
+            "nodeType": "ErrorDefinition",
+            "src": "361:29:8",
+            "nodes": [],
+            "errorSelector": "96ab19c8",
+            "name": "AmountExceedsBalance",
+            "nameLocation": "367:20:8",
+            "parameters": {
+              "id": 5715,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "387:2:8"
+            }
+          },
+          {
+            "id": 5718,
+            "nodeType": "ErrorDefinition",
+            "src": "395:30:8",
+            "nodes": [],
+            "errorSelector": "dd8133e6",
+            "name": "ClaimWindowNotStarted",
+            "nameLocation": "401:21:8",
+            "parameters": {
+              "id": 5717,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "422:2:8"
+            }
+          },
+          {
+            "id": 5720,
+            "nodeType": "ErrorDefinition",
+            "src": "430:22:8",
+            "nodes": [],
+            "errorSelector": "72e54d4d",
+            "name": "EndTimeInPast",
+            "nameLocation": "436:13:8",
+            "parameters": {
+              "id": 5719,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "449:2:8"
+            }
+          },
+          {
+            "id": 5722,
+            "nodeType": "ErrorDefinition",
+            "src": "457:42:8",
+            "nodes": [],
+            "errorSelector": "693944c0",
+            "name": "EndTimeLessThanOrEqualToStartTime",
+            "nameLocation": "463:33:8",
+            "parameters": {
+              "id": 5721,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "496:2:8"
+            }
+          },
+          {
+            "id": 5724,
+            "nodeType": "ErrorDefinition",
+            "src": "504:29:8",
+            "nodes": [],
+            "errorSelector": "be00dcd4",
+            "name": "MustImplementInChild",
+            "nameLocation": "510:20:8",
+            "parameters": {
+              "id": 5723,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "530:2:8"
+            }
+          },
+          {
+            "id": 5726,
+            "nodeType": "ErrorDefinition",
+            "src": "538:24:8",
+            "nodes": [],
+            "errorSelector": "ce3f0005",
+            "name": "NotQuestFactory",
+            "nameLocation": "544:15:8",
+            "parameters": {
+              "id": 5725,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "559:2:8"
+            }
+          },
+          {
+            "id": 5728,
+            "nodeType": "ErrorDefinition",
+            "src": "567:24:8",
+            "nodes": [],
+            "errorSelector": "0f3f8610",
+            "name": "NoTokensToClaim",
+            "nameLocation": "573:15:8",
+            "parameters": {
+              "id": 5727,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "588:2:8"
+            }
+          },
+          {
+            "id": 5730,
+            "nodeType": "ErrorDefinition",
+            "src": "596:30:8",
+            "nodes": [],
+            "errorSelector": "ee56a2b0",
+            "name": "NoWithdrawDuringClaim",
+            "nameLocation": "602:21:8",
+            "parameters": {
+              "id": 5729,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "623:2:8"
+            }
+          },
+          {
+            "id": 5732,
+            "nodeType": "ErrorDefinition",
+            "src": "631:19:8",
+            "nodes": [],
+            "errorSelector": "6f312cbd",
+            "name": "NotStarted",
+            "nameLocation": "637:10:8",
+            "parameters": {
+              "id": 5731,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "647:2:8"
+            }
+          },
+          {
+            "id": 5734,
+            "nodeType": "ErrorDefinition",
+            "src": "655:34:8",
+            "nodes": [],
+            "errorSelector": "dfae425d",
+            "name": "TotalAmountExceedsBalance",
+            "nameLocation": "661:25:8",
+            "parameters": {
+              "id": 5733,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "686:2:8"
+            }
+          },
+          {
+            "id": 5741,
+            "nodeType": "FunctionDefinition",
+            "src": "695:66:8",
+            "nodes": [],
+            "functionSelector": "9e34070f",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isClaimed",
+            "nameLocation": "704:9:8",
+            "parameters": {
+              "id": 5737,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5736,
+                  "mutability": "mutable",
+                  "name": "tokenId_",
+                  "nameLocation": "722:8:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5741,
+                  "src": "714:16:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5735,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "714:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "713:18:8"
+            },
+            "returnParameters": {
+              "id": 5740,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5739,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5741,
+                  "src": "755:4:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5738,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "755:4:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "754:6:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5746,
+            "nodeType": "FunctionDefinition",
+            "src": "766:59:8",
+            "nodes": [],
+            "functionSelector": "09a69f57",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getRewardAmount",
+            "nameLocation": "775:15:8",
+            "parameters": {
+              "id": 5742,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "790:2:8"
+            },
+            "returnParameters": {
+              "id": 5745,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5744,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5746,
+                  "src": "816:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5743,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "816:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "815:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5751,
+            "nodeType": "FunctionDefinition",
+            "src": "830:58:8",
+            "nodes": [],
+            "functionSelector": "69940d79",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getRewardToken",
+            "nameLocation": "839:14:8",
+            "parameters": {
+              "id": 5747,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "853:2:8"
+            },
+            "returnParameters": {
+              "id": 5750,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5749,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5751,
+                  "src": "879:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5748,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "879:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "878:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5756,
+            "nodeType": "FunctionDefinition",
+            "src": "893:47:8",
+            "nodes": [],
+            "functionSelector": "16049ddf",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "queued",
+            "nameLocation": "902:6:8",
+            "parameters": {
+              "id": 5752,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "908:2:8"
+            },
+            "returnParameters": {
+              "id": 5755,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5754,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5756,
+                  "src": "934:4:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5753,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "934:4:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "933:6:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5761,
+            "nodeType": "FunctionDefinition",
+            "src": "945:53:8",
+            "nodes": [],
+            "functionSelector": "78e97925",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "startTime",
+            "nameLocation": "954:9:8",
+            "parameters": {
+              "id": 5757,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "963:2:8"
+            },
+            "returnParameters": {
+              "id": 5760,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5759,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5761,
+                  "src": "989:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5758,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "989:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "988:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5766,
+            "nodeType": "FunctionDefinition",
+            "src": "1003:51:8",
+            "nodes": [],
+            "functionSelector": "3197cbb6",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "endTime",
+            "nameLocation": "1012:7:8",
+            "parameters": {
+              "id": 5762,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1019:2:8"
+            },
+            "returnParameters": {
+              "id": 5765,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5764,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5766,
+                  "src": "1045:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5763,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1045:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1044:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5771,
+            "nodeType": "FunctionDefinition",
+            "src": "1059:47:8",
+            "nodes": [],
+            "functionSelector": "7282a4aa",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "singleClaim",
+            "nameLocation": "1068:11:8",
+            "parameters": {
+              "id": 5769,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5768,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nameLocation": "1088:7:8",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5771,
+                  "src": "1080:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5767,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1080:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1079:17:8"
+            },
+            "returnParameters": {
+              "id": 5770,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1105:0:8"
+            },
+            "scope": 5782,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5776,
+            "nodeType": "FunctionDefinition",
+            "src": "1111:55:8",
+            "nodes": [],
+            "functionSelector": "f7c618c1",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "rewardToken",
+            "nameLocation": "1120:11:8",
+            "parameters": {
+              "id": 5772,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1131:2:8"
+            },
+            "returnParameters": {
+              "id": 5775,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5774,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5776,
+                  "src": "1157:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5773,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1157:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1156:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 5781,
+            "nodeType": "FunctionDefinition",
+            "src": "1171:61:8",
+            "nodes": [],
+            "functionSelector": "69d2dc05",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "rewardAmountInWei",
+            "nameLocation": "1180:17:8",
+            "parameters": {
+              "id": 5777,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1197:2:8"
+            },
+            "returnParameters": {
+              "id": 5780,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5779,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5781,
+                  "src": "1223:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5778,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1223:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1222:9:8"
+            },
+            "scope": 5782,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IQuest",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          5782
+        ],
+        "name": "IQuest",
+        "nameLocation": "75:6:8",
+        "scope": 5783,
+        "usedErrors": [
+          5714,
+          5716,
+          5718,
+          5720,
+          5722,
+          5724,
+          5726,
+          5728,
+          5730,
+          5732,
+          5734
+        ]
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 8
+}

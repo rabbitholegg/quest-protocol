@@ -1,0 +1,3861 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "AddressAlreadyMinted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AddressNotSigned",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AddressZeroNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Deprecated",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Erc20QuestAddressNotSet",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidHash",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MsgValueLessThanQuestNFTFee",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyOwnerCanCreate1155Quest",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OverMaxAllowedToMint",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestEnded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestFeeTooHigh",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestIdUsed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestNotQueued",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestNotStarted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestTypeInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "QuestTypeNotSupported",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReferralFeeTooHigh",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RewardNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddressNotAllowed",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ExtraMintFeeReturned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "MintFeeSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "addresses",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "fees",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "NftQuestFeeListSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fee",
+          "type": "uint256"
+        }
+      ],
+      "name": "NftQuestFeeSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "questAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Quest1155Claimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardTokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalParticipants",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardAmountOrTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Quest1155Created",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "questAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardAmountInWei",
+          "type": "uint256"
+        }
+      ],
+      "name": "QuestClaimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "questAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardAmountInWeiOrTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "referralFee",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "mintFeeEthWei",
+          "type": "uint256"
+        }
+      ],
+      "name": "QuestClaimedReferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardTokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalParticipants",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardAmountOrTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "QuestCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rewardTokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalParticipants",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardAmountOrTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "actionSpec",
+          "type": "string"
+        }
+      ],
+      "name": "QuestCreatedWithAction",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newQuestNFT",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "questCreator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "collectionName",
+          "type": "string"
+        }
+      ],
+      "name": "QuestNFTCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "questAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        }
+      ],
+      "name": "QuestNFTMinted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "questAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "questId",
+          "type": "string"
+        }
+      ],
+      "name": "ReceiptMinted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "percent",
+          "type": "uint16"
+        }
+      ],
+      "name": "ReferralFeeSet",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "questId_",
+          "type": "string"
+        }
+      ],
+      "name": "questInfo",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "questInfo(string)": "ec461ac4"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"AddressAlreadyMinted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AddressNotSigned\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AddressZeroNotAllowed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"Deprecated\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"Erc20QuestAddressNotSet\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidHash\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgValueLessThanQuestNFTFee\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyOwnerCanCreate1155Quest\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OverMaxAllowedToMint\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestEnded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestFeeTooHigh\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestIdUsed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestNotQueued\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestNotStarted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestTypeInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"QuestTypeNotSupported\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReferralFeeTooHigh\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RewardNotAllowed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddressNotAllowed\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ExtraMintFeeReturned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"MintFeeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"addresses\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"fees\",\"type\":\"uint256[]\"}],\"name\":\"NftQuestFeeListSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"fee\",\"type\":\"uint256\"}],\"name\":\"NftQuestFeeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"questAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Quest1155Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contractAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"contractType\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalParticipants\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmountOrTokenId\",\"type\":\"uint256\"}],\"name\":\"Quest1155Created\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"questAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmountInWei\",\"type\":\"uint256\"}],\"name\":\"QuestClaimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"questAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmountInWeiOrTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"referrer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint16\",\"name\":\"referralFee\",\"type\":\"uint16\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"mintFeeEthWei\",\"type\":\"uint256\"}],\"name\":\"QuestClaimedReferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contractAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"contractType\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalParticipants\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmountOrTokenId\",\"type\":\"uint256\"}],\"name\":\"QuestCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contractAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"contractType\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"rewardTokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalParticipants\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmountOrTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"actionSpec\",\"type\":\"string\"}],\"name\":\"QuestCreatedWithAction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newQuestNFT\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"questCreator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"collectionName\",\"type\":\"string\"}],\"name\":\"QuestNFTCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"questAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"}],\"name\":\"QuestNFTMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"questAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"questId\",\"type\":\"string\"}],\"name\":\"ReceiptMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint16\",\"name\":\"percent\",\"type\":\"uint16\"}],\"name\":\"ReferralFeeSet\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"questId_\",\"type\":\"string\"}],\"name\":\"questInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/interfaces/IQuestFactory.sol\":\"IQuestFactory\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":@prb/math/=lib/prb-math/src/\",\":@sablier/v2-core/=lib/v2-core/src/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/v2-core/lib/openzeppelin-contracts/lib/erc4626-tests/\",\":eth-gas-reporter/=node_modules/eth-gas-reporter/\",\":forge-std/=lib/forge-std/src/\",\":hardhat-deploy/=node_modules/hardhat-deploy/\",\":hardhat/=node_modules/hardhat/\",\":openzeppelin-contracts/=lib/v2-core/lib/openzeppelin-contracts/\",\":prb-math/=lib/prb-math/src/\",\":prb-test/=lib/prb-math/lib/prb-test/src/\",\":solady/=node_modules/solady/\",\":solarray/=lib/v2-core/lib/solarray/src/\",\":solmate/=node_modules/solmate/\",\":v2-core/=lib/v2-core/\",\"lib/prb-math:@prb/test/=lib/prb-math/lib/prb-test/src/\",\"lib/v2-core:@openzeppelin/contracts/=lib/v2-core/lib/openzeppelin-contracts/contracts/\",\"lib/v2-core:openzeppelin/=lib/v2-core/lib/openzeppelin-contracts/contracts/\"]},\"sources\":{\"contracts/interfaces/IQuestFactory.sol\":{\"keccak256\":\"0x95a4b086d69309315ac088507065a52097c9992fe9f767f955d65b413efe743d\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://cf1af055127683684c897d8137ae0b8db9f4b2fd33665f9f4b77ec68d7c3b62a\",\"dweb:/ipfs/QmZ5yya9DhqecLWebTy2o59JQ1uLjcfSgpzN6Lgvk1ruxB\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "AddressAlreadyMinted"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "AddressNotSigned"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "AddressZeroNotAllowed"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "Deprecated"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "Erc20QuestAddressNotSet"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "InvalidHash"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "MsgValueLessThanQuestNFTFee"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "OnlyOwnerCanCreate1155Quest"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "OverMaxAllowedToMint"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestEnded"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestFeeTooHigh"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestIdUsed"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestNotQueued"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestNotStarted"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestTypeInvalid"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "QuestTypeNotSupported"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "ReferralFeeTooHigh"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "RewardNotAllowed"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "ZeroAddressNotAllowed"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "ExtraMintFeeReturned",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "MintFeeSet",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "fees",
+              "type": "uint256[]",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "NftQuestFeeListSet",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "fee",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "NftQuestFeeSet",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardToken",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "Quest1155Claimed",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "creator",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "contractAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "string",
+              "name": "contractType",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardTokenAddress",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalParticipants",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "rewardAmountOrTokenId",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "Quest1155Created",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardToken",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "rewardAmountInWei",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestClaimed",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardToken",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "rewardAmountInWeiOrTokenId",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "referrer",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint16",
+              "name": "referralFee",
+              "type": "uint16",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "mintFeeEthWei",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestClaimedReferred",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "creator",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "contractAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "string",
+              "name": "contractType",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardTokenAddress",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalParticipants",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "rewardAmountOrTokenId",
+              "type": "uint256",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestCreated",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "creator",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "contractAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "string",
+              "name": "contractType",
+              "type": "string",
+              "indexed": false
+            },
+            {
+              "internalType": "address",
+              "name": "rewardTokenAddress",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalParticipants",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256",
+              "name": "rewardAmountOrTokenId",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "internalType": "string",
+              "name": "actionSpec",
+              "type": "string",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestCreatedWithAction",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newQuestNFT",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questCreator",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "internalType": "string",
+              "name": "collectionName",
+              "type": "string",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestNFTCreated",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "QuestNFTMinted",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "questAddress",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true
+            },
+            {
+              "internalType": "string",
+              "name": "questId",
+              "type": "string",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "ReceiptMinted",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint16",
+              "name": "percent",
+              "type": "uint16",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "ReferralFeeSet",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "questId_",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "questInfo",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "@openzeppelin/=node_modules/@openzeppelin/",
+        "@prb/math/=lib/prb-math/src/",
+        "@sablier/v2-core/=lib/v2-core/src/",
+        "ds-test/=lib/forge-std/lib/ds-test/src/",
+        "erc4626-tests/=lib/v2-core/lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+        "forge-std/=lib/forge-std/src/",
+        "hardhat-deploy/=node_modules/hardhat-deploy/",
+        "hardhat/=node_modules/hardhat/",
+        "openzeppelin-contracts/=lib/v2-core/lib/openzeppelin-contracts/",
+        "prb-math/=lib/prb-math/src/",
+        "prb-test/=lib/prb-math/lib/prb-test/src/",
+        "solady/=node_modules/solady/",
+        "solarray/=lib/v2-core/lib/solarray/src/",
+        "solmate/=node_modules/solmate/",
+        "v2-core/=lib/v2-core/",
+        "lib/prb-math:@prb/test/=lib/prb-math/lib/prb-test/src/",
+        "lib/v2-core:@openzeppelin/contracts/=lib/v2-core/lib/openzeppelin-contracts/contracts/",
+        "lib/v2-core:openzeppelin/=lib/v2-core/lib/openzeppelin-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/interfaces/IQuestFactory.sol": "IQuestFactory"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/interfaces/IQuestFactory.sol": {
+        "keccak256": "0x95a4b086d69309315ac088507065a52097c9992fe9f767f955d65b413efe743d",
+        "urls": [
+          "bzz-raw://cf1af055127683684c897d8137ae0b8db9f4b2fd33665f9f4b77ec68d7c3b62a",
+          "dweb:/ipfs/QmZ5yya9DhqecLWebTy2o59JQ1uLjcfSgpzN6Lgvk1ruxB"
+        ],
+        "license": "UNLICENSED"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/interfaces/IQuestFactory.sol",
+    "id": 6036,
+    "exportedSymbols": {
+      "IQuestFactory": [
+        6035
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:2807:10",
+    "nodes": [
+      {
+        "id": 5827,
+        "nodeType": "PragmaDirective",
+        "src": "39:24:10",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".18"
+        ]
+      },
+      {
+        "id": 6035,
+        "nodeType": "ContractDefinition",
+        "src": "65:2780:10",
+        "nodes": [
+          {
+            "id": 5829,
+            "nodeType": "ErrorDefinition",
+            "src": "95:29:10",
+            "nodes": [],
+            "errorSelector": "f5f915f0",
+            "name": "AddressAlreadyMinted",
+            "nameLocation": "101:20:10",
+            "parameters": {
+              "id": 5828,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "121:2:10"
+            }
+          },
+          {
+            "id": 5831,
+            "nodeType": "ErrorDefinition",
+            "src": "129:25:10",
+            "nodes": [],
+            "errorSelector": "05d0fdda",
+            "name": "AddressNotSigned",
+            "nameLocation": "135:16:10",
+            "parameters": {
+              "id": 5830,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "151:2:10"
+            }
+          },
+          {
+            "id": 5833,
+            "nodeType": "ErrorDefinition",
+            "src": "159:30:10",
+            "nodes": [],
+            "errorSelector": "0855380c",
+            "name": "AddressZeroNotAllowed",
+            "nameLocation": "165:21:10",
+            "parameters": {
+              "id": 5832,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "186:2:10"
+            }
+          },
+          {
+            "id": 5835,
+            "nodeType": "ErrorDefinition",
+            "src": "194:32:10",
+            "nodes": [],
+            "errorSelector": "db2505de",
+            "name": "Erc20QuestAddressNotSet",
+            "nameLocation": "200:23:10",
+            "parameters": {
+              "id": 5834,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "223:2:10"
+            }
+          },
+          {
+            "id": 5837,
+            "nodeType": "ErrorDefinition",
+            "src": "231:20:10",
+            "nodes": [],
+            "errorSelector": "0af806e0",
+            "name": "InvalidHash",
+            "nameLocation": "237:11:10",
+            "parameters": {
+              "id": 5836,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "248:2:10"
+            }
+          },
+          {
+            "id": 5839,
+            "nodeType": "ErrorDefinition",
+            "src": "256:36:10",
+            "nodes": [],
+            "errorSelector": "764a7c50",
+            "name": "OnlyOwnerCanCreate1155Quest",
+            "nameLocation": "262:27:10",
+            "parameters": {
+              "id": 5838,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "289:2:10"
+            }
+          },
+          {
+            "id": 5841,
+            "nodeType": "ErrorDefinition",
+            "src": "297:29:10",
+            "nodes": [],
+            "errorSelector": "571e5b18",
+            "name": "OverMaxAllowedToMint",
+            "nameLocation": "303:20:10",
+            "parameters": {
+              "id": 5840,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "323:2:10"
+            }
+          },
+          {
+            "id": 5843,
+            "nodeType": "ErrorDefinition",
+            "src": "331:19:10",
+            "nodes": [],
+            "errorSelector": "8b602a42",
+            "name": "QuestEnded",
+            "nameLocation": "337:10:10",
+            "parameters": {
+              "id": 5842,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "347:2:10"
+            }
+          },
+          {
+            "id": 5845,
+            "nodeType": "ErrorDefinition",
+            "src": "355:24:10",
+            "nodes": [],
+            "errorSelector": "4ae19ab6",
+            "name": "QuestFeeTooHigh",
+            "nameLocation": "361:15:10",
+            "parameters": {
+              "id": 5844,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "376:2:10"
+            }
+          },
+          {
+            "id": 5847,
+            "nodeType": "ErrorDefinition",
+            "src": "384:20:10",
+            "nodes": [],
+            "errorSelector": "b2431b61",
+            "name": "QuestIdUsed",
+            "nameLocation": "390:11:10",
+            "parameters": {
+              "id": 5846,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "401:2:10"
+            }
+          },
+          {
+            "id": 5849,
+            "nodeType": "ErrorDefinition",
+            "src": "409:23:10",
+            "nodes": [],
+            "errorSelector": "e5ec6b04",
+            "name": "QuestNotQueued",
+            "nameLocation": "415:14:10",
+            "parameters": {
+              "id": 5848,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "429:2:10"
+            }
+          },
+          {
+            "id": 5851,
+            "nodeType": "ErrorDefinition",
+            "src": "437:24:10",
+            "nodes": [],
+            "errorSelector": "59710113",
+            "name": "QuestNotStarted",
+            "nameLocation": "443:15:10",
+            "parameters": {
+              "id": 5850,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "458:2:10"
+            }
+          },
+          {
+            "id": 5853,
+            "nodeType": "ErrorDefinition",
+            "src": "466:25:10",
+            "nodes": [],
+            "errorSelector": "d5fde11d",
+            "name": "QuestTypeInvalid",
+            "nameLocation": "472:16:10",
+            "parameters": {
+              "id": 5852,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "488:2:10"
+            }
+          },
+          {
+            "id": 5855,
+            "nodeType": "ErrorDefinition",
+            "src": "496:25:10",
+            "nodes": [],
+            "errorSelector": "9f7fdf31",
+            "name": "RewardNotAllowed",
+            "nameLocation": "502:16:10",
+            "parameters": {
+              "id": 5854,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "518:2:10"
+            }
+          },
+          {
+            "id": 5857,
+            "nodeType": "ErrorDefinition",
+            "src": "526:30:10",
+            "nodes": [],
+            "errorSelector": "8579befe",
+            "name": "ZeroAddressNotAllowed",
+            "nameLocation": "532:21:10",
+            "parameters": {
+              "id": 5856,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "553:2:10"
+            }
+          },
+          {
+            "id": 5859,
+            "nodeType": "ErrorDefinition",
+            "src": "561:27:10",
+            "nodes": [],
+            "errorSelector": "aa6e2112",
+            "name": "ReferralFeeTooHigh",
+            "nameLocation": "567:18:10",
+            "parameters": {
+              "id": 5858,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "585:2:10"
+            }
+          },
+          {
+            "id": 5861,
+            "nodeType": "ErrorDefinition",
+            "src": "593:36:10",
+            "nodes": [],
+            "errorSelector": "97e2b23c",
+            "name": "MsgValueLessThanQuestNFTFee",
+            "nameLocation": "599:27:10",
+            "parameters": {
+              "id": 5860,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "626:2:10"
+            }
+          },
+          {
+            "id": 5863,
+            "nodeType": "ErrorDefinition",
+            "src": "634:19:10",
+            "nodes": [],
+            "errorSelector": "c73b9d7c",
+            "name": "Deprecated",
+            "nameLocation": "640:10:10",
+            "parameters": {
+              "id": 5862,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "650:2:10"
+            }
+          },
+          {
+            "id": 5865,
+            "nodeType": "ErrorDefinition",
+            "src": "658:30:10",
+            "nodes": [],
+            "errorSelector": "efe6f921",
+            "name": "QuestTypeNotSupported",
+            "nameLocation": "664:21:10",
+            "parameters": {
+              "id": 5864,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "685:2:10"
+            }
+          },
+          {
+            "id": 5885,
+            "nodeType": "EventDefinition",
+            "src": "694:302:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "7ffd904b9426b92270b251e237818b61230a9c7dc857d7e6130dddc21b761937",
+            "name": "QuestCreated",
+            "nameLocation": "700:12:10",
+            "parameters": {
+              "id": 5884,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5867,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "creator",
+                  "nameLocation": "738:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "722:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5866,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "722:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5869,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "contractAddress",
+                  "nameLocation": "771:15:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "755:31:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5868,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "755:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5871,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "803:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "796:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5870,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "796:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5873,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "contractType",
+                  "nameLocation": "827:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "820:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5872,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "820:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5875,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardTokenAddress",
+                  "nameLocation": "857:18:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "849:26:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5874,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "849:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5877,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "endTime",
+                  "nameLocation": "890:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "885:12:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5876,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "885:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5879,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "startTime",
+                  "nameLocation": "912:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "907:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5878,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "907:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5881,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "totalParticipants",
+                  "nameLocation": "936:17:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "931:22:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5880,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "931:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5883,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAmountOrTokenId",
+                  "nameLocation": "968:21:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5885,
+                  "src": "963:26:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5882,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "963:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "712:283:10"
+            }
+          },
+          {
+            "id": 5905,
+            "nodeType": "EventDefinition",
+            "src": "1002:306:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "c11cd436665e5002482ffbd27e32c5040ca5e74794d7beee41a0ad8e8da415f7",
+            "name": "Quest1155Created",
+            "nameLocation": "1008:16:10",
+            "parameters": {
+              "id": 5904,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5887,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "creator",
+                  "nameLocation": "1050:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1034:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5886,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1034:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5889,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "contractAddress",
+                  "nameLocation": "1083:15:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1067:31:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5888,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1067:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5891,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "1115:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1108:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5890,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1108:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5893,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "contractType",
+                  "nameLocation": "1139:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1132:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5892,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1132:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5895,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardTokenAddress",
+                  "nameLocation": "1169:18:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1161:26:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5894,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1161:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5897,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "endTime",
+                  "nameLocation": "1202:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1197:12:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5896,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1197:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5899,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "startTime",
+                  "nameLocation": "1224:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1219:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5898,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1219:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5901,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "totalParticipants",
+                  "nameLocation": "1248:17:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1243:22:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5900,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1243:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5903,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAmountOrTokenId",
+                  "nameLocation": "1280:21:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5905,
+                  "src": "1275:26:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5902,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1275:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1024:283:10"
+            }
+          },
+          {
+            "id": 5927,
+            "nodeType": "EventDefinition",
+            "src": "1313:351:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "37e7622b8f2f0ab15e4e56620571dd35e2c14114a492bf49fad3580861d9d02e",
+            "name": "QuestCreatedWithAction",
+            "nameLocation": "1319:22:10",
+            "parameters": {
+              "id": 5926,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5907,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "creator",
+                  "nameLocation": "1367:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1351:23:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5906,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1351:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5909,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "contractAddress",
+                  "nameLocation": "1400:15:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1384:31:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5908,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1384:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5911,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "1432:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1425:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5910,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1425:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5913,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "contractType",
+                  "nameLocation": "1456:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1449:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5912,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1449:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5915,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardTokenAddress",
+                  "nameLocation": "1486:18:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1478:26:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5914,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1478:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5917,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "endTime",
+                  "nameLocation": "1522:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1514:15:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5916,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1514:7:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5919,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "startTime",
+                  "nameLocation": "1547:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1539:17:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5918,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1539:7:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5921,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "totalParticipants",
+                  "nameLocation": "1574:17:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1566:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5920,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1566:7:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5923,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAmountOrTokenId",
+                  "nameLocation": "1609:21:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1601:29:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5922,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1601:7:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5925,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "actionSpec",
+                  "nameLocation": "1647:10:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5927,
+                  "src": "1640:17:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5924,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1640:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1341:322:10"
+            }
+          },
+          {
+            "id": 5937,
+            "nodeType": "EventDefinition",
+            "src": "1669:115:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "a9e09a39b54248cb5161a8bad4e544f88b8aa2da99e7c425846bece6703cc1fc",
+            "name": "ReceiptMinted",
+            "nameLocation": "1675:13:10",
+            "parameters": {
+              "id": 5936,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5929,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "1705:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5937,
+                  "src": "1689:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5928,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1689:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5931,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "questAddress",
+                  "nameLocation": "1732:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5937,
+                  "src": "1716:28:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5930,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1716:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5933,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nameLocation": "1759:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5937,
+                  "src": "1746:20:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5932,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1746:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5935,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "1775:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5937,
+                  "src": "1768:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5934,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1768:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1688:95:10"
+            }
+          },
+          {
+            "id": 5947,
+            "nodeType": "EventDefinition",
+            "src": "1789:116:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "8ca4afab6c1c357d949c5772e0ca2015ba1daf555ddf41121a7221f84ff3a279",
+            "name": "QuestNFTMinted",
+            "nameLocation": "1795:14:10",
+            "parameters": {
+              "id": 5946,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5939,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "1826:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5947,
+                  "src": "1810:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5938,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1810:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5941,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "questAddress",
+                  "nameLocation": "1853:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5947,
+                  "src": "1837:28:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5940,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1837:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5943,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nameLocation": "1880:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5947,
+                  "src": "1867:20:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5942,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1867:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5945,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "1896:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5947,
+                  "src": "1889:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5944,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1889:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1809:95:10"
+            }
+          },
+          {
+            "id": 5951,
+            "nodeType": "EventDefinition",
+            "src": "1910:30:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "97aee230ba41961438e908e115df76fa8113f85a0586d85b19ba5be50e6a2274",
+            "name": "MintFeeSet",
+            "nameLocation": "1916:10:10",
+            "parameters": {
+              "id": 5950,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5949,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "1932:6:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5951,
+                  "src": "1927:11:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5948,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1927:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1926:13:10"
+            }
+          },
+          {
+            "id": 5955,
+            "nodeType": "EventDefinition",
+            "src": "1945:37:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "a7bf2cb2b95a425df48655de4071d888fbb2d429d265bb008a4cea1dc8a89548",
+            "name": "ReferralFeeSet",
+            "nameLocation": "1951:14:10",
+            "parameters": {
+              "id": 5954,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5953,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "percent",
+                  "nameLocation": "1973:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5955,
+                  "src": "1966:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint16",
+                    "typeString": "uint16"
+                  },
+                  "typeName": {
+                    "id": 5952,
+                    "name": "uint16",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1966:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint16",
+                      "typeString": "uint16"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1965:16:10"
+            }
+          },
+          {
+            "id": 5961,
+            "nodeType": "EventDefinition",
+            "src": "1987:67:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "a460cf400fb0d3a1ca6caa7a08fc3474317aa3f31e2b6744210d97f640507406",
+            "name": "ExtraMintFeeReturned",
+            "nameLocation": "1993:20:10",
+            "parameters": {
+              "id": 5960,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5957,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "2030:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5961,
+                  "src": "2014:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5956,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2014:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5959,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "2046:6:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5961,
+                  "src": "2041:11:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5958,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2041:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2013:40:10"
+            }
+          },
+          {
+            "id": 5965,
+            "nodeType": "EventDefinition",
+            "src": "2059:31:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "acfc857f5247cf27fd46d9d8774f59e409be9b50fe1412825bec5c648863f036",
+            "name": "NftQuestFeeSet",
+            "nameLocation": "2065:14:10",
+            "parameters": {
+              "id": 5964,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5963,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "fee",
+                  "nameLocation": "2085:3:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5965,
+                  "src": "2080:8:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5962,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2080:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2079:10:10"
+            }
+          },
+          {
+            "id": 5973,
+            "nodeType": "EventDefinition",
+            "src": "2095:96:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "80b1638762f5bce20e41d9916cf592a1a748c2f59e73946210791e089e3d7d9f",
+            "name": "QuestNFTCreated",
+            "nameLocation": "2101:15:10",
+            "parameters": {
+              "id": 5972,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5967,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "newQuestNFT",
+                  "nameLocation": "2133:11:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5973,
+                  "src": "2117:27:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5966,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2117:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5969,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questCreator",
+                  "nameLocation": "2154:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5973,
+                  "src": "2146:20:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5968,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2146:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5971,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "collectionName",
+                  "nameLocation": "2175:14:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5973,
+                  "src": "2168:21:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5970,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2168:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2116:74:10"
+            }
+          },
+          {
+            "id": 5985,
+            "nodeType": "EventDefinition",
+            "src": "2196:137:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "d35f2250d08242f6e4e2bfe3dac8b5887040ea7223991b25a628b415c3265be9",
+            "name": "QuestClaimed",
+            "nameLocation": "2202:12:10",
+            "parameters": {
+              "id": 5984,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5975,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "2231:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "2215:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5974,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2215:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5977,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "questAddress",
+                  "nameLocation": "2258:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "2242:28:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5976,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2242:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5979,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "2279:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "2272:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5978,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2272:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5981,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardToken",
+                  "nameLocation": "2296:11:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "2288:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5980,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2288:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5983,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAmountInWei",
+                  "nameLocation": "2314:17:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5985,
+                  "src": "2309:22:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5982,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2309:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2214:118:10"
+            }
+          },
+          {
+            "id": 6003,
+            "nodeType": "EventDefinition",
+            "src": "2338:212:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "9c503975322622df0e05ce3ba5b99b1eace4b358cc8c0af4ddf1610f9ce58bbc",
+            "name": "QuestClaimedReferred",
+            "nameLocation": "2344:20:10",
+            "parameters": {
+              "id": 6002,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5987,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "2381:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2365:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5986,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2365:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5989,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "questAddress",
+                  "nameLocation": "2408:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2392:28:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5988,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2392:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5991,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "2429:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2422:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5990,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2422:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5993,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardToken",
+                  "nameLocation": "2446:11:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2438:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5992,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2438:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5995,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardAmountInWeiOrTokenId",
+                  "nameLocation": "2464:26:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2459:31:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5994,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2459:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5997,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "referrer",
+                  "nameLocation": "2500:8:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2492:16:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5996,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2492:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5999,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "referralFee",
+                  "nameLocation": "2517:11:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2510:18:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint16",
+                    "typeString": "uint16"
+                  },
+                  "typeName": {
+                    "id": 5998,
+                    "name": "uint16",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2510:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint16",
+                      "typeString": "uint16"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6001,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "mintFeeEthWei",
+                  "nameLocation": "2535:13:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6003,
+                  "src": "2530:18:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6000,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2530:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2364:185:10"
+            }
+          },
+          {
+            "id": 6015,
+            "nodeType": "EventDefinition",
+            "src": "2555:131:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "10301d5d7c155e8a5269fc62b7841a3fd101266acc5768d5df29b6e8d8234331",
+            "name": "Quest1155Claimed",
+            "nameLocation": "2561:16:10",
+            "parameters": {
+              "id": 6014,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6005,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nameLocation": "2594:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "2578:25:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6004,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2578:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6007,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "questAddress",
+                  "nameLocation": "2621:12:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "2605:28:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6006,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2605:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6009,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "questId",
+                  "nameLocation": "2642:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "2635:14:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6008,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2635:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6011,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardToken",
+                  "nameLocation": "2659:11:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "2651:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6010,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2651:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6013,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nameLocation": "2677:7:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6015,
+                  "src": "2672:12:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6012,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2672:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2577:108:10"
+            }
+          },
+          {
+            "id": 6023,
+            "nodeType": "EventDefinition",
+            "src": "2691:59:10",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "7412a73f7b9b8b4a2fa22f3cb493a2e3008eb96b92abf7f5b06a18ca796eaa31",
+            "name": "NftQuestFeeListSet",
+            "nameLocation": "2697:18:10",
+            "parameters": {
+              "id": 6022,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6018,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "addresses",
+                  "nameLocation": "2726:9:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6023,
+                  "src": "2716:19:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6016,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2716:7:10",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6017,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2716:9:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6021,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "fees",
+                  "nameLocation": "2744:4:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6023,
+                  "src": "2737:11:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6019,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2737:4:10",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6020,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2737:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2715:34:10"
+            }
+          },
+          {
+            "id": 6034,
+            "nodeType": "FunctionDefinition",
+            "src": "2756:87:10",
+            "nodes": [],
+            "functionSelector": "ec461ac4",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "questInfo",
+            "nameLocation": "2765:9:10",
+            "parameters": {
+              "id": 6026,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6025,
+                  "mutability": "mutable",
+                  "name": "questId_",
+                  "nameLocation": "2789:8:10",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6034,
+                  "src": "2775:22:10",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6024,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2775:6:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2774:24:10"
+            },
+            "returnParameters": {
+              "id": 6033,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6028,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6034,
+                  "src": "2822:7:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6027,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2822:7:10",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6030,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6034,
+                  "src": "2831:4:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6029,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2831:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6032,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6034,
+                  "src": "2837:4:10",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6031,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2837:4:10",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2821:21:10"
+            },
+            "scope": 6035,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IQuestFactory",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          6035
+        ],
+        "name": "IQuestFactory",
+        "nameLocation": "75:13:10",
+        "scope": 6036,
+        "usedErrors": [
+          5829,
+          5831,
+          5833,
+          5835,
+          5837,
+          5839,
+          5841,
+          5843,
+          5845,
+          5847,
+          5849,
+          5851,
+          5853,
+          5855,
+          5857,
+          5859,
+          5861,
+          5863,
+          5865
+        ]
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 10
+}

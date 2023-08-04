@@ -1,0 +1,964 @@
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "lib/prb-math/src/ud60x18/ValueType.sol",
+    "id": 13073,
+    "exportedSymbols": {
+      "Casting": [
+        13000
+      ],
+      "Helpers": [
+        13001
+      ],
+      "Math": [
+        13002
+      ],
+      "UD60x18": [
+        13004
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:2758:38",
+    "nodes": [
+      {
+        "id": 12999,
+        "nodeType": "PragmaDirective",
+        "src": "32:25:38",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".19"
+        ]
+      },
+      {
+        "id": 13000,
+        "nodeType": "ImportDirective",
+        "src": "59:34:38",
+        "nodes": [],
+        "absolutePath": "lib/prb-math/src/ud60x18/Casting.sol",
+        "file": "./Casting.sol",
+        "nameLocation": "85:7:38",
+        "scope": 13073,
+        "sourceUnit": 11515,
+        "symbolAliases": [],
+        "unitAlias": "Casting"
+      },
+      {
+        "id": 13001,
+        "nodeType": "ImportDirective",
+        "src": "94:34:38",
+        "nodes": [],
+        "absolutePath": "lib/prb-math/src/ud60x18/Helpers.sol",
+        "file": "./Helpers.sol",
+        "nameLocation": "120:7:38",
+        "scope": 13073,
+        "sourceUnit": 12242,
+        "symbolAliases": [],
+        "unitAlias": "Helpers"
+      },
+      {
+        "id": 13002,
+        "nodeType": "ImportDirective",
+        "src": "129:28:38",
+        "nodes": [],
+        "absolutePath": "lib/prb-math/src/ud60x18/Math.sol",
+        "file": "./Math.sol",
+        "nameLocation": "152:4:38",
+        "scope": 13073,
+        "sourceUnit": 12998,
+        "symbolAliases": [],
+        "unitAlias": "Math"
+      },
+      {
+        "id": 13004,
+        "nodeType": "UserDefinedValueTypeDefinition",
+        "src": "480:24:38",
+        "nodes": [],
+        "canonicalName": "UD60x18",
+        "name": "UD60x18",
+        "nameLocation": "485:7:38",
+        "underlyingType": {
+          "id": 13003,
+          "name": "uint256",
+          "nodeType": "ElementaryTypeName",
+          "src": "496:7:38",
+          "typeDescriptions": {
+            "typeIdentifier": "t_uint256",
+            "typeString": "uint256"
+          }
+        }
+      },
+      {
+        "id": 13014,
+        "nodeType": "UsingForDirective",
+        "src": "705:195:38",
+        "nodes": [],
+        "functionList": [
+          {
+            "function": {
+              "id": 13005,
+              "name": "Casting.intoSD1x18",
+              "nameLocations": [
+                "717:7:38",
+                "725:10:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11278,
+              "src": "717:18:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13006,
+              "name": "Casting.intoUD2x18",
+              "nameLocations": [
+                "741:7:38",
+                "749:10:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11317,
+              "src": "741:18:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13007,
+              "name": "Casting.intoSD59x18",
+              "nameLocations": [
+                "765:7:38",
+                "773:11:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11359,
+              "src": "765:19:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13008,
+              "name": "Casting.intoUint128",
+              "nameLocations": [
+                "790:7:38",
+                "798:11:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11411,
+              "src": "790:19:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13009,
+              "name": "Casting.intoUint256",
+              "nameLocations": [
+                "815:7:38",
+                "823:11:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11376,
+              "src": "815:19:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13010,
+              "name": "Casting.intoUint40",
+              "nameLocations": [
+                "840:7:38",
+                "848:10:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11446,
+              "src": "840:18:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13011,
+              "name": "Casting.unwrap",
+              "nameLocations": [
+                "864:7:38",
+                "872:6:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11497,
+              "src": "864:14:38"
+            }
+          }
+        ],
+        "global": true,
+        "typeName": {
+          "id": 13013,
+          "nodeType": "UserDefinedTypeName",
+          "pathNode": {
+            "id": 13012,
+            "name": "UD60x18",
+            "nameLocations": [
+              "885:7:38"
+            ],
+            "nodeType": "IdentifierPath",
+            "referencedDeclaration": 13004,
+            "src": "885:7:38"
+          },
+          "referencedDeclaration": 13004,
+          "src": "885:7:38",
+          "typeDescriptions": {
+            "typeIdentifier": "t_userDefinedValueType$_UD60x18_$13004",
+            "typeString": "UD60x18"
+          }
+        }
+      },
+      {
+        "id": 13033,
+        "nodeType": "UsingForDirective",
+        "src": "1210:260:38",
+        "nodes": [],
+        "functionList": [
+          {
+            "function": {
+              "id": 13015,
+              "name": "Math.avg",
+              "nameLocations": [
+                "1222:4:38",
+                "1227:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12305,
+              "src": "1222:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13016,
+              "name": "Math.ceil",
+              "nameLocations": [
+                "1236:4:38",
+                "1241:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12334,
+              "src": "1236:9:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13017,
+              "name": "Math.div",
+              "nameLocations": [
+                "1251:4:38",
+                "1256:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12363,
+              "src": "1251:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13018,
+              "name": "Math.exp",
+              "nameLocations": [
+                "1265:4:38",
+                "1270:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12408,
+              "src": "1265:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13019,
+              "name": "Math.exp2",
+              "nameLocations": [
+                "1279:4:38",
+                "1284:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12454,
+              "src": "1279:9:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13020,
+              "name": "Math.floor",
+              "nameLocations": [
+                "1294:4:38",
+                "1299:5:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12466,
+              "src": "1294:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13021,
+              "name": "Math.frac",
+              "nameLocations": [
+                "1310:4:38",
+                "1315:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12478,
+              "src": "1310:9:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13022,
+              "name": "Math.gm",
+              "nameLocations": [
+                "1325:4:38",
+                "1330:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12545,
+              "src": "1325:7:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13023,
+              "name": "Math.inv",
+              "nameLocations": [
+                "1338:4:38",
+                "1343:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12567,
+              "src": "1338:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13024,
+              "name": "Math.ln",
+              "nameLocations": [
+                "1352:4:38",
+                "1357:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12593,
+              "src": "1352:7:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13025,
+              "name": "Math.log10",
+              "nameLocations": [
+                "1365:4:38",
+                "1370:5:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12644,
+              "src": "1365:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13026,
+              "name": "Math.log2",
+              "nameLocations": [
+                "1381:4:38",
+                "1386:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12748,
+              "src": "1381:9:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13027,
+              "name": "Math.mul",
+              "nameLocations": [
+                "1396:4:38",
+                "1401:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12776,
+              "src": "1396:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13028,
+              "name": "Math.pow",
+              "nameLocations": [
+                "1410:4:38",
+                "1415:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12883,
+              "src": "1410:8:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13029,
+              "name": "Math.powu",
+              "nameLocations": [
+                "1424:4:38",
+                "1429:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12955,
+              "src": "1424:9:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13030,
+              "name": "Math.sqrt",
+              "nameLocations": [
+                "1439:4:38",
+                "1444:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12997,
+              "src": "1439:9:38"
+            }
+          }
+        ],
+        "global": true,
+        "typeName": {
+          "id": 13032,
+          "nodeType": "UserDefinedTypeName",
+          "pathNode": {
+            "id": 13031,
+            "name": "UD60x18",
+            "nameLocations": [
+              "1455:7:38"
+            ],
+            "nodeType": "IdentifierPath",
+            "referencedDeclaration": 13004,
+            "src": "1455:7:38"
+          },
+          "referencedDeclaration": 13004,
+          "src": "1455:7:38",
+          "typeDescriptions": {
+            "typeIdentifier": "t_userDefinedValueType$_UD60x18_$13004",
+            "typeString": "UD60x18"
+          }
+        }
+      },
+      {
+        "id": 13054,
+        "nodeType": "UsingForDirective",
+        "src": "1778:357:38",
+        "nodes": [],
+        "functionList": [
+          {
+            "function": {
+              "id": 13034,
+              "name": "Helpers.add",
+              "nameLocations": [
+                "1790:7:38",
+                "1798:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11812,
+              "src": "1790:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13035,
+              "name": "Helpers.and",
+              "nameLocations": [
+                "1807:7:38",
+                "1815:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11835,
+              "src": "1807:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13036,
+              "name": "Helpers.eq",
+              "nameLocations": [
+                "1824:7:38",
+                "1832:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11884,
+              "src": "1824:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13037,
+              "name": "Helpers.gt",
+              "nameLocations": [
+                "1840:7:38",
+                "1848:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11907,
+              "src": "1840:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13038,
+              "name": "Helpers.gte",
+              "nameLocations": [
+                "1856:7:38",
+                "1864:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11930,
+              "src": "1856:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13039,
+              "name": "Helpers.isZero",
+              "nameLocations": [
+                "1873:7:38",
+                "1881:6:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11948,
+              "src": "1873:14:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13040,
+              "name": "Helpers.lshift",
+              "nameLocations": [
+                "1893:7:38",
+                "1901:6:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11971,
+              "src": "1893:14:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13041,
+              "name": "Helpers.lt",
+              "nameLocations": [
+                "1913:7:38",
+                "1921:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11994,
+              "src": "1913:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13042,
+              "name": "Helpers.lte",
+              "nameLocations": [
+                "1929:7:38",
+                "1937:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12017,
+              "src": "1929:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13043,
+              "name": "Helpers.mod",
+              "nameLocations": [
+                "1946:7:38",
+                "1954:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12043,
+              "src": "1946:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13044,
+              "name": "Helpers.neq",
+              "nameLocations": [
+                "1963:7:38",
+                "1971:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12066,
+              "src": "1963:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13045,
+              "name": "Helpers.not",
+              "nameLocations": [
+                "1980:7:38",
+                "1988:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12086,
+              "src": "1980:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13046,
+              "name": "Helpers.or",
+              "nameLocations": [
+                "1997:7:38",
+                "2005:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12112,
+              "src": "1997:10:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13047,
+              "name": "Helpers.rshift",
+              "nameLocations": [
+                "2013:7:38",
+                "2021:6:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12135,
+              "src": "2013:14:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13048,
+              "name": "Helpers.sub",
+              "nameLocations": [
+                "2033:7:38",
+                "2041:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12161,
+              "src": "2033:11:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13049,
+              "name": "Helpers.uncheckedAdd",
+              "nameLocations": [
+                "2050:7:38",
+                "2058:12:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12188,
+              "src": "2050:20:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13050,
+              "name": "Helpers.uncheckedSub",
+              "nameLocations": [
+                "2076:7:38",
+                "2084:12:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12215,
+              "src": "2076:20:38"
+            }
+          },
+          {
+            "function": {
+              "id": 13051,
+              "name": "Helpers.xor",
+              "nameLocations": [
+                "2102:7:38",
+                "2110:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12241,
+              "src": "2102:11:38"
+            }
+          }
+        ],
+        "global": true,
+        "typeName": {
+          "id": 13053,
+          "nodeType": "UserDefinedTypeName",
+          "pathNode": {
+            "id": 13052,
+            "name": "UD60x18",
+            "nameLocations": [
+              "2120:7:38"
+            ],
+            "nodeType": "IdentifierPath",
+            "referencedDeclaration": 13004,
+            "src": "2120:7:38"
+          },
+          "referencedDeclaration": 13004,
+          "src": "2120:7:38",
+          "typeDescriptions": {
+            "typeIdentifier": "t_userDefinedValueType$_UD60x18_$13004",
+            "typeString": "UD60x18"
+          }
+        }
+      },
+      {
+        "id": 13072,
+        "nodeType": "UsingForDirective",
+        "src": "2436:353:38",
+        "nodes": [],
+        "functionList": [
+          {
+            "definition": {
+              "id": 13055,
+              "name": "Helpers.add",
+              "nameLocations": [
+                "2448:7:38",
+                "2456:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11812,
+              "src": "2448:11:38"
+            },
+            "operator": "+"
+          },
+          {
+            "definition": {
+              "id": 13056,
+              "name": "Helpers.and2",
+              "nameLocations": [
+                "2470:7:38",
+                "2478:4:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11861,
+              "src": "2470:12:38"
+            },
+            "operator": "&"
+          },
+          {
+            "definition": {
+              "id": 13057,
+              "name": "Math.div",
+              "nameLocations": [
+                "2493:4:38",
+                "2498:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12363,
+              "src": "2493:8:38"
+            },
+            "operator": "/"
+          },
+          {
+            "definition": {
+              "id": 13058,
+              "name": "Helpers.eq",
+              "nameLocations": [
+                "2512:7:38",
+                "2520:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11884,
+              "src": "2512:10:38"
+            },
+            "operator": "=="
+          },
+          {
+            "definition": {
+              "id": 13059,
+              "name": "Helpers.gt",
+              "nameLocations": [
+                "2534:7:38",
+                "2542:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11907,
+              "src": "2534:10:38"
+            },
+            "operator": ">"
+          },
+          {
+            "definition": {
+              "id": 13060,
+              "name": "Helpers.gte",
+              "nameLocations": [
+                "2555:7:38",
+                "2563:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11930,
+              "src": "2555:11:38"
+            },
+            "operator": ">="
+          },
+          {
+            "definition": {
+              "id": 13061,
+              "name": "Helpers.lt",
+              "nameLocations": [
+                "2578:7:38",
+                "2586:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11994,
+              "src": "2578:10:38"
+            },
+            "operator": "<"
+          },
+          {
+            "definition": {
+              "id": 13062,
+              "name": "Helpers.lte",
+              "nameLocations": [
+                "2599:7:38",
+                "2607:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12017,
+              "src": "2599:11:38"
+            },
+            "operator": "<="
+          },
+          {
+            "definition": {
+              "id": 13063,
+              "name": "Helpers.or",
+              "nameLocations": [
+                "2622:7:38",
+                "2630:2:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12112,
+              "src": "2622:10:38"
+            },
+            "operator": "|"
+          },
+          {
+            "definition": {
+              "id": 13064,
+              "name": "Helpers.mod",
+              "nameLocations": [
+                "2643:7:38",
+                "2651:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12043,
+              "src": "2643:11:38"
+            },
+            "operator": "%"
+          },
+          {
+            "definition": {
+              "id": 13065,
+              "name": "Math.mul",
+              "nameLocations": [
+                "2665:4:38",
+                "2670:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12776,
+              "src": "2665:8:38"
+            },
+            "operator": "*"
+          },
+          {
+            "definition": {
+              "id": 13066,
+              "name": "Helpers.neq",
+              "nameLocations": [
+                "2684:7:38",
+                "2692:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12066,
+              "src": "2684:11:38"
+            },
+            "operator": "!="
+          },
+          {
+            "definition": {
+              "id": 13067,
+              "name": "Helpers.not",
+              "nameLocations": [
+                "2707:7:38",
+                "2715:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12086,
+              "src": "2707:11:38"
+            },
+            "operator": "~"
+          },
+          {
+            "definition": {
+              "id": 13068,
+              "name": "Helpers.sub",
+              "nameLocations": [
+                "2729:7:38",
+                "2737:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12161,
+              "src": "2729:11:38"
+            },
+            "operator": "-"
+          },
+          {
+            "definition": {
+              "id": 13069,
+              "name": "Helpers.xor",
+              "nameLocations": [
+                "2751:7:38",
+                "2759:3:38"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 12241,
+              "src": "2751:11:38"
+            },
+            "operator": "^"
+          }
+        ],
+        "global": true,
+        "typeName": {
+          "id": 13071,
+          "nodeType": "UserDefinedTypeName",
+          "pathNode": {
+            "id": 13070,
+            "name": "UD60x18",
+            "nameLocations": [
+              "2774:7:38"
+            ],
+            "nodeType": "IdentifierPath",
+            "referencedDeclaration": 13004,
+            "src": "2774:7:38"
+          },
+          "referencedDeclaration": 13004,
+          "src": "2774:7:38",
+          "typeDescriptions": {
+            "typeIdentifier": "t_userDefinedValueType$_UD60x18_$13004",
+            "typeString": "UD60x18"
+          }
+        }
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 38
+}
