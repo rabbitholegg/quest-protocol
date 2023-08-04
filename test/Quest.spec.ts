@@ -144,6 +144,7 @@ describe('Quest', async () => {
             ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
+            0, // durationTotal_
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
       })
@@ -162,6 +163,7 @@ describe('Quest', async () => {
             ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
+            0, // durationTotal_
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
