@@ -4,3 +4,6 @@
 [submodule "lib/v2-core"]
 	path = lib/v2-core
 	url = https://github.com/sablier-labs/v2-core
+[submodule "lib/prb-math"]
+	path = lib/prb-math
+	url = https://github.com/PaulRBerg/prb-math
