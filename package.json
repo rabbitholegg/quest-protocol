@@ -50,6 +50,8 @@
     "@openzeppelin/contracts-upgradeable": "4.8.0",
     "@openzeppelin/hardhat-defender": "^1.8.2",
     "@openzeppelin/hardhat-upgrades": "^1.26.0",
+    "@prb/math": "^4.0.1",
+    "@sablier/v2-core": "^1.0.1",
     "@typechain/ethers-v5": "^10.2.0",
     "@typechain/hardhat": "^6.1.5",
     "@types/chai": "^4.2.6",
