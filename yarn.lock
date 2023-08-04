@@ -763,19 +763,6 @@
     proper-lockfile "^4.1.1"
     solidity-ast "^0.4.15"
 
-"@prb/math@4.0.1", "@prb/math@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@prb/math/-/math-4.0.1.tgz#bc90277f4f1c085c973f502455bf12c2b3b67666"
-  integrity sha512-ANTz2KMV+dMdZ57mWgDTR6jZo5uQzUczQEHCxd7CvJZZ9yafnfPhUUILHvvigIOZ85fZbTPVkC8YoRG1z5Qf7g==
-
-"@sablier/v2-core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@sablier/v2-core/-/v2-core-1.0.1.tgz#e78e8c2e071b2c34359000e05a4910e45c36c437"
-  integrity sha512-f7ALblu7XPQ0+RvzWbG1WxpRVZpDEkT9A1DHCRuoGLx4aOgNRK00MuzuJNET25zmbbKYTdGcY8B7gLYBgIkMZw==
-  dependencies:
-    "@openzeppelin/contracts" "4.9.2"
-    "@prb/math" "4.0.1"
-
 "@scure/base@~1.1.0":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.1.tgz#ebb651ee52ff84f420097055f4bf46cfba403938"
