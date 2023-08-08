@@ -27,7 +27,7 @@ jobs:
       - name: "Restore the cached build"
         uses: "actions/cache/restore@v3"
         with:
-          fail-on-cache-miss: true
+          fail-on-cache-miss: false
           key: "foundry-build-${{ github.sha }}"
           path: "out-optimized"
 
