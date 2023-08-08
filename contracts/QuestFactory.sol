@@ -34,7 +34,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         string questType;
-        uint40 duratiootal;
+        uint40 durationTotal;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -63,6 +63,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint redeemedTokens;
         uint rewardAmountOrTokenId;
         bool hasWithdrawn;
+        string questType;
+        uint40 durationTotal;
     }
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
@@ -192,8 +194,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         if(durationTotal_ > 0){
-            currentQuest.duratiootal = durationTotal_;
-            currentQuest.questType = "erc20_stream";
+            currentQuest.durationTotal = durationTotal_;
+            currentQuest.questType = "erc20Stream";
         }else{
             currentQuest.questType = "erc20";
         }
@@ -272,7 +274,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    /// @dev Create an erc20 with a sablier stream reward quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @dev Create a sablier stream reward quest and start it at the same time.
+    /// @notice The function will transfer the reward amount to the quest contract
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
@@ -283,7 +286,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param discountTokenId_ The id of the discount token
     /// @param durationTotal_ The duration of the sablier stream
     /// @return address the quest contract address
-    function createSablierQuest(
+    function createERC20StreamQuest(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -553,7 +556,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            questContract.hasWithdrawn()
+            questContract.hasWithdrawn(),
+            thisQuest.questType,
+            thisQuest.durationTotal
         );
 
         return data;

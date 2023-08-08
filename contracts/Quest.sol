@@ -199,7 +199,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
         if(durationTotal > 0) {
-            createLockupLinearStream(amount_, sender_);
+            createLockupLinearStream(sender_, amount_);
         } else {
             rewardToken.safeTransfer(sender_, amount_);
         }
@@ -267,14 +267,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 
-    function createLockupLinearStream(uint256 totalAmount_, address recepient_) internal returns (uint256 streamId) {
+    function createLockupLinearStream(address recepient_, uint256 totalAmount_) internal returns (uint256 streamId) {
         // Approve the Sablier contract to spend reward tokens
         rewardToken.safeApprove(address(lockupLinear), totalAmount_);
 
-        // Declare the params struct
         LockupLinear.CreateWithDurations memory params;
 
-        // Declare the function parameters
         params.sender = msg.sender; // The sender will be able to cancel the stream
         params.recipient = recepient_; // The recipient of the streamed assets
         params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
