@@ -287,7 +287,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         streamId = lockupLinear.createWithDurations(params);
     }
 
-    function getLockupLinearContract() internal pure returns (ISablierV2LockupLinear) {
-        return ISablierV2LockupLinear(0xA4fc358455Febe425536fd1878bE67FfDBDEC59a);
+    function getLockupLinearContract() internal view returns (ISablierV2LockupLinear) {
+        if (block.chainid == 1) return ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95); // mainnet
+        if (block.chainid == 42161) return ISablierV2LockupLinear(0x197D655F3be03903fD25e7828c3534504bfe525e); // arbitrum
+        if (block.chainid == 10) return ISablierV2LockupLinear(0xB923aBdCA17Aed90EB5EC5E407bd37164f632bFD); // optimisim
+        if (block.chainid == 137) return ISablierV2LockupLinear(0x67422C3E36A908D5C3237e9cFfEB40bDE7060f6E); // polygon
     }
 }
