@@ -427,6 +427,8 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
         false,
+        'erc20',
+        0,
       ])
     })
 
@@ -468,6 +470,8 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(1),
         ethers.BigNumber.from(NFTTokenId),
         false,
+        'erc1155',
+        0,
       ])
     })
   })
