@@ -20,9 +20,6 @@ import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
 
-    // todo pass this in, this address is different per network
-    ISablierV2LockupLinear public constant lockupLinear = ISablierV2LockupLinear(0xA4fc358455Febe425536fd1878bE67FfDBDEC59a);
-
     RabbitHoleReceipt public rabbitHoleReceiptContract;
     QuestFactory public questFactoryContract;
     address public rewardToken;
@@ -268,6 +265,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     function createLockupLinearStream(address recepient_, uint256 totalAmount_) internal returns (uint256 streamId) {
+        ISablierV2LockupLinear lockupLinear = getLockupLinearContract();
+
         // Approve the Sablier contract to spend reward tokens
         rewardToken.safeApprove(address(lockupLinear), totalAmount_);
 
@@ -286,5 +285,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
         streamId = lockupLinear.createWithDurations(params);
+    }
+
+    function getLockupLinearContract() internal pure returns (ISablierV2LockupLinear) {
+        return ISablierV2LockupLinear(0xA4fc358455Febe425536fd1878bE67FfDBDEC59a);
     }
 }
