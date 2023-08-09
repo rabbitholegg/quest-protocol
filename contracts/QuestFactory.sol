@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
+import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
 import {LibString} from 'solady/src/utils/LibString.sol';
@@ -23,7 +24,7 @@ import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 /// @dev This contract is used to create quests and mint receipts
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeTransferLib for address;
-    using LibClone for address;
+    using Clones for address;
     using LibString for string;
     using LibString for uint256;
 
