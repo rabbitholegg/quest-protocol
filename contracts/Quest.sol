@@ -292,5 +292,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (block.chainid == 42161) return ISablierV2LockupLinear(0x197D655F3be03903fD25e7828c3534504bfe525e); // arbitrum
         if (block.chainid == 10) return ISablierV2LockupLinear(0xB923aBdCA17Aed90EB5EC5E407bd37164f632bFD); // optimisim
         if (block.chainid == 137) return ISablierV2LockupLinear(0x67422C3E36A908D5C3237e9cFfEB40bDE7060f6E); // polygon
+        revert UnsupportedChainIdForSablier();
     }
 }

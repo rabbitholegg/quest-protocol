@@ -18,6 +18,7 @@ interface IQuest {
     error NoWithdrawDuringClaim();
     error NotStarted();
     error TotalAmountExceedsBalance();
+    error UnsupportedChainIdForSablier();
 
     function isClaimed(uint256 tokenId_) external view returns (bool);
     function getRewardAmount() external view returns (uint256);
