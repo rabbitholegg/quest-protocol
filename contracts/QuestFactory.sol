@@ -18,6 +18,9 @@ import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 
+// import console.log
+import 'hardhat/console.sol';
+
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and mint receipts

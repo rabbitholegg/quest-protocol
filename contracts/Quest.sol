@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
+pragma experimental ABIEncoderV2;
 
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
@@ -36,6 +37,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
     uint40 public durationTotal;
+    mapping(address => uint[]) public streamIdsForAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -264,7 +266,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 
-    function createLockupLinearStream(address recepient_, uint256 totalAmount_) internal returns (uint256 streamId) {
+    function createLockupLinearStream(address recepient_, uint totalAmount_) internal {
         ISablierV2LockupLinear lockupLinear = getLockupLinearContract();
 
         // Approve the Sablier contract to spend reward tokens
@@ -272,7 +274,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         LockupLinear.CreateWithDurations memory params;
 
-        params.sender = msg.sender; // The sender will be able to cancel the stream
+        params.sender = msg.sender; // The sender will be able to cancel the stream, this is the QuestFactory contract
         params.recipient = recepient_; // The recipient of the streamed assets
         params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
         params.asset = IERC20(rewardToken); // The streaming asset
@@ -284,14 +286,23 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         params.broker = Broker(address(0), ud60x18(0)); // Optional parameter for charging a fee
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
-        streamId = lockupLinear.createWithDurations(params);
+        uint streamId = lockupLinear.createWithDurations(params);
+
+        streamIdsForAddress[recepient_].push(streamId);
     }
 
+    // ToDo: do we want to do this, or set the address in storage in the questFactory and pass it down on quest creation?
+    // probably the later.
     function getLockupLinearContract() internal view returns (ISablierV2LockupLinear) {
         if (block.chainid == 1) return ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95); // mainnet
-        if (block.chainid == 42161) return ISablierV2LockupLinear(0x197D655F3be03903fD25e7828c3534504bfe525e); // arbitrum
         if (block.chainid == 10) return ISablierV2LockupLinear(0xB923aBdCA17Aed90EB5EC5E407bd37164f632bFD); // optimisim
         if (block.chainid == 137) return ISablierV2LockupLinear(0x67422C3E36A908D5C3237e9cFfEB40bDE7060f6E); // polygon
+        if (block.chainid == 1337) return ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95); // local
+        if (block.chainid == 42161) return ISablierV2LockupLinear(0x197D655F3be03903fD25e7828c3534504bfe525e); // arbitrum
         revert UnsupportedChainIdForSablier();
+    }
+
+    function getStreamIds(address address_) external view returns(uint[] memory) {
+        return streamIdsForAddress[address_];
     }
 }
