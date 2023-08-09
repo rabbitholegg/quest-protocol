@@ -4741,11 +4741,6 @@ slice-ansi@^5.0.0:
     ansi-styles "^6.0.0"
     is-fullwidth-code-point "^4.0.0"
 
-solady@^0.0.107:
-  version "0.0.107"
-  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.107.tgz#b9b218b1e16f804714e4f6d41a75ac50dec2345b"
-  integrity sha512-etZ9XZ5IlHiLaE3itu6w7gROVVO7s2bBUfuCw/hMx9u2Jpv8rYv7l1SYAdAiBT6WKbpwBvp8PPLtIcoLKmIFKQ==
-
 solc@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.7.3.tgz#04646961bd867a744f63d2b4e3c0701ffdc7d78a"
@@ -4809,11 +4804,6 @@ solidity-coverage@^0.8.2:
     semver "^7.3.4"
     shelljs "^0.8.3"
     web3-utils "^1.3.6"
-
-solmate@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/solmate/-/solmate-6.1.0.tgz#b85aaa8c2b34afe9c6d6d5a015c369267c576313"
-  integrity sha512-gxG4YU5nnAQ+Ac23R44GS3Xo3+X0+8XCe4/P1KvVobL5ERBzQBG/xMv7NSvVo/pkHSYGufgUAPjiueYxujKJAA==
 
 source-map-support@^0.5.13, source-map-support@^0.5.17:
   version "0.5.21"
