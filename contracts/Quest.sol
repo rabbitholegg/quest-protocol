@@ -38,6 +38,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     string public jsonSpecCID;
     uint40 public durationTotal;
     mapping(address => uint[]) public streamIdsForAddress;
+    ISablierV2LockupLinear public sablierV2LockupLinearContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -54,7 +55,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         address receiptContractAddress_,
         uint16 questFee_,
         address protocolFeeRecipient_,
-        uint40 durationTotal_
+        uint40 durationTotal_,
+        address sablierV2LockupLinearAddress_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -66,6 +68,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questId = questId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
         rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
+        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
@@ -73,6 +76,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
+    }
+
+    /// @dev set the Sablier contract address
+    /// @param sablierV2LockupLinearContract_ The Sablier contract address
+    function setSablierV2LockupLinearContract(address sablierV2LockupLinearContract_) external onlyOwner {
+        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearContract_);
     }
 
     /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
@@ -267,10 +276,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     function createLockupLinearStream(address recepient_, uint totalAmount_) internal {
-        ISablierV2LockupLinear lockupLinear = getLockupLinearContract();
-
         // Approve the Sablier contract to spend reward tokens
-        rewardToken.safeApprove(address(lockupLinear), totalAmount_);
+        rewardToken.safeApprove(address(sablierV2LockupLinearContract), totalAmount_);
 
         LockupLinear.CreateWithDurations memory params;
 
@@ -286,20 +293,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         params.broker = Broker(address(0), ud60x18(0)); // Optional parameter for charging a fee
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
-        uint streamId = lockupLinear.createWithDurations(params);
+        uint streamId = sablierV2LockupLinearContract.createWithDurations(params);
 
         streamIdsForAddress[recepient_].push(streamId);
-    }
-
-    // ToDo: do we want to do this, or set the address in storage in the questFactory and pass it down on quest creation?
-    // probably the later.
-    function getLockupLinearContract() internal view returns (ISablierV2LockupLinear) {
-        if (block.chainid == 1) return ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95); // mainnet
-        if (block.chainid == 10) return ISablierV2LockupLinear(0xB923aBdCA17Aed90EB5EC5E407bd37164f632bFD); // optimisim
-        if (block.chainid == 137) return ISablierV2LockupLinear(0x67422C3E36A908D5C3237e9cFfEB40bDE7060f6E); // polygon
-        if (block.chainid == 1337) return ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95); // local
-        if (block.chainid == 42161) return ISablierV2LockupLinear(0x197D655F3be03903fD25e7828c3534504bfe525e); // arbitrum
-        revert UnsupportedChainIdForSablier();
     }
 
     function getStreamIds(address address_) external view returns(uint[] memory) {

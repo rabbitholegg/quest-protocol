@@ -27,6 +27,7 @@ describe('QuestFactory', () => {
   let deployedErc20Quest: Quest
   let deployedErc1155Quest: Quest
   let expiryDate: number, startDate: number
+  const sablierV2LockupLinearAddress = '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
@@ -98,7 +99,8 @@ describe('QuestFactory', () => {
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
       owner.address,
-      owner.address, // this will become the questTerminalKey contract
+      ethers.constants.AddressZero, // this will become the questTerminalKey contract
+      sablierV2LockupLinearAddress,
       nftQuestFee,
       referralFee,
     ])) as QuestFactory

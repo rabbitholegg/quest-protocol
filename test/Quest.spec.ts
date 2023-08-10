@@ -20,7 +20,7 @@ describe('Quest', async () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
   let expiryDate: number, startDate: number
-  const mockAddress = '0x0000000000000000000000000000000000000000'
+  const sablierV2LockupLinearAddress = '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const questId = 'asdf'
   const totalParticipants = 300
@@ -97,6 +97,7 @@ describe('Quest', async () => {
       ethers.constants.AddressZero, // as a placeholder, would be the Quest1155 NFT contract
       owner.address,
       ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
+      sablierV2LockupLinearAddress, // sablier contract address on mainnet
       100, // the nftQuestFee
       5000, // referralFee
     ])) as QuestFactory
@@ -135,7 +136,7 @@ describe('Quest', async () => {
       it('Should revert', async () => {
         await expect(
           upgrades.deployProxy(questContract, [
-            mockAddress,
+            ethers.constants.AddressZero,
             startDate - 1000,
             startDate,
             totalParticipants,
@@ -145,6 +146,7 @@ describe('Quest', async () => {
             10,
             ethers.constants.AddressZero,
             0, // durationTotal_
+            sablierV2LockupLinearAddress, // sablier contract address on mainnet
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
       })
@@ -154,7 +156,7 @@ describe('Quest', async () => {
       it('Should revert', async () => {
         await expect(
           upgrades.deployProxy(questContract, [
-            mockAddress,
+            ethers.constants.AddressZero,
             startDate + 1,
             startDate + 10,
             totalParticipants,
@@ -164,6 +166,7 @@ describe('Quest', async () => {
             10,
             ethers.constants.AddressZero,
             0, // durationTotal_
+            sablierV2LockupLinearAddress, // sablier contract address on mainnet
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })

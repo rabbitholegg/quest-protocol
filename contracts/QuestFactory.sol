@@ -76,6 +76,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool exists;
     }
     uint16 public referralFee;
+    address public sablierV2LockupLinearAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -88,6 +89,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address payable erc1155QuestAddress_,
         address ownerAddress_,
         address questTerminalKeyAddress_,
+        address sablierV2LockupLinearAddress_,
         uint nftQuestFee_,
         uint16 referralFee_
     ) external initializer {
@@ -101,6 +103,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
         questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
+        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
     }
@@ -219,7 +222,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             address(rabbitHoleReceiptContract),
             protocolFee,
             protocolFeeRecipient,
-            durationTotal_
+            durationTotal_,
+            sablierV2LockupLinearAddress
         );
 
         return newQuest;
@@ -695,6 +699,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
         }
         emit NftQuestFeeListSet(toAddAddresses_, fees_);
+    }
+
+    /// @dev set sablierV2LockupLinearAddress
+    /// @param sablierV2LockupLinearAddress_ The address of the sablierV2LockupLinear contract
+    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external onlyOwner {
+        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
+        emit SablierV2LockupLinearAddressSet(sablierV2LockupLinearAddress_);
     }
 
     // Receive function to receive ETH
