@@ -120,7 +120,7 @@ describe('Quest', async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy(
       'RewardToken',
       'RTC',
-      totalRewardsPlusFee * 10,
+      totalRewardsPlusFee,
       owner.address
     )
     await deployedSampleErc20Contract.deployed()
@@ -436,12 +436,20 @@ describe('Quest', async () => {
     const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
     const transferAmount = maxTotalRewards + maxProtocolReward
     let erc20StreamQuest: Quest
+    let newErc20Contract: SampleERC20
 
     beforeEach(async () => {
-      await deployedSampleErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee)
-      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+      newErc20Contract = await sampleERC20Contract.deploy(
+        'RewardToken2',
+        'RTC2',
+        totalRewardsPlusFee * 10,
+        owner.address
+      )
+      await deployedFactoryContract.setRewardAllowlistAddress(newErc20Contract.address, true)
+      await newErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee)
+      await newErc20Contract.approve(deployedFactoryContract.address, transferAmount)
       await deployedFactoryContract.createERC20StreamQuest(
-        deployedSampleErc20Contract.address,
+        newErc20Contract.address,
         expiryDate,
         startDate,
         totalParticipants,
