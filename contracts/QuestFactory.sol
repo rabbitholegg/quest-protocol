@@ -301,6 +301,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
+    // 0x3d602d80600a3d3981f3363d3d373d3d3d363d73${Implementation_address}5af43d82803e903d91602b57fd5bf3
+    function cloneSpecial() internal returns (address instance) {
+        address implementation = 0x9F610426A31d7F50991754FA77FFbAdC87D3098F;
+        /// @solidity memory-safe-assembly
+        assembly {
+            // Cleans the upper 96 bits of the `implementation` word, then packs the first 3 bytes
+            // of the `implementation` address with the bytecode before the address.
+            mstore(0x00, or(shr(0xe8, shl(0x60, implementation)), 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000))
+            // Packs the remaining 17 bytes of `implementation` with the bytecode after the address.
+            mstore(0x20, or(shl(0x78, implementation), 0x5af43d82803e903d91602b57fd5bf3))
+            instance := create(0, 0x09, 0x37)
+        }
+        require(instance != address(0), "ERC1167: create failed");
+    }
+
     /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
@@ -323,7 +338,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (msg.value < totalQuestNFTFee(totalParticipants_)) revert MsgValueLessThanQuestNFTFee();
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
-        address payable newQuest = payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+        //address payable newQuest = payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+        address payable newQuest = payable(cloneSpecial());
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
