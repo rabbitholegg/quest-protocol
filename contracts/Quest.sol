@@ -207,7 +207,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
         if(durationTotal > 0) {
-            createLockupLinearStream(sender_, amount_);
+            _createLockupLinearStream(sender_, amount_);
         } else {
             rewardToken.safeTransfer(sender_, amount_);
         }
@@ -275,7 +275,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 
-    function createLockupLinearStream(address recepient_, uint totalAmount_) internal {
+    function _createLockupLinearStream(address recepient_, uint totalAmount_) internal {
         // Approve the Sablier contract to spend reward tokens
         rewardToken.safeApprove(address(sablierV2LockupLinearContract), totalAmount_);
 
