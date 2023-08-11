@@ -39,7 +39,8 @@ async function upgrade(contractName: string, proxyAddress: string) {
 }
 
 async function main() {
-  // await deployProxy('QuestFactory', [
+  // this hasn't been tested since splitting out the questfactory base contract
+  // await deployProxy('QuestFactoryZK', [
   //   '0x94c3e5e801830dd65cd786f2fe37e79c65df4148', // claimSignerAddress_
   //   '0x0000000000000000000000000000000000000000', // rabbitHoleReceiptContract_
   //   '0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c', // protocolFeeRecipient_
@@ -66,7 +67,7 @@ async function main() {
   // await deploy('Quest', [])
   // await deploy('Quest1155', [])
 
-  await upgrade('QuestFactory', '0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7') // testnet
+  await upgrade('QuestFactoryZK', '0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7') // testnet
   // await upgrade('RabbitHoleTickets', '0x651c7fBBaC1fA3a8937377C4879Ca99C11F1261c') // testnet
 }
 

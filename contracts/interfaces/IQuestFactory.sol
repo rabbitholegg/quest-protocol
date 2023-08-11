@@ -21,6 +21,7 @@ interface IQuestFactory {
     error MsgValueLessThanQuestNFTFee();
     error Deprecated();
     error QuestTypeNotSupported();
+    error NotImplemented();
 
     event QuestCreated(
         address indexed creator,

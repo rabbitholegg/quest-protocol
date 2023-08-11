@@ -2,19 +2,19 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require('dotenv').config()
-// require('hardhat-deploy') // comment out when doing zksync deploy or verify
+require('hardhat-deploy') // comment out when doing zksync deploy or verify
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
 import '@nomiclabs/hardhat-ethers'
-// import '@nomicfoundation/hardhat-toolbox' // comment out when doing zksync deploy or verify
-// import '@openzeppelin/hardhat-upgrades' // comment out when doing zksync deploy or verify
+import '@nomicfoundation/hardhat-toolbox' // comment out when doing zksync deploy or verify
+import '@openzeppelin/hardhat-upgrades' // comment out when doing zksync deploy or verify
 import '@openzeppelin/hardhat-defender'
 
 // un-comment below when doing a zksync deploy
-import '@matterlabs/hardhat-zksync-solc'
-import '@matterlabs/hardhat-zksync-deploy'
-import '@matterlabs/hardhat-zksync-verify'
-import '@matterlabs/hardhat-zksync-upgradable'
+// import '@matterlabs/hardhat-zksync-solc'
+// import '@matterlabs/hardhat-zksync-deploy'
+// import '@matterlabs/hardhat-zksync-verify'
+// import '@matterlabs/hardhat-zksync-upgradable'
 
 const config: HardhatUserConfig = {
   namedAccounts: {
