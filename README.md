@@ -97,6 +97,17 @@ More reading [here](https://dev.to/jamiescript/design-patterns-in-solidity-1i28#
 yarn
 ```
 
+### Environment Setup
+
+We leverage a few services for ease of life.
+
+In order to verify contracts automatically we rely on **Etherscan**, or the equivalent service for the given chain (i.e. polygonscan). Before Deployment the corresponding API key (i.e. `MAIN_ETHERSCAN_API_KEY` for mainnet) should be added into the `.env` file.
+
+We also use **Open Zeppelin Defender** in order to verify deployments. The `DEFENDER_TEAM_API_KEY` should also be added to the `.env` before any deployments.
+
+Beyond that, at minimum for tests to pass it's necessary to add the mainnet `ALCHEMY_MAINNET_API_KEY` to the `.env` (we use this to fork an instance of mainnet for testing) and a `MAINNET_PRIVATE_KEY`. For testing purposed the Hardhat default value of `ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80` is sufficient.
+
+
 ### Compile Contracts
 
 ```bash
@@ -128,6 +139,10 @@ yarn test:gas-stories
 ---
 
 ## Deployment
+
+### Setup
+
+Ensure that the Defender and network appropriate etherscan API keys are added to the `.env`. For more information see [Environment Setup](https://github.com/rabbitholegg/quest-protocol#environment-setup)
 
 ### RabbitHoleReceipt and QuestFactory
 - checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt contracts and hence address)
