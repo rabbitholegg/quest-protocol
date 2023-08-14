@@ -718,6 +718,21 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-waffle/-/hardhat-waffle-2.0.6.tgz#d11cb063a5f61a77806053e54009c40ddee49a54"
   integrity sha512-+Wz0hwmJGSI17B+BhU/qFRZ1l6/xMW82QGXE/Gi+WTmwgJrQefuBs1lIf7hzQ1hLk6hpkvb/zwcNkpVKRYTQYg==
 
+"@openzeppelin/contracts-upgradeable@4.9.3":
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.3.tgz#ff17a80fb945f5102571f8efecb5ce5915cc4811"
+  integrity sha512-jjaHAVRMrE4UuZNfDwjlLGDxTHWIOwTJS2ldnc278a0gevfXfPr8hxKEVBGFBE96kl2G3VHDZhUimw/+G3TG2A==
+
+"@openzeppelin/contracts@4.9.2":
+  version "4.9.2"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.2.tgz#1cb2d5e4d3360141a17dbc45094a8cad6aac16c1"
+  integrity sha512-mO+y6JaqXjWeMh9glYVzVu8HYPGknAAnWyxTRhGeckOruyXQMNnlcW6w/Dx9ftLeIQk6N+ZJFuVmTwF7lEIFrg==
+
+"@openzeppelin/contracts@4.9.3":
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
+  integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
+
 "@openzeppelin/hardhat-defender@^1.8.2":
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/hardhat-defender/-/hardhat-defender-1.8.2.tgz#138709fb7b68385aa79a73abd4abf8644b570136"
@@ -752,6 +767,19 @@
     ethereumjs-util "^7.0.3"
     proper-lockfile "^4.1.1"
     solidity-ast "^0.4.15"
+
+"@prb/math@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@prb/math/-/math-4.0.1.tgz#bc90277f4f1c085c973f502455bf12c2b3b67666"
+  integrity sha512-ANTz2KMV+dMdZ57mWgDTR6jZo5uQzUczQEHCxd7CvJZZ9yafnfPhUUILHvvigIOZ85fZbTPVkC8YoRG1z5Qf7g==
+
+"@sablier/v2-core@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@sablier/v2-core/-/v2-core-1.0.2.tgz#75bb53604554a817cb5ba8f25b78314cec06dcb3"
+  integrity sha512-BjobBTRLuh38fQsHtFGVsQI1XN9JXatldxbS+aFxlhYaU77fQimCejYrBqP7W1wQZnBAvdXRdKNPUskdUpM5nw==
+  dependencies:
+    "@openzeppelin/contracts" "4.9.2"
+    "@prb/math" "4.0.1"
 
 "@scure/base@~1.1.0":
   version "1.1.1"
@@ -4740,6 +4768,11 @@ slice-ansi@^5.0.0:
   dependencies:
     ansi-styles "^6.0.0"
     is-fullwidth-code-point "^4.0.0"
+
+solady@^0.0.113:
+  version "0.0.113"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.113.tgz#187f1599e7f7d1bf8f6213b9c40d622c9db0a4b6"
+  integrity sha512-FdCLCSZv9xkSY4qNobSrrsz6QmKOkchSqRmLKBU6ZY4oWNY1E1J3IDaByHIdWMPJvQhcBoObVupid21qYT740w==
 
 solc@0.7.3:
   version "0.7.3"
