@@ -11,8 +11,7 @@ import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
 import { ISablierV2LockupLinear } from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
-import { ud60x18 } from "@sablier/v2-core/src/types/Math.sol";
-import { Broker, LockupLinear } from "@sablier/v2-core/src/types/DataTypes.sol";
+import { LockupLinear } from "@sablier/v2-core/src/types/DataTypes.sol";
 import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
 
 /// @title Quest
@@ -290,7 +289,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
             cliff: 0,
             total: durationTotal
          });
-        params.broker = Broker(address(0), ud60x18(0)); // Optional parameter for charging a fee
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
         uint streamId = sablierV2LockupLinearContract.createWithDurations(params);
