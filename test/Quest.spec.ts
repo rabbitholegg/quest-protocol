@@ -478,13 +478,13 @@ describe('Quest', async () => {
       await firstAddress.sendTransaction({ to: signer.address, value: ethers.utils.parseEther('1') })
 
       await erc20StreamQuest.connect(signer).singleClaim(owner.address)
-      const streamId = await erc20StreamQuest.getStreamIds(owner.address)
+      const streamId = await erc20StreamQuest.streamIdForAddress(owner.address)
 
       const sablierV2LockupLinear = await ethers.getContractAt(
         'ISablierV2LockupLinear',
         '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
       )
-      expect(await sablierV2LockupLinear.getDepositedAmount(streamId[0])).to.equal(rewardAmount)
+      expect(await sablierV2LockupLinear.getDepositedAmount(streamId)).to.equal(rewardAmount)
     })
   })
 })

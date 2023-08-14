@@ -33,6 +33,9 @@ describe('QuestFactory', () => {
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const nftQuestFee = 100
   const referralFee = 5000 // 50%
+  const maxTotalRewards = totalRewards * rewardAmount
+  const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
+  const transferAmount = maxTotalRewards + maxProtocolReward
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
@@ -351,6 +354,32 @@ describe('QuestFactory', () => {
     })
   })
 
+  describe('createERC20StreamQuest()', () => {
+    const erc20QuestId = 'erc20StreamQuestId'
+
+    beforeEach(async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+    })
+
+    it('createERC20StreamQuest should create a new quest and start it', async () => {
+      await deployedFactoryContract.createERC20StreamQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        erc20QuestId,
+        'actionSpec',
+        0,
+        1000
+      )
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const erc20StreamQuest = await ethers.getContractAt('Quest', questAddress)
+      expect(await erc20StreamQuest.startTime()).to.equal(startDate)
+    })
+  })
+
   describe('setClaimSignerAddress()', () => {
     it('Should update claimSignerAddress', async () => {
       const newAddress = royaltyRecipient.address
@@ -480,9 +509,6 @@ describe('QuestFactory', () => {
 
   describe('claimRewards()', () => {
     const erc20QuestId = 'rewardQuestId'
-    const maxTotalRewards = totalRewards * rewardAmount
-    const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
-    const transferAmount = maxTotalRewards + maxProtocolReward
     let messageHash: string
     let signature: string
     let questAddress: string

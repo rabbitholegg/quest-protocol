@@ -35,7 +35,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
     uint40 public durationTotal;
-    mapping(address => uint[]) public streamIdsForAddress;
+    mapping(address => uint) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -286,10 +286,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
         uint streamId = sablierV2LockupLinearContract.createWithDurations(params);
 
-        streamIdsForAddress[recepient_].push(streamId);
-    }
-
-    function getStreamIds(address address_) external view returns(uint[] memory) {
-        return streamIdsForAddress[address_];
+        streamIdForAddress[recepient_] = streamId;
     }
 }
