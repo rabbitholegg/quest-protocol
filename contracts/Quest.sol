@@ -77,12 +77,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         __ReentrancyGuard_init();
     }
 
-    /// @dev set the Sablier contract address
-    /// @param sablierV2LockupLinearContract_ The Sablier contract address
-    function setSablierV2LockupLinearContract(address sablierV2LockupLinearContract_) external onlyOwner {
-        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearContract_);
-    }
-
     /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
     function totalTransferAmount() external view returns (uint256) {
         return this.maxTotalRewards() + this.maxProtocolReward();
