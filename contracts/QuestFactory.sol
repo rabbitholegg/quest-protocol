@@ -10,8 +10,10 @@ import {LibClone} from 'solady/src/utils/LibClone.sol';
 contract QuestFactory is QuestFactoryBase {
     using LibClone for address;
 
-    function deploy1155Quest(address erc1155QuestAddress, string memory questId_) internal override(QuestFactoryBase) returns (address quest1155) {
+    function deploy1155Quest(
+        address erc1155QuestAddress,
+        string memory questId_
+    ) internal override(QuestFactoryBase) returns (address quest1155) {
         quest1155 = erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
     }
-
 }

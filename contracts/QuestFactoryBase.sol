@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
-pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
@@ -12,11 +11,8 @@ import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {IQuestFactory} from './interfaces/IQuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
-import {Quest as QuestContract} from './Quest.sol';
-import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {QuestTerminalKey} from "./QuestTerminalKey.sol";
+import {IQuestTerminalKey} from './interfaces/IQuestTerminalKey.sol';
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -40,14 +36,14 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    address public rabbitHoleReceiptContract;
     address public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    QuestTerminalKey private questTerminalKeyContract;
+    address private questTerminalKeyContract;
     uint public nftQuestFee;
     address public questNFTAddress;
     struct QuestData {
@@ -90,11 +86,11 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         questFee = 2_000; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
+        rabbitHoleReceiptContract = rabbitHoleReceiptContract_;
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
+        questTerminalKeyContract = questTerminalKeyAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
     }
@@ -103,18 +99,23 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
     modifier nonReentrant() virtual {
         if (locked == 0) locked = 1;
-        require(locked == 1, "REENTRANCY");
+        require(locked == 1, 'REENTRANCY');
         locked = 2;
         _;
         locked = 1;
     }
 
-    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
+    modifier claimChecks(
+        string memory questId_,
+        bytes32 hash_,
+        bytes memory signature_,
+        address ref_
+    ) {
         Quest storage currentQuest = quests[questId_];
         bytes32 encodedHash;
-        if (ref_ == address(0)){
+        if (ref_ == address(0)) {
             encodedHash = keccak256(abi.encodePacked(msg.sender, questId_));
-        }else{
+        } else {
             encodedHash = keccak256(abi.encodePacked(msg.sender, questId_, ref_));
         }
 
@@ -126,7 +127,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     }
 
     modifier sufficientMintFee() {
-        require(msg.value >= mintFee, "Insufficient mint fee");
+        require(msg.value >= mintFee, 'Insufficient mint fee');
         _;
     }
 
@@ -143,7 +144,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         _;
     }
 
-    function mintReceipt(string memory, bytes32, bytes memory) external pure{
+    function mintReceipt(string memory, bytes32, bytes memory) external pure {
         revert Deprecated();
     }
 
@@ -165,7 +166,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
                 msg.sender,
                 address(newQuest),
                 questId_,
-                "erc20",
+                'erc20',
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -173,12 +174,12 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
                 rewardAmount_,
                 actionSpec_
             );
-       } else {
+        } else {
             emit QuestCreated(
                 msg.sender,
                 address(newQuest),
                 questId_,
-                "erc20",
+                'erc20',
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -189,15 +190,15 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
-        currentQuest.questType = "erc20";
+        currentQuest.questType = 'erc20';
 
-        if(discountTokenId_ == 0){
+        if (discountTokenId_ == 0) {
             protocolFee = questFee;
-        }else{
+        } else {
             protocolFee = doDiscountedFee(discountTokenId_);
         }
 
-        QuestContract(newQuest).initialize(
+        IQuest(newQuest).initialize(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -213,11 +214,14 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     }
 
     function doDiscountedFee(uint tokenId_) internal returns (uint16) {
-        require(questTerminalKeyContract.ownerOf(tokenId_) == msg.sender, "QuestFactory: caller is not owner of discount token");
+        require(
+            IQuestTerminalKey(questTerminalKeyContract).ownerOf(tokenId_) == msg.sender,
+            'QuestFactory: caller is not owner of discount token'
+        );
 
-        (uint16 discountPercentage, ) = questTerminalKeyContract.discounts(tokenId_);
+        (uint16 discountPercentage, ) = IQuestTerminalKey(questTerminalKeyContract).discounts(tokenId_);
 
-        questTerminalKeyContract.incrementUsedCount(tokenId_);
+        IQuestTerminalKey(questTerminalKeyContract).incrementUsedCount(tokenId_);
         return uint16((uint(questFee) * (10000 - uint(discountPercentage))) / 10000);
     }
 
@@ -226,8 +230,8 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
-        QuestContract(newQuest_).queue();
+        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, IQuest(newQuest_).totalTransferAmount());
+        IQuest(newQuest_).queue();
     }
 
     /// @dev Create an erc20 quest
@@ -255,10 +259,10 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
             rewardAmount_,
             questId_,
             0,
-            ""
+            ''
         );
 
-        QuestContract(newQuest).transferOwnership(msg.sender);
+        OwnableUpgradeable(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
     }
@@ -295,13 +299,13 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).transferOwnership(msg.sender);
+        OwnableUpgradeable(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
     }
 
     /// @dev this function must be implemented in child contracts
-    function deploy1155Quest(address, string memory) virtual internal returns (address) {
+    function deploy1155Quest(address, string memory) internal virtual returns (address) {
         // revert NotImplemented();
     }
 
@@ -332,9 +336,9 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         currentQuest.questAddress = newQuest;
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
-        currentQuest.questType = "erc1155";
+        currentQuest.questType = 'erc1155';
 
-        Quest1155Contract(newQuest).initialize(
+        IQuest1155(newQuest).initialize(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -345,15 +349,15 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         );
 
         IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, '0x00');
-        Quest1155Contract(newQuest).queue();
-        Quest1155Contract(newQuest).transferOwnership(msg.sender);
+        IQuest1155(newQuest).queue();
+        IQuest1155(newQuest).transferOwnership(msg.sender);
 
         if (bytes(actionSpec_).length > 0) {
             emit QuestCreatedWithAction(
                 msg.sender,
                 address(newQuest),
                 questId_,
-                "erc1155",
+                'erc1155',
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -366,7 +370,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
                 msg.sender,
                 address(newQuest),
                 questId_,
-                "erc1155",
+                'erc1155',
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -427,12 +431,6 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         return mintFeeRecipient;
     }
 
-    /// @dev set the rabbithole receipt contract
-    /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
-    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-    }
-
     /// @dev set the nftQuestFee
     /// @param nftQuestFee_ The value of the nftQuestFee
     function setNftQuestFee(uint nftQuestFee_) external onlyOwner {
@@ -451,7 +449,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyContract_);
+        questTerminalKeyContract = questTerminalKeyContract_;
     }
 
     /// @dev set or remave a contract address to be used as a reward
@@ -487,13 +485,13 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @param questId_ The id of the quest
     function questData(string memory questId_) external view returns (QuestData memory) {
         Quest storage thisQuest = quests[questId_];
-        QuestContract questContract = QuestContract(thisQuest.questAddress);
+        IQuest questContract = IQuest(thisQuest.questAddress);
         uint rewardAmountOrTokenId;
         uint16 erc20QuestFee;
 
-        if(thisQuest.questType.eq("erc1155")) {
+        if (thisQuest.questType.eq('erc1155')) {
             rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
-        }else{
+        } else {
             rewardAmountOrTokenId = questContract.rewardAmountInWei();
             erc20QuestFee = questContract.questFee();
         }
@@ -543,9 +541,9 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
     function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
-        if (quests[questId_].questType.eq("erc20")) {
+        if (quests[questId_].questType.eq('erc20')) {
             claimRewardsRef(questId_, hash_, signature_, ref_);
-        } else if (quests[questId_].questType.eq("erc1155")) {
+        } else if (quests[questId_].questType.eq('erc1155')) {
             claim1155RewardsRef(questId_, hash_, signature_, ref_);
         } else {
             revert QuestTypeNotSupported();
@@ -565,7 +563,12 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
-    function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claimRewardsRef(
+        string memory questId_,
+        bytes32 hash_,
+        bytes memory signature_,
+        address ref_
+    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest questContract_ = IQuest(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -576,12 +579,27 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee(ref_);
+        if (mintFee > 0) processMintFee(ref_);
 
-        emit QuestClaimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei());
+        emit QuestClaimed(
+            msg.sender,
+            currentQuest.questAddress,
+            questId_,
+            questContract_.rewardToken(),
+            questContract_.rewardAmountInWei()
+        );
 
-        if(ref_ != address(0)) {
-            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.rewardAmountInWei(), ref_, referralFee, mintFee);
+        if (ref_ != address(0)) {
+            emit QuestClaimedReferred(
+                msg.sender,
+                currentQuest.questAddress,
+                questId_,
+                questContract_.rewardToken(),
+                questContract_.rewardAmountInWei(),
+                ref_,
+                referralFee,
+                mintFee
+            );
         }
     }
 
@@ -597,7 +615,12 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function claim1155RewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
+    function claim1155RewardsRef(
+        string memory questId_,
+        bytes32 hash_,
+        bytes memory signature_,
+        address ref_
+    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
         IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
@@ -608,12 +631,27 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if(mintFee > 0) processMintFee(ref_);
+        if (mintFee > 0) processMintFee(ref_);
 
-        emit Quest1155Claimed(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId());
+        emit Quest1155Claimed(
+            msg.sender,
+            currentQuest.questAddress,
+            questId_,
+            questContract_.rewardToken(),
+            questContract_.tokenId()
+        );
 
-        if(ref_ != address(0)) {
-            emit QuestClaimedReferred(msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId(), ref_, referralFee, mintFee);
+        if (ref_ != address(0)) {
+            emit QuestClaimedReferred(
+                msg.sender,
+                currentQuest.questAddress,
+                questId_,
+                questContract_.rewardToken(),
+                questContract_.tokenId(),
+                ref_,
+                referralFee,
+                mintFee
+            );
         }
     }
 
@@ -637,8 +675,7 @@ contract QuestFactoryBase is Initializable, OwnableUpgradeable, AccessControlUpg
         }
     }
 
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external onlyOwner
-    {
+    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external onlyOwner {
         for (uint i = 0; i < toAddAddresses_.length; i++) {
             nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
         }

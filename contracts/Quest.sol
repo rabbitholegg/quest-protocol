@@ -72,9 +72,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
-    function queue() public virtual onlyOwner {
-        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount())
-            revert TotalAmountExceedsBalance();
+    function queue() external virtual onlyOwner {
+        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount()) revert TotalAmountExceedsBalance();
         queued = true;
         emit Queued(block.timestamp);
     }
@@ -133,7 +132,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
+    function singleClaim(
+        address account_
+    ) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
         uint256 totalRedeemableRewards = _calculateRewards(1);
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
@@ -203,9 +204,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         require(!hasWithdrawn, 'Already withdrawn');
 
         uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
-        uint256 nonClaimableTokens = rewardToken.balanceOf(address(this)) -
-            this.protocolFee() -
-            unclaimedTokens;
+        uint256 nonClaimableTokens = rewardToken.balanceOf(address(this)) - this.protocolFee() - unclaimedTokens;
         hasWithdrawn = true;
 
         rewardToken.safeTransfer(owner(), nonClaimableTokens);

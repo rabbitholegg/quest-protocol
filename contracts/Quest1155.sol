@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {ERC1155Holder} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
 import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import {QuestFactory} from './QuestFactory.sol';
@@ -102,8 +102,9 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
-    function queue() public virtual onlyOwner {
-        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) revert InsufficientTokenBalance();
+    function queue() external virtual onlyOwner {
+        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants)
+            revert InsufficientTokenBalance();
         if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
@@ -123,10 +124,12 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_) external virtual nonReentrant whenNotPaused whenNotEnded onlyStarted onlyQueued onlyQuestFactory {
+    function singleClaim(
+        address account_
+    ) external virtual nonReentrant whenNotPaused whenNotEnded onlyStarted onlyQueued onlyQuestFactory {
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
-        if(questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
+        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
@@ -156,5 +159,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     // Functions to receive ETH
     receive() external payable {}
+
     fallback() external payable {}
 }

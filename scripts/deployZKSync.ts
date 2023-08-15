@@ -67,6 +67,8 @@ async function main() {
   // await deploy('Quest', [])
   // await deploy('Quest1155', [])
 
+  // await deploy('QuestFactoryZK', [])
+
   await upgrade('QuestFactoryZK', '0x49f05f2646772b6D0E695550CA49D1e3fF8A17E7') // testnet
   // await upgrade('RabbitHoleTickets', '0x651c7fBBaC1fA3a8937377C4879Ca99C11F1261c') // testnet
 }
