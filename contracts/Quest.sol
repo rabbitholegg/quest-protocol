@@ -88,17 +88,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _unpause();
     }
 
-    /// @notice Marks token ids as claimed
-    /// @param tokenIds_ The token ids to mark as claimed
-    function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length; ) {
-            claimedList[tokenIds_[i]] = true;
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Prevents reward withdrawal until the Quest has ended
     modifier onlyWithdrawAfterEnd() {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
