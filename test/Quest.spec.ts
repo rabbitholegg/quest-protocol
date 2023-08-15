@@ -20,7 +20,7 @@ describe('Quest', async () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedRabbitholeReceiptContract: RabbitHoleReceipt
   let expiryDate: number, startDate: number
-  const mockAddress = '0x0000000000000000000000000000000000000000'
+  const sablierV2LockupLinearAddress = '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const questId = 'asdf'
   const totalParticipants = 300
@@ -97,6 +97,7 @@ describe('Quest', async () => {
       ethers.constants.AddressZero, // as a placeholder, would be the Quest1155 NFT contract
       owner.address,
       ethers.constants.AddressZero, // as a placeholder, would be the QuestTerminalKey NFT contract
+      sablierV2LockupLinearAddress, // sablier contract address on mainnet
       100, // the nftQuestFee
       5000, // referralFee
     ])) as QuestFactory
@@ -135,7 +136,7 @@ describe('Quest', async () => {
       it('Should revert', async () => {
         await expect(
           upgrades.deployProxy(questContract, [
-            mockAddress,
+            ethers.constants.AddressZero,
             startDate - 1000,
             startDate,
             totalParticipants,
@@ -144,6 +145,8 @@ describe('Quest', async () => {
             ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
+            0, // durationTotal_
+            sablierV2LockupLinearAddress, // sablier contract address on mainnet
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeInPast')
       })
@@ -153,7 +156,7 @@ describe('Quest', async () => {
       it('Should revert', async () => {
         await expect(
           upgrades.deployProxy(questContract, [
-            mockAddress,
+            ethers.constants.AddressZero,
             startDate + 1,
             startDate + 10,
             totalParticipants,
@@ -162,6 +165,8 @@ describe('Quest', async () => {
             ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
+            0, // durationTotal_
+            sablierV2LockupLinearAddress, // sablier contract address on mainnet
           ])
         ).to.be.revertedWithCustomError(questContract, 'EndTimeLessThanOrEqualToStartTime')
       })
@@ -425,6 +430,61 @@ describe('Quest', async () => {
         questContract,
         'NotQuestFactory'
       )
+    })
+  })
+
+  describe('erc20Stream Quest', async () => {
+    const streamQuestId = questId + 'stream'
+    const maxTotalRewards = totalParticipants * rewardAmount
+    const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
+    const transferAmount = maxTotalRewards + maxProtocolReward
+    let erc20StreamQuest: Quest
+    let newErc20Contract: SampleERC20
+
+    beforeEach(async () => {
+      newErc20Contract = await sampleERC20Contract.deploy(
+        'RewardToken2',
+        'RTC2',
+        totalRewardsPlusFee * 10,
+        owner.address
+      )
+      await deployedFactoryContract.setRewardAllowlistAddress(newErc20Contract.address, true)
+      await newErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee)
+      await newErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+      await deployedFactoryContract.createERC20StreamQuest(
+        newErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalParticipants,
+        rewardAmount,
+        streamQuestId,
+        '', // actionSpec
+        0, // discountTokenId
+        5000 // durationTotal
+      )
+
+      let questAddress = await deployedFactoryContract.quests(streamQuestId).then((res) => res.questAddress)
+      erc20StreamQuest = await ethers.getContractAt('Quest', questAddress)
+
+      await time.increaseTo(startDate)
+    })
+
+    it('should create the sablier stream', async () => {
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [deployedFactoryContract.address],
+      })
+      const signer = await ethers.getSigner(deployedFactoryContract.address)
+      await firstAddress.sendTransaction({ to: signer.address, value: ethers.utils.parseEther('1') })
+
+      await erc20StreamQuest.connect(signer).singleClaim(owner.address)
+      const streamId = await erc20StreamQuest.streamIdForAddress(owner.address)
+
+      const sablierV2LockupLinear = await ethers.getContractAt(
+        'ISablierV2LockupLinear',
+        '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
+      )
+      expect(await sablierV2LockupLinear.getDepositedAmount(streamId)).to.equal(rewardAmount)
     })
   })
 })

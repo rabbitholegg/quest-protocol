@@ -273,7 +273,7 @@ contract QuestTerminalKey is
     /// @param interfaceId_ the interface id
     function supportsInterface(
         bytes4 interfaceId_
-    ) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, IERC165Upgradeable) returns (bool) {
+    ) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, IERC165Upgradeable) returns (bool) {
         return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }

@@ -1,7 +1,14 @@
 {
   "search.exclude": {
     "**/coverage.json": true,
-    "**/deployments/*": true,
-    "**/.openzeppelin/*": true
+    "**/deployments": true,
+    "**/.openzeppelin": true,
+    "**/node_modules": true,
+    "**/build": true,
+    "**/artifacts": true,
+    "**/coverage": true,
+    "**/migrations": true,
+    "**/typechain-types": true,
+    "**/lib": true,
   }
 }

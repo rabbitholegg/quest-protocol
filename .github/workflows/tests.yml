@@ -14,10 +14,21 @@ jobs:
       ALCHEMY_MAINNET_API_KEY: ${{ secrets.ALCHEMY_MAINNET_API_KEY }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 16.x
+
+      # - name: "Install Foundry"
+      #   uses: "foundry-rs/foundry-toolchain@v1"
+
+      # - name: "Restore the cached build"
+      #   uses: "actions/cache/restore@v3"
+      #   with:
+      #     key: "foundry-build-${{ github.sha }}"
+      #     path: "out-optimized"
 
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
