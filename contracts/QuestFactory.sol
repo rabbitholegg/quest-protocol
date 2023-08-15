@@ -14,7 +14,6 @@ import {IQuest} from './interfaces/IQuest.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 
@@ -40,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    address public rabbitHoleReceiptContract;
     address public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
