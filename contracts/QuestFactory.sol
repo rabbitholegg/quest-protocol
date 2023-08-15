@@ -76,7 +76,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function initialize(
         address claimSignerAddress_,
-        address rabbitHoleReceiptContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
@@ -90,7 +89,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         questFee = 2_000; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
