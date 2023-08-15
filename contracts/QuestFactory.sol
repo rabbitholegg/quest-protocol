@@ -417,12 +417,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return mintFeeRecipient;
     }
 
-    /// @dev set the rabbithole receipt contract
-    /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
-    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-    }
-
     /// @dev set the nftQuestFee
     /// @param nftQuestFee_ The value of the nftQuestFee
     function setNftQuestFee(uint nftQuestFee_) external onlyOwner {
