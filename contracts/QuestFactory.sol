@@ -20,7 +20,7 @@ import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
-/// @dev This contract is used to create quests and mint receipts
+/// @dev This contract is used to create quests and handle claims
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeTransferLib for address;
     using LibClone for address;
@@ -458,8 +458,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit MintFeeSet(mintFee_);
     }
 
-    /// @dev return the number of minted receipts for a quest
+    /// @notice Right now this is a misnomer - it tracks total claims vs receipts minted
+    /// @dev return the number of quest claims submitted
     /// @param questId_ The id of the quest
+    /// @return uint Total quests claimed
     function getNumberMinted(string memory questId_) external view returns (uint) {
         return quests[questId_].numberMinted;
     }
@@ -503,10 +505,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return (currentQuest.questAddress, currentQuest.totalParticipants, currentQuest.numberMinted);
     }
 
-    /// @dev return status of whether an address has minted a receipt for a quest
+    /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
+    /// @dev return status of whether an address has claimed a quest
     /// @param questId_ The id of the quest
     /// @param address_ The address to check
-    /// @return Minted status
+    /// @return claimed status
     function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
         return quests[questId_].addressMinted[address_];
     }

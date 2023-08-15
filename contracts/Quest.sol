@@ -160,7 +160,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
 
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
-    /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
+    /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         require(!hasWithdrawn, 'Already withdrawn');
 
@@ -177,7 +177,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return (this.receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
     }
 
-    // @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
+    /// @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
     /// @return total number of claims submitted
     function receiptRedeemers() public view returns (uint256) {
         return questFactoryContract.getNumberMinted(questId);
