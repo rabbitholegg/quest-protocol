@@ -140,34 +140,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
     }
 
-    /// @notice Allows user to claim the rewards entitled to them
-    /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
-        uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
-
-        if (tokens.length == 0) revert NoTokensToClaim();
-
-        uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length; ) {
-            if (!this.isClaimed(tokens[i])) {
-                unchecked {
-                    redeemableTokenCount++;
-                }
-            }
-            unchecked {
-                i++;
-            }
-        }
-
-        if (redeemableTokenCount == 0) revert AlreadyClaimed();
-
-        uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
-        _setClaimed(tokens);
-        _transferRewards(msg.sender, totalRedeemableRewards);
-        redeemedTokens = redeemedTokens + redeemableTokenCount;
-
-        emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
-    }
 
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
     /// @return The maximum amount of rewards that can be claimed by all users
