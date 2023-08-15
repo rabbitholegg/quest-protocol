@@ -131,7 +131,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
     function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
-        uint256 totalRedeemableRewards = _calculateRewards(1);
+        uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
         emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
@@ -158,13 +158,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         rewardToken.safeTransfer(sender_, amount_);
     }
 
-    /// @notice Internal function that calculates the reward amount
-    /// @dev It is possible for users to have multiple receipts (if they buy others on secondary markets)
-    /// @param redeemableTokenCount_ The amount of tokens that can be redeemed
-    /// @return The total amount of rewards that can be claimed by a user
-    function _calculateRewards(uint256 redeemableTokenCount_) internal view returns (uint256) {
-        return redeemableTokenCount_ * rewardAmountInWei;
-    }
 
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
