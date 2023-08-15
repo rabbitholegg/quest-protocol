@@ -172,12 +172,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return questFactoryContract.getNumberMinted(questId);
     }
 
-    /// @notice Checks if a Receipt token id has been used to claim a reward
-    /// @param tokenId_ The token id to check
-    function isClaimed(uint256 tokenId_) external view returns (bool) {
-        return claimedList[tokenId_] == true;
-    }
-
     /// @dev Returns the reward amount
     function getRewardAmount() external view returns (uint256) {
         return rewardAmountInWei;

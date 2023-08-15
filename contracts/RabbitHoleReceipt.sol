@@ -167,7 +167,7 @@ contract RabbitHoleReceipt is
         (address questAddress, uint totalParticipants, ) = QuestFactoryContract.questInfo(questId);
         IQuest questContract = IQuest(questAddress);
 
-        bool claimed = questContract.isClaimed(tokenId_);
+        bool claimed = false;
         uint rewardAmount = questContract.getRewardAmount();
         address rewardAddress = questContract.getRewardToken();
 
