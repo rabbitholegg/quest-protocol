@@ -140,7 +140,6 @@ describe('Quest', async () => {
             totalParticipants,
             100,
             'questid',
-            ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
           ])
@@ -158,7 +157,6 @@ describe('Quest', async () => {
             totalParticipants,
             100,
             'questid',
-            ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
           ])
