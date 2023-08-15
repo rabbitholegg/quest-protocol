@@ -6,11 +6,9 @@ import { Wallet, utils } from 'ethers'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
   Quest__factory,
-  RabbitHoleReceipt__factory,
   SampleERC20__factory,
   Quest,
   SampleERC20,
-  RabbitHoleReceipt,
   QuestFactory,
   QuestFactory__factory,
 } from '../typechain-types'
@@ -18,7 +16,6 @@ import {
 describe('Quest', async () => {
   let deployedQuestContract: Quest
   let deployedSampleErc20Contract: SampleERC20
-  let deployedRabbitholeReceiptContract: RabbitHoleReceipt
   let expiryDate: number, startDate: number
   const sablierV2LockupLinearAddress = '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
@@ -34,7 +31,6 @@ describe('Quest', async () => {
   let protocolFeeRecipient: SignerWithAddress
   let questContract: Quest__factory
   let sampleERC20Contract: SampleERC20__factory
-  let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let deployedFactoryContract: QuestFactory
   let questFactoryContract: QuestFactory__factory
   let wallet: Wallet
@@ -46,7 +42,6 @@ describe('Quest', async () => {
       await ethers.getSigners()
     questContract = await ethers.getContractFactory('Quest')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
-    rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
     wallet = Wallet.fromMnemonic(mnemonic)
 
@@ -59,7 +54,6 @@ describe('Quest', async () => {
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
-    await deployRabbitholeReceiptContract()
     await deploySampleErc20Contract()
     await deployFactoryContract()
 
@@ -91,7 +85,6 @@ describe('Quest', async () => {
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
-      deployedRabbitholeReceiptContract.address,
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       ethers.constants.AddressZero, // as a placeholder, would be the Quest1155 NFT contract
@@ -101,20 +94,6 @@ describe('Quest', async () => {
       100, // the nftQuestFee
       5000, // referralFee
     ])) as QuestFactory
-  }
-
-  const deployRabbitholeReceiptContract = async () => {
-    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
-    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
-    await deployedReceiptRenderer.deployed()
-
-    deployedRabbitholeReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
-      deployedReceiptRenderer.address,
-      owner.address,
-      minterAddress.address, // as a placeholder, would be the factory contract
-      10,
-      owner.address,
-    ])) as RabbitHoleReceipt
   }
 
   const deploySampleErc20Contract = async () => {
@@ -142,7 +121,6 @@ describe('Quest', async () => {
             totalParticipants,
             100,
             'questid',
-            ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
             0, // durationTotal_
@@ -162,7 +140,6 @@ describe('Quest', async () => {
             totalParticipants,
             100,
             'questid',
-            ethers.constants.AddressZero,
             10,
             ethers.constants.AddressZero,
             0, // durationTotal_
@@ -256,78 +233,6 @@ describe('Quest', async () => {
     })
   })
 
-  describe('claim()', async () => {
-    it('should fail if quest has not started yet', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NotStarted')
-    })
-
-    it('should fail if quest is paused', async () => {
-      await deployedQuestContract.queue()
-      await time.setNextBlockTimestamp(startDate + 1)
-      await deployedQuestContract.pause()
-
-      await expect(deployedQuestContract.claim()).to.be.revertedWith('Pausable: paused')
-    })
-
-    it('should fail if before start time stamp', async () => {
-      await deployedQuestContract.queue()
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'ClaimWindowNotStarted')
-    })
-
-    it('should fail if the contract is out of rewards', async () => {
-      await deployedQuestContract.queue()
-      await time.setNextBlockTimestamp(expiryDate + 1)
-      await deployedQuestContract.withdrawRemainingTokens()
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'NoTokensToClaim')
-    })
-
-    it('should only transfer the correct amount of rewards', async () => {
-      await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.queue()
-
-      await time.increaseTo(startDate)
-
-      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(0)
-
-      const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
-      expect(totalTokens.length).to.equal(1)
-
-      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
-
-      await deployedQuestContract.claim()
-      expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(rewardAmount)
-    })
-
-    it('should let you claim mulitiple rewards if you have multiple tokens', async () => {
-      await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.queue()
-
-      await time.increaseTo(startDate)
-
-      const startingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(startingBalance).to.equal(0)
-
-      const totalTokens = await deployedRabbitholeReceiptContract.getOwnedTokenIdsOfQuest(questId, owner.address)
-      expect(totalTokens.length).to.equal(2)
-
-      expect(await deployedQuestContract.isClaimed(1)).to.equal(false)
-
-      await deployedQuestContract.claim()
-      const endingBalance = await deployedSampleErc20Contract.balanceOf(owner.address)
-      expect(endingBalance).to.equal(2000)
-    })
-
-    it('should not let you claim if you have already claimed', async () => {
-      await deployedRabbitholeReceiptContract.connect(minterAddress).mint(owner.address, questId)
-      await deployedQuestContract.queue()
-
-      await time.increaseTo(expiryDate + 1)
-      await deployedQuestContract.claim()
-      await expect(deployedQuestContract.claim()).to.be.revertedWithCustomError(questContract, 'AlreadyClaimed')
-    })
-  })
 
   describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdrawRemainingTokens', async () => {

@@ -5,7 +5,6 @@ import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
@@ -18,8 +17,7 @@ import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
-
-    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    address public rabbitHoleReceiptContract;    // Deprecated - do not use
     QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
@@ -50,7 +48,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 totalParticipants_,
         uint256 rewardAmountInWei_,
         string memory questId_,
-        address receiptContractAddress_,
         uint16 questFee_,
         address protocolFeeRecipient_,
         uint40 durationTotal_,
@@ -65,7 +62,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
-        rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
@@ -102,17 +98,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _unpause();
     }
 
-    /// @notice Marks token ids as claimed
-    /// @param tokenIds_ The token ids to mark as claimed
-    function _setClaimed(uint256[] memory tokenIds_) private {
-        for (uint i = 0; i < tokenIds_.length; ) {
-            claimedList[tokenIds_[i]] = true;
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Prevents reward withdrawal until the Quest has ended
     modifier onlyWithdrawAfterEnd() {
         if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
@@ -145,40 +130,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
     function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
-        uint256 totalRedeemableRewards = _calculateRewards(1);
+        uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
         emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
-    }
-
-    /// @notice Allows user to claim the rewards entitled to them
-    /// @dev User can claim based on the (unclaimed) number of tokens they own of the Quest
-    /// @dev this is depricated, use singleClaim instead
-    function claim() external virtual nonReentrant onlyQuestActive whenNotPaused {
-        uint[] memory tokens = rabbitHoleReceiptContract.getOwnedTokenIdsOfQuest(questId, msg.sender);
-
-        if (tokens.length == 0) revert NoTokensToClaim();
-
-        uint256 redeemableTokenCount = 0;
-        for (uint i = 0; i < tokens.length; ) {
-            if (!this.isClaimed(tokens[i])) {
-                unchecked {
-                    redeemableTokenCount++;
-                }
-            }
-            unchecked {
-                i++;
-            }
-        }
-
-        if (redeemableTokenCount == 0) revert AlreadyClaimed();
-
-        uint256 totalRedeemableRewards = _calculateRewards(redeemableTokenCount);
-        _setClaimed(tokens);
-        _transferRewards(msg.sender, totalRedeemableRewards);
-        redeemedTokens = redeemedTokens + redeemableTokenCount;
-
-        emit Claimed(msg.sender, rewardToken, totalRedeemableRewards);
     }
 
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
@@ -205,27 +160,18 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         }
     }
 
-    /// @notice Internal function that calculates the reward amount
-    /// @dev It is possible for users to have multiple receipts (if they buy others on secondary markets)
-    /// @param redeemableTokenCount_ The amount of tokens that can be redeemed
-    /// @return The total amount of rewards that can be claimed by a user
-    function _calculateRewards(uint256 redeemableTokenCount_) internal view returns (uint256) {
-        return redeemableTokenCount_ * rewardAmountInWei;
-    }
 
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
-    /// @dev Every receipt minted should still be able to claim rewards (and cannot be withdrawn). This function can only be called after the quest end time
+    /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         require(!hasWithdrawn, 'Already withdrawn');
 
-        uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
-        uint256 nonClaimableTokens = rewardToken.balanceOf(address(this)) -
-            this.protocolFee() -
-            unclaimedTokens;
+        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
+
+        rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
+
         hasWithdrawn = true;
 
-        rewardToken.safeTransfer(owner(), nonClaimableTokens);
-        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
     }
 
     /// @notice Function that calculates the protocol fee
@@ -233,16 +179,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return (this.receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
     }
 
-    // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
-    /// @return The amount of receipts that have been minted for the given quest
+    /// @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
+    /// @return total number of claims submitted
     function receiptRedeemers() public view returns (uint256) {
         return questFactoryContract.getNumberMinted(questId);
-    }
-
-    /// @notice Checks if a Receipt token id has been used to claim a reward
-    /// @param tokenId_ The token id to check
-    function isClaimed(uint256 tokenId_) external view returns (bool) {
-        return claimedList[tokenId_] == true;
     }
 
     /// @dev Returns the reward amount

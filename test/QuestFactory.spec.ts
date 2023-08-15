@@ -8,11 +8,9 @@ import {
   SampleERC1155,
   QuestFactory,
   QuestTerminalKey,
-  RabbitHoleReceipt,
   Quest__factory,
   QuestFactory__factory,
   QuestTerminalKey__factory,
-  RabbitHoleReceipt__factory,
   SampleERC20__factory,
   SampleERC1155__factory,
 } from '../typechain-types'
@@ -21,7 +19,6 @@ import { Wallet, utils, constants } from 'ethers'
 describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedSampleErc1155Contract: SampleERC1155
-  let deployedRabbitHoleReceiptContract: RabbitHoleReceipt
   let deployedFactoryContract: QuestFactory
   let deployedQuestTerminalKeyContract: QuestTerminalKey
   let deployedErc20Quest: Quest
@@ -47,7 +44,6 @@ describe('QuestFactory', () => {
   let questTerminalKeyContract: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
   let erc1155QuestContract: Quest__factory
-  let rabbitholeReceiptContract: RabbitHoleReceipt__factory
   let sampleERC20Contract: SampleERC20__factory
   let sampleERC1155Contract: SampleERC1155__factory
   let wallet: Wallet
@@ -64,13 +60,11 @@ describe('QuestFactory', () => {
     questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     erc1155QuestContract = await ethers.getContractFactory('Quest1155')
-    rabbitholeReceiptContract = await ethers.getContractFactory('RabbitHoleReceipt')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
     sampleERC1155Contract = await ethers.getContractFactory('SampleERC1155')
 
     await deploySampleErc20Contract()
     await deploySampleErc1155Contract()
-    await deployRabbitHoleReceiptContract()
     await deployFactoryContract()
     await deployQuestTerminalKey()
   })
@@ -97,7 +91,6 @@ describe('QuestFactory', () => {
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
-      deployedRabbitHoleReceiptContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
@@ -108,7 +101,6 @@ describe('QuestFactory', () => {
       referralFee,
     ])) as QuestFactory
 
-    await deployedRabbitHoleReceiptContract.setMinterAddress(deployedFactoryContract.address)
   }
 
   const deploySampleErc20Contract = async () => {
@@ -119,20 +111,6 @@ describe('QuestFactory', () => {
   const deploySampleErc1155Contract = async () => {
     deployedSampleErc1155Contract = await sampleERC1155Contract.deploy()
     await deployedSampleErc1155Contract.deployed()
-  }
-
-  const deployRabbitHoleReceiptContract = async () => {
-    const ReceiptRenderer = await ethers.getContractFactory('ReceiptRenderer')
-    const deployedReceiptRenderer = await ReceiptRenderer.deploy()
-    await deployedReceiptRenderer.deployed()
-
-    deployedRabbitHoleReceiptContract = (await upgrades.deployProxy(rabbitholeReceiptContract, [
-      deployedReceiptRenderer.address,
-      royaltyRecipient.address,
-      owner.address,
-      69,
-      owner.address,
-    ])) as RabbitHoleReceipt
   }
 
   describe('createQuest()', () => {

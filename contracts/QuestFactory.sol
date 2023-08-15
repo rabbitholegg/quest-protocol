@@ -13,13 +13,12 @@ import {IQuest} from './interfaces/IQuest.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
 import {Quest as QuestContract} from './Quest.sol';
 import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
-/// @dev This contract is used to create quests and mint receipts
+/// @dev This contract is used to create quests and handle claims
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeTransferLib for address;
     using LibClone for address;
@@ -40,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    address public rabbitHoleReceiptContract;
     address public rabbitHoleTicketsContract;
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
@@ -79,7 +78,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function initialize(
         address claimSignerAddress_,
-        address rabbitHoleReceiptContract_,
         address protocolFeeRecipient_,
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
@@ -94,7 +92,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         questFee = 2_000; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitHoleReceiptContract_);
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
@@ -146,10 +143,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     modifier nonZeroAddress(address address_) {
         if (address_ == address(0)) revert ZeroAddressNotAllowed();
         _;
-    }
-
-    function mintReceipt(string memory, bytes32, bytes memory) external pure{
-        revert Deprecated();
     }
 
     function createERC20QuestInternal(
@@ -215,7 +208,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            address(rabbitHoleReceiptContract),
             protocolFee,
             protocolFeeRecipient,
             durationTotal_,
@@ -477,12 +469,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return mintFeeRecipient;
     }
 
-    /// @dev set the rabbithole receipt contract
-    /// @param rabbitholeReceiptContract_ The address of the rabbithole receipt contract
-    function setRabbitHoleReceiptContract(address rabbitholeReceiptContract_) external onlyOwner {
-        rabbitHoleReceiptContract = RabbitHoleReceipt(rabbitholeReceiptContract_);
-    }
-
     /// @dev set the nftQuestFee
     /// @param nftQuestFee_ The value of the nftQuestFee
     function setNftQuestFee(uint nftQuestFee_) external onlyOwner {
@@ -527,8 +513,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit MintFeeSet(mintFee_);
     }
 
-    /// @dev return the number of minted receipts for a quest
+    /// @notice Right now this is a misnomer - it tracks total claims vs receipts minted
+    /// @dev return the number of quest claims submitted
     /// @param questId_ The id of the quest
+    /// @return uint Total quests claimed
     function getNumberMinted(string memory questId_) external view returns (uint) {
         return quests[questId_].numberMinted;
     }
@@ -574,10 +562,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return (currentQuest.questAddress, currentQuest.totalParticipants, currentQuest.numberMinted);
     }
 
-    /// @dev return status of whether an address has minted a receipt for a quest
+    /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
+    /// @dev return status of whether an address has claimed a quest
     /// @param questId_ The id of the quest
     /// @param address_ The address to check
-    /// @return Minted status
+    /// @return claimed status
     function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
         return quests[questId_].addressMinted[address_];
     }
