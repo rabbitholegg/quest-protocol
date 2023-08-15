@@ -5,8 +5,8 @@ require('dotenv').config()
 require('hardhat-deploy')
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-import '@nomiclabs/hardhat-ethers'
 import '@nomicfoundation/hardhat-toolbox'
+import '@nomiclabs/hardhat-ethers'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
 
@@ -72,6 +72,15 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      {
+        version: '0.8.19',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 5000,
+          },
+        },
+      },
     ],
   },
   etherscan: {
@@ -90,7 +99,7 @@ const config: HardhatUserConfig = {
       chainId: 1337,
       forking: {
         url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_API_KEY}`,
-        blockNumber: 14787640,
+        blockNumber: 17613138, // after sablier contract deployment
       },
       settings: {
         debug: {

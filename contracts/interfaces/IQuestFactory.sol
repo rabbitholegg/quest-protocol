@@ -67,6 +67,7 @@ interface IQuestFactory {
     event QuestClaimedReferred(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint rewardAmountInWeiOrTokenId, address referrer, uint16 referralFee, uint mintFeeEthWei);
     event Quest1155Claimed(address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint tokenId);
     event NftQuestFeeListSet(address[] addresses, uint[] fees);
+    event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
 
     function questInfo(string memory questId_) external view returns (address, uint, uint);
 }

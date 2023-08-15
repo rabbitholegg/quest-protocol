@@ -24,11 +24,15 @@ describe('QuestFactory', () => {
   let deployedErc20Quest: Quest
   let deployedErc1155Quest: Quest
   let expiryDate: number, startDate: number
+  const sablierV2LockupLinearAddress = '0xB10daee1FCF62243aE27776D7a92D39dC8740f95'
   const totalRewards = 1000
   const rewardAmount = 10
   const mnemonic = 'announce room limb pattern dry unit scale effort smooth jazz weasel alcohol'
   const nftQuestFee = 100
   const referralFee = 5000 // 50%
+  const maxTotalRewards = totalRewards * rewardAmount
+  const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
+  const transferAmount = maxTotalRewards + maxProtocolReward
   let owner: SignerWithAddress
   let royaltyRecipient: SignerWithAddress
   let protocolRecipient: SignerWithAddress
@@ -91,7 +95,8 @@ describe('QuestFactory', () => {
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
       owner.address,
-      owner.address, // this will become the questTerminalKey contract
+      ethers.constants.AddressZero, // this will become the questTerminalKey contract
+      sablierV2LockupLinearAddress,
       nftQuestFee,
       referralFee,
     ])) as QuestFactory
@@ -327,6 +332,32 @@ describe('QuestFactory', () => {
     })
   })
 
+  describe('createERC20StreamQuest()', () => {
+    const erc20QuestId = 'erc20StreamQuestId'
+
+    beforeEach(async () => {
+      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+    })
+
+    it('createERC20StreamQuest should create a new quest and start it', async () => {
+      await deployedFactoryContract.createERC20StreamQuest(
+        deployedSampleErc20Contract.address,
+        expiryDate,
+        startDate,
+        totalRewards,
+        rewardAmount,
+        erc20QuestId,
+        'actionSpec',
+        0,
+        1000
+      )
+      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
+      const erc20StreamQuest = await ethers.getContractAt('Quest', questAddress)
+      expect(await erc20StreamQuest.startTime()).to.equal(startDate)
+    })
+  })
+
   describe('setClaimSignerAddress()', () => {
     it('Should update claimSignerAddress', async () => {
       const newAddress = royaltyRecipient.address
@@ -405,6 +436,8 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
         false,
+        'erc20',
+        0,
       ])
     })
 
@@ -446,15 +479,14 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(1),
         ethers.BigNumber.from(NFTTokenId),
         false,
+        'erc1155',
+        0,
       ])
     })
   })
 
   describe('claimRewards()', () => {
     const erc20QuestId = 'rewardQuestId'
-    const maxTotalRewards = totalRewards * rewardAmount
-    const maxProtocolReward = (maxTotalRewards * 2_000) / 10_000
-    const transferAmount = maxTotalRewards + maxProtocolReward
     let messageHash: string
     let signature: string
     let questAddress: string

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
-pragma experimental ABIEncoderV2;
 
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
@@ -33,6 +32,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint totalParticipants;
         uint numberMinted;
         string questType;
+        uint40 durationTotal;
     }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
@@ -61,6 +61,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint redeemedTokens;
         uint rewardAmountOrTokenId;
         bool hasWithdrawn;
+        string questType;
+        uint40 durationTotal;
     }
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
@@ -69,6 +71,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         bool exists;
     }
     uint16 public referralFee;
+    address public sablierV2LockupLinearAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -80,6 +83,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address payable erc1155QuestAddress_,
         address ownerAddress_,
         address questTerminalKeyAddress_,
+        address sablierV2LockupLinearAddress_,
         uint nftQuestFee_,
         uint16 referralFee_
     ) external initializer {
@@ -92,6 +96,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
         questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
+        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
     }
@@ -148,7 +153,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         uint256 discountTokenId_,
-        string memory actionSpec_
+        string memory actionSpec_,
+        uint40 durationTotal_
     ) internal returns (address) {
         Quest storage currentQuest = quests[questId_];
         address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
@@ -182,7 +188,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
-        currentQuest.questType = "erc20";
+        if(durationTotal_ > 0){
+            currentQuest.durationTotal = durationTotal_;
+            currentQuest.questType = "erc20Stream";
+        }else{
+            currentQuest.questType = "erc20";
+        }
 
         if(discountTokenId_ == 0){
             protocolFee = questFee;
@@ -198,7 +209,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             protocolFee,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            durationTotal_,
+            sablierV2LockupLinearAddress
         );
 
         return newQuest;
@@ -247,9 +260,51 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             0,
-            ""
+            "",
+            0
         );
 
+        QuestContract(newQuest).transferOwnership(msg.sender);
+
+        return newQuest;
+    }
+
+    /// @dev Create a sablier stream reward quest and start it at the same time.
+    /// @notice The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionSpec_ The JSON action spec for the quest
+    /// @param discountTokenId_ The id of the discount token
+    /// @param durationTotal_ The duration of the sablier stream
+    /// @return address the quest contract address
+    function createERC20StreamQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionSpec_,
+        uint256 discountTokenId_,
+        uint40 durationTotal_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createERC20QuestInternal(
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            discountTokenId_,
+            actionSpec_,
+            durationTotal_
+        );
+
+        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
         QuestContract(newQuest).transferOwnership(msg.sender);
 
         return newQuest;
@@ -283,7 +338,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             rewardAmount_,
             questId_,
             discountTokenId_,
-            actionSpec_
+            actionSpec_,
+            0
         );
 
         transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
@@ -491,7 +547,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            questContract.hasWithdrawn()
+            questContract.hasWithdrawn(),
+            thisQuest.questType,
+            thisQuest.durationTotal
         );
 
         return data;
@@ -626,6 +684,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
         }
         emit NftQuestFeeListSet(toAddAddresses_, fees_);
+    }
+
+    /// @dev set sablierV2LockupLinearAddress
+    /// @param sablierV2LockupLinearAddress_ The address of the sablierV2LockupLinear contract
+    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external onlyOwner {
+        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
+        emit SablierV2LockupLinearAddressSet(sablierV2LockupLinearAddress_);
     }
 
     // Receive function to receive ETH
