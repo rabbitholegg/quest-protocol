@@ -5,7 +5,6 @@ import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/
 import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 import {Ownable} from 'solady/src/auth/Ownable.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
-import {RabbitHoleReceipt} from './RabbitHoleReceipt.sol';
 import {QuestFactory} from './QuestFactory.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 
@@ -14,7 +13,7 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
-    RabbitHoleReceipt public rabbitHoleReceiptContract;    // Deprecated - do not use
+    address public rabbitHoleReceiptContract;    // Deprecated - do not use
     QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
