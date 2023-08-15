@@ -198,7 +198,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            address(rabbitHoleReceiptContract),
             protocolFee,
             protocolFeeRecipient
         );

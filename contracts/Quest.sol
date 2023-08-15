@@ -14,8 +14,7 @@ import {IQuest} from './interfaces/IQuest.sol';
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
-
-    RabbitHoleReceipt public rabbitHoleReceiptContract;
+    RabbitHoleReceipt public rabbitHoleReceiptContract;    // Deprecated - do not use
     QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
@@ -43,7 +42,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 totalParticipants_,
         uint256 rewardAmountInWei_,
         string memory questId_,
-        address receiptContractAddress_,
         uint16 questFee_,
         address protocolFeeRecipient_
     ) external initializer {
@@ -56,7 +54,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
-        rabbitHoleReceiptContract = RabbitHoleReceipt(receiptContractAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
