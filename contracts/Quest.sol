@@ -164,14 +164,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         require(!hasWithdrawn, 'Already withdrawn');
 
-        uint unclaimedTokens = (this.receiptRedeemers() - redeemedTokens) * rewardAmountInWei;
-        uint256 nonClaimableTokens = rewardToken.balanceOf(address(this)) -
-            this.protocolFee() -
-            unclaimedTokens;
+        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
+
+        rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
+
         hasWithdrawn = true;
 
-        rewardToken.safeTransfer(owner(), nonClaimableTokens);
-        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
     }
 
     /// @notice Function that calculates the protocol fee
