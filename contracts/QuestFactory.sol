@@ -143,10 +143,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
-    function mintReceipt(string memory, bytes32, bytes memory) external pure{
-        revert Deprecated();
-    }
-
     function createERC20QuestInternal(
         address rewardTokenAddress_,
         uint256 endTime_,
