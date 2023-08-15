@@ -91,7 +91,6 @@ describe('Quest', async () => {
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
-      deployedRabbitholeReceiptContract.address,
       protocolFeeRecipient.address,
       deployedErc20Quest.address,
       ethers.constants.AddressZero, // as a placeholder, would be the Quest1155 NFT contract

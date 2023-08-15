@@ -93,7 +93,6 @@ describe('QuestFactory', () => {
 
     deployedFactoryContract = (await upgrades.deployProxy(questFactoryContract, [
       wallet.address,
-      deployedRabbitHoleReceiptContract.address,
       protocolRecipient.address,
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
