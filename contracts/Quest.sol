@@ -179,8 +179,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return (this.receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
     }
 
-    // @notice Call the QuestFactory contract to get the amount of receipts that have been minted
-    /// @return The amount of receipts that have been minted for the given quest
+    // @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
+    /// @return total number of claims submitted
     function receiptRedeemers() public view returns (uint256) {
         return questFactoryContract.getNumberMinted(questId);
     }
