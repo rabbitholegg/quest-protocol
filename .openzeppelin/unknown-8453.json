@@ -7,6 +7,10 @@
     {
       "address": "0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E",
       "kind": "transparent"
+    },
+    {
+      "address": "0x0D380362762B0cf375227037f2217f59A4eC4b9E",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -379,6 +383,93 @@
           "t_uint40": {
             "label": "uint40",
             "numberOfBytes": "5"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "9d16d6ab9487c9a5cb5c9741a782b3bf6e99e4e99ab679a79899f09e09db5c09": {
+      "address": "0x6fD5274FAca039Fb8988f7a4B97b974e527f4487",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "royaltyRecipient",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:22"
+          },
+          {
+            "label": "minterAddress",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:23"
+          },
+          {
+            "label": "royaltyFee",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:24"
+          },
+          {
+            "label": "imageIPFSCID",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_string_storage",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:25"
+          },
+          {
+            "label": "animationUrlIPFSCID",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_string_storage",
+            "contract": "RabbitHoleTickets",
+            "src": "contracts/RabbitHoleTickets.sol:26"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
           },
           "t_uint8": {
             "label": "uint8",

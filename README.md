@@ -136,7 +136,8 @@ yarn test:gas-stories
 - checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
 
 ### RabbitHoleTickets
-- checkout from sha `13d13cfab0cf4085dde8707e0a22aba477d9eafb`
+- checkout from sha `70a56a1567dcd9c4d6f7718388667c5e0564fb2f`
+(must add in the deploy script manually)
 
 then:
 - `yarn hardhat deploy --network network_name`
