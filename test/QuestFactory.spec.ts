@@ -180,25 +180,27 @@ describe('QuestFactory', () => {
     it('Should revert if trying to use existing quest id', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
 
-      await deployedFactoryContract.createQuest(
+      await deployedFactoryContract.createQuestAndQueue(
         deployedSampleErc20Contract.address,
         expiryDate,
         startDate,
         totalRewards,
         rewardAmount,
-        'erc20',
-        erc20QuestId
+        erc20QuestId,
+        '', // actionSpec
+        0   // discountTokenId
       )
 
       await expect(
-        deployedFactoryContract.createQuest(
+        deployedFactoryContract.createQuestAndQueue(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
           totalRewards,
           rewardAmount,
-          'erc20',
-          erc20QuestId
+          erc20QuestId,
+          '', // actionSpec
+          0   // discountTokenId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
