@@ -173,16 +173,18 @@ describe('QuestFactory', () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, false)
 
       expect(await deployedFactoryContract.rewardAllowlist(rewardAddress)).to.equal(false)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
 
       await expect(
-        deployedFactoryContract.createQuest(
+        deployedFactoryContract.createQuestAndQueue(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
           totalRewards,
           rewardAmount,
-          'erc20',
-          erc20QuestId
+          erc20QuestId,
+          '', // actionSpec
+          0   // discountTokenId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
