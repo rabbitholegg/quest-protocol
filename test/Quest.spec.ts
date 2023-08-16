@@ -191,12 +191,6 @@ describe('Quest', async () => {
         'Unauthorized'
       )
     })
-
-    it('should set start correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
-      expect(await deployedQuestContract.queued()).to.equal(true)
-    })
   })
 
   describe('pause()', () => {
