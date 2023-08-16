@@ -400,21 +400,24 @@ describe('QuestFactory', () => {
 
     it('Should return the correct quest data for erc20 quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-      await deployedFactoryContract.createQuest(
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
+
+      await deployedFactoryContract.createQuestAndQueue(
         deployedSampleErc20Contract.address,
         expiryDate,
         startDate,
         totalRewards,
         rewardAmount,
-        'erc20',
-        erc20QuestId
+        erc20QuestId,
+        '', // actionSpec
+        0   // discountTokenId
       )
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
       const questData = await deployedFactoryContract.questData(erc20QuestId)
       expect(questData).to.eql([
         questAddress,
         deployedSampleErc20Contract.address,
-        false,
+        true, // Queued now defaults to true
         2000, // questFee
         ethers.BigNumber.from(startDate),
         ethers.BigNumber.from(expiryDate),
