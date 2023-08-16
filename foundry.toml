@@ -11,3 +11,4 @@ optimizer_runs = 1_000
 [fmt]
 multiline_func_header = "params_first"
 number_underscore = "thousands"
+quote_style = "double"

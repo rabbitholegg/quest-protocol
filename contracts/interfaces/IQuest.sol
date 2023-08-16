@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 interface IQuest {
     event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
-    event Queued(uint timestamp);
+    event Queued(uint256 timestamp);
     event JsonSpecCIDSet(string cid);
 
     error AlreadyClaimed();

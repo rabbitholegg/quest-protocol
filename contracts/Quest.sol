@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import {ReentrancyGuardUpgradeable} from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
-import {Ownable} from 'solady/src/auth/Ownable.sol';
-import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
-import {QuestFactory} from './QuestFactory.sol';
-import {IQuest} from './interfaces/IQuest.sol';
-
-import { ISablierV2LockupLinear } from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
-import { LockupLinear } from "@sablier/v2-core/src/types/DataTypes.sol";
-import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {Ownable} from "solady/src/auth/Ownable.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {QuestFactory} from "./QuestFactory.sol";
+import {IQuest} from "./interfaces/IQuest.sol";
+import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
+import {LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
+import {IERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
-    address public rabbitHoleReceiptContract;    // Deprecated - do not use
+
+    address public rabbitHoleReceiptContract; // Deprecated - do not use
     QuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
@@ -33,7 +33,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     mapping(uint256 => bool) private claimedList;
     string public jsonSpecCID;
     uint40 public durationTotal;
-    mapping(address => uint) public streamIdForAddress;
+    mapping(address => uint256) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -80,8 +80,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount())
+        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount()) {
             revert TotalAmountExceedsBalance();
+        }
         queued = true;
         emit Queued(block.timestamp);
     }
@@ -118,7 +119,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
-        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), 'Not protocol fee recipient or owner');
+        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), "Not protocol fee recipient or owner");
         _;
     }
 
@@ -129,7 +130,14 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_) external virtual nonReentrant onlyQuestActive whenNotPaused onlyQuestFactory {
+    function singleClaim(address account_)
+        external
+        virtual
+        nonReentrant
+        onlyQuestActive
+        whenNotPaused
+        onlyQuestFactory
+    {
         uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
@@ -153,25 +161,23 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        if(durationTotal > 0) {
+        if (durationTotal > 0) {
             _createLockupLinearStream(sender_, amount_);
         } else {
             rewardToken.safeTransfer(sender_, amount_);
         }
     }
 
-
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
-        require(!hasWithdrawn, 'Already withdrawn');
+        require(!hasWithdrawn, "Already withdrawn");
 
         rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
 
         rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
 
         hasWithdrawn = true;
-
     }
 
     /// @notice Function that calculates the protocol fee
@@ -198,16 +204,16 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external onlyOwner {
-        require(erc20Address_ != rewardToken, 'Cannot refund reward token');
+        require(erc20Address_ != rewardToken, "Cannot refund reward token");
 
-        uint balance = address(this).balance;
+        uint256 balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);
 
-        uint erc20Balance = erc20Address_.balanceOf(address(this));
+        uint256 erc20Balance = erc20Address_.balanceOf(address(this));
         if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
     }
 
-    function _createLockupLinearStream(address recepient_, uint totalAmount_) internal {
+    function _createLockupLinearStream(address recepient_, uint256 totalAmount_) internal {
         // Approve the Sablier contract to spend reward tokens
         rewardToken.safeApprove(address(sablierV2LockupLinearContract), totalAmount_);
 
@@ -218,13 +224,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
         params.asset = IERC20(rewardToken); // The streaming asset
         params.cancelable = true; // Whether the stream will be cancelable or not
-        params.durations = LockupLinear.Durations({
-            cliff: 0,
-            total: durationTotal
-         });
+        params.durations = LockupLinear.Durations({cliff: 0, total: durationTotal});
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
-        uint streamId = sablierV2LockupLinearContract.createWithDurations(params);
+        uint256 streamId = sablierV2LockupLinearContract.createWithDurations(params);
 
         streamIdForAddress[recepient_] = streamId;
     }
