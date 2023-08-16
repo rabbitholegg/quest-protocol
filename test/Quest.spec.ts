@@ -284,7 +284,6 @@ describe('Quest', async () => {
 
   describe('singleClaim()', async () => {
     beforeEach(async () => {
-      await deployedQuestContract.queue()
       await time.increaseTo(startDate)
     })
 
