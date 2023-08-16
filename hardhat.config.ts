@@ -5,8 +5,8 @@ require('dotenv').config()
 require('hardhat-deploy')
 import { HardhatUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-chai-matchers'
-// import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-verify'
+import '@nomicfoundation/hardhat-toolbox'
+// import '@nomicfoundation/hardhat-verify' // need to uncomment this to verify on base
 import '@nomiclabs/hardhat-ethers'
 import '@openzeppelin/hardhat-upgrades'
 import '@openzeppelin/hardhat-defender'
