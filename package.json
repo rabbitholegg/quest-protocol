@@ -21,7 +21,8 @@
     "prepublishOnly": "yarn test",
     "prepare": "husky install",
     "test:coverage": "yarn hardhat coverage",
-    "test:gas-stories": "yarn hardhat --config hardhat.gas-stories.config.ts test"
+    "test:gas-stories": "yarn hardhat --config hardhat.gas-stories.config.ts test",
+    "lint": "yarn forge fmt && yarn solhint"
   },
   "repository": {
     "type": "git",
@@ -32,9 +33,6 @@
   ],
   "engines": {
     "node": ">=10"
-  },
-  "lint-staged": {
-    "*.{js,ts,sol}": "prettier --write"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -70,8 +68,6 @@
     "install-peers": "^1.0.4",
     "lint-staged": ">=10",
     "mocha": "^6.2.2",
-    "prettier": "^2.8.1",
-    "prettier-plugin-solidity": "^1.1.2",
     "rimraf": "^3.0.0",
     "@sablier/v2-core": "^1.0.2",
     "solady": "^0.0.113",
