@@ -130,13 +130,18 @@ yarn test:gas-stories
 ## Deployment
 
 ### RabbitHoleReceipt and QuestFactory
-- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt contracts and hence address)
-- `yarn hardhat deploy --network network_name`
-- `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
 
 ### QuestTerminalKey
-- checkout from sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+- checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+
+### RabbitHoleTickets
+- checkout from sha `13d13cfab0cf4085dde8707e0a22aba477d9eafb`
+
+then:
 - `yarn hardhat deploy --network network_name`
+- `yarn hardhat --network network_name etherscan-verify --api-key etherscan_api_key`
+
 
 ## Upgrading
 
