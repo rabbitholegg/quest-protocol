@@ -45,7 +45,6 @@ Mainnet, Optimism, Polygon, Arbitrum, and Sepolia:
 |Contract Name|Address|
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
-|RabbitHole Receipt|0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E|
 |Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 |RabbitHole Tickets|0x0D380362762B0cf375227037f2217f59A4eC4b9E|
 
@@ -130,13 +129,19 @@ yarn test:gas-stories
 ## Deployment
 
 ### RabbitHoleReceipt and QuestFactory
-- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2` (to get the same contract code for the factory and receipt contracts and hence address)
-- `yarn hardhat deploy --network network_name`
-- `yarn hardhat --network goerli etherscan-verify --api-key etherscan_api_key`
+- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
 
 ### QuestTerminalKey
-- checkout from sha `sha fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+- checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+
+### RabbitHoleTickets
+- checkout from sha `70a56a1567dcd9c4d6f7718388667c5e0564fb2f`
+(must add in the deploy script manually)
+
+then:
 - `yarn hardhat deploy --network network_name`
+- `yarn hardhat --network network_name etherscan-verify --api-key etherscan_api_key`
+
 
 ## Upgrading
 
