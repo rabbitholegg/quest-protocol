@@ -67,7 +67,6 @@
     "hardhat-preprocessor": "^0.1.5",
     "husky": ">=6",
     "install-peers": "^1.0.4",
-    "lint-staged": ">=10",
     "mocha": "^6.2.2",
     "rimraf": "^3.0.0",
     "solady": "^0.0.113",
