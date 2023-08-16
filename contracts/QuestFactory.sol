@@ -230,9 +230,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev Contract must be approved to transfer first
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
-    function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
-        QuestContract(newQuest_).queue();
+    function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
+        address sender = msg.sender;
+        QuestContract questContract = QuestContract(newQuest_);
+        rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
+        questContract.transferOwnership(sender);
     }
 
     /// @dev Create a sablier stream reward quest and start it at the same time.
@@ -269,10 +271,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             actionSpec_,
             durationTotal_
         );
-
-        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
     }
 
@@ -307,10 +306,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             actionSpec_,
             0
         );
-
-        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
     }
 
