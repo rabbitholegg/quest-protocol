@@ -202,8 +202,6 @@ describe('Quest', async () => {
     })
 
     it('should set pause correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
@@ -219,9 +217,7 @@ describe('Quest', async () => {
     })
 
     it('should set unPause correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      expect(await deployedQuestContract.paused()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
+      expect(await deployedQuestContract.queued()).to.equal(true)
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
