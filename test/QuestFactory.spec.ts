@@ -555,7 +555,6 @@ describe('QuestFactory', () => {
     it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
       const requiredFee = 1000
       const extraChange = 100
-      await erc20Quest.queue()
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
       const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
@@ -582,7 +581,6 @@ describe('QuestFactory', () => {
       const requiredFee = 1000
       const extraChange = 100
       const referralAmount = (requiredFee * referralFee) / 10_000
-      await erc20Quest.queue()
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
       const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
