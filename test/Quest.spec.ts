@@ -38,6 +38,8 @@ describe('Quest', async () => {
   let signature: string
 
   beforeEach(async () => {
+    // local_owner is our default signature, unless another signer is manually connected expect this one to be the one used
+    // Right now we're only using the owner, firstAddress(this account is our main claimer/completer) and the protocolFeeRecipient
     const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] =
       await ethers.getSigners()
     questContract = await ethers.getContractFactory('Quest')
@@ -54,28 +56,29 @@ describe('Quest', async () => {
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
+
     await deploySampleErc20Contract()
     await deployFactoryContract()
 
+    // Setup quest completion signature
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))
+    // Setup ERC20 instance of quest contract through factory
     await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-    const createQuestTx = await deployedFactoryContract.createQuest(
+    await deployedSampleErc20Contract.approve(deployedFactoryContract.address, totalRewardsPlusFee)
+    await deployedFactoryContract.createQuestAndQueue(
       deployedSampleErc20Contract.address,
       expiryDate,
       startDate,
       totalParticipants,
       rewardAmount,
-      'erc20',
-      questId
+      questId,
+      '', // actionSpec
+      0   // discountTokenId
     )
+    let questAddress = await deployedFactoryContract.quests(questId).then((res) => res.questAddress)
+    deployedQuestContract = await ethers.getContractAt('Quest', questAddress)
 
-    const waitedTx = await createQuestTx.wait()
-
-    const event = waitedTx?.events?.find((event) => event.event === 'QuestCreated')
-    const [_from, contractAddress, type] = event?.args as Result
-
-    deployedQuestContract = await questContract.attach(contractAddress)
     await transferRewardsToDistributor()
   })
 
@@ -100,7 +103,7 @@ describe('Quest', async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy(
       'RewardToken',
       'RTC',
-      totalRewardsPlusFee,
+      '1000000',
       owner.address
     )
     await deployedSampleErc20Contract.deployed()
