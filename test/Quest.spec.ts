@@ -79,7 +79,6 @@ describe('Quest', async () => {
     let questAddress = await deployedFactoryContract.quests(questId).then((res) => res.questAddress)
     deployedQuestContract = await ethers.getContractAt('Quest', questAddress)
 
-    await transferRewardsToDistributor()
   })
 
   const deployFactoryContract = async () => {
@@ -103,14 +102,10 @@ describe('Quest', async () => {
     deployedSampleErc20Contract = await sampleERC20Contract.deploy(
       'RewardToken',
       'RTC',
-      '1000000',
+      totalRewardsPlusFee,
       owner.address
     )
     await deployedSampleErc20Contract.deployed()
-  }
-
-  const transferRewardsToDistributor = async () => {
-    await deployedSampleErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee)
   }
 
   describe('Deployment', () => {
