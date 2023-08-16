@@ -19,6 +19,7 @@ import {QuestTerminalKey} from "./QuestTerminalKey.sol";
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
+// solhint-disable-next-line max-states-count
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     using SafeTransferLib for address;
     using LibClone for address;
@@ -79,6 +80,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     address public sablierV2LockupLinearAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() initializer {}
 
     function initialize(
@@ -110,6 +112,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
     modifier nonReentrant() virtual {
         if (locked == 0) locked = 1;
+        // solhint-disable-next-line custom-errors
         require(locked == 1, "REENTRANCY");
         locked = 2;
         _;
@@ -133,6 +136,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     modifier sufficientMintFee() {
+        // solhint-disable-next-line custom-errors
         require(msg.value >= mintFee, "Insufficient mint fee");
         _;
     }
@@ -223,6 +227,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function doDiscountedFee(uint256 tokenId_) internal returns (uint16) {
+        // solhint-disable-next-line custom-errors, reason-string
         require(
             questTerminalKeyContract.ownerOf(tokenId_) == msg.sender,
             "QuestFactory: caller is not owner of discount token"

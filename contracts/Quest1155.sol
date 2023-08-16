@@ -29,6 +29,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public questFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }

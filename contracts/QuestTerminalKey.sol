@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721URIStorageUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721EnumerableUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {Base64} from "solady/src/utils/Base64.sol";
 import {LibString} from "solady/src/utils/LibString.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -45,6 +47,7 @@ contract QuestTerminalKey is
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
@@ -71,11 +74,13 @@ contract QuestTerminalKey is
     }
 
     modifier onlyMinter() {
+        // solhint-disable-next-line custom-errors
         require(msg.sender == minterAddress, "Only minter");
         _;
     }
 
     modifier onlyQuestFactory() {
+        // solhint-disable-next-line custom-errors
         require(msg.sender == questFactoryAddress, "Only quest factory");
         _;
     }
@@ -83,6 +88,7 @@ contract QuestTerminalKey is
     /// @dev modifier to check for zero address
     /// @param _address the address to check
     modifier nonZeroAddress(address _address) {
+        // solhint-disable-next-line custom-errors
         require(_address != address(0), "Zero address");
         _;
     }
@@ -134,6 +140,7 @@ contract QuestTerminalKey is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
+        // solhint-disable-next-line custom-errors
         require(discountPercentage_ <= 10_000, "Invalid discount percentage");
 
         mintWithDiscount(to_, discountPercentage_);
@@ -213,6 +220,7 @@ contract QuestTerminalKey is
             generateAttribute("Discount Used Count", discounts[tokenId_].usedCount.toString()),
             "]"
         );
+        //solhint-disable quotes
         bytes memory dataURI = abi.encodePacked(
             "{",
             '"name": "Quest Terminal Key",',
@@ -227,6 +235,7 @@ contract QuestTerminalKey is
             attributes,
             "}"
         );
+        //solhint-enable quotes
         return dataURI;
     }
 
@@ -245,6 +254,7 @@ contract QuestTerminalKey is
     /// @param key The key for the attribute
     /// @param value The value for the attribute
     function generateAttribute(string memory key, string memory value) internal pure returns (string memory) {
+        // solhint-disable-next-line quotes
         bytes memory attribute = abi.encodePacked("{", '"trait_type": "', key, '",', '"value": "', value, '"', "}");
         return string(attribute);
     }
@@ -256,6 +266,7 @@ contract QuestTerminalKey is
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
+        // solhint-disable-next-line custom-errors
         require(_exists(tokenId_), "Nonexistent token");
 
         uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;

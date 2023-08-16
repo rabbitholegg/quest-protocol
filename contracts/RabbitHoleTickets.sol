@@ -24,6 +24,7 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
     string public animationUrlIPFSCID;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
@@ -112,6 +113,7 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
 
     /// @dev returns the data uri in json format
     function generateDataURI() internal view virtual returns (bytes memory) {
+        // solhint-disable quotes
         bytes memory dataURI = abi.encodePacked(
             "{",
             '"name": "',
@@ -128,6 +130,7 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
             '"',
             "}"
         );
+        // solhint-enable quotes
         return dataURI;
     }
 
