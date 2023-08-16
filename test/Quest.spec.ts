@@ -238,7 +238,6 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from owner', async () => {
-      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
@@ -261,7 +260,6 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from protocolFeeRecipient', async () => {
-      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
