@@ -92,6 +92,7 @@ const config: HardhatUserConfig = {
       optimisticGoerli: process.env.OPT_ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
       arbitrumOne: process.env.ARBISCAN_API_KEY,
+      base: process.env.BASESCAN_API_KEY,
     },
   },
   networks: {
@@ -178,6 +179,16 @@ const config: HardhatUserConfig = {
       verify: {
         etherscan: {
           apiKey: process.env.OPT_ETHERSCAN_API_KEY,
+        },
+      },
+    },
+    base: {
+      url: `https://radial-alien-bush.base-mainnet.quiknode.pro/${process.env.QUICKNODE_BASE_API_KEY}/`,
+      accounts: process.env.MAINNET_PRIVATE_KEY ? [`0x${process.env.MAINNET_PRIVATE_KEY}`] : [],
+      chainId: 8453,
+      verify: {
+        etherscan: {
+          apiKey: process.env.BASESCAN_API_KEY,
         },
       },
     },
