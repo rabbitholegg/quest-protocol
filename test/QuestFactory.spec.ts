@@ -123,16 +123,18 @@ describe('QuestFactory', () => {
     it('Should revert if reward address is not on the reward allowlist', async () => {
       const rewardAddress = deployedSampleErc20Contract.address
       expect(await deployedFactoryContract.rewardAllowlist(rewardAddress)).to.equal(false)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
 
       await expect(
-        deployedFactoryContract.createQuest(
+        deployedFactoryContract.createQuestAndQueue(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
           totalRewards,
           rewardAmount,
-          'erc20',
-          erc20QuestId
+          erc20QuestId,
+          '', // actionSpec
+          0   // discountTokenId
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
@@ -179,6 +181,7 @@ describe('QuestFactory', () => {
 
     it('Should revert if trying to use existing quest id', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.approve(deployedFactoryContract.address, transferAmount)
 
       await deployedFactoryContract.createQuestAndQueue(
         deployedSampleErc20Contract.address,
