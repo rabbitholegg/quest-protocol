@@ -235,40 +235,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         QuestContract(newQuest_).queue();
     }
 
-    /// @dev Create an erc20 quest
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
-    /// @return address the quest contract address
-    function createQuest(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory, // was contractType_ , currently deprecated.
-        string memory questId_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            0,
-            "",
-            0
-        );
-
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
-        return newQuest;
-    }
-
     /// @dev Create a sablier stream reward quest and start it at the same time.
     /// @notice The function will transfer the reward amount to the quest contract
     /// @param rewardTokenAddress_ The contract address of the reward token
