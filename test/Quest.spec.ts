@@ -165,7 +165,7 @@ describe('Quest', async () => {
 
       it('Should set has started with correct value', async () => {
         const queued = await deployedQuestContract.queued()
-        expect(queued).to.equal(false)
+        expect(queued).to.equal(true) // New default behavior is to queue quests on creation - this will be removed in follow-on
       })
 
       it('Should set the end time with correct value', async () => {
