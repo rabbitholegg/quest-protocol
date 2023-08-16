@@ -179,15 +179,6 @@ describe('Quest', async () => {
     })
   })
 
-  describe('queue()', () => {
-    it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWithCustomError(
-        questContract,
-        'Unauthorized'
-      )
-    })
-  })
-
   describe('pause()', () => {
     it('should only allow the owner to pause', async () => {
       await expect(deployedQuestContract.connect(firstAddress).pause()).to.be.revertedWithCustomError(
