@@ -10,5 +10,11 @@
     "**/migrations": true,
     "**/typechain-types": true,
     "**/lib": true,
+  },
+  "editor.formatOnSave": true,
+  "solidity.formatter": "forge",
+  "solidity.linter": "solhint",
+  "[solidity]": {
+      "editor.defaultFormatter": "JuanBlanco.solidity"
   }
 }
