@@ -220,17 +220,20 @@ describe('QuestFactory', () => {
 
     it('Should allow anyone to create a quest', async () => {
       await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
+      await deployedSampleErc20Contract.transfer(royaltyRecipient.address, transferAmount)
+      await deployedSampleErc20Contract.connect(royaltyRecipient).approve(deployedFactoryContract.address, transferAmount)
 
       const tx = await deployedFactoryContract
         .connect(royaltyRecipient)
-        .createQuest(
+        .createQuestAndQueue(
           deployedSampleErc20Contract.address,
           expiryDate,
           startDate,
           totalRewards,
           rewardAmount,
-          'erc20',
-          erc20QuestId
+          erc20QuestId,
+          '', // actionSpec
+          0   // discountTokenId
         )
       await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
