@@ -30,6 +30,7 @@ contract QuestTerminalKey is
     error InvalidDiscountPercentage();
     error NonexistentToken();
     error OnlyMinter();
+    error OnlyFactory();
 
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -87,8 +88,7 @@ contract QuestTerminalKey is
     }
 
     modifier onlyQuestFactory() {
-        // solhint-disable-next-line custom-errors
-        require(msg.sender == questFactoryAddress, "Only quest factory");
+        if (msg.sender != questFactoryAddress) revert OnlyFactory();
         _;
     }
 
