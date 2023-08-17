@@ -1,20 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+// Inherits
 import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
 import {AccessControlUpgradeable} from '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
-import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
+// Implements
+import {IQuestFactory} from './interfaces/IQuestFactory.sol';
+// Leverages
 import {ECDSA} from 'solady/src/utils/ECDSA.sol';
 import {LibClone} from 'solady/src/utils/LibClone.sol';
 import {LibString} from 'solady/src/utils/LibString.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
-import {IQuestFactory} from './interfaces/IQuestFactory.sol';
+// References
+import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {IQuest} from './interfaces/IQuest.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
-import {Quest as QuestContract} from './Quest.sol';
-import {Quest1155 as Quest1155Contract} from './Quest1155.sol';
-import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import {QuestTerminalKey} from "./QuestTerminalKey.sol";
+import {Quest as QuestContract} from './Quest.sol'; // Collapse into interface
+import {Quest1155 as Quest1155Contract} from './Quest1155.sol'; // Collapse into interface
+import {QuestTerminalKey} from "./QuestTerminalKey.sol"; // Collapse into interface
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
