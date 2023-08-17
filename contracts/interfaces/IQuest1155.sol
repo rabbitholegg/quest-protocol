@@ -18,6 +18,17 @@ interface IQuest1155 {
     error QuestEnded();
     error AlreadyWithdrawn();
 
+    // Initializer/Contstructor Function
+    function initialize(
+        address rewardTokenAddress_,
+        uint endTime_,
+        uint startTime_,
+        uint totalParticipants_,
+        uint tokenId_,
+        uint questFee_,
+        address protocolFeeRecipient_
+    ) external;
+
     // Read Functions
     function endTime() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
