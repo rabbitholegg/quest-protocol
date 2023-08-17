@@ -215,8 +215,9 @@ describe('Quest', async () => {
 
   describe('withdrawRemainingTokens()', async () => {
     it('should only allow the owner to withdrawRemainingTokens', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWith(
-        'Not protocol fee recipient or owner'
+      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWithCustomError(
+        questContract,
+        'AuthOwnerRecipient'
       )
     })
 
