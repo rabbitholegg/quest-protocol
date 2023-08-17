@@ -28,6 +28,7 @@ contract QuestTerminalKey is
 {
     error ZeroAddress();
     error InvalidDiscountPercentage();
+    error NonexistentToken();
 
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -270,8 +271,7 @@ contract QuestTerminalKey is
         uint256 tokenId_,
         uint256 salePrice_
     ) external view override returns (address receiver, uint256 royaltyAmount) {
-        // solhint-disable-next-line custom-errors
-        require(_exists(tokenId_), "Nonexistent token");
+        if (!_exists(tokenId_)) revert NonexistentToken();
 
         uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
         return (royaltyRecipient, royaltyPayment);
