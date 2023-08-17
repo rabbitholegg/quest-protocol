@@ -212,7 +212,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         params.recipient = recepient_; // The recipient of the streamed assets
         params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
         params.asset = IERC20(rewardToken); // The streaming asset
-        params.cancelable = true; // Whether the stream will be cancelable or not
         params.durations = LockupLinear.Durations({cliff: 0, total: durationTotal});
 
         // Create the Sablier stream using a function that sets the start time to `block.timestamp`
