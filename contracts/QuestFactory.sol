@@ -14,9 +14,8 @@ import {LibString} from 'solady/src/utils/LibString.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 // References
 import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
-import {IQuest} from './interfaces/IQuest.sol';
+import {IQuestOwnable} from './interfaces/IQuestOwnable.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
-import {Quest as QuestContract} from './Quest.sol'; // Collapse into interface
 import {Quest1155 as Quest1155Contract} from './Quest1155.sol'; // Collapse into interface
 import {QuestTerminalKey} from "./QuestTerminalKey.sol"; // Collapse into interface
 
@@ -205,7 +204,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             protocolFee = doDiscountedFee(discountTokenId_);
         }
 
-        QuestContract(newQuest).initialize(
+        IQuestOwnable(newQuest).initialize(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -236,7 +235,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
         address sender = msg.sender;
-        QuestContract questContract = QuestContract(newQuest_);
+        IQuestOwnable questContract = IQuestOwnable(newQuest_);
         rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
         questContract.transferOwnership(sender);
     }
@@ -491,7 +490,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     function questData(string memory questId_) external view returns (QuestData memory) {
         Quest storage thisQuest = quests[questId_];
-        QuestContract questContract = QuestContract(thisQuest.questAddress);
+        IQuestOwnable questContract = IQuestOwnable(thisQuest.questAddress);
         uint rewardAmountOrTokenId;
         uint16 erc20QuestFee;
 
@@ -574,7 +573,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param ref_ The referral address
     function claimRewardsRef(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
-        IQuest questContract_ = IQuest(currentQuest.questAddress);
+        IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
