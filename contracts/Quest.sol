@@ -11,7 +11,7 @@ import {IQuest} from './interfaces/IQuest.sol';
 import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
 import { LockupLinear } from "@sablier/v2-core/src/types/DataTypes.sol";
 // References
-import {QuestFactory} from './QuestFactory.sol';
+import { IQuestFactory } from './interfaces/IQuestFactory.sol';
 import { ISablierV2LockupLinear } from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
 import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
 
@@ -21,7 +21,7 @@ import { IERC20 } from "@sablier/v2-core/src/types/Tokens.sol";
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
     using SafeTransferLib for address;
     address public rabbitHoleReceiptContract;    // Deprecated - do not use
-    QuestFactory public questFactoryContract;
+    IQuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
@@ -64,7 +64,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = QuestFactory(payable(msg.sender));
+        questFactoryContract = IQuestFactory(payable(msg.sender));
         sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
