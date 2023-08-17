@@ -5,26 +5,24 @@ const { ethers } = require('hardhat')
 async function main() {
   const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E' // production everywhere
   const questTerminalKeyAddress = '0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab' // production everywhere
-  const rabbitHoleReceiptAddress = '0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E' // production everywhere
   const rabbitHoleTicketsAddress = '0x0D380362762B0cf375227037f2217f59A4eC4b9E' // production everywhere
   const Erc20Quest = await ethers.getContractFactory('Quest')
   const Erc1155Quest = await ethers.getContractFactory('Quest1155')
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
   const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
-  const RabbitHoleReceipt = await ethers.getContractFactory('RabbitHoleReceipt')
   const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')
 
   // deploy new quest implementation
-  // const erc20Quest = await Erc20Quest.deploy()
-  // await erc20Quest.deployed()
-  // console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
-  // await hre.run('verify:verify', { address: erc20Quest.address })
+  const erc20Quest = await Erc20Quest.deploy()
+  await erc20Quest.deployed()
+  console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
+  await hre.run('verify:verify', { address: erc20Quest.address })
 
   // deploy new 1155 quest implementation
-  // const erc1155Quest = await Erc1155Quest.deploy()
-  // await erc1155Quest.deployed()
-  // console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
-  // await hre.run('verify:verify', { address: erc1155Quest.address })
+  const erc1155Quest = await Erc1155Quest.deploy()
+  await erc1155Quest.deployed()
+  console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
+  await hre.run('verify:verify', { address: erc1155Quest.address })
 
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
@@ -37,14 +35,6 @@ async function main() {
   console.log('deployed QuestFactory Implementation to:', questFactoryImp.address)
   await hre.run('verify:verify', { address: questFactoryImp.address })
 
-  // Validates and deploys a new implementation contract for RabbitHoleReceipt
-  // await hre.upgrades.forceImport(rabbitHoleReceiptAddress, RabbitHoleReceipt)
-  // await hre.upgrades.validateUpgrade(rabbitHoleReceiptAddress, RabbitHoleReceipt)
-  // const RabbitHoleReceiptImp = await RabbitHoleReceipt.deploy()
-  // await RabbitHoleReceiptImp.deployed()
-  // console.log('deployed RabbitHoleReceipt Implementation to:', RabbitHoleReceiptImp.address)
-  // await hre.run('verify:verify', { address: RabbitHoleReceiptImp.address })
-
   // validates and deploys a new implementation contract for QuestTerminalKey
   // await hre.upgrades.forceImport(questTerminalKeyAddress, QuestTerminalKey)
   // await hre.upgrades.validateUpgrade(questTerminalKeyAddress, QuestTerminalKey)
@@ -54,12 +44,12 @@ async function main() {
   // await hre.run('verify:verify', { address: QTKImp.address })
 
   // validates and deploys a new implementation contract for RabbitHoleTickets
-  // await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  // await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  // const RHTImp = await RabbitHoleTickets.deploy()
-  // await RHTImp.deployed()
-  // console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
-  // await hre.run('verify:verify', { address: RHTImp.address })
+  await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  const RHTImp = await RabbitHoleTickets.deploy()
+  await RHTImp.deployed()
+  console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
+  await hre.run('verify:verify', { address: RHTImp.address })
 }
 
 main()

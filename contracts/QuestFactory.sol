@@ -243,35 +243,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev Contract must be approved to transfer first
     /// @param newQuest_ The address of the new quest
     /// @param rewardTokenAddress_ The contract address of the reward token
-    function transferTokensAndQueueQuest(address newQuest_, address rewardTokenAddress_) internal {
-        rewardTokenAddress_.safeTransferFrom(msg.sender, newQuest_, QuestContract(newQuest_).totalTransferAmount());
-        QuestContract(newQuest_).queue();
-    }
-
-    /// @dev Create an erc20 quest
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
-    /// @return address the quest contract address
-    function createQuest(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory, // was contractType_ , currently deprecated.
-        string memory questId_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_, endTime_, startTime_, totalParticipants_, rewardAmount_, questId_, 0, "", 0
-        );
-
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
-        return newQuest;
+    function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
+        address sender = msg.sender;
+        QuestContract questContract = QuestContract(newQuest_);
+        rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
+        questContract.transferOwnership(sender);
     }
 
     /// @dev Create a sablier stream reward quest and start it at the same time.
@@ -308,10 +284,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             actionSpec_,
             durationTotal_
         );
-
-        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
     }
 
@@ -346,10 +319,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             actionSpec_,
             0
         );
-
-        transferTokensAndQueueQuest(newQuest, rewardTokenAddress_);
-        QuestContract(newQuest).transferOwnership(msg.sender);
-
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
     }
 
