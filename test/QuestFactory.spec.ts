@@ -549,7 +549,7 @@ describe('QuestFactory', () => {
         deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
           value: requiredFee - 1,
         })
-      ).to.be.revertedWith('Insufficient mint fee')
+      ).to.be.revertedWithCustomError(questFactoryContract, 'InvalidMintFee')
     })
 
     it('should succeed if the mint fee is equal or greator than required amount, and only recieve the required amount', async function () {
