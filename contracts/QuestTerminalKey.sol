@@ -26,6 +26,8 @@ contract QuestTerminalKey is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable
 {
+    error ZeroAddress();
+
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
     event QuestFactoryAddressSet(address indexed questFactoryAddress);
@@ -91,8 +93,7 @@ contract QuestTerminalKey is
     /// @dev modifier to check for zero address
     /// @param _address the address to check
     modifier nonZeroAddress(address _address) {
-        // solhint-disable-next-line custom-errors
-        require(_address != address(0), "Zero address");
+        if (_address == address(0)) revert ZeroAddress();
         _;
     }
 
