@@ -4,8 +4,8 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -27,10 +27,12 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
+    // solhint-disable-next-line func-name-mixedcase
     function __Ownable_init(address owner_) internal onlyInitializing {
         __Ownable_init_unchained(owner_);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __Ownable_init_unchained(address owner_) internal onlyInitializing {
         _transferOwnership(owner_);
     }
@@ -54,6 +56,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner() internal view virtual {
+        // solhint-disable-next-line custom-errors
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
     }
 
@@ -73,6 +76,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
+        // solhint-disable-next-line custom-errors, reason-string
         require(newOwner != address(0), "Ownable: new owner is the zero address");
         _transferOwnership(newOwner);
     }

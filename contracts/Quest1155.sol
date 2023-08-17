@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
-import {ERC1155Holder} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
-import {PausableUpgradeable} from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {Ownable} from 'solady/src/auth/Ownable.sol';
-import {SafeTransferLib} from 'solady/src/utils/SafeTransferLib.sol';
-import {QuestFactory} from './QuestFactory.sol';
+import {Ownable} from "solady/src/auth/Ownable.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {QuestFactory} from "./QuestFactory.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
@@ -21,14 +21,15 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     address public rewardToken;
-    uint public endTime;
-    uint public startTime;
-    uint public totalParticipants;
-    uint public tokenId;
-    uint public redeemedTokens;
-    uint public questFee;
+    uint256 public endTime;
+    uint256 public startTime;
+    uint256 public totalParticipants;
+    uint256 public tokenId;
+    uint256 public redeemedTokens;
+    uint256 public questFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
@@ -44,16 +45,16 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     error QuestEnded();
     error AlreadyWithdrawn();
 
-    event ClaimedSingle(address indexed account, address rewardAddress, uint amount);
-    event Queued(uint timestamp);
+    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
+    event Queued(uint256 timestamp);
 
     function initialize(
         address rewardTokenAddress_,
-        uint endTime_,
-        uint startTime_,
-        uint totalParticipants_,
-        uint tokenId_,
-        uint questFee_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        uint256 questFee_,
         address protocolFeeRecipient_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -103,7 +104,9 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
     /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
     function queue() public virtual onlyOwner {
-        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) revert InsufficientTokenBalance();
+        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
+            revert InsufficientTokenBalance();
+        }
         if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
@@ -123,16 +126,25 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_) external virtual nonReentrant whenNotPaused whenNotEnded onlyStarted onlyQueued onlyQuestFactory {
+    function singleClaim(address account_)
+        external
+        virtual
+        nonReentrant
+        whenNotPaused
+        whenNotEnded
+        onlyStarted
+        onlyQueued
+        onlyQuestFactory
+    {
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
-        if(questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
+        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
     /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    function maxProtocolReward() external view returns (uint) {
+    function maxProtocolReward() external view returns (uint256) {
         return (totalParticipants * questFee);
     }
 
@@ -150,8 +162,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @notice Internal function that transfers rewards from this contract
     /// @param to_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(address to_, uint amount_) internal {
-        IERC1155(rewardToken).safeTransferFrom(address(this), to_, tokenId, amount_, '0x00');
+    function _transferRewards(address to_, uint256 amount_) internal {
+        IERC1155(rewardToken).safeTransferFrom(address(this), to_, tokenId, amount_, "0x00");
     }
 
     // Functions to receive ETH
