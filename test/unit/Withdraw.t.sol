@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.19;
 
 import "../ProtocolRewardsTest.sol";
 
@@ -14,16 +14,15 @@ contract WithdrawTest is ProtocolRewardsTest {
     }
 
     function getDomainSeparator() internal view virtual returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256(bytes("ProtocolRewards")),
-                    keccak256(bytes("1")),
-                    block.chainid,
-                    address(protocolRewards)
-                )
-            );
+        return keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes("ProtocolRewards")),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(protocolRewards)
+            )
+        );
     }
 
     function testWithdraw() public {
@@ -114,7 +113,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -137,7 +138,8 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, 0, nonce, deadline));
+        bytes32 withdrawHash =
+            keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, 0, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -159,7 +161,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -179,7 +183,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, address(0), creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, address(0), creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -196,7 +202,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator) + 1;
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -213,7 +221,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, notCreator, creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, notCreator, creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -230,7 +240,11 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance + 1, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(
+                protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance + 1, nonce, deadline
+            )
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 
@@ -247,7 +261,9 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 nonce = protocolRewards.nonces(creator);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 withdrawHash = keccak256(abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline));
+        bytes32 withdrawHash = keccak256(
+            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), creator, creator, creatorRewardsBalance, nonce, deadline)
+        );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.19;
 
 import {EIP712} from "solady/src/utils/EIP712.sol";
 import {Ownable} from "solady/src/auth/Ownable.sol";
