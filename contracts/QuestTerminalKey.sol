@@ -27,6 +27,7 @@ contract QuestTerminalKey is
     ReentrancyGuardUpgradeable
 {
     error ZeroAddress();
+    error InvalidDiscountPercentage();
 
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -144,8 +145,7 @@ contract QuestTerminalKey is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
-        // solhint-disable-next-line custom-errors
-        require(discountPercentage_ <= 10_000, "Invalid discount percentage");
+        if (discountPercentage_ > 10_000) revert InvalidDiscountPercentage();
 
         mintWithDiscount(to_, discountPercentage_);
     }
