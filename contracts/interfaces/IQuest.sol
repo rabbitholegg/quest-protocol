@@ -25,4 +25,5 @@ interface IQuest {
     function singleClaim(address account) external;
     function rewardToken() external view returns (address);
     function rewardAmountInWei() external view returns (uint256);
+    function totalTransferAmount() external view returns (uint256);
 }
