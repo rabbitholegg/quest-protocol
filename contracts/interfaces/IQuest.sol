@@ -38,4 +38,5 @@ interface IQuest {
     function rewardToken() external view returns (address);
     function rewardAmountInWei() external view returns (uint256);
     function totalTransferAmount() external view returns (uint256);
+    function questFee() external view returns (uint16);
 }
