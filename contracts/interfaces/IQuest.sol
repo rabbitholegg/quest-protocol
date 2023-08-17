@@ -17,6 +17,18 @@ interface IQuest {
     error NotStarted();
     error TotalAmountExceedsBalance();
 
+    function initialize(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmountInWei_,
+        string memory questId_,
+        uint16 questFee_,
+        address protocolFeeRecipient_,
+        uint40 durationTotal_,
+        address sablierV2LockupLinearAddress_
+    ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
     function queued() external view returns (bool);
