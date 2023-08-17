@@ -41,4 +41,5 @@ interface IQuest {
     function questFee() external view returns (uint16);
     function totalParticipants() external view returns (uint256);
     function redeemedTokens() external view returns (uint256);
+    function hasWithdrawn() external view returns (bool);
 }
