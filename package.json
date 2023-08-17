@@ -34,6 +34,9 @@
   "engines": {
     "node": ">=10"
   },
+  "lint-staged": {
+    "*.{sol}": "solhint --fix && forge fmt"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
