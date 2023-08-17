@@ -16,6 +16,7 @@ interface IQuest {
     error NoWithdrawDuringClaim();
     error NotStarted();
     error TotalAmountExceedsBalance();
+    error AuthOwnerRecipient();
 
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);

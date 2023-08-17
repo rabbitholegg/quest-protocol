@@ -106,7 +106,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     modifier onlyProtocolFeeRecipientOrOwner() {
         // solhint-disable-next-line reason-string, custom-errors
-        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), "Not protocol fee recipient or owner");
+        if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
         _;
     }
 
