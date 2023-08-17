@@ -39,4 +39,5 @@ interface IQuest {
     function rewardAmountInWei() external view returns (uint256);
     function totalTransferAmount() external view returns (uint256);
     function questFee() external view returns (uint16);
+    function totalParticipants() external view returns (uint256);
 }
