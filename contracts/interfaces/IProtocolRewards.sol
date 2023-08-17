@@ -4,32 +4,6 @@ pragma solidity 0.8.18;
 /// @title IProtocolRewards
 /// @notice The interface for deposits & withdrawals for Protocol Rewards
 interface IProtocolRewards {
-    /// @notice Rewards Deposit Event
-    /// @param creator Creator for NFT rewards
-    /// @param createReferral Creator referral
-    /// @param mintReferral Mint referral user
-    /// @param firstMinter First minter reward recipient
-    /// @param zora ZORA recipient
-    /// @param from The caller of the deposit
-    /// @param creatorReward Creator reward amount
-    /// @param createReferralReward Creator referral reward
-    /// @param mintReferralReward Mint referral amount
-    /// @param firstMinterReward First minter reward amount
-    /// @param zoraReward ZORA amount
-    event RewardsDeposit(
-        address indexed creator,
-        address indexed createReferral,
-        address indexed mintReferral,
-        address firstMinter,
-        address zora,
-        address from,
-        uint256 creatorReward,
-        uint256 createReferralReward,
-        uint256 mintReferralReward,
-        uint256 firstMinterReward,
-        uint256 zoraReward
-    );
-
     /// @notice Deposit Event
     /// @param from From user
     /// @param to To user (within contract)
@@ -107,4 +81,14 @@ interface IProtocolRewards {
         bytes32 r,
         bytes32 s
     ) external;
+
+    function excessSupply() external view returns (uint256);
+
+    /// @param to Increase the balance of an address
+    /// @param amount Amount to increase by
+    function increaseBalance(address to, uint256 amount) external;
+
+    /// @param to array of addresses to increase the balance of
+    /// @param amounts Amounts to increase by
+    function increaseBalanceBatch(address[] calldata to, uint256[] calldata amounts) external;
 }
