@@ -12,6 +12,7 @@ interface IQuest {
     error ClaimWindowNotStarted();
     error EndTimeInPast();
     error EndTimeLessThanOrEqualToStartTime();
+    error InvalidRefundToken();
     error MustImplementInChild();
     error NotQuestFactory();
     error NoWithdrawDuringClaim();

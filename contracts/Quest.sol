@@ -187,8 +187,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external onlyOwner {
-        // solhint-disable-next-line custom-errors
-        require(erc20Address_ != rewardToken, "Cannot refund reward token");
+        if (erc20Address_ == rewardToken) revert InvalidRefundToken();
 
         uint256 balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);
