@@ -5,6 +5,7 @@ interface IQuestFactory {
     error AddressAlreadyMinted();
     error AddressNotSigned();
     error AddressZeroNotAllowed();
+    error AuthOwnerDiscountToken();
     error Erc20QuestAddressNotSet();
     error InvalidHash();
     error OnlyOwnerCanCreate1155Quest();

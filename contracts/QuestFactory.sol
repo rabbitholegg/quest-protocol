@@ -225,11 +225,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function doDiscountedFee(uint256 tokenId_) internal returns (uint16) {
-        // solhint-disable-next-line custom-errors, reason-string
-        require(
-            questTerminalKeyContract.ownerOf(tokenId_) == msg.sender,
-            "QuestFactory: caller is not owner of discount token"
-        );
+        if (questTerminalKeyContract.ownerOf(tokenId_) != msg.sender) revert AuthOwnerDiscountToken();
 
         (uint16 discountPercentage,) = questTerminalKeyContract.discounts(tokenId_);
 
