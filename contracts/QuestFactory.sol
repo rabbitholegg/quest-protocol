@@ -17,7 +17,7 @@ import {IERC1155} from '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import {IQuestOwnable} from './interfaces/IQuestOwnable.sol';
 import {IQuest1155} from './interfaces/IQuest1155.sol';
 import {Quest1155 as Quest1155Contract} from './Quest1155.sol'; // Collapse into interface
-import {QuestTerminalKey} from "./QuestTerminalKey.sol"; // Collapse into interface
+import {IQuestTerminalKeyERC721} from "./interfaces/IQuestTerminalKeyERC721.sol"; 
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -49,7 +49,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    QuestTerminalKey private questTerminalKeyContract;
+    IQuestTerminalKeyERC721 private questTerminalKeyContract;
     uint public nftQuestFee;
     address public questNFTAddress;
     struct QuestData {
@@ -98,7 +98,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
+        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyAddress_);
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
@@ -452,7 +452,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyContract_);
+        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
