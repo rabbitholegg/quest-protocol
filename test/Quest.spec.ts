@@ -38,6 +38,8 @@ describe('Quest', async () => {
   let signature: string
 
   beforeEach(async () => {
+    // local_owner is our default signature, unless another signer is manually connected expect this one to be the one used
+    // Right now we're only using the owner, firstAddress(this account is our main claimer/completer) and the protocolFeeRecipient
     const [local_owner, local_firstAddress, local_secondAddress, local_thirdAddress, local_fourthAddress] =
       await ethers.getSigners()
     questContract = await ethers.getContractFactory('Quest')
@@ -54,29 +56,29 @@ describe('Quest', async () => {
     const latestTime = await time.latest()
     expiryDate = latestTime + 1000
     startDate = latestTime + 100
+
     await deploySampleErc20Contract()
     await deployFactoryContract()
 
+    // Setup quest completion signature
     messageHash = utils.solidityKeccak256(['address', 'string'], [firstAddress.address.toLowerCase(), questId])
     signature = await wallet.signMessage(utils.arrayify(messageHash))
+    // Setup ERC20 instance of quest contract through factory
     await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-    const createQuestTx = await deployedFactoryContract.createQuest(
+    await deployedSampleErc20Contract.approve(deployedFactoryContract.address, totalRewardsPlusFee)
+    await deployedFactoryContract.createQuestAndQueue(
       deployedSampleErc20Contract.address,
       expiryDate,
       startDate,
       totalParticipants,
       rewardAmount,
-      'erc20',
-      questId
+      questId,
+      '', // actionSpec
+      0   // discountTokenId
     )
+    let questAddress = await deployedFactoryContract.quests(questId).then((res) => res.questAddress)
+    deployedQuestContract = await ethers.getContractAt('Quest', questAddress)
 
-    const waitedTx = await createQuestTx.wait()
-
-    const event = waitedTx?.events?.find((event) => event.event === 'QuestCreated')
-    const [_from, contractAddress, type] = event?.args as Result
-
-    deployedQuestContract = await questContract.attach(contractAddress)
-    await transferRewardsToDistributor()
   })
 
   const deployFactoryContract = async () => {
@@ -104,10 +106,6 @@ describe('Quest', async () => {
       owner.address
     )
     await deployedSampleErc20Contract.deployed()
-  }
-
-  const transferRewardsToDistributor = async () => {
-    await deployedSampleErc20Contract.functions.transfer(deployedQuestContract.address, totalRewardsPlusFee)
   }
 
   describe('Deployment', () => {
@@ -162,7 +160,7 @@ describe('Quest', async () => {
 
       it('Should set has started with correct value', async () => {
         const queued = await deployedQuestContract.queued()
-        expect(queued).to.equal(false)
+        expect(queued).to.equal(true) // New default behavior is to queue quests on creation - this will be removed in follow-on
       })
 
       it('Should set the end time with correct value', async () => {
@@ -181,21 +179,6 @@ describe('Quest', async () => {
     })
   })
 
-  describe('queue()', () => {
-    it('should only allow the owner to start', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).queue()).to.be.revertedWithCustomError(
-        questContract,
-        'Unauthorized'
-      )
-    })
-
-    it('should set start correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
-      expect(await deployedQuestContract.queued()).to.equal(true)
-    })
-  })
-
   describe('pause()', () => {
     it('should only allow the owner to pause', async () => {
       await expect(deployedQuestContract.connect(firstAddress).pause()).to.be.revertedWithCustomError(
@@ -205,8 +188,6 @@ describe('Quest', async () => {
     })
 
     it('should set pause correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
@@ -222,9 +203,7 @@ describe('Quest', async () => {
     })
 
     it('should set unPause correctly', async () => {
-      expect(await deployedQuestContract.queued()).to.equal(false)
-      expect(await deployedQuestContract.paused()).to.equal(false)
-      await deployedQuestContract.connect(owner).queue()
+      expect(await deployedQuestContract.queued()).to.equal(true)
       expect(await deployedQuestContract.paused()).to.equal(false)
       await deployedQuestContract.connect(owner).pause()
       expect(await deployedQuestContract.paused()).to.equal(true)
@@ -259,7 +238,6 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from owner', async () => {
-      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
@@ -282,7 +260,6 @@ describe('Quest', async () => {
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from protocolFeeRecipient', async () => {
-      await deployedQuestContract.queue()
       await time.setNextBlockTimestamp(startDate + 1)
       await deployedFactoryContract.connect(firstAddress).claimRewards(questId, messageHash, signature)
       expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(0)
@@ -307,7 +284,6 @@ describe('Quest', async () => {
 
   describe('singleClaim()', async () => {
     beforeEach(async () => {
-      await deployedQuestContract.queue()
       await time.increaseTo(startDate)
     })
 

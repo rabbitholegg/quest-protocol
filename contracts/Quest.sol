@@ -67,6 +67,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
         durationTotal = durationTotal_;
+        queued = true;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -77,24 +78,15 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return this.maxTotalRewards() + this.maxProtocolReward();
     }
 
-    /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
-    /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
-    function queue() public virtual onlyOwner {
-        if (rewardToken.balanceOf(address(this)) < this.totalTransferAmount())
-            revert TotalAmountExceedsBalance();
-        queued = true;
-        emit Queued(block.timestamp);
-    }
-
     /// @notice Pauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function pause() external onlyOwner onlyStarted {
+    function pause() external onlyOwner {
         _pause();
     }
 
     /// @notice Unpauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() external onlyOwner onlyStarted {
+    function unPause() external onlyOwner {
         _unpause();
     }
 
@@ -104,15 +96,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _;
     }
 
-    /// @notice Checks if the Quest has started at the function level
-    modifier onlyStarted() {
-        if (!queued) revert NotStarted();
-        _;
-    }
-
     /// @notice Checks if quest has started both at the function level and at the start time
     modifier onlyQuestActive() {
-        if (!queued) revert NotStarted();
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
         _;
     }
