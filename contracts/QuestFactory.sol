@@ -112,8 +112,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
     modifier nonReentrant() virtual {
         if (locked == 0) locked = 1;
-        // solhint-disable-next-line custom-errors
-        require(locked == 1, "REENTRANCY");
+        if (locked != 1) revert Reentrancy();
         locked = 2;
         _;
         locked = 1;
