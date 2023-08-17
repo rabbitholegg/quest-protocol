@@ -105,7 +105,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
-        // solhint-disable-next-line reason-string, custom-errors
         if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
         _;
     }
@@ -158,13 +157,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
-        // solhint-disable-next-line custom-errors
-        require(!hasWithdrawn, "Already withdrawn");
-
+        if (hasWithdrawn) revert AlreadyWithdrawn();
         rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
-
         rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
-
         hasWithdrawn = true;
     }
 

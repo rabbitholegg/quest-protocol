@@ -7,6 +7,7 @@ interface IQuest {
     event JsonSpecCIDSet(string cid);
 
     error AlreadyClaimed();
+    error AlreadyWithdrawn();
     error AmountExceedsBalance();
     error ClaimWindowNotStarted();
     error EndTimeInPast();
