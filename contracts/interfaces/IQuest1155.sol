@@ -3,8 +3,8 @@ pragma solidity ^0.8.18;
 
 interface IQuest1155 {
     // Events
-    event ClaimedSingle(address indexed account, address rewardAddress, uint amount);
-    event Queued(uint timestamp);
+    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
+    event Queued(uint256 timestamp);
 
     // Errors
     error EndTimeInPast();
@@ -21,11 +21,11 @@ interface IQuest1155 {
     // Initializer/Contstructor Function
     function initialize(
         address rewardTokenAddress_,
-        uint endTime_,
-        uint startTime_,
-        uint totalParticipants_,
-        uint tokenId_,
-        uint questFee_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        uint256 questFee_,
         address protocolFeeRecipient_
     ) external;
 
@@ -33,7 +33,7 @@ interface IQuest1155 {
     function endTime() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
 
-    function maxProtocolReward() external view returns (uint);
+    function maxProtocolReward() external view returns (uint256);
     function questFee() external view returns (uint256);
     function queued() external view returns (bool);
     function startTime() external view returns (uint256);

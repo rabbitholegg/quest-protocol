@@ -7,12 +7,8 @@ contract SampleERC20 is ERC20 {
     string internal _name;
     string internal _symbol;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint256 initialSupply_,
-        address owner_
-    ) {
+    // solhint-disable-next-line func-visibility
+    constructor(string memory name_, string memory symbol_, uint256 initialSupply_, address owner_) {
         _name = name_;
         _symbol = symbol_;
         _mint(owner_, initialSupply_);

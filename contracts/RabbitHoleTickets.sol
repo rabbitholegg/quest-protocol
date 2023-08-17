@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import {Ownable} from 'solady/src/auth/Ownable.sol';
-import {ERC1155} from 'solady/src/tokens/ERC1155.sol';
-import {Base64} from 'solady/src/utils/Base64.sol';
-import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import {IERC165Upgradeable, IERC2981Upgradeable} from '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
-
-contract RabbitHoleTickets is
-    Initializable,
-    Ownable,
-    ERC1155,
+import {Ownable} from "solady/src/auth/Ownable.sol";
+import {ERC1155} from "solady/src/tokens/ERC1155.sol";
+import {Base64} from "solady/src/utils/Base64.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {
+    IERC165Upgradeable,
     IERC2981Upgradeable
-{
+} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+
+contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeable {
     error OnlyMinter();
 
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
@@ -21,11 +19,12 @@ contract RabbitHoleTickets is
     // storage
     address public royaltyRecipient;
     address public minterAddress;
-    uint public royaltyFee;
+    uint256 public royaltyFee;
     string public imageIPFSCID;
     string public animationUrlIPFSCID;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
@@ -33,7 +32,7 @@ contract RabbitHoleTickets is
     function initialize(
         address royaltyRecipient_,
         address minterAddress_,
-        uint royaltyFee_,
+        uint256 royaltyFee_,
         address owner_,
         string memory imageIPFSCID_,
         string memory animationUrlIPFSCID_
@@ -107,20 +106,16 @@ contract RabbitHoleTickets is
     }
 
     /// @dev returns the token uri
-    function uri(uint256)
-        public
-        view
-        override(ERC1155)
-        returns (string memory)
-    {
+    function uri(uint256) public view override (ERC1155) returns (string memory) {
         bytes memory dataURI = generateDataURI();
-        return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
     function generateDataURI() internal view virtual returns (bytes memory) {
+        // solhint-disable quotes
         bytes memory dataURI = abi.encodePacked(
-            '{',
+            "{",
             '"name": "',
             "RabbitHole Ticket",
             '",',
@@ -133,20 +128,21 @@ contract RabbitHoleTickets is
             '"animation_url": "',
             animationUrl(animationUrlIPFSCID),
             '"',
-            '}'
+            "}"
         );
+        // solhint-enable quotes
         return dataURI;
     }
 
     function tokenImage(string memory imageIPFSCID_) internal view virtual returns (string memory) {
-        return string(abi.encodePacked('ipfs://', imageIPFSCID_));
+        return string(abi.encodePacked("ipfs://", imageIPFSCID_));
     }
 
     function animationUrl(string memory animationUrlIPFSCID_) internal view virtual returns (string memory) {
         if (bytes(animationUrlIPFSCID_).length == 0) {
-            return '';
+            return "";
         }
-        return string(abi.encodePacked('ipfs://', animationUrlIPFSCID_));
+        return string(abi.encodePacked("ipfs://", animationUrlIPFSCID_));
     }
 
     /// @dev See {IERC165-royaltyInfo}
@@ -161,9 +157,13 @@ contract RabbitHoleTickets is
 
     /// @dev returns true if the supplied interface id is supported
     /// @param interfaceId_ the interface id
-    function supportsInterface(
-        bytes4 interfaceId_
-    ) public view virtual override(ERC1155, IERC165Upgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId_)
+        public
+        view
+        virtual
+        override (ERC1155, IERC165Upgradeable)
+        returns (bool)
+    {
         return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }

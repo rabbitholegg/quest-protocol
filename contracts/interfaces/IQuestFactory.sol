@@ -2,7 +2,6 @@
 pragma solidity ^0.8.18;
 
 interface IQuestFactory {
-
     // Errors
     error AddressAlreadyMinted();
     error AddressNotSigned();
@@ -33,8 +32,8 @@ interface IQuestFactory {
     struct Quest {
         mapping(address => bool) addressMinted;
         address questAddress;
-        uint totalParticipants;
-        uint numberMinted;
+        uint256 totalParticipants;
+        uint256 numberMinted;
         string questType;
         uint40 durationTotal;
     }
@@ -44,12 +43,12 @@ interface IQuestFactory {
         address rewardToken;
         bool queued;
         uint16 questFee;
-        uint startTime;
-        uint endTime;
-        uint totalParticipants;
-        uint numberMinted;
-        uint redeemedTokens;
-        uint rewardAmountOrTokenId;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 totalParticipants;
+        uint256 numberMinted;
+        uint256 redeemedTokens;
+        uint256 rewardAmountOrTokenId;
         bool hasWithdrawn;
         string questType;
         uint40 durationTotal;
@@ -57,15 +56,49 @@ interface IQuestFactory {
 
     // Events
     event ExtraMintFeeReturned(address indexed recipient, uint256 amount);
-    event MintFeeSet(uint mintFee);
-    event NftQuestFeeListSet(address[] addresses, uint[] fees);
-    event NftQuestFeeSet(uint nftQuestFee);
-    event Quest1155Claimed(address indexed claimer, address questAddress, string questId, address rewardToken, uint256 tokenId);
-    event QuestClaimed(address indexed claimer, address questAddress, string questId, address rewardToken, uint256 rewardAmount);
-    event QuestClaimedReferred(address indexed claimer, address questAddress, string questId, address rewardToken, uint256 rewardAmount, address referrer, uint16 referralFee, uint mintFee);
-    event QuestCreated(address indexed creator, address questAddress, string questId, string questType, address rewardToken, uint256 endTime, uint256 startTime, uint256 totalParticipants, uint256 rewardAmountOrTokenId);
-    event QuestCreatedWithAction(address indexed creator, address questAddress, string questId, string questType, address rewardToken, uint256 endTime, uint256 startTime, uint256 totalParticipants, uint256 rewardAmountOrTokenId, string actionSpec);
-    event QuestInfo(address questAddress, uint totalParticipants, uint numberMinted);
+    event MintFeeSet(uint256 mintFee);
+    event NftQuestFeeListSet(address[] addresses, uint256[] fees);
+    event NftQuestFeeSet(uint256 nftQuestFee);
+    event Quest1155Claimed(
+        address indexed claimer, address questAddress, string questId, address rewardToken, uint256 tokenId
+    );
+    event QuestClaimed(
+        address indexed claimer, address questAddress, string questId, address rewardToken, uint256 rewardAmount
+    );
+    event QuestClaimedReferred(
+        address indexed claimer,
+        address questAddress,
+        string questId,
+        address rewardToken,
+        uint256 rewardAmount,
+        address referrer,
+        uint16 referralFee,
+        uint256 mintFee
+    );
+    event QuestCreated(
+        address indexed creator,
+        address questAddress,
+        string questId,
+        string questType,
+        address rewardToken,
+        uint256 endTime,
+        uint256 startTime,
+        uint256 totalParticipants,
+        uint256 rewardAmountOrTokenId
+    );
+    event QuestCreatedWithAction(
+        address indexed creator,
+        address questAddress,
+        string questId,
+        string questType,
+        address rewardToken,
+        uint256 endTime,
+        uint256 startTime,
+        uint256 totalParticipants,
+        uint256 rewardAmountOrTokenId,
+        string actionSpec
+    );
+    event QuestInfo(address questAddress, uint256 totalParticipants, uint256 numberMinted);
     event ReferralFeeSet(uint16 referralFee);
     event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
 
@@ -73,12 +106,11 @@ interface IQuestFactory {
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
     function getMintFeeRecipient() external view returns (address);
     function getNftQuestFee(address address_) external view returns (uint256);
-    function getNumberMinted(string memory questId_) external view returns (uint);
+    function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
-    function questInfo(string memory questId_) external view returns (address, uint, uint);
+    function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
-    function totalQuestNFTFee(uint totalParticipants_) external view returns (uint256);
-
+    function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
 
     // Update Functions
 
@@ -102,10 +134,10 @@ interface IQuestFactory {
     function setClaimSignerAddress(address claimSignerAddress_) external;
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
     function setErc20QuestAddress(address erc20QuestAddress_) external;
-    function setMintFee(uint mintFee_) external;
+    function setMintFee(uint256 mintFee_) external;
     function setMintFeeRecipient(address mintFeeRecipient_) external;
-    function setNftQuestFee(uint nftQuestFee_) external;
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint[] calldata fees_) external;
+    function setNftQuestFee(uint256 nftQuestFee_) external;
+    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external;

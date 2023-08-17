@@ -1,17 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import '@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
-import {OwnableUpgradeable} from './OwnableUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import '@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {Base64} from 'solady/src/utils/Base64.sol';
-import {LibString} from 'solady/src/utils/LibString.sol';
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721URIStorageUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721EnumerableUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {
+    IERC165Upgradeable,
+    IERC2981Upgradeable
+} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {Base64} from "solady/src/utils/Base64.sol";
+import {LibString} from "solady/src/utils/LibString.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {IQuestTerminalKey} from "./interfaces/IQuestTerminalKey.sol";
+
 contract QuestTerminalKey is
     IQuestTerminalKey,
     Initializable,
@@ -22,7 +28,6 @@ contract QuestTerminalKey is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable
 {
-
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using LibString for uint256;
     using LibString for uint16;
@@ -32,13 +37,13 @@ contract QuestTerminalKey is
     address public royaltyRecipient;
     address public minterAddress;
     address public questFactoryAddress;
-    uint public royaltyFee;
+    uint256 public royaltyFee;
     string public imageIPFSHash;
     string public animationUrlIPFSHash;
     mapping(uint256 => Discount) public discounts;
 
-
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() {
         _disableInitializers();
     }
@@ -47,12 +52,12 @@ contract QuestTerminalKey is
         address royaltyRecipient_,
         address minterAddress_,
         address questFactoryAddress_,
-        uint royaltyFee_,
+        uint256 royaltyFee_,
         address owner_,
         string memory imageIPFSHash_,
         string memory animationUrlIPFSHash_
     ) external initializer {
-        __ERC721_init('QuestTerminalKey', 'QTK');
+        __ERC721_init("QuestTerminalKey", "QTK");
         __ERC721URIStorage_init();
         __Ownable_init(owner_);
         __ReentrancyGuard_init();
@@ -65,19 +70,22 @@ contract QuestTerminalKey is
     }
 
     modifier onlyMinter() {
-        require(msg.sender == minterAddress, 'Only minter');
+        // solhint-disable-next-line custom-errors
+        require(msg.sender == minterAddress, "Only minter");
         _;
     }
 
     modifier onlyQuestFactory() {
-        require(msg.sender == questFactoryAddress, 'Only quest factory');
+        // solhint-disable-next-line custom-errors
+        require(msg.sender == questFactoryAddress, "Only quest factory");
         _;
     }
 
     /// @dev modifier to check for zero address
     /// @param _address the address to check
     modifier nonZeroAddress(address _address) {
-        require(_address != address(0), 'Zero address');
+        // solhint-disable-next-line custom-errors
+        require(_address != address(0), "Zero address");
         _;
     }
 
@@ -108,7 +116,11 @@ contract QuestTerminalKey is
 
     /// @dev set the quest factory address
     /// @param questFactoryAddress_ the address of the quest factory
-    function setQuestFactoryAddress(address questFactoryAddress_) external nonZeroAddress(questFactoryAddress_) onlyOwner {
+    function setQuestFactoryAddress(address questFactoryAddress_)
+        external
+        nonZeroAddress(questFactoryAddress_)
+        onlyOwner
+    {
         questFactoryAddress = questFactoryAddress_;
         emit QuestFactoryAddressSet(questFactoryAddress_);
     }
@@ -124,7 +136,8 @@ contract QuestTerminalKey is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
-        require(discountPercentage_ <= 10000, 'Invalid discount percentage');
+        // solhint-disable-next-line custom-errors
+        require(discountPercentage_ <= 10_000, "Invalid discount percentage");
 
         mintWithDiscount(to_, discountPercentage_);
     }
@@ -137,14 +150,14 @@ contract QuestTerminalKey is
 
     function mintWithDiscount(address to_, uint16 discountPercentage_) internal {
         _tokenIds.increment();
-        uint tokenId = _tokenIds.current();
+        uint256 tokenId = _tokenIds.current();
         discounts[tokenId] = Discount(discountPercentage_, 0);
         _mint(to_, tokenId);
     }
 
     /// @dev increment used count
     /// @param tokenId_ the token id
-    function incrementUsedCount(uint tokenId_) external onlyQuestFactory {
+    function incrementUsedCount(uint256 tokenId_) external onlyQuestFactory {
         discounts[tokenId_].usedCount++;
     }
 
@@ -166,19 +179,18 @@ contract QuestTerminalKey is
     /// @param to the address to
     /// @param tokenId the token id
     /// @param batchSize the batch size
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
-        internal
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        uint256 batchSize
+    ) internal override (ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     /// @dev burn a token
     /// @param tokenId the token id
-    function _burn(uint256 tokenId)
-        internal
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
-    {
+    function _burn(uint256 tokenId) internal override (ERC721Upgradeable, ERC721URIStorageUpgradeable) {
         super._burn(tokenId);
     }
 
@@ -187,27 +199,26 @@ contract QuestTerminalKey is
     function tokenURI(uint256 tokenId_)
         public
         view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable, IQuestTerminalKey)
+        override (ERC721Upgradeable, ERC721URIStorageUpgradeable, IQuestTerminalKey)
         returns (string memory)
     {
         bytes memory dataURI = generateDataURI(tokenId_);
-        return string(abi.encodePacked('data:application/json;base64,', Base64.encode(dataURI)));
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(dataURI)));
     }
 
     /// @dev returns the data uri in json format
     /// @param tokenId_ the token id
-    function generateDataURI(
-        uint tokenId_
-    ) internal view virtual returns (bytes memory) {
+    function generateDataURI(uint256 tokenId_) internal view virtual returns (bytes memory) {
         bytes memory attributes = abi.encodePacked(
-            '[',
-            generateAttribute('Discount Percentage BPS', discounts[tokenId_].percentage.toString()),
-            ',',
-            generateAttribute('Discount Used Count', discounts[tokenId_].usedCount.toString()),
-            ']'
+            "[",
+            generateAttribute("Discount Percentage BPS", discounts[tokenId_].percentage.toString()),
+            ",",
+            generateAttribute("Discount Used Count", discounts[tokenId_].usedCount.toString()),
+            "]"
         );
+        //solhint-disable quotes
         bytes memory dataURI = abi.encodePacked(
-            '{',
+            "{",
             '"name": "Quest Terminal Key",',
             '"description": "A key that can be used to create quests in the Quest Terminal",',
             '"image": "',
@@ -218,36 +229,29 @@ contract QuestTerminalKey is
             '",',
             '"attributes": ',
             attributes,
-            '}'
+            "}"
         );
+        //solhint-enable quotes
         return dataURI;
     }
 
     function tokenImage() internal view virtual returns (string memory) {
-        return string(abi.encodePacked('ipfs://', imageIPFSHash));
+        return string(abi.encodePacked("ipfs://", imageIPFSHash));
     }
 
     function animationUrl() internal view virtual returns (string memory) {
         if (bytes(animationUrlIPFSHash).length == 0) {
-            return '';
+            return "";
         }
-        return string(abi.encodePacked('ipfs://', animationUrlIPFSHash));
+        return string(abi.encodePacked("ipfs://", animationUrlIPFSHash));
     }
 
     /// @dev generates an attribute object for an ERC-721 token
     /// @param key The key for the attribute
     /// @param value The value for the attribute
     function generateAttribute(string memory key, string memory value) internal pure returns (string memory) {
-        bytes memory attribute = abi.encodePacked(
-            '{',
-            '"trait_type": "',
-            key,
-            '",',
-            '"value": "',
-            value,
-            '"',
-            '}'
-        );
+        // solhint-disable-next-line quotes
+        bytes memory attribute = abi.encodePacked("{", '"trait_type": "', key, '",', '"value": "', value, '"', "}");
         return string(attribute);
     }
 
@@ -257,8 +261,14 @@ contract QuestTerminalKey is
     function royaltyInfo(
         uint256 tokenId_,
         uint256 salePrice_
-    ) external view override(IERC2981Upgradeable, IQuestTerminalKey) returns (address receiver, uint256 royaltyAmount) {
-        require(_exists(tokenId_), 'Nonexistent token');
+    )
+        external
+        view
+        override (IERC2981Upgradeable, IQuestTerminalKey)
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        // solhint-disable-next-line custom-errors
+        require(_exists(tokenId_), "Nonexistent token");
 
         uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
         return (royaltyRecipient, royaltyPayment);
@@ -266,9 +276,13 @@ contract QuestTerminalKey is
 
     /// @dev returns true if the supplied interface id is supported
     /// @param interfaceId_ the interface id
-    function supportsInterface(
-        bytes4 interfaceId_
-    ) public view virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, IERC165Upgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId_)
+        public
+        view
+        virtual
+        override (ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
         return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }
