@@ -28,14 +28,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     using LibString for uint256;
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
-    struct Quest {
-        mapping(address => bool) addressMinted;
-        address questAddress;
-        uint totalParticipants;
-        uint numberMinted;
-        string questType;
-        uint40 durationTotal;
-    }
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
@@ -51,27 +43,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     IQuestTerminalKeyERC721 private questTerminalKeyContract;
     uint public nftQuestFee;
     address public questNFTAddress;
-    struct QuestData {
-        address questAddress;
-        address rewardToken;
-        bool queued;
-        uint16 questFee;
-        uint startTime;
-        uint endTime;
-        uint totalParticipants;
-        uint numberMinted;
-        uint redeemedTokens;
-        uint rewardAmountOrTokenId;
-        bool hasWithdrawn;
-        string questType;
-        uint40 durationTotal;
-    }
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
-    struct NftQuestFees {
-        uint256 fee;
-        bool exists;
-    }
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
 
