@@ -13,6 +13,11 @@ contract WithdrawTest is ProtocolRewardsTest {
         protocolRewards.deposit{value: 10 ether}(creator, "", "");
     }
 
+    /// Todo test these functions
+    // - excessSupply
+    // - increaseBalance
+    // - increaseBalanceBatch
+
     function getDomainSeparator() internal view virtual returns (bytes32) {
         return keccak256(
             abi.encode(
