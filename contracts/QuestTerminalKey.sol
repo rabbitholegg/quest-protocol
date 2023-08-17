@@ -36,10 +36,7 @@ contract QuestTerminalKey is
     string public imageIPFSHash;
     string public animationUrlIPFSHash;
     mapping(uint256 => Discount) public discounts;
-    struct Discount {
-        uint16 percentage; //in BIPS
-        uint16 usedCount;
-    }
+
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

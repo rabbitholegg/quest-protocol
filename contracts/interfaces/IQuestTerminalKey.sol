@@ -2,6 +2,12 @@
 pragma solidity ^0.8.18;
 
 interface IQuestTerminalKey {
+    // Structs
+    struct Discount {
+        uint16 percentage; //in BIPS
+        uint16 usedCount;
+    }
+    
     // Events
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
@@ -32,4 +38,5 @@ interface IQuestTerminalKey {
     function getOwnedTokenIds(address owner_) external view returns (uint256[] memory);
     function tokenURI(uint256 tokenId_) external view returns (string memory);
     function royaltyInfo(uint256 tokenId_, uint256 salePrice_) external view returns (address receiver, uint256 royaltyAmount);
+    function discounts(uint256 tokenId_) external view returns (uint16 percentage, uint16 usedCount);
 }
