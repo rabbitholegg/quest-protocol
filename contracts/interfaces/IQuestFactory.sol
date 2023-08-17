@@ -22,6 +22,7 @@ interface IQuestFactory {
     error Deprecated();
     error QuestTypeNotSupported();
     error Reentrancy();
+    error InvalidMintFee();
 
     event QuestCreated(
         address indexed creator,

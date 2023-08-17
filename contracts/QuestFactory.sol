@@ -135,8 +135,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     modifier sufficientMintFee() {
-        // solhint-disable-next-line custom-errors
-        require(msg.value >= mintFee, "Insufficient mint fee");
+        if (msg.value < mintFee) revert InvalidMintFee();
         _;
     }
 
