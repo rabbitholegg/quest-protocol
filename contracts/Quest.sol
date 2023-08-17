@@ -68,8 +68,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         protocolFeeRecipient = protocolFeeRecipient_;
         durationTotal = durationTotal_;
         queued = true;
-        // Note: Not sure if this is needed; figured I'd include it incase we're watching for it but easy to remove
-        emit Queued(block.timestamp);
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
