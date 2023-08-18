@@ -16,7 +16,6 @@ import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
-import {IQuestTerminalKeyERC721} from "./interfaces/IQuestTerminalKeyERC721.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -41,7 +40,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint256 public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    IQuestTerminalKeyERC721 private questTerminalKeyContract;
+    address private questTerminalKeyContract; // deprecated
     uint256 public nftQuestFee;
     address public questNFTAddress;
     mapping(address => address[]) public ownerCollections;
@@ -72,7 +71,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyAddress_);
+        questTerminalKeyContract = questTerminalKeyAddress_;
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
@@ -216,6 +215,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionSpec_,
+        uint256,
         uint40 durationTotal_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
@@ -248,7 +248,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory questId_,
-        string memory actionSpec_
+        string memory actionSpec_,
+        uint256
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
             rewardTokenAddress_, endTime_, startTime_, totalParticipants_, rewardAmount_, questId_, actionSpec_, 0
@@ -393,12 +394,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
         referralFee = referralFee_;
         emit ReferralFeeSet(referralFee_);
-    }
-
-    /// @dev set questTerminalKeyContract address
-    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward

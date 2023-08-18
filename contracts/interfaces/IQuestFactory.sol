@@ -144,7 +144,6 @@ interface IQuestFactory {
     function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
     function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external;
 }
