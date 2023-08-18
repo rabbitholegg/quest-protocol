@@ -68,20 +68,26 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint40 durationTotal_,
         address sablierV2LockupLinearAddress_
     ) external initializer {
+        // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
+
+        // Process input parameters
+        rewardToken = rewardTokenAddress_;
         endTime = endTime_;
         startTime = startTime_;
-        rewardToken = rewardTokenAddress_;
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = IQuestFactory(payable(msg.sender));
-        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
-        hasWithdrawn = false;
         protocolFeeRecipient = protocolFeeRecipient_;
         durationTotal = durationTotal_;
+        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
+
+        // Setup default state
+        questFactoryContract = IQuestFactory(payable(msg.sender));
+        // Note: this is redundant
+        hasWithdrawn = false;
         queued = true;
         _initializeOwner(msg.sender);
         __Pausable_init();
