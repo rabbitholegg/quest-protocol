@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+// Inherits
+import {Ownable} from "solady/src/auth/Ownable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {Ownable} from "solady/src/auth/Ownable.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
-import {QuestFactory} from "./QuestFactory.sol";
+// Implements
 import {IQuest} from "./interfaces/IQuest.sol";
-import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
+// Leverages
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
+// References
+import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
+import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
 import {IERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 
 /// @title Quest
@@ -19,7 +23,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     using SafeTransferLib for address;
 
     address public rabbitHoleReceiptContract; // Deprecated - do not use
-    QuestFactory public questFactoryContract;
+    IQuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
@@ -63,7 +67,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = QuestFactory(payable(msg.sender));
+        questFactoryContract = IQuestFactory(payable(msg.sender));
         sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
         hasWithdrawn = false;

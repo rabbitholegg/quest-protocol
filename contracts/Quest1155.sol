@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IQuest1155} from "./interfaces/IQuest1155.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -13,7 +14,7 @@ import {QuestFactory} from "./QuestFactory.sol";
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens.
 /// @dev This contract will not work with RabbitHoleReceipt
-contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable {
+contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest1155 {
     using SafeTransferLib for address;
 
     QuestFactory public questFactoryContract;
@@ -33,20 +34,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     constructor() {
         _disableInitializers();
     }
-
-    error EndTimeInPast();
-    error EndTimeLessThanOrEqualToStartTime();
-    error InsufficientTokenBalance();
-    error InsufficientETHBalance();
-    error NotStarted();
-    error NotEnded();
-    error NotQueued();
-    error NotQuestFactory();
-    error QuestEnded();
-    error AlreadyWithdrawn();
-
-    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
-    event Queued(uint256 timestamp);
 
     function initialize(
         address rewardTokenAddress_,
