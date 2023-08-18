@@ -46,6 +46,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint40 public durationTotal;
     mapping(address => uint256) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
+    // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
