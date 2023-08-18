@@ -332,26 +332,26 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
-    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
+    function setClaimSignerAddress(address claimSignerAddress_) external onlyOwner {
         claimSignerAddress = claimSignerAddress_;
     }
 
     /// @dev set erc1155QuestAddress
     /// @param erc1155QuestAddress_ The address of the erc1155 quest
-    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+    function setErc1155QuestAddress(address erc1155QuestAddress_) external onlyOwner {
         erc1155QuestAddress = erc1155QuestAddress_;
     }
 
     /// @dev set erc20QuestAddress
     /// @param erc20QuestAddress_ The address of the erc20 quest
-    function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
+    function setErc20QuestAddress(address erc20QuestAddress_) external onlyOwner {
         erc20QuestAddress = erc20QuestAddress_;
     }
 
     /// @dev set the mint fee
     /// @notice the mint fee in ether
     /// @param mintFee_ The mint fee value
-    function setMintFee(uint256 mintFee_) public onlyOwner {
+    function setMintFee(uint256 mintFee_) external onlyOwner {
         mintFee = mintFee_;
         emit MintFeeSet(mintFee_);
     }
@@ -365,7 +365,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set the protocol fee recipient
     /// @param protocolFeeRecipient_ The address of the protocol fee recipient
-    function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
+    function setProtocolFeeRecipient(address protocolFeeRecipient_) external onlyOwner {
         if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         protocolFeeRecipient = protocolFeeRecipient_;
     }
@@ -379,7 +379,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set the quest fee
     /// @notice the quest fee should be in Basis Point units
     /// @param questFee_ The quest fee value
-    function setQuestFee(uint16 questFee_) public onlyOwner {
+    function setQuestFee(uint16 questFee_) external onlyOwner {
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
     }
@@ -402,13 +402,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set or remave a contract address to be used as a reward
     /// @param rewardAddress_ The contract address to set
     /// @param allowed_ Whether the contract address is allowed or not
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyOwner {
+    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external onlyOwner {
         rewardAllowlist[rewardAddress_] = allowed_;
     }
 
     /// @dev set the mintFeeRecipient
     /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
+    function setMintFeeRecipient(address mintFeeRecipient_) external onlyOwner {
         if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         mintFeeRecipient = mintFeeRecipient_;
     }
