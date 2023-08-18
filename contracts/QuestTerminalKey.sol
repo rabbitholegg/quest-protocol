@@ -16,8 +16,10 @@ import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cou
 import {Base64} from "solady/src/utils/Base64.sol";
 import {LibString} from "solady/src/utils/LibString.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {IQuestTerminalKey} from "./interfaces/IQuestTerminalKey.sol";
 
 contract QuestTerminalKey is
+    IQuestTerminalKey,
     Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
@@ -26,10 +28,6 @@ contract QuestTerminalKey is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable
 {
-    event RoyaltyFeeSet(uint256 indexed royaltyFee);
-    event MinterAddressSet(address indexed minterAddress);
-    event QuestFactoryAddressSet(address indexed questFactoryAddress);
-
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using LibString for uint256;
     using LibString for uint16;
@@ -43,11 +41,6 @@ contract QuestTerminalKey is
     string public imageIPFSHash;
     string public animationUrlIPFSHash;
     mapping(uint256 => Discount) public discounts;
-
-    struct Discount {
-        uint16 percentage; //in BIPS
-        uint16 usedCount;
-    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
@@ -206,7 +199,7 @@ contract QuestTerminalKey is
     function tokenURI(uint256 tokenId_)
         public
         view
-        override (ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        override (ERC721Upgradeable, ERC721URIStorageUpgradeable, IQuestTerminalKey)
         returns (string memory)
     {
         bytes memory dataURI = generateDataURI(tokenId_);
@@ -268,7 +261,12 @@ contract QuestTerminalKey is
     function royaltyInfo(
         uint256 tokenId_,
         uint256 salePrice_
-    ) external view override returns (address receiver, uint256 royaltyAmount) {
+    )
+        external
+        view
+        override (IERC2981Upgradeable, IQuestTerminalKey)
+        returns (address receiver, uint256 royaltyAmount)
+    {
         // solhint-disable-next-line custom-errors
         require(_exists(tokenId_), "Nonexistent token");
 

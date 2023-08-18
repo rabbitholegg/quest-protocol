@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+// Inherits
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+// Implements
+import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
+// Leverages
 import {ECDSA} from "solady/src/utils/ECDSA.sol";
 import {LibClone} from "solady/src/utils/LibClone.sol";
 import {LibString} from "solady/src/utils/LibString.sol";
 import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
-import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
-import {IQuest} from "./interfaces/IQuest.sol";
-import {IQuest1155} from "./interfaces/IQuest1155.sol";
-import {Quest as QuestContract} from "./Quest.sol";
-import {Quest1155 as Quest1155Contract} from "./Quest1155.sol";
-import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
-import {QuestTerminalKey} from "./QuestTerminalKey.sol";
+// References
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
+import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
+import {IQuestTerminalKeyERC721} from "./interfaces/IQuestTerminalKeyERC721.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -27,15 +29,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     using LibString for uint256;
 
     // storage vars. Insert new vars at the end to keep the storage layout the same.
-    struct Quest {
-        mapping(address => bool) addressMinted;
-        address questAddress;
-        uint256 totalParticipants;
-        uint256 numberMinted;
-        string questType;
-        uint40 durationTotal;
-    }
-
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
@@ -48,34 +41,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint256 public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    QuestTerminalKey private questTerminalKeyContract;
+    IQuestTerminalKeyERC721 private questTerminalKeyContract;
     uint256 public nftQuestFee;
     address public questNFTAddress;
-
-    struct QuestData {
-        address questAddress;
-        address rewardToken;
-        bool queued;
-        uint16 questFee;
-        uint256 startTime;
-        uint256 endTime;
-        uint256 totalParticipants;
-        uint256 numberMinted;
-        uint256 redeemedTokens;
-        uint256 rewardAmountOrTokenId;
-        bool hasWithdrawn;
-        string questType;
-        uint40 durationTotal;
-    }
-
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
-
-    struct NftQuestFees {
-        uint256 fee;
-        bool exists;
-    }
-
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
 
@@ -102,7 +72,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyAddress_);
+        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyAddress_);
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
@@ -210,7 +180,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             protocolFee = doDiscountedFee(discountTokenId_);
         }
 
-        QuestContract(newQuest).initialize(
+        IQuestOwnable(newQuest).initialize(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -245,7 +215,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardTokenAddress_ The contract address of the reward token
     function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
         address sender = msg.sender;
-        QuestContract questContract = QuestContract(newQuest_);
+        IQuestOwnable questContract = IQuestOwnable(newQuest_);
         rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
         questContract.transferOwnership(sender);
     }
@@ -351,8 +321,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
+        IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
-        Quest1155Contract(newQuest).initialize(
+        questContract.initialize(
             rewardTokenAddress_,
             endTime_,
             startTime_,
@@ -363,8 +334,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         );
 
         IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, "0x00");
-        Quest1155Contract(newQuest).queue();
-        Quest1155Contract(newQuest).transferOwnership(msg.sender);
+        questContract.queue();
+        questContract.transferOwnership(msg.sender);
 
         if (bytes(actionSpec_).length > 0) {
             emit QuestCreatedWithAction(
@@ -463,7 +434,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set questTerminalKeyContract address
     /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
     function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = QuestTerminalKey(questTerminalKeyContract_);
+        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
@@ -501,12 +472,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param questId_ The id of the quest
     function questData(string memory questId_) external view returns (QuestData memory) {
         Quest storage thisQuest = quests[questId_];
-        QuestContract questContract = QuestContract(thisQuest.questAddress);
+        IQuestOwnable questContract = IQuestOwnable(thisQuest.questAddress);
         uint256 rewardAmountOrTokenId;
         uint16 erc20QuestFee;
 
         if (thisQuest.questType.eq("erc1155")) {
-            rewardAmountOrTokenId = IQuest1155(thisQuest.questAddress).tokenId();
+            rewardAmountOrTokenId = IQuest1155Ownable(thisQuest.questAddress).tokenId();
         } else {
             rewardAmountOrTokenId = questContract.rewardAmountInWei();
             erc20QuestFee = questContract.questFee();
@@ -589,7 +560,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address ref_
     ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
-        IQuest questContract_ = IQuest(currentQuest.questAddress);
+        IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
@@ -641,7 +612,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address ref_
     ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
         Quest storage currentQuest = quests[questId_];
-        IQuest1155 questContract_ = IQuest1155(currentQuest.questAddress);
+        IQuest1155Ownable questContract_ = IQuest1155Ownable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
