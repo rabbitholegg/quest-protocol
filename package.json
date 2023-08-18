@@ -20,6 +20,7 @@
     "clean": "yarn hardhat clean",
     "prepublishOnly": "yarn test",
     "prepare": "husky install",
+    "reports": "forge coverage --report lcov && forge snapshot",
     "test:coverage": "yarn hardhat coverage",
     "test:gas-stories": "yarn hardhat --config hardhat.gas-stories.config.ts test",
     "lint": "yarn forge fmt && yarn solhint 'contracts/**/*.sol'"
