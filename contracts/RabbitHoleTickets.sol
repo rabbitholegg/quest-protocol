@@ -11,18 +11,27 @@ import {
 } from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeable {
+    /*//////////////////////////////////////////////////////////////
+                                 ERRORS
+    //////////////////////////////////////////////////////////////*/
     error OnlyMinter();
 
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);
 
-    // storage
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
     address public royaltyRecipient;
     address public minterAddress;
     uint256 public royaltyFee;
     string public imageIPFSCID;
     string public animationUrlIPFSCID;
+    // insert new vars here at the end to keep the storage layout the same
 
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
     constructor() {
@@ -45,43 +54,21 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
         animationUrlIPFSCID = animationUrlIPFSCID_;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
     modifier onlyMinter() {
         if (msg.sender != minterAddress) revert OnlyMinter();
         _;
     }
 
-    /// @dev set the image IPFS CID
-    /// @param imageIPFSCID_ the image IPFS CID
-    function setImageIPFSCID(string memory imageIPFSCID_) external onlyOwner {
-        imageIPFSCID = imageIPFSCID_;
-    }
+    /*//////////////////////////////////////////////////////////////
+                            EXTERNAL UPDATE
+    //////////////////////////////////////////////////////////////*/
 
-    /// @dev set the animation url IPFS CID
-    /// @param animationUrlIPFSCID_ the animation url IPFS CID
-    function setAnimationUrlIPFSCID(string memory animationUrlIPFSCID_) external onlyOwner {
-        animationUrlIPFSCID = animationUrlIPFSCID_;
-    }
-
-    /// @dev set the royalty recipient
-    /// @param royaltyRecipient_ the address of the royalty recipient
-    function setRoyaltyRecipient(address royaltyRecipient_) external onlyOwner {
-        royaltyRecipient = royaltyRecipient_;
-    }
-
-    /// @dev set the royalty fee
-    /// @param royaltyFee_ the royalty fee
-    function setRoyaltyFee(uint256 royaltyFee_) external onlyOwner {
-        royaltyFee = royaltyFee_;
-        emit RoyaltyFeeSet(royaltyFee_);
-    }
-
-    /// @dev set the minter address
-    /// @param minterAddress_ the address of the minter
-    function setMinterAddress(address minterAddress_) external onlyOwner {
-        minterAddress = minterAddress_;
-        emit MinterAddressSet(minterAddress_);
-    }
-
+    /*//////////////////////////////////////////////////////////////
+                                  MINT
+    //////////////////////////////////////////////////////////////*/
     /// @dev mint a single ticket, only callable by the allowed minter
     /// @param to_ the address to mint the ticket to
     /// @param id_ the id of the ticket to mint
@@ -105,10 +92,82 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
         _batchMint(to_, ids_, amounts_, data_);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                  SET
+    //////////////////////////////////////////////////////////////*/
+    /// @dev set the animation url IPFS CID
+    /// @param animationUrlIPFSCID_ the animation url IPFS CID
+    function setAnimationUrlIPFSCID(string memory animationUrlIPFSCID_) external onlyOwner {
+        animationUrlIPFSCID = animationUrlIPFSCID_;
+    }
+
+    /// @dev set the image IPFS CID
+    /// @param imageIPFSCID_ the image IPFS CID
+    function setImageIPFSCID(string memory imageIPFSCID_) external onlyOwner {
+        imageIPFSCID = imageIPFSCID_;
+    }
+
+    /// @dev set the minter address
+    /// @param minterAddress_ the address of the minter
+    function setMinterAddress(address minterAddress_) external onlyOwner {
+        minterAddress = minterAddress_;
+        emit MinterAddressSet(minterAddress_);
+    }
+
+    /// @dev set the royalty fee
+    /// @param royaltyFee_ the royalty fee
+    function setRoyaltyFee(uint256 royaltyFee_) external onlyOwner {
+        royaltyFee = royaltyFee_;
+        emit RoyaltyFeeSet(royaltyFee_);
+    }
+
+    /// @dev set the royalty recipient
+    /// @param royaltyRecipient_ the address of the royalty recipient
+    function setRoyaltyRecipient(address royaltyRecipient_) external onlyOwner {
+        royaltyRecipient = royaltyRecipient_;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev See {IERC165-royaltyInfo}
+    /// @param salePrice_ the sale price
+    function royaltyInfo(
+        uint256,
+        uint256 salePrice_
+    ) external view override returns (address receiver, uint256 royaltyAmount) {
+        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
+        return (royaltyRecipient, royaltyPayment);
+    }
+
+    /// @dev returns true if the supplied interface id is supported
+    /// @param interfaceId_ the interface id
+    function supportsInterface(bytes4 interfaceId_)
+        public
+        view
+        virtual
+        override (ERC1155, IERC165Upgradeable)
+        returns (bool)
+    {
+        return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
+    }
+
     /// @dev returns the token uri
     function uri(uint256) public view override (ERC1155) returns (string memory) {
         bytes memory dataURI = generateDataURI();
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(dataURI)));
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             INTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    function animationUrl(string memory animationUrlIPFSCID_) internal view virtual returns (string memory) {
+        if (bytes(animationUrlIPFSCID_).length == 0) {
+            return "";
+        }
+        return string(abi.encodePacked("ipfs://", animationUrlIPFSCID_));
     }
 
     /// @dev returns the data uri in json format
@@ -136,34 +195,5 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
 
     function tokenImage(string memory imageIPFSCID_) internal view virtual returns (string memory) {
         return string(abi.encodePacked("ipfs://", imageIPFSCID_));
-    }
-
-    function animationUrl(string memory animationUrlIPFSCID_) internal view virtual returns (string memory) {
-        if (bytes(animationUrlIPFSCID_).length == 0) {
-            return "";
-        }
-        return string(abi.encodePacked("ipfs://", animationUrlIPFSCID_));
-    }
-
-    /// @dev See {IERC165-royaltyInfo}
-    /// @param salePrice_ the sale price
-    function royaltyInfo(
-        uint256,
-        uint256 salePrice_
-    ) external view override returns (address receiver, uint256 royaltyAmount) {
-        uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
-        return (royaltyRecipient, royaltyPayment);
-    }
-
-    /// @dev returns true if the supplied interface id is supported
-    /// @param interfaceId_ the interface id
-    function supportsInterface(bytes4 interfaceId_)
-        public
-        view
-        virtual
-        override (ERC1155, IERC165Upgradeable)
-        returns (bool)
-    {
-        return interfaceId_ == type(IERC2981Upgradeable).interfaceId || super.supportsInterface(interfaceId_);
     }
 }
