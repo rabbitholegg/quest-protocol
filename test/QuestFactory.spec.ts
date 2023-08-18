@@ -254,45 +254,6 @@ describe('QuestFactory', () => {
       expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
     })
 
-    it('createQuestAndQueue should create a new quest and start it with a discount', async () => {
-
-      const maxTotalRewards = totalRewards * rewardAmount
-      const questFee = 2_000
-      const discountedQuestFee = questFee * 0.5 // minus 50% for discount
-      const maxProtocolRewardDiscounted = (maxTotalRewards * discountedQuestFee) / 10_000
-      const maxProtocolReward = (maxTotalRewards * questFee) / 10_000
-      const transferAmountDiscounted = maxTotalRewards + maxProtocolRewardDiscounted
-      const transferAmount = maxTotalRewards + maxProtocolReward
-
-      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-      // approve the quest factory to spend the reward token, twice the amount because we will deploy two quests
-      await deployedSampleErc20Contract.approve(
-        deployedFactoryContract.address,
-        transferAmountDiscounted + transferAmount
-      )
-
-      // first quest uses the discounted quest fee
-      const tx = await deployedFactoryContract.createQuestAndQueue(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        rewardAmount,
-        erc20QuestId,
-        'jsonSpecCid',
-        0   // discountTokenId - deprecated
-      )
-
-      await tx.wait()
-      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
-      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
-      expect(await deployedErc20Quest.startTime()).to.equal(startDate)
-      expect(await deployedErc20Quest.owner()).to.equal(owner.address)
-
-      expect(await deployedErc20Quest.queued()).to.equal(true)
-      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmountDiscounted)
-      expect(await deployedErc20Quest.questFee()).to.equal(discountedQuestFee)
-    })
   })
 
   describe('createERC20StreamQuest()', () => {
