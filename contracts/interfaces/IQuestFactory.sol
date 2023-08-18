@@ -6,8 +6,11 @@ interface IQuestFactory {
     error AddressAlreadyMinted();
     error AddressNotSigned();
     error AddressZeroNotAllowed();
+    error AuthOwnerDiscountToken();
+    error Deprecated();
     error Erc20QuestAddressNotSet();
     error InvalidHash();
+    error InvalidMintFee();
     error MsgValueLessThanQuestNFTFee();
     error OverMaxAllowedToMint();
     error QuestFeeTooHigh();
@@ -16,6 +19,7 @@ interface IQuestFactory {
     error QuestNotStarted();
     error QuestEnded();
     error QuestTypeNotSupported();
+    error Reentrancy();
     error ReferralFeeTooHigh();
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();

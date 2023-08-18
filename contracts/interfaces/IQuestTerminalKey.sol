@@ -8,6 +8,13 @@ interface IQuestTerminalKey {
         uint16 usedCount;
     }
 
+    // Errors
+    error ZeroAddress();
+    error InvalidDiscountPercentage();
+    error NonexistentToken();
+    error OnlyMinter();
+    error OnlyFactory();
+
     // Events
     event RoyaltyFeeSet(uint256 indexed royaltyFee);
     event MinterAddressSet(address indexed minterAddress);

@@ -20,6 +20,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
  * the owner.
  */
 abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
+    error OnlyOwner();
+    error InvalidNewOwner();
+
     address private _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -56,8 +59,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner() internal view virtual {
-        // solhint-disable-next-line custom-errors
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        if (owner() != _msgSender()) revert OnlyOwner();
     }
 
     /**
@@ -76,8 +78,7 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        // solhint-disable-next-line custom-errors, reason-string
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        if (newOwner == address(0)) revert InvalidNewOwner();
         _transferOwnership(newOwner);
     }
 

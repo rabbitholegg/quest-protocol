@@ -109,8 +109,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
-        // solhint-disable-next-line reason-string, custom-errors
-        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), "Not protocol fee recipient or owner");
+        if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
         _;
     }
 
@@ -162,13 +161,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
-        // solhint-disable-next-line custom-errors
-        require(!hasWithdrawn, "Already withdrawn");
-
+        if (hasWithdrawn) revert AlreadyWithdrawn();
         rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
-
         rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
-
         hasWithdrawn = true;
     }
 
@@ -196,8 +191,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external onlyOwner {
-        // solhint-disable-next-line custom-errors
-        require(erc20Address_ != rewardToken, "Cannot refund reward token");
+        if (erc20Address_ == rewardToken) revert InvalidRefundToken();
 
         uint256 balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);

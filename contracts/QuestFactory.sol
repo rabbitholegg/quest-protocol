@@ -82,8 +82,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
     modifier nonReentrant() virtual {
         if (locked == 0) locked = 1;
-        // solhint-disable-next-line custom-errors
-        require(locked == 1, "REENTRANCY");
+        if (locked != 1) revert Reentrancy();
         locked = 2;
         _;
         locked = 1;
@@ -106,8 +105,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     modifier sufficientMintFee() {
-        // solhint-disable-next-line custom-errors
-        require(msg.value >= mintFee, "Insufficient mint fee");
+        if (msg.value < mintFee) revert InvalidMintFee();
         _;
     }
 
@@ -197,11 +195,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     }
 
     function doDiscountedFee(uint256 tokenId_) internal returns (uint16) {
-        // solhint-disable-next-line custom-errors, reason-string
-        require(
-            questTerminalKeyContract.ownerOf(tokenId_) == msg.sender,
-            "QuestFactory: caller is not owner of discount token"
-        );
+        if (questTerminalKeyContract.ownerOf(tokenId_) != msg.sender) revert AuthOwnerDiscountToken();
 
         (uint16 discountPercentage,) = questTerminalKeyContract.discounts(tokenId_);
 

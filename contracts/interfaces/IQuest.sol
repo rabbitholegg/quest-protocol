@@ -7,15 +7,18 @@ interface IQuest {
     event JsonSpecCIDSet(string cid);
 
     error AlreadyClaimed();
+    error AlreadyWithdrawn();
     error AmountExceedsBalance();
     error ClaimWindowNotStarted();
     error EndTimeInPast();
     error EndTimeLessThanOrEqualToStartTime();
+    error InvalidRefundToken();
     error MustImplementInChild();
     error NotQuestFactory();
     error NoWithdrawDuringClaim();
     error NotStarted();
     error TotalAmountExceedsBalance();
+    error AuthOwnerRecipient();
 
     function initialize(
         address rewardTokenAddress_,

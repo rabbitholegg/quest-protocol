@@ -70,22 +70,19 @@ contract QuestTerminalKey is
     }
 
     modifier onlyMinter() {
-        // solhint-disable-next-line custom-errors
-        require(msg.sender == minterAddress, "Only minter");
+        if (msg.sender != minterAddress) revert OnlyMinter();
         _;
     }
 
     modifier onlyQuestFactory() {
-        // solhint-disable-next-line custom-errors
-        require(msg.sender == questFactoryAddress, "Only quest factory");
+        if (msg.sender != questFactoryAddress) revert OnlyFactory();
         _;
     }
 
     /// @dev modifier to check for zero address
     /// @param _address the address to check
     modifier nonZeroAddress(address _address) {
-        // solhint-disable-next-line custom-errors
-        require(_address != address(0), "Zero address");
+        if (_address == address(0)) revert ZeroAddress();
         _;
     }
 
@@ -136,8 +133,7 @@ contract QuestTerminalKey is
     /// @param to_ the address to mint to
     /// @param discountPercentage_ the discount percentage
     function mint(address to_, uint16 discountPercentage_) external onlyMinter {
-        // solhint-disable-next-line custom-errors
-        require(discountPercentage_ <= 10_000, "Invalid discount percentage");
+        if (discountPercentage_ > 10_000) revert InvalidDiscountPercentage();
 
         mintWithDiscount(to_, discountPercentage_);
     }
@@ -267,8 +263,7 @@ contract QuestTerminalKey is
         override (IERC2981Upgradeable, IQuestTerminalKey)
         returns (address receiver, uint256 royaltyAmount)
     {
-        // solhint-disable-next-line custom-errors
-        require(_exists(tokenId_), "Nonexistent token");
+        if (!_exists(tokenId_)) revert NonexistentToken();
 
         uint256 royaltyPayment = (salePrice_ * royaltyFee) / 10_000;
         return (royaltyRecipient, royaltyPayment);
