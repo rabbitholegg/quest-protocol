@@ -21,7 +21,9 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
     /// @notice Total Balance across all accounts
     uint256 public totalBalance;
 
-    constructor() payable EIP712() {}
+    constructor() payable EIP712() {
+        _initializeOwner(msg.sender);
+    }
 
     function _domainNameAndVersion()
         internal
@@ -287,4 +289,10 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
             revert TRANSFER_FAILED();
         }
     }
+
+    // Receive function to receive ETH
+    receive() external payable {}
+
+    // Fallback function to receive ETH when other functions are not available
+    fallback() external payable {}
 }

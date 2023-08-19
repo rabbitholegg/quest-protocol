@@ -11,22 +11,18 @@ contract ProtocolRewardsTest is Test {
     ProtocolRewards internal protocolRewards;
 
     address internal collector;
+    address internal collector2;
     address internal creator;
-    address internal createReferral;
-    address internal mintReferral;
-    address internal firstMinter;
-    address internal zora;
+    address internal owner;
 
     function setUp() public virtual {
-        protocolRewards = new ProtocolRewards();
-
-        vm.label(address(protocolRewards), "protocolRewards");
-
         collector = makeAddr("collector");
+        collector2 = makeAddr("collector2");
         creator = makeAddr("creator");
-        createReferral = makeAddr("createReferral");
-        mintReferral = makeAddr("mintReferral");
-        firstMinter = makeAddr("firstMinter");
-        zora = makeAddr("zora");
+        owner = makeAddr("owner");
+
+        vm.prank(owner);
+        protocolRewards = new ProtocolRewards();
+        vm.label(address(protocolRewards), "protocolRewards");
     }
 }
