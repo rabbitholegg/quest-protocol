@@ -488,9 +488,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            questContract.hasWithdrawn(),
-            thisQuest.questType,
-            thisQuest.durationTotal
+            questContract.hasWithdrawn()
         );
 
         return data;
