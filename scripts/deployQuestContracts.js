@@ -13,16 +13,16 @@ async function main() {
   const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')
 
   // deploy new quest implementation
-  const erc20Quest = await Erc20Quest.deploy()
-  await erc20Quest.deployed()
-  console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
-  await hre.run('verify:verify', { address: erc20Quest.address })
+  // const erc20Quest = await Erc20Quest.deploy()
+  // await erc20Quest.deployed()
+  // console.log('deployed Erc20Quest implementation to:', erc20Quest.address)
+  // await hre.run('verify:verify', { address: erc20Quest.address })
 
-  // deploy new 1155 quest implementation
-  const erc1155Quest = await Erc1155Quest.deploy()
-  await erc1155Quest.deployed()
-  console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
-  await hre.run('verify:verify', { address: erc1155Quest.address })
+  // // deploy new 1155 quest implementation
+  // const erc1155Quest = await Erc1155Quest.deploy()
+  // await erc1155Quest.deployed()
+  // console.log('deployed erc1155Quest implementation to:', erc1155Quest.address)
+  // await hre.run('verify:verify', { address: erc1155Quest.address })
 
   // the below doesnt seem to work, so we do it manually with `validateUpgrade` and `deploy`
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
@@ -44,12 +44,12 @@ async function main() {
   // await hre.run('verify:verify', { address: QTKImp.address })
 
   // validates and deploys a new implementation contract for RabbitHoleTickets
-  await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
-  const RHTImp = await RabbitHoleTickets.deploy()
-  await RHTImp.deployed()
-  console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
-  await hre.run('verify:verify', { address: RHTImp.address })
+  // await hre.upgrades.forceImport(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  // await hre.upgrades.validateUpgrade(rabbitHoleTicketsAddress, RabbitHoleTickets)
+  // const RHTImp = await RabbitHoleTickets.deploy()
+  // await RHTImp.deployed()
+  // console.log('deployed RabbitHoleTickets Implementation to:', RHTImp.address)
+  // await hre.run('verify:verify', { address: RHTImp.address })
 }
 
 main()

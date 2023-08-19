@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+// Inherits
+import {Ownable} from "solady/src/auth/Ownable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {Ownable} from "solady/src/auth/Ownable.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
-import {QuestFactory} from "./QuestFactory.sol";
+// Implements
 import {IQuest} from "./interfaces/IQuest.sol";
-import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
+// Leverages
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
+// References
+import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
+import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
 import {IERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 
 /// @title Quest
@@ -19,7 +23,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     using SafeTransferLib for address;
 
     address public rabbitHoleReceiptContract; // Deprecated - do not use
-    QuestFactory public questFactoryContract;
+    IQuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
     uint256 public startTime;
@@ -63,7 +67,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         totalParticipants = totalParticipants_;
         rewardAmountInWei = rewardAmountInWei_;
         questId = questId_;
-        questFactoryContract = QuestFactory(payable(msg.sender));
+        questFactoryContract = IQuestFactory(payable(msg.sender));
         sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
         questFee = questFee_;
         hasWithdrawn = false;
@@ -105,8 +109,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     modifier onlyProtocolFeeRecipientOrOwner() {
-        // solhint-disable-next-line reason-string, custom-errors
-        require(msg.sender == protocolFeeRecipient || msg.sender == owner(), "Not protocol fee recipient or owner");
+        if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
         _;
     }
 
@@ -158,13 +161,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
     /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
-        // solhint-disable-next-line custom-errors
-        require(!hasWithdrawn, "Already withdrawn");
-
+        if (hasWithdrawn) revert AlreadyWithdrawn();
         rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
-
         rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
-
         hasWithdrawn = true;
     }
 
@@ -192,8 +191,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
     /// @param erc20Address_ The address of the ERC20 token to refund
     function refund(address erc20Address_) external onlyOwner {
-        // solhint-disable-next-line custom-errors
-        require(erc20Address_ != rewardToken, "Cannot refund reward token");
+        if (erc20Address_ == rewardToken) revert InvalidRefundToken();
 
         uint256 balance = address(this).balance;
         if (balance > 0) payable(msg.sender).transfer(balance);

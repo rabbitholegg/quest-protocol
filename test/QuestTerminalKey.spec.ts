@@ -63,8 +63,9 @@ describe('QuestTerminalKey Contract', async () => {
     })
 
     it('reverts if not called by minter', async () => {
-      await expect(questTerminalKey.connect(firstAddress).mint(firstAddress.address, 1000)).to.be.revertedWith(
-        'Only minter'
+      await expect(questTerminalKey.connect(firstAddress).mint(firstAddress.address, 1000)).to.be.revertedWithCustomError(
+        questTerminalKey,
+        'OnlyMinter'
       )
     })
   })
@@ -81,7 +82,7 @@ describe('QuestTerminalKey Contract', async () => {
     it('reverts if not called by minter', async () => {
       await expect(
         questTerminalKey.connect(firstAddress).bulkMintNoDiscount([firstAddress.address])
-      ).to.be.revertedWith('Only minter')
+      ).to.be.revertedWithCustomError(questTerminalKey, 'OnlyMinter')
     })
   })
 
