@@ -341,7 +341,6 @@ describe('Quest', async () => {
         rewardAmount,
         streamQuestId,
         '', // actionSpec
-        0, // discountTokenId
         5000 // durationTotal
       )
 

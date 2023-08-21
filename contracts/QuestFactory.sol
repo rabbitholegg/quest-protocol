@@ -16,7 +16,6 @@ import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
-import {IQuestTerminalKeyERC721} from "./interfaces/IQuestTerminalKeyERC721.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -41,7 +40,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     uint256 public mintFee;
     address public mintFeeRecipient;
     uint256 private locked;
-    IQuestTerminalKeyERC721 private questTerminalKeyContract;
+    address private questTerminalKeyContract; // deprecated
     uint256 public nftQuestFee;
     address public questNFTAddress;
     mapping(address => address[]) public ownerCollections;
@@ -72,7 +71,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyAddress_);
+        questTerminalKeyContract = questTerminalKeyAddress_;
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
@@ -129,7 +128,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 totalParticipants_,
         uint256 rewardAmount_,
         string memory questId_,
-        uint256 discountTokenId_,
         string memory actionSpec_,
         uint40 durationTotal_
     ) internal returns (address) {
@@ -162,7 +160,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 rewardAmount_
                 );
         }
-        uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         if (durationTotal_ > 0) {
@@ -172,12 +169,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             currentQuest.questType = "erc20";
         }
 
-        if (discountTokenId_ == 0) {
-            protocolFee = questFee;
-        } else {
-            protocolFee = doDiscountedFee(discountTokenId_);
-        }
-
         IQuestOwnable(newQuest).initialize(
             rewardTokenAddress_,
             endTime_,
@@ -185,22 +176,13 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            protocolFee,
+            questFee,
             protocolFeeRecipient,
             durationTotal_,
             sablierV2LockupLinearAddress
         );
 
         return newQuest;
-    }
-
-    function doDiscountedFee(uint256 tokenId_) internal returns (uint16) {
-        if (questTerminalKeyContract.ownerOf(tokenId_) != msg.sender) revert AuthOwnerDiscountToken();
-
-        (uint16 discountPercentage,) = questTerminalKeyContract.discounts(tokenId_);
-
-        questTerminalKeyContract.incrementUsedCount(tokenId_);
-        return uint16((uint256(questFee) * (10_000 - uint256(discountPercentage))) / 10_000);
     }
 
     /// @dev Transfer the total transfer amount to the quest contract
@@ -223,7 +205,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
     /// @param durationTotal_ The duration of the sablier stream
     /// @return address the quest contract address
     function createERC20StreamQuest(
@@ -234,7 +215,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionSpec_,
-        uint256 discountTokenId_,
         uint40 durationTotal_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
@@ -244,7 +224,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            discountTokenId_,
             actionSpec_,
             durationTotal_
         );
@@ -260,7 +239,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
     /// @return address the quest contract address
     function createQuestAndQueue(
         address rewardTokenAddress_,
@@ -270,18 +248,10 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionSpec_,
-        uint256 discountTokenId_
+        uint256
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            discountTokenId_,
-            actionSpec_,
-            0
+            rewardTokenAddress_, endTime_, startTime_, totalParticipants_, rewardAmount_, questId_, actionSpec_, 0
         );
         transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
@@ -423,12 +393,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
         referralFee = referralFee_;
         emit ReferralFeeSet(referralFee_);
-    }
-
-    /// @dev set questTerminalKeyContract address
-    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
