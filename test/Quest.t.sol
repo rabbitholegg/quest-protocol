@@ -22,7 +22,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     string QUEST_ID = "QUEST_ID";
     uint16 QUEST_FEE = 2000; // 20%
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
-    uint40 DURATION_TOTAL = 1_000_000;
+    uint40 DURATION_TOTAL = 0;
     address sablierMock;
     address questFactoryMock;
     Quest quest;
@@ -59,6 +59,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             DURATION_TOTAL,
             sablierMock
         );
+        // Transfer all tokens to quest
+        vm.prank(admin);
+        SampleERC20(rewardTokenAddress).transfer(address(quest), defaultTotalRewardsPlusFee);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -207,6 +210,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             DURATION_TOTAL,
             sablierMock
         );
+        // Transfer all tokens to quest
+        vm.prank(admin);
+        SampleERC20(rewardTokenAddress).transfer(address(quest), defaultTotalRewardsPlusFee);
         // Claim single and check for correct event logging
         vm.warp(startTime);
         vm.prank(questFactoryMock);
