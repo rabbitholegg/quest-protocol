@@ -54,8 +54,6 @@ interface IQuestFactory {
         uint256 redeemedTokens;
         uint256 rewardAmountOrTokenId;
         bool hasWithdrawn;
-        string questType;
-        uint40 durationTotal;
     }
 
     // Events
@@ -63,25 +61,30 @@ interface IQuestFactory {
     event MintFeeSet(uint256 mintFee);
     event NftQuestFeeListSet(address[] addresses, uint256[] fees);
     event NftQuestFeeSet(uint256 nftQuestFee);
+
     event Quest1155Claimed(
-        address indexed claimer, address questAddress, string questId, address rewardToken, uint256 tokenId
+        address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint256 tokenId
     );
     event QuestClaimed(
-        address indexed claimer, address questAddress, string questId, address rewardToken, uint256 rewardAmount
-    );
-    event QuestClaimedReferred(
-        address indexed claimer,
-        address questAddress,
+        address indexed recipient,
+        address indexed questAddress,
         string questId,
         address rewardToken,
-        uint256 rewardAmount,
+        uint256 rewardAmountInWei
+    );
+    event QuestClaimedReferred(
+        address indexed recipient,
+        address indexed questAddress,
+        string questId,
+        address rewardToken,
+        uint256 rewardAmountInWeiOrTokenId,
         address referrer,
         uint16 referralFee,
-        uint256 mintFee
+        uint256 mintFeeEthWei
     );
     event QuestCreated(
         address indexed creator,
-        address questAddress,
+        address indexed contractAddress,
         string questId,
         string questType,
         address rewardToken,
@@ -92,18 +95,17 @@ interface IQuestFactory {
     );
     event QuestCreatedWithAction(
         address indexed creator,
-        address questAddress,
+        address indexed contractAddress,
         string questId,
-        string questType,
-        address rewardToken,
+        string contractType,
+        address rewardTokenAddress,
         uint256 endTime,
         uint256 startTime,
         uint256 totalParticipants,
         uint256 rewardAmountOrTokenId,
         string actionSpec
     );
-    event QuestInfo(address questAddress, uint256 totalParticipants, uint256 numberMinted);
-    event ReferralFeeSet(uint16 referralFee);
+    event ReferralFeeSet(uint16 percent);
     event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
 
     // Read Functions
@@ -144,7 +146,6 @@ interface IQuestFactory {
     function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
     function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external;
 }

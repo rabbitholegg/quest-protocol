@@ -11,7 +11,7 @@
     "**/typechain-types": true,
     "**/lib": true,
   },
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "solidity.formatter": "forge",
   "solidity.linter": "solhint",
   "[solidity]": {

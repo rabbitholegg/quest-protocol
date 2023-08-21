@@ -7,10 +7,8 @@ import {
   SampleERC20,
   SampleERC1155,
   QuestFactory,
-  QuestTerminalKey,
   Quest__factory,
   QuestFactory__factory,
-  QuestTerminalKey__factory,
   SampleERC20__factory,
   SampleERC1155__factory,
 } from '../typechain-types'
@@ -20,7 +18,6 @@ describe('QuestFactory', () => {
   let deployedSampleErc20Contract: SampleERC20
   let deployedSampleErc1155Contract: SampleERC1155
   let deployedFactoryContract: QuestFactory
-  let deployedQuestTerminalKeyContract: QuestTerminalKey
   let deployedErc20Quest: Quest
   let deployedErc1155Quest: Quest
   let expiryDate: number, startDate: number
@@ -41,7 +38,6 @@ describe('QuestFactory', () => {
   let affiliate: SignerWithAddress
 
   let questFactoryContract: QuestFactory__factory
-  let questTerminalKeyContract: QuestTerminalKey__factory
   let erc20QuestContract: Quest__factory
   let erc1155QuestContract: Quest__factory
   let sampleERC20Contract: SampleERC20__factory
@@ -57,7 +53,6 @@ describe('QuestFactory', () => {
     wallet = Wallet.fromMnemonic(mnemonic)
 
     questFactoryContract = await ethers.getContractFactory('QuestFactory')
-    questTerminalKeyContract = await ethers.getContractFactory('QuestTerminalKey')
     erc20QuestContract = await ethers.getContractFactory('Quest')
     erc1155QuestContract = await ethers.getContractFactory('Quest1155')
     sampleERC20Contract = await ethers.getContractFactory('SampleERC20')
@@ -66,22 +61,8 @@ describe('QuestFactory', () => {
     await deploySampleErc20Contract()
     await deploySampleErc1155Contract()
     await deployFactoryContract()
-    await deployQuestTerminalKey()
   })
 
-  const deployQuestTerminalKey = async () => {
-    deployedQuestTerminalKeyContract = (await upgrades.deployProxy(questTerminalKeyContract, [
-      royaltyRecipient.address,
-      protocolRecipient.address,
-      deployedFactoryContract.address,
-      10,
-      owner.address,
-      'QmTy8w65yBXgyfG2ZBg5TrfB2hPjrDQH3RCQFJGkARStJb',
-      'QmcniBv7UQ4gGPQQW2BwbD4ZZHzN3o3tPuNLZCbBchd1zh',
-    ])) as QuestTerminalKey
-
-    deployedFactoryContract.setQuestTerminalKeyContract(deployedQuestTerminalKeyContract.address)
-  }
 
   const deployFactoryContract = async () => {
     deployedErc20Quest = await erc20QuestContract.deploy()
@@ -95,7 +76,7 @@ describe('QuestFactory', () => {
       deployedErc20Quest.address,
       deployedErc1155Quest.address,
       owner.address,
-      ethers.constants.AddressZero, // this will become the questTerminalKey contract
+      ethers.constants.AddressZero, // questTerminalKey is deprecated
       sablierV2LockupLinearAddress,
       nftQuestFee,
       referralFee,
@@ -134,7 +115,7 @@ describe('QuestFactory', () => {
           rewardAmount,
           erc20QuestId,
           '', // actionSpec
-          0   // discountTokenId
+          0   // discountTokenId - deprecated
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
@@ -184,7 +165,7 @@ describe('QuestFactory', () => {
           rewardAmount,
           erc20QuestId,
           '', // actionSpec
-          0   // discountTokenId
+          0   // discountTokenId - deprecated
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'RewardNotAllowed')
     })
@@ -201,7 +182,7 @@ describe('QuestFactory', () => {
         rewardAmount,
         erc20QuestId,
         '', // actionSpec
-        0   // discountTokenId
+        0   // discountTokenId - deprecated
       )
 
       await expect(
@@ -213,7 +194,7 @@ describe('QuestFactory', () => {
           rewardAmount,
           erc20QuestId,
           '', // actionSpec
-          0   // discountTokenId
+          0   // discountTokenId - deprecated
         )
       ).to.be.revertedWithCustomError(questFactoryContract, 'QuestIdUsed')
     })
@@ -233,7 +214,7 @@ describe('QuestFactory', () => {
           rewardAmount,
           erc20QuestId,
           '', // actionSpec
-          0   // discountTokenId
+          0   // discountTokenId - deprecated
         )
       await tx.wait()
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
@@ -273,50 +254,6 @@ describe('QuestFactory', () => {
       expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmount)
     })
 
-    it('createQuestAndQueue should create a new quest and start it with a discount', async () => {
-      // mint a deployedQuestTerminalKeyContract to user, with one max use
-      await deployedQuestTerminalKeyContract.connect(protocolRecipient).mint(owner.address, 5000)
-      const ids = await deployedQuestTerminalKeyContract.getOwnedTokenIds(owner.address)
-      const discountTokenId = ids[0].toNumber()
-
-      const maxTotalRewards = totalRewards * rewardAmount
-      const questFee = 2_000
-      const discountedQuestFee = questFee * 0.5 // minus 50% for discount
-      const maxProtocolRewardDiscounted = (maxTotalRewards * discountedQuestFee) / 10_000
-      const maxProtocolReward = (maxTotalRewards * questFee) / 10_000
-      const transferAmountDiscounted = maxTotalRewards + maxProtocolRewardDiscounted
-      const transferAmount = maxTotalRewards + maxProtocolReward
-
-      await deployedFactoryContract.setRewardAllowlistAddress(deployedSampleErc20Contract.address, true)
-      // approve the quest factory to spend the reward token, twice the amount because we will deploy two quests
-      await deployedSampleErc20Contract.approve(
-        deployedFactoryContract.address,
-        transferAmountDiscounted + transferAmount
-      )
-
-      // first quest uses the discounted quest fee
-      const tx = await deployedFactoryContract.createQuestAndQueue(
-        deployedSampleErc20Contract.address,
-        expiryDate,
-        startDate,
-        totalRewards,
-        rewardAmount,
-        erc20QuestId,
-        'jsonSpecCid',
-        discountTokenId
-      )
-
-      await tx.wait()
-      const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
-      const deployedErc20Quest = await ethers.getContractAt('Quest', questAddress)
-      expect(await deployedErc20Quest.startTime()).to.equal(startDate)
-      expect(await deployedErc20Quest.owner()).to.equal(owner.address)
-
-      expect(await deployedErc20Quest.queued()).to.equal(true)
-      expect(await deployedSampleErc20Contract.balanceOf(questAddress)).to.equal(transferAmountDiscounted)
-      expect(await deployedErc20Quest.questFee()).to.equal(discountedQuestFee)
-      expect(await deployedQuestTerminalKeyContract.discounts(discountTokenId)).to.eql([5000, 1]) // percentage, usedCount
-    })
   })
 
   describe('createERC20StreamQuest()', () => {
@@ -336,7 +273,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         erc20QuestId,
         'actionSpec',
-        0,
         1000
       )
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
@@ -410,7 +346,7 @@ describe('QuestFactory', () => {
         rewardAmount,
         erc20QuestId,
         '', // actionSpec
-        0   // discountTokenId
+        0   // discountTokenId - deprecated
       )
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
       const questData = await deployedFactoryContract.questData(erc20QuestId)
@@ -426,8 +362,6 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(0),
         ethers.BigNumber.from(rewardAmount),
         false,
-        'erc20',
-        0,
       ])
     })
 
@@ -469,8 +403,6 @@ describe('QuestFactory', () => {
         ethers.BigNumber.from(1),
         ethers.BigNumber.from(NFTTokenId),
         false,
-        'erc1155',
-        0,
       ])
     })
   })
