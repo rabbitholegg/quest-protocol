@@ -8,9 +8,10 @@ import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/src/utils/LibClone.sol";
-import {Errors} from "./helpers/errors.sol";
+import {Errors} from "./helpers/Errors.sol";
+import {Events} from "./helpers/Events.sol";
 
-contract TestQuest is Test, TestUtils, Errors {
+contract TestQuest is Test, TestUtils, Errors, Events {
     using LibClone for address;
 
     address rewardTokenAddress;
@@ -26,6 +27,7 @@ contract TestQuest is Test, TestUtils, Errors {
     address questFactoryMock;
     Quest quest;
     address admin = makeAddr(("admin"));
+    address participant = makeAddr(("participant"));
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
@@ -150,15 +152,82 @@ contract TestQuest is Test, TestUtils, Errors {
     /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
-    function test_singleClaim() public {}
+    function test_singleClaim() public {
+        vm.warp(START_TIME);
+        vm.prank(questFactoryMock);
+        vm.expectEmit(true, true, false, false, address(quest));
+        emit ClaimedSingle(participant, rewardTokenAddress, REWARD_AMOUNT_IN_WEI);
+        quest.singleClaim(participant);
+    }
 
-    function test_fuzz_singleClaim() public {}
+    function test_fuzz_singleClaim(
+        uint256 rewardAmountInWei,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 currentTime
+    ) public {
+        vm.warp(0);
+        // Make sure our params have reasonable bounds
+        startTime = bound(startTime, block.timestamp, END_TIME - 1);
+        endTime = bound(endTime, startTime + 1, END_TIME);
+        currentTime = bound(currentTime, startTime, endTime - 1);
+        rewardAmountInWei = bound(rewardAmountInWei, 1, REWARD_AMOUNT_IN_WEI * REWARD_AMOUNT_IN_WEI);
+        // Setup a reward token with fuzzed rewardAmountInWei
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, rewardAmountInWei, QUEST_FEE);
+        rewardTokenAddress = address(
+            new SampleERC20(      
+                DEFAULT_ERC20_NAME,
+                DEFAULT_ERC20_SYMBOL,
+                defaultTotalRewardsPlusFee,
+                admin
+            )
+        );
+        // Create new quest with fuzzed values
+        quest = new Quest();
+        quest =
+            Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
+        vm.prank(questFactoryMock);
+        quest.initialize(
+            rewardTokenAddress,
+            endTime,
+            startTime,
+            TOTAL_PARTICIPANTS,
+            rewardAmountInWei,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            DURATION_TOTAL,
+            sablierMock
+        );
+        // Claim single and check for correct event logging
+        vm.warp(startTime);
+        vm.prank(questFactoryMock);
+        vm.expectEmit(true, true, false, false, address(quest));
+        emit ClaimedSingle(participant, rewardTokenAddress, rewardAmountInWei);
+        quest.singleClaim(participant);
+    }
 
-    function test_RevertIf_singleClaim_NotQuestFactory() public {}
+    function test_RevertIf_singleClaim_NotQuestFactory() public {
+        vm.warp(START_TIME);
+        vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
+        quest.singleClaim(participant);
+    }
 
-    function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {}
+    function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {
+        vm.warp(START_TIME - 1);
+        vm.prank(questFactoryMock);
+        vm.expectRevert(abi.encodeWithSelector(ClaimWindowNotStarted.selector));
+        quest.singleClaim(participant);
+    }
 
-    function test_RevertIf_singleClaim_whenNotPaused() public {}
+    function test_RevertIf_singleClaim_whenNotPaused() public {
+        vm.startPrank(questFactoryMock);
+        quest.pause();
+        vm.warp(START_TIME);
+        vm.expectRevert("Pausable: paused");
+        quest.singleClaim(participant);
+        vm.stopPrank();
+    }
 
     /*//////////////////////////////////////////////////////////////
                       WITHDRAWREMAININGTOKENS

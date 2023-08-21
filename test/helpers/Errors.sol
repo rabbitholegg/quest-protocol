@@ -16,4 +16,5 @@ contract Errors {
     error TotalAmountExceedsBalance();
     error AuthOwnerRecipient();
     error Unauthorized();
+    error EnforcedPause();
 }
