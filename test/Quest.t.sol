@@ -153,11 +153,17 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
     function test_singleClaim() public {
+        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         vm.warp(START_TIME);
         vm.prank(questFactoryMock);
         vm.expectEmit(true, true, false, false, address(quest));
         emit ClaimedSingle(participant, rewardTokenAddress, REWARD_AMOUNT_IN_WEI);
         quest.singleClaim(participant);
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(participant),
+            startingBalance + REWARD_AMOUNT_IN_WEI,
+            "participant should have received the reward"
+        );
     }
 
     function test_fuzz_singleClaim(
@@ -182,6 +188,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                 admin
             )
         );
+        // Get the participants starting balance
+        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         // Create new quest with fuzzed values
         quest = new Quest();
         quest =
@@ -205,6 +213,12 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         vm.expectEmit(true, true, false, false, address(quest));
         emit ClaimedSingle(participant, rewardTokenAddress, rewardAmountInWei);
         quest.singleClaim(participant);
+        // Check that the participant received the correct amount of tokens
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(participant),
+            startingBalance + rewardAmountInWei,
+            "participant should have received the reward"
+        );
     }
 
     function test_RevertIf_singleClaim_NotQuestFactory() public {
