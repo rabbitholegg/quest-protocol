@@ -134,9 +134,18 @@ contract TestQuest is Test, TestUtils, Errors {
     /*//////////////////////////////////////////////////////////////
                               UNPAUSE
     //////////////////////////////////////////////////////////////*/
-    function test_unpause() public {}
+    function test_unpause() public {
+        vm.startPrank(questFactoryMock);
+        quest.pause();
+        quest.unPause();
+        assertFalse(quest.paused(), "paused should be false");
+        vm.stopPrank();
+    }
 
-    function test_RevertIf_unpause_Unauthorized() public {}
+    function test_RevertIf_unpause_Unauthorized() public {
+        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
+        quest.unPause();
+    }
 
     /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
