@@ -227,6 +227,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
+    function test_singleClaim_stream() public {}
+
     function test_RevertIf_singleClaim_NotQuestFactory() public {
         vm.warp(START_TIME);
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
@@ -253,9 +255,31 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                       WITHDRAWREMAININGTOKENS
     //////////////////////////////////////////////////////////////*/
 
-    function test_withdrawRemainingTokens() public {}
+    function test_withdrawRemainingTokens() public {
+        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
+        uint256 questBalanceMinusFees = questBalance - totalFees;
+        // Simulate the quest being completed by max participants
+        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+        vm.warp(END_TIME);
+        vm.prank(protocolFeeRecipient);
+        quest.withdrawRemainingTokens();
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(protocolFeeRecipient),
+            totalFees,
+            "protocolFeeRecipient should have received the remaining tokens"
+        );
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(address(questFactoryMock)),
+            questBalanceMinusFees,
+            "quest should have 0 tokens"
+        );
+    }
 
-    function test_fuzz_withdrawRemainingTokens() public {}
+    function test_fuzz_withdrawRemainingTokens(uint16 withdrawerRoll, uint256 totalClaims) public {
+        address[2] memory withdrawers = [protocolFeeRecipient, questFactoryMock];
+        address withdrawer = withdrawers[withdrawerRoll % 2];
+    }
 
     function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {}
 
