@@ -3,6 +3,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "./helpers/TestUtils.sol";
+import "/contracts/test/SampleERC20.sol";
+import "./mocks/QuestFactoryMock.sol";
+import "./mocks/SablierMock.sol";
+import "/contracts/Quest.sol";
 
 contract TestQuest is Test, TestUtils {
     address rewardTokenAddress;
@@ -16,13 +20,47 @@ contract TestQuest is Test, TestUtils {
     uint40 DURATION_TOTAL = 1_000_000;
     address sablierMock;
     address questFactoryMock;
+    Quest quest;
 
-    function setup() public {}
+    function setup() public {
+        rewardTokenAddress = address(new SampleERC20());
+        sablierMock = address(new SablierMock());
+        questFactoryMock = address(new QuestFactoryMock());
+        vm.prank(questFactoryMock);
+        quest = new Quest(
+            rewardTokenAddress,
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            TOTAL_REWARDS_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            DURATION_TOTAL,
+            sablierMock,
+            questFactoryMock
+        );
+    }
 
     /*//////////////////////////////////////////////////////////////
                               INITIALIZE
     //////////////////////////////////////////////////////////////*/
-    function test_initialize() public {}
+    function test_initialize() public {
+        assertEq(rewardTokenAddress, quest.rewardToken(), "rewardTokenAddress not set");
+        assertEq(END_TIME, quest.endTime(), "endTime not set");
+        assertEq(START_TIME, quest.startTime(), "startTime not set");
+        assertEq(TOTAL_PARTICIPANTS, quest.totalParticipants(), "totalParticipants not set");
+        assertEq(TOTAL_REWARDS_IN_WEI, quest.totalRewardsInWei(), "totalRewardsInWei not set");
+        assertEq(QUEST_ID, quest.questId(), "questId not set");
+        assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
+        assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
+        assertEq(DURATION_TOTAL, quest.durationTotal(), "durationTotal not set");
+        assertEq(sablierMock, quest.sablierV2LockupLinearContract(), "sablier not set");
+        assertEq(questFactoryMock, quest.questFactoryContract(), "questFactory not set");
+        assertTrue(quest.isInitialized(), "isInitialized should be true");
+        assertTrue(quest.queued(), "queued should be true");
+        assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
+    }
 
     function test_RevertIf_initialize_EndTimeInPast() public {}
 
