@@ -16,5 +16,8 @@
   "solidity.linter": "solhint",
   "[solidity]": {
       "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
   }
 }
