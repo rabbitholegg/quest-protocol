@@ -8,8 +8,9 @@ import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/src/utils/LibClone.sol";
+import {Errors} from "./helpers/errors.sol";
 
-contract TestQuest is Test, TestUtils {
+contract TestQuest is Test, TestUtils, Errors {
     using LibClone for address;
 
     address rewardTokenAddress;
@@ -63,23 +64,58 @@ contract TestQuest is Test, TestUtils {
     //////////////////////////////////////////////////////////////*/
     function test_initialize() public {
         assertEq(rewardTokenAddress, quest.rewardToken(), "rewardTokenAddress not set");
-        // assertEq(END_TIME, quest.endTime(), "endTime not set");
-        // assertEq(START_TIME, quest.startTime(), "startTime not set");
-        // assertEq(TOTAL_PARTICIPANTS, quest.totalParticipants(), "totalParticipants not set");
-        // assertEq(REWARD_AMOUNT_IN_WEI, quest.rewardAmountInWei(), "totalRewardsInWei not set");
-        // assertEq(QUEST_ID, quest.questId(), "questId not set");
-        // assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
-        // assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
-        // assertEq(DURATION_TOTAL, quest.durationTotal(), "durationTotal not set");
-        // assertEq(sablierMock, address(quest.sablierV2LockupLinearContract()), "sablier not set");
-        // assertEq(questFactoryMock, address(quest.questFactoryContract()), "questFactory not set");
-        // assertTrue(quest.queued(), "queued should be true");
-        // assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
+        assertEq(END_TIME, quest.endTime(), "endTime not set");
+        assertEq(START_TIME, quest.startTime(), "startTime not set");
+        assertEq(TOTAL_PARTICIPANTS, quest.totalParticipants(), "totalParticipants not set");
+        assertEq(REWARD_AMOUNT_IN_WEI, quest.rewardAmountInWei(), "totalRewardsInWei not set");
+        assertEq(QUEST_ID, quest.questId(), "questId not set");
+        assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
+        assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
+        assertEq(DURATION_TOTAL, quest.durationTotal(), "durationTotal not set");
+        assertEq(sablierMock, address(quest.sablierV2LockupLinearContract()), "sablier not set");
+        assertEq(questFactoryMock, address(quest.questFactoryContract()), "questFactory not set");
+        assertTrue(quest.queued(), "queued should be true");
+        assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
     }
 
-    function test_RevertIf_initialize_EndTimeInPast() public {}
+    function test_RevertIf_initialize_EndTimeInPast() public {
+        vm.warp(END_TIME + 1);
+        quest = new Quest();
+        quest = Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        vm.prank(questFactoryMock);
+        vm.expectRevert(abi.encodeWithSelector(EndTimeInPast.selector));
+        quest.initialize(
+            rewardTokenAddress,
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            DURATION_TOTAL,
+            sablierMock
+        );
+    }
 
-    function test_RevertIf_initialize_EndTimeLessThanOrEqualToStartTime() public {}
+    function test_RevertIf_initialize_EndTimeLessThanOrEqualToStartTime() public {
+        quest = new Quest();
+        quest = Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        vm.prank(questFactoryMock);
+        vm.expectRevert(abi.encodeWithSelector(EndTimeLessThanOrEqualToStartTime.selector));
+        quest.initialize(
+            rewardTokenAddress,
+            START_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            DURATION_TOTAL,
+            sablierMock
+        );
+    }
 
     /*//////////////////////////////////////////////////////////////
                                 PAUSE
