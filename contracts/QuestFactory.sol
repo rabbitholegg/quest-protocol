@@ -225,7 +225,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
     /// @param durationTotal_ The duration of the sablier stream
     /// @return address the quest contract address
     function createERC20StreamQuest(
@@ -236,7 +235,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionSpec_,
-        uint256 discountTokenId_,
         uint40 durationTotal_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
@@ -246,7 +244,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            discountTokenId_,
             actionSpec_,
             durationTotal_
         );
@@ -263,7 +260,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
     /// @return address the quest contract address
     function createQuestAndQueue(
         address rewardTokenAddress_,
@@ -273,7 +269,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionSpec_,
-        uint256 discountTokenId_
+        uint256
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
             rewardTokenAddress_,
@@ -282,7 +278,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             totalParticipants_,
             rewardAmount_,
             questId_,
-            discountTokenId_,
             actionSpec_,
             0
         );
@@ -367,12 +362,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external onlyOwner {
         if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         protocolFeeRecipient = protocolFeeRecipient_;
-    }
-
-    /// @dev set questTerminalKeyContract address
-    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
     }
 
     /// @dev set the quest fee
@@ -479,9 +468,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            questContract.hasWithdrawn(),
-            thisQuest.questType,
-            thisQuest.durationTotal
+            questContract.hasWithdrawn()
         );
 
         return data;
