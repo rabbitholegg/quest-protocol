@@ -15,4 +15,5 @@ contract Errors {
     error NotStarted();
     error TotalAmountExceedsBalance();
     error AuthOwnerRecipient();
+    error Unauthorized();
 }
