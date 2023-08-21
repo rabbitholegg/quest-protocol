@@ -273,7 +273,6 @@ describe('QuestFactory', () => {
         rewardAmount,
         erc20QuestId,
         'actionSpec',
-        0,
         1000
       )
       const questAddress = await deployedFactoryContract.quests(erc20QuestId).then((res) => res.questAddress)
