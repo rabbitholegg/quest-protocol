@@ -357,9 +357,20 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.withdrawRemainingTokens();
     }
 
-    function test_RevertIf_withdrawRemainingToken_AuthOwnerRecipient() public {}
+    function test_RevertIf_withdrawRemainingToken_AuthOwnerRecipient() public {
+        vm.warp(END_TIME);
+        vm.expectRevert(abi.encodeWithSelector(AuthOwnerRecipient.selector));
+        quest.withdrawRemainingTokens();
+    }
 
-    function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {}
+    function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
+        vm.warp(END_TIME);
+        vm.startPrank(protocolFeeRecipient);
+        quest.withdrawRemainingTokens();
+        vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
+        quest.withdrawRemainingTokens();
+        vm.stopPrank();
+    }
 
     /*//////////////////////////////////////////////////////////////
                                 REFUND
