@@ -18,6 +18,8 @@ interface IProtocolRewards {
     /// @param amount Amount of deposit
     event Withdraw(address indexed from, address indexed to, uint256 amount);
 
+    event TransferExcessSupply(address indexed from, address indexed to, uint256 amount);
+
     /// @notice Cannot send to address zero
     error ADDRESS_ZERO();
 
@@ -29,9 +31,6 @@ interface IProtocolRewards {
 
     /// @notice Invalid withdraw
     error INVALID_WITHDRAW();
-
-    /// @notice Low-level ETH transfer has failed
-    error TRANSFER_FAILED();
 
     error INVALID_AMOUNT();
 

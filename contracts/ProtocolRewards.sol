@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {Ownable} from "solady/src/auth/Ownable.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards
@@ -16,6 +17,8 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
     /// @notice Total Balance across all accounts
     uint256 public totalBalance;
 
+    using SafeTransferLib for address;
+
     constructor() payable {
         _initializeOwner(msg.sender);
     }
@@ -28,6 +31,27 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
     /// @notice The total excess amount of ETH held in the contract
     function excessSupply() external view returns (uint256) {
         return address(this).balance - totalBalance;
+    }
+
+    /// @notice transfer excessSupply onlyOwner
+    /// @param to The address to transfer to
+    function transferExcessSupply(address to, uint256 amount) external onlyOwner {
+        if (amount > this.excessSupply()) {
+            revert INVALID_AMOUNT();
+        }
+        _transferExcessSupply(to, amount);
+    }
+
+    /// @notice transfer excessSupply onlyOwner
+    /// @param to The address to transfer to
+    function _transferExcessSupply(address to, uint256 amount) internal {
+        if (to == address(0)) {
+            revert ADDRESS_ZERO();
+        }
+
+        to.safeTransferETH(amount);
+
+        emit TransferExcessSupply(msg.sender, to, amount);
     }
 
     /// @notice Generic function to deposit ETH for a recipient, with an optional comment
@@ -186,11 +210,7 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
 
         emit Withdraw(owner, to, amount);
 
-        (bool success,) = to.call{value: amount}("");
-
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
+        to.safeTransferETH(amount);
     }
 
     /// @notice Withdraw rewards on behalf of an address
@@ -213,11 +233,7 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
 
         emit Withdraw(to, to, amount);
 
-        (bool success,) = to.call{value: amount}("");
-
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
+        to.safeTransferETH(amount);
     }
 
     // Receive function to receive ETH

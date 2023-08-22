@@ -40,6 +40,7 @@ interface IQuestFactory {
         uint256 numberMinted;
         string questType;
         uint40 durationTotal;
+        address questCreator;
     }
 
     struct QuestData {
@@ -110,7 +111,7 @@ interface IQuestFactory {
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
-    function getMintFeeRecipient() external view returns (address);
+    function getMintFeeRecipient(address address_) external view returns (address);
     function getNftQuestFee(address address_) external view returns (uint256);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);

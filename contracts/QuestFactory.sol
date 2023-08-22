@@ -48,6 +48,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
+    mapping(address => address) mintFeeRecipientList;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
@@ -165,6 +166,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint16 protocolFee;
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
+        currentQuest.questCreator = msg.sender;
         if (durationTotal_ > 0) {
             currentQuest.durationTotal = durationTotal_;
             currentQuest.questType = "erc20Stream";
@@ -315,6 +317,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
+        currentQuest.questCreator = msg.sender;
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -401,13 +404,24 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         mintFeeRecipient = mintFeeRecipient_;
     }
 
+    /// @dev set a mintFeeRecipient for a specific address
+    /// @param mintFeeRecipient_ The address of the mint fee recipient
+    /// @param address_ The address of the account
+    function setMintFeeRecipientForAddress(address mintFeeRecipient_, address address_) public onlyOwner {
+        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
+        mintFeeRecipientList[address_] = mintFeeRecipient_;
+    }
+
     /// @dev get the mintFeeRecipient return the protocol fee recipient if the mint fee recipient is not set
+    /// @param questCreatorAddress_ The address of the quest creator, to get the mintFee
     /// @return address the mint fee recipient
-    function getMintFeeRecipient() public view returns (address) {
-        if (mintFeeRecipient == address(0)) {
-            return protocolFeeRecipient;
+    function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
+        address _mintFeeRecipient;
+        _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
+        if (_mintFeeRecipient == address(0)) {
+            return mintFeeRecipient;
         }
-        return mintFeeRecipient;
+        return _mintFeeRecipient;
     }
 
     /// @dev set the nftQuestFee
@@ -561,7 +575,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
 
         emit QuestClaimed(
             msg.sender,
@@ -613,7 +627,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
 
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
@@ -633,15 +647,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
     }
 
-    function processMintFee(address ref_) private {
+    function processMintFee(address ref_, address questCreator_) private {
         returnChange();
         if (ref_ == address(0)) {
-            getMintFeeRecipient().safeTransferETH(mintFee);
+            getMintFeeRecipient(questCreator_).safeTransferETH(mintFee);
             return;
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
-        getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
+        getMintFeeRecipient(questCreator_).safeTransferETH(mintFee - referralAmount);
     }
 
     function returnChange() private {
