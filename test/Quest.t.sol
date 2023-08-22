@@ -418,17 +418,44 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                             EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
-    function test_totalTransferAmount() public {}
+    function test_totalTransferAmount() public {
+        assertEq(quest.totalTransferAmount(), defaultTotalRewardsPlusFee, "totalTransferAmount should be correct");
+    }
 
-    function test_maxTotalRewards() public {}
+    function test_maxTotalRewards() public {
+        assertEq(
+            quest.maxTotalRewards(),
+            calculateTotalRewards(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI),
+            "maxTotalRewards should be correct"
+        );
+    }
 
-    function test_maxProtocolReward() public {}
+    function test_maxProtocolReward() public {
+        assertEq(
+            quest.maxProtocolReward(),
+            calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE),
+            "maxProtocolReward should be correct"
+        );
+    }
 
-    function test_protocolFee() public {}
+    function test_fuzz_protocolFee(uint256 totalClaims) public {
+        totalClaims = bound(totalClaims, 1, TOTAL_PARTICIPANTS);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);
 
-    function test_receiptRedeemers() public {}
+        assertEq(quest.protocolFee(), calculateTotalFees(totalClaims, REWARD_AMOUNT_IN_WEI, QUEST_FEE));
+    }
 
-    function test_getRewardAmount() public {}
+    function test_fuzz_receiptRedeemers(uint256 redeemers) public {
+        assertEq(quest.receiptRedeemers(), 0, "receiptRedeemers should be correct");
+        QuestFactoryMock(questFactoryMock).setNumberMinted(redeemers);
+        assertEq(quest.receiptRedeemers(), redeemers, "receiptRedeemers should be correct");
+    }
 
-    function test_getRewardToken() public {}
+    function test_getRewardAmount() public {
+        assertEq(quest.getRewardAmount(), REWARD_AMOUNT_IN_WEI, "getRewardAmount should be correct");
+    }
+
+    function test_getRewardToken() public {
+        assertEq(quest.getRewardToken(), rewardTokenAddress, "getRewardToken should be correct");
+    }
 }
