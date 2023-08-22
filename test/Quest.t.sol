@@ -336,7 +336,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         uint256 totalFees = calculateTotalFees(totalClaims, rewardAmountInWei, questFee);
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
-        vm.prank(protocolFeeRecipient);
+        vm.prank(withdrawer);
         quest.withdrawRemainingTokens();
         // Check owner and fee recipient received the correct amount of tokens
         assertEq(
@@ -351,7 +351,11 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {}
+    function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {
+        vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
+        vm.prank(protocolFeeRecipient);
+        quest.withdrawRemainingTokens();
+    }
 
     function test_RevertIf_withdrawRemainingToken_AuthOwnerRecipient() public {}
 
