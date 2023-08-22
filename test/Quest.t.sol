@@ -8,11 +8,13 @@ import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/src/utils/LibClone.sol";
+import {LibString} from "solady/src/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 
 contract TestQuest is Test, TestUtils, Errors, Events {
     using LibClone for address;
+    using LibString for uint256;
 
     address rewardTokenAddress;
     uint256 END_TIME = 1_000_000_000;
@@ -279,6 +281,14 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_fuzz_withdrawRemainingTokens(uint16 withdrawerRoll, uint256 totalClaims) public {
         address[2] memory withdrawers = [protocolFeeRecipient, questFactoryMock];
         address withdrawer = withdrawers[withdrawerRoll % 2];
+        totalClaims = bound(totalClaims, 1, TOTAL_PARTICIPANTS);
+        for (uint256 i = 0; i < totalClaims; i++) {
+            address claimer = makeAddr(string.concat("Claimer", i.toString()));
+            vm.warp(START_TIME + i);
+            vm.prank(questFactoryMock);
+            emit ClaimedSingle(claimer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI);
+            quest.singleClaim(claimer);
+        }
     }
 
     function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {}
