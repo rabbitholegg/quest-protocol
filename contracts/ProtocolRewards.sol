@@ -68,6 +68,8 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
             revert INVALID_AMOUNT();
         }
         _increaseBalance(to, amount);
+
+        //todo emit event here, same basically as deposit
     }
 
     /// @notice Increase the balance of addresses in amounts in a batch function
@@ -107,6 +109,8 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
                 revert INVALID_AMOUNT();
             }
             _increaseBalance(currentRecipient, currentAmount);
+
+            //todo emit event here, same basically as deposit
 
             unchecked {
                 ++i;
