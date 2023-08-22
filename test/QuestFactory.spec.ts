@@ -385,7 +385,7 @@ describe('QuestFactory', () => {
 
   describe('getMintFeeRecipient', () => {
     beforeEach(async () => {
-      await deployedFactoryContract.setMintFeeRecipient(mintFeeRecipient.address)
+      await deployedFactoryContract.setDefaultMintFeeRecipient(mintFeeRecipient.address)
     })
 
     it('Should return the mintFeeRecipient when address is not in mintFeeRecipientList', async () => {

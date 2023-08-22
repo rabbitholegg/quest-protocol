@@ -41,6 +41,7 @@ interface IQuestFactory {
         string questType;
         uint40 durationTotal;
         address questCreator;
+        address mintFeeRecipient;
     }
 
     struct QuestData {
@@ -142,7 +143,7 @@ interface IQuestFactory {
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
-    function setMintFeeRecipient(address mintFeeRecipient_) external;
+    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
     function setNftQuestFee(uint256 nftQuestFee_) external;
     function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;

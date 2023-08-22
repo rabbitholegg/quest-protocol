@@ -4,16 +4,18 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import "../contracts/ProtocolRewards.sol";
+import "forge-std/console.sol";
 
 contract ProtocolRewardsTest is Test {
-    uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
-
     ProtocolRewards internal protocolRewards;
 
     address internal collector;
     address internal collector2;
     address internal creator;
     address internal owner;
+
+    event IncreaseBalance(address indexed to, uint256 amount);
+    event Withdraw(address indexed from, address indexed to, uint256 amount);
 
     function setUp() public virtual {
         collector = makeAddr("collector");
@@ -36,13 +38,17 @@ contract ProtocolRewardsTest is Test {
     }
 
     // increase balance tests
-        function testExcessSupply() public {
+    function testExcessSupply() public {
         assertEq(protocolRewards.totalBalance(), 10 ether);
         assertEq(protocolRewards.excessSupply(), 20 ether);
     }
 
     function testIncreaseBalance() public {
         vm.prank(owner);
+
+        vm.expectEmit();
+        emit IncreaseBalance(collector, 5 ether);
+
         protocolRewards.increaseBalance(collector, 5 ether);
 
         assertEq(protocolRewards.balanceOf(collector), 5 ether);
@@ -111,11 +117,31 @@ contract ProtocolRewardsTest is Test {
         uint256 creatorRewardsBalance = protocolRewards.balanceOf(creator);
 
         vm.prank(creator);
+
+        vm.expectEmit();
+        emit Withdraw(creator, creator, creatorRewardsBalance);
+
         protocolRewards.withdraw(creator, creatorRewardsBalance);
 
         assertEq(creator.balance, beforeCreatorBalance + creatorRewardsBalance);
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
     }
+
+    function testfuzz_Withdraw(uint256 amount) public {
+        uint256 beforeCreatorBalance = creator.balance;
+        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+
+        vm.assume(amount <= protocolRewards.balanceOf(creator));
+        vm.assume(amount > 0);
+
+        vm.prank(creator);
+
+        protocolRewards.withdraw(creator, amount);
+
+        assertEq(creator.balance, beforeCreatorBalance + amount);
+        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - amount);
+    }
+
 
     function testWithdrawFullBalance() public {
         uint256 beforeCreatorBalance = creator.balance;
@@ -156,6 +182,19 @@ contract ProtocolRewardsTest is Test {
 
         assertEq(creator.balance, beforeCreatorBalance + creatorRewardsBalance);
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
+    }
+
+    function testFuzz_WithdrawFor(uint256 amount) public {
+        uint256 beforeCreatorBalance = creator.balance;
+        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+
+        vm.assume(amount <= protocolRewards.balanceOf(creator));
+        vm.assume(amount > 0);
+
+        protocolRewards.withdrawFor(creator, amount);
+
+        assertEq(creator.balance, beforeCreatorBalance + amount);
+        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - amount);
     }
 
     function testWithdrawForFullBalance() public {

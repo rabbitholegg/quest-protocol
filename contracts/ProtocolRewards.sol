@@ -11,9 +11,6 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;
 
-    /// @notice An account's nonce for gasless withdraws
-    mapping(address => uint256) public nonces;
-
     /// @notice Total Balance across all accounts
     uint256 public totalBalance;
 
@@ -77,7 +74,7 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
         }
         _increaseBalance(to, amount);
 
-        //todo emit event here, same basically as deposit
+        emit IncreaseBalance(to, amount);
     }
 
     /// @notice Increase the balance of addresses in amounts in a batch function
@@ -86,19 +83,6 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
 
         if (numRecipients != amounts.length) {
             revert ARRAY_LENGTH_MISMATCH();
-        }
-
-        // do we do this here, or we can check inside the next loop also
-        uint256 expectedTotalValue;
-        for (uint256 i; i < numRecipients;) {
-            expectedTotalValue += amounts[i];
-
-            unchecked {
-                ++i;
-            }
-        }
-        if (expectedTotalValue > this.excessSupply()) {
-            revert INVALID_AMOUNT();
         }
 
         address currentRecipient;
@@ -111,18 +95,17 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
             if (currentRecipient == address(0)) {
                 revert ADDRESS_ZERO();
             }
-
-            // this check is redundant because of the check above, unless we remove it?
-            if (currentAmount > this.excessSupply()) {
-                revert INVALID_AMOUNT();
-            }
             _increaseBalance(currentRecipient, currentAmount);
 
-            //todo emit event here, same basically as deposit
+            emit IncreaseBalance(currentRecipient, currentAmount);
 
             unchecked {
                 ++i;
             }
+        }
+
+        if (totalBalance > address(this).balance) {
+            revert INVALID_AMOUNT();
         }
     }
 

@@ -12,6 +12,8 @@ interface IProtocolRewards {
     /// @param comment Optional user comment
     event Deposit(address indexed from, address indexed to, bytes4 indexed reason, uint256 amount, string comment);
 
+    event IncreaseBalance(address indexed to, uint256 amount);
+
     /// @notice Withdraw Event
     /// @param from From user
     /// @param to To user (within contract)

@@ -39,7 +39,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    address public mintFeeRecipient;
+    address public defaultMintFeeRecipient;
     uint256 private locked;
     IQuestTerminalKeyERC721 private questTerminalKeyContract;
     uint256 public nftQuestFee;
@@ -48,7 +48,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
-    mapping(address => address) mintFeeRecipientList;
+    mapping(address => address) public mintFeeRecipientList;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
@@ -167,6 +167,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questCreator = msg.sender;
+        currentQuest.mintFeeRecipient = getMintFeeRecipient(msg.sender);
         if (durationTotal_ > 0) {
             currentQuest.durationTotal = durationTotal_;
             currentQuest.questType = "erc20Stream";
@@ -318,6 +319,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
         currentQuest.questCreator = msg.sender;
+        currentQuest.mintFeeRecipient = getMintFeeRecipient(msg.sender);
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -399,16 +401,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     /// @dev set the mintFeeRecipient
     /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
+    function setDefaultMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
         if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-        mintFeeRecipient = mintFeeRecipient_;
+        defaultMintFeeRecipient = mintFeeRecipient_;
     }
 
     /// @dev set a mintFeeRecipient for a specific address
     /// @param address_ The address of the account
     /// @param mintFeeRecipient_ The address of the mint fee recipient
     function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) public onlyOwner {
-        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         mintFeeRecipientList[address_] = mintFeeRecipient_;
     }
 
@@ -419,7 +420,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address _mintFeeRecipient;
         _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
         if (_mintFeeRecipient == address(0)) {
-            return mintFeeRecipient;
+            return defaultMintFeeRecipient;
         }
         return _mintFeeRecipient;
     }
@@ -575,7 +576,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.mintFeeRecipient);
 
         emit QuestClaimed(
             msg.sender,
@@ -627,7 +628,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.mintFeeRecipient);
 
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
@@ -647,15 +648,15 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
     }
 
-    function processMintFee(address ref_, address questCreator_) private {
+    function processMintFee(address ref_, address _mintFeeRecipient) private {
         returnChange();
         if (ref_ == address(0)) {
-            getMintFeeRecipient(questCreator_).safeTransferETH(mintFee);
+            _mintFeeRecipient.safeTransferETH(mintFee);
             return;
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
-        getMintFeeRecipient(questCreator_).safeTransferETH(mintFee - referralAmount);
+        _mintFeeRecipient.safeTransferETH(mintFee - referralAmount);
     }
 
     function returnChange() private {
