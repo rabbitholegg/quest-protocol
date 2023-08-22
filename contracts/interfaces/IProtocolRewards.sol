@@ -27,14 +27,8 @@ interface IProtocolRewards {
     /// @notice Invalid deposit
     error INVALID_DEPOSIT();
 
-    /// @notice Invalid signature for deposit
-    error INVALID_SIGNATURE();
-
     /// @notice Invalid withdraw
     error INVALID_WITHDRAW();
-
-    /// @notice Signature for withdraw is too old and has expired
-    error SIGNATURE_DEADLINE_EXPIRED();
 
     /// @notice Low-level ETH transfer has failed
     error TRANSFER_FAILED();
@@ -63,24 +57,6 @@ interface IProtocolRewards {
     /// @param to Withdraws from msg.sender to this address
     /// @param amount amount to withdraw
     function withdraw(address to, uint256 amount) external;
-
-    /// @notice Execute a withdraw of protocol rewards via signature
-    /// @param from Withdraw from this address
-    /// @param to Withdraw to this address
-    /// @param amount Amount to withdraw
-    /// @param deadline Deadline for the signature to be valid
-    /// @param v V component of signature
-    /// @param r R component of signature
-    /// @param s S component of signature
-    function withdrawWithSig(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
 
     function excessSupply() external view returns (uint256);
 

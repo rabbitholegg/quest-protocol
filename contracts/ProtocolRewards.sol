@@ -1,17 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {EIP712} from "solady/src/utils/EIP712.sol";
 import {Ownable} from "solady/src/auth/Ownable.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
-    /// @notice The EIP-712 typehash for gasless withdraws
-    bytes32 public constant WITHDRAW_TYPEHASH =
-        keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
-
+contract ProtocolRewards is IProtocolRewards, Ownable {
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;
 
@@ -21,19 +16,8 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
     /// @notice Total Balance across all accounts
     uint256 public totalBalance;
 
-    constructor() payable EIP712() {
+    constructor() payable {
         _initializeOwner(msg.sender);
-    }
-
-    function _domainNameAndVersion()
-        internal
-        pure
-        virtual
-        override
-        returns (string memory name, string memory version)
-    {
-        name = "ProtocolRewards";
-        version = "1";
     }
 
     /// @notice The total amount of ETH held in the contract
@@ -228,64 +212,6 @@ contract ProtocolRewards is IProtocolRewards, EIP712, Ownable {
         balanceOf[to] -= amount;
 
         emit Withdraw(to, to, amount);
-
-        (bool success,) = to.call{value: amount}("");
-
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
-    }
-
-    /// @notice Execute a withdraw of protocol rewards via signature
-    /// @param from Withdraw from this address
-    /// @param to Withdraw to this address
-    /// @param amount Amount to withdraw (0 for total balance)
-    /// @param deadline Deadline for the signature to be valid
-    /// @param v V component of signature
-    /// @param r R component of signature
-    /// @param s S component of signature
-    function withdrawWithSig(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        if (block.timestamp > deadline) {
-            revert SIGNATURE_DEADLINE_EXPIRED();
-        }
-
-        bytes32 withdrawHash;
-
-        unchecked {
-            withdrawHash = keccak256(abi.encode(WITHDRAW_TYPEHASH, from, to, amount, nonces[from]++, deadline));
-        }
-
-        bytes32 digest = _hashTypedData(withdrawHash);
-
-        address recoveredAddress = ecrecover(digest, v, r, s);
-
-        if (recoveredAddress == address(0) || recoveredAddress != from) {
-            revert INVALID_SIGNATURE();
-        }
-
-        if (to == address(0)) {
-            revert ADDRESS_ZERO();
-        }
-
-        if (amount > balanceOf[from]) {
-            revert INVALID_WITHDRAW();
-        }
-
-        if (amount == 0) {
-            amount = balanceOf[from];
-        }
-
-        _decreaseBalance(from, amount);
-
-        emit Withdraw(from, to, amount);
 
         (bool success,) = to.call{value: amount}("");
 
