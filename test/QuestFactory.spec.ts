@@ -320,13 +320,17 @@ describe('QuestFactory', () => {
   })
 
   describe('getMintFeeRecipient', () => {
-    it('Should return the protocolRecipient when no mintFeeRecipient is set', async () => {
-      expect(await deployedFactoryContract.getMintFeeRecipient()).to.equal(protocolRecipient.address)
+    beforeEach(async () => {
+      await deployedFactoryContract.setDefaultMintFeeRecipient(mintFeeRecipient.address)
     })
 
-    it('Should return the mintFeeRecipient when set', async () => {
-      await deployedFactoryContract.setMintFeeRecipient(mintFeeRecipient.address)
-      expect(await deployedFactoryContract.getMintFeeRecipient()).to.equal(mintFeeRecipient.address)
+    it('Should return the mintFeeRecipient when address is not in mintFeeRecipientList', async () => {
+      expect(await deployedFactoryContract.getMintFeeRecipient(owner.address)).to.equal(mintFeeRecipient.address)
+    })
+
+    it('Should return the protocolRecipient for address in mintFeeRecipientList', async () => {
+      await deployedFactoryContract.setMintFeeRecipientForAddress(owner.address, protocolRecipient.address)
+      expect(await deployedFactoryContract.getMintFeeRecipient(owner.address)).to.equal(protocolRecipient.address)
     })
   })
 
@@ -489,7 +493,7 @@ describe('QuestFactory', () => {
       const extraChange = 100
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
-      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())
+      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))
 
       await expect(
         deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
@@ -499,7 +503,7 @@ describe('QuestFactory', () => {
         .to.emit(deployedFactoryContract, 'QuestClaimed')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
         balanceBefore.add(requiredFee)
       )
     })
@@ -516,7 +520,7 @@ describe('QuestFactory', () => {
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
       const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
-        deployedFactoryContract.getMintFeeRecipient()
+        deployedFactoryContract.getMintFeeRecipient(owner.address)
       )
       const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
 
@@ -529,7 +533,7 @@ describe('QuestFactory', () => {
         .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
         mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
       )
       expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
@@ -594,7 +598,7 @@ describe('QuestFactory', () => {
         )
         await time.setNextBlockTimestamp(startDate)
         const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
-          deployedFactoryContract.getMintFeeRecipient()
+          deployedFactoryContract.getMintFeeRecipient(owner.address)
         )
         const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
 
@@ -606,7 +610,7 @@ describe('QuestFactory', () => {
           .to.emit(deployedFactoryContract, 'Quest1155Claimed')
           .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
 
-        expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient())).to.equal(
+        expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
           mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
         )
         expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
