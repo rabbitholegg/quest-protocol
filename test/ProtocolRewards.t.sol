@@ -4,10 +4,11 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import "../contracts/ProtocolRewards.sol";
-import "forge-std/console.sol";
+import {ERC1967Factory} from "solady/src/utils/ERC1967Factory.sol";
 
 contract ProtocolRewardsTest is Test {
     ProtocolRewards internal protocolRewards;
+    ERC1967Factory internal factory;
 
     address internal collector;
     address internal collector2;
@@ -23,8 +24,14 @@ contract ProtocolRewardsTest is Test {
         creator = makeAddr("creator");
         owner = makeAddr("owner");
 
-        vm.prank(owner);
-        protocolRewards = new ProtocolRewards();
+        address protocolRewardsImp = address(new ProtocolRewards());
+        factory = new ERC1967Factory();
+
+        // initializeCallData is setting up: protocolRewards.initialize(owner);
+        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address)", owner);
+        address payable protocolRewardsAddr = payable(factory.deployAndCall(protocolRewardsImp, owner, initializeCallData));
+        protocolRewards = ProtocolRewards(protocolRewardsAddr);
+
         vm.label(address(protocolRewards), "protocolRewards");
 
         vm.deal(collector, 40 ether);

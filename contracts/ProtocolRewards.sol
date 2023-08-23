@@ -2,12 +2,13 @@
 pragma solidity 0.8.19;
 
 import {Ownable} from "solady/src/auth/Ownable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract ProtocolRewards is IProtocolRewards, Ownable {
+contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;
 
@@ -16,8 +17,14 @@ contract ProtocolRewards is IProtocolRewards, Ownable {
 
     using SafeTransferLib for address;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line func-visibility
     constructor() payable {
-        _initializeOwner(msg.sender);
+        _disableInitializers();
+    }
+
+    function initialize(address ownerAddress_) external initializer {
+        _initializeOwner(ownerAddress_);
     }
 
     /// @notice The total amount of ETH held in the contract
