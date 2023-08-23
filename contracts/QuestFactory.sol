@@ -407,7 +407,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @dev set a mintFeeRecipient for a specific address
     /// @param address_ The address of the account
     /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) public onlyOwner {
+    function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) external onlyOwner {
         mintFeeRecipientList[address_] = mintFeeRecipient_;
     }
 
