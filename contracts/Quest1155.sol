@@ -15,8 +15,14 @@ import {QuestFactory} from "./QuestFactory.sol";
 /// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens.
 /// @dev This contract will not work with RabbitHoleReceipt
 contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest1155 {
+    /*//////////////////////////////////////////////////////////////
+                                 USING
+    //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
 
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
     QuestFactory public questFactoryContract;
     bool public queued;
     bool public hasWithdrawn;
@@ -28,7 +34,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public redeemedTokens;
     uint256 public questFee;
+    // insert new vars here at the end to keep the storage layout the same
 
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
     constructor() {
@@ -59,21 +69,17 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         __ReentrancyGuard_init();
     }
 
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
     /// @notice Checks if the quest end time is passed
     modifier onlyEnded() {
         if (block.timestamp < endTime) revert NotEnded();
         _;
     }
 
-    /// @notice Checks if the quest end time has not passed
-    modifier whenNotEnded() {
-        if (block.timestamp > endTime) revert QuestEnded();
-        _;
-    }
-
-    /// @notice Checks if the quest start time is passed
-    modifier onlyStarted() {
-        if (block.timestamp < startTime) revert NotStarted();
+    modifier onlyQuestFactory() {
+        if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
         _;
     }
 
@@ -83,32 +89,36 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _;
     }
 
-    modifier onlyQuestFactory() {
-        if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
+    /// @notice Checks if the quest start time is passed
+    modifier onlyStarted() {
+        if (block.timestamp < startTime) revert NotStarted();
         _;
     }
 
-    /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
-    /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
-    function queue() public virtual onlyOwner {
-        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
-            revert InsufficientTokenBalance();
-        }
-        if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
-        queued = true;
-        emit Queued(block.timestamp);
+    /// @notice Checks if the quest end time has not passed
+    modifier whenNotEnded() {
+        if (block.timestamp > endTime) revert QuestEnded();
+        _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            EXTERNAL UPDATE
+    //////////////////////////////////////////////////////////////*/
     /// @notice Pauses the Quest
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function pause() external onlyOwner onlyStarted {
         _pause();
     }
 
-    /// @notice Unpauses the Quest
-    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() external onlyOwner onlyStarted {
-        _unpause();
+    /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
+    /// @dev Requires that the balance of the rewards in the contract is greater than or equal to the maximum amount of rewards that can be claimed by all users and the protocol
+    function queue() external virtual onlyOwner {
+        if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
+            revert InsufficientTokenBalance();
+        }
+        if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
+        queued = true;
+        emit Queued(block.timestamp);
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
@@ -129,10 +139,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
-    /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    function maxProtocolReward() external view returns (uint256) {
-        return (totalParticipants * questFee);
+    /// @notice Unpauses the Quest
+    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
+    function unPause() external onlyOwner onlyStarted {
+        _unpause();
     }
 
     /// @dev Function that transfers all 1155 tokens and ETH in the contract to the owner
@@ -146,6 +156,18 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
     }
 
+    /*//////////////////////////////////////////////////////////////
+                             EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
+    /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
+    function maxProtocolReward() external view returns (uint256) {
+        return (totalParticipants * questFee);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL UPDATE
+    //////////////////////////////////////////////////////////////*/
     /// @notice Internal function that transfers rewards from this contract
     /// @param to_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
@@ -153,7 +175,9 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         IERC1155(rewardToken).safeTransferFrom(address(this), to_, tokenId, amount_, "0x00");
     }
 
-    // Functions to receive ETH
+    /*//////////////////////////////////////////////////////////////
+                                DEFAULTS
+    //////////////////////////////////////////////////////////////*/
     receive() external payable {}
     fallback() external payable {}
 }

@@ -65,6 +65,27 @@ The main contracts are:
 - `Quest Terminal Key` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestTerminalKey.sol))
   - A contract for gating access and handling discounts for the Quest Terminal
 
+### Contract Structure
+
+Contracts are layed out in the following order:
+
+1. Use statements (i.e. `using SafeTransferLib for address;`)
+2. Contract storage - we use upgradable architecture so pay special attention to preserving the order of contract storage, and only add to the end.
+3. Contract constructors and initialization functions
+4. Modifiers
+5. External Update functions - anything that modifies contract state
+6. External View Functions - self explanatory
+7. Internal Update functions
+8. Internal View functions
+
+Interfaces should be used to hold the following:
+
+1. Events
+2. Errors
+3. Structs
+
+### Best Practices
+For anything not covered here please refer to the [Foundry Best Practices](https://book.getfoundry.sh/tutorials/best-practices) for more information.
 ---
 
 ## Patterns
