@@ -138,9 +138,7 @@ contract ProtocolRewardsTest is Test {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
-        vm.assume(amount <= protocolRewards.balanceOf(creator));
-        vm.assume(amount > 0);
-
+        amount = bound(amount, 1,  protocolRewards.balanceOf(creator));
         vm.prank(creator);
 
         protocolRewards.withdraw(creator, amount);
@@ -195,9 +193,7 @@ contract ProtocolRewardsTest is Test {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
-        vm.assume(amount <= protocolRewards.balanceOf(creator));
-        vm.assume(amount > 0);
-
+        amount = bound(amount, 1,  protocolRewards.balanceOf(creator));
         protocolRewards.withdrawFor(creator, amount);
 
         assertEq(creator.balance, beforeCreatorBalance + amount);
