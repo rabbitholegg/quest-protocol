@@ -6,15 +6,9 @@ import {ProtocolRewards} from "../contracts/ProtocolRewards.sol";
 import {ERC1967FactoryConstants} from "solady/src/utils/ERC1967FactoryConstants.sol";
 import {ERC1967Factory} from "solady/src/utils/ERC1967Factory.sol";
 
-// # To deploy and verify this contract run this below, replacing sepolia with the rpc alias of the network you are deploying on
-// forge script script/ProtocolRewards.s.sol:ProtocolRewardsScript --rpc-url sepolia --broadcast --verify -vvvv
-// this should deploy to 0x168437d131f8def2d94b555ff34f4539458dd6f9
-
-// to upgrade this contract
-// 1. deploy a new implementation (script todo)
-// 2. use the functions in the erc1967factory to upgrade it. This is deployed everywhere at 0x0000000000006396FF2a80c067f99B3d2Ab4Df24
-
-contract ProtocolRewardsScript is Script {
+// # To deploy and verify ProtocolRewards.sol run this command below
+// forge script script/ProtocolRewards.s.sol:ProtocolRewardsDeploy --rpc-url sepolia --broadcast --verify -vvvv
+contract ProtocolRewardsDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
 
@@ -28,6 +22,25 @@ contract ProtocolRewardsScript is Script {
         bytes32 salt = bytes32(bytes20(owner));
 
         factory.deployDeterministicAndCall(protocolRewardsImp, owner, salt, initializeCallData);
+
+        vm.stopBroadcast();
+    }
+}
+
+// to upgrade ProtocolRewards, run this command below:
+// ! important: make sure storage layouts are compatible first
+// forge script script/ProtocolRewards.s.sol:ProtocolRewardsUpgrade --rpc-url sepolia --broadcast --verify -vvvv
+contract ProtocolRewardsUpgrade is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        address protocolRewardsProxy = 0x168437d131f8deF2d94B555FF34f4539458DD6F9;
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        address protocolRewardsImp = address(new ProtocolRewards());
+        ERC1967Factory factory = ERC1967Factory(ERC1967FactoryConstants.ADDRESS);
+
+        factory.upgrade(protocolRewardsProxy, protocolRewardsImp);
 
         vm.stopBroadcast();
     }
