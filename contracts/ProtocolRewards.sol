@@ -8,6 +8,7 @@ import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
+/// @custom:oz-upgrades-from ProtocolRewardsV0
 contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;

@@ -27,8 +27,9 @@ contract ProtocolRewardsDeploy is Script {
     }
 }
 
-// to upgrade ProtocolRewards, run this command below:
-// ! important: make sure storage layouts are compatible first
+// to upgrade ProtocolRewards, run the commands below:
+// ! important: make sure storage layouts are compatible first:
+// forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract ProtocolRewards
 // forge script script/ProtocolRewards.s.sol:ProtocolRewardsUpgrade --rpc-url sepolia --broadcast --verify -vvvv
 contract ProtocolRewardsUpgrade is Script {
     function run() external {

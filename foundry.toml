@@ -7,6 +7,8 @@ solc_version = '0.8.19'
 auto_detect_solc = false
 optimizer = true
 optimizer_runs = 1_000
+build_info = true
+extra_output = ["storageLayout"]
 
 [fmt]
 multiline_func_header = "params_first"
