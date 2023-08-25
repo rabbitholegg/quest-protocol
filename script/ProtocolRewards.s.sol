@@ -25,6 +25,7 @@ contract ProtocolRewardsScript is Script {
 
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address)", owner);
         bytes32 salt = 0x0000000000000000000000000000000000000000000000000000000000000001;
+
         factory.deployDeterministicAndCall(protocolRewardsImp, owner, salt, initializeCallData);
 
         vm.stopBroadcast();
