@@ -61,12 +61,12 @@ contract ProtocolRewardsTest is Test {
     }
 
     // increase balance tests
-    function testExcessSupply() public {
+    function test_excessSupply() public {
         assertEq(protocolRewards.totalBalance(), 10 ether);
         assertEq(protocolRewards.excessSupply(), 20 ether);
     }
 
-    function testIncreaseBalance() public {
+    function test_increaseBalance() public {
         vm.prank(owner);
 
         vm.expectEmit();
@@ -91,14 +91,14 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.excessSupply(), 15 ether);
     }
 
-    function testIncreaseBalance_with_error_INVALID_AMOUNT() public {
+    function test_RevertIf_increaseBalance_INVALID_AMOUNT() public {
         vm.expectRevert(abi.encodeWithSignature("INVALID_AMOUNT()"));
 
         vm.prank(owner);
         protocolRewards.increaseBalance(collector, 100 ether);
     }
 
-    function testIncreaseBalanceBatch() public {
+    function test_increaseBalanceBatch() public {
         address[] memory addresses = new address[](2);
         addresses[0] = collector;
         addresses[1] = collector2;
@@ -117,7 +117,7 @@ contract ProtocolRewardsTest is Test {
     }
 
 
-    function testIncreaseBalanceBatch_with_error_INVALID_AMOUNT() public {
+    function test_RevertIf_increaseBalanceBatch_INVALID_AMOUNT() public {
         vm.expectRevert(abi.encodeWithSignature("INVALID_AMOUNT()"));
 
         address[] memory addresses = new address[](2);
@@ -145,7 +145,7 @@ contract ProtocolRewardsTest is Test {
         );
     }
 
-    function testWithdraw() public {
+    function test_withdraw() public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -162,7 +162,7 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
     }
 
-    function testfuzz_Withdraw(uint256 amount) public {
+    function test_fuzz_withdraw(uint256 amount) public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -176,7 +176,7 @@ contract ProtocolRewardsTest is Test {
     }
 
 
-    function testWithdrawFullBalance() public {
+    function test_withdrawFullBalance() public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -189,7 +189,7 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
     }
 
-    function testRevert_InvalidWithdrawToAddress() public {
+    function test_RevertIf_withdraw_ADDRESS_ZERO() public {
         uint256 creatorRewardsBalance = protocolRewards.balanceOf(creator);
 
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
@@ -197,7 +197,7 @@ contract ProtocolRewardsTest is Test {
         protocolRewards.withdraw(address(0), creatorRewardsBalance);
     }
 
-    function testRevert_WithdrawInvalidAmount() public {
+    function test_RevertIf_withdraw_INVALID_WITHDRAW() public {
         uint256 creatorRewardsBalance = protocolRewards.balanceOf(creator);
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_WITHDRAW()"));
@@ -205,7 +205,7 @@ contract ProtocolRewardsTest is Test {
         protocolRewards.withdraw(creator, creatorRewardsBalance + 1);
     }
 
-    function testWithdrawFor() public {
+    function test_withdrawFor() public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -217,7 +217,7 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
     }
 
-    function testFuzz_WithdrawFor(uint256 amount) public {
+    function test_Fuzz_withdrawFor(uint256 amount) public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -228,7 +228,7 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - amount);
     }
 
-    function testWithdrawForFullBalance() public {
+    function test_withdrawForFullBalance() public {
         uint256 beforeCreatorBalance = creator.balance;
         uint256 beforeTotalSupply = protocolRewards.totalSupply();
 
@@ -240,14 +240,14 @@ contract ProtocolRewardsTest is Test {
         assertEq(protocolRewards.totalSupply(), beforeTotalSupply - creatorRewardsBalance);
     }
 
-    function testRevert_WithdrawForInvalidAmount() public {
+    function test_RevertIf_withdrawFor_INVALID_WITHDRAW() public {
         uint256 creatorRewardsBalance = protocolRewards.balanceOf(creator);
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_WITHDRAW()"));
         protocolRewards.withdrawFor(creator, creatorRewardsBalance + 1);
     }
 
-    function testRevert_WithdrawForInvalidToAddress() public {
+    function test_RevertIf_withdrawFor_ADDRESS_ZERO() public {
         uint256 creatorRewardsBalance = protocolRewards.balanceOf(creator);
 
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));

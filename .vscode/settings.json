@@ -11,6 +11,8 @@
     "**/typechain-types": true,
     "**/lib": true,
   },
+  "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+  "solidity.packageDefaultDependenciesDirectory": "lib",
   "editor.formatOnSave": false,
   "solidity.formatter": "forge",
   "solidity.linter": "solhint",
