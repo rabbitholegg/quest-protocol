@@ -44,6 +44,22 @@ contract ProtocolRewardsTest is Test {
         require(success, "deposit failed");
     }
 
+    function test_transferExcessSupply() public {
+        assertEq(protocolRewards.excessSupply(), 20 ether);
+
+        vm.prank(owner);
+        protocolRewards.transferExcessSupply(collector2, 3 ether);
+
+        assertEq(protocolRewards.excessSupply(), 17 ether);
+        assertEq(collector2.balance, 3 ether);
+    }
+
+    function test_transferExcessSupply_Unauthorized_error() public {
+        vm.expectRevert(abi.encodeWithSignature("Unauthorized()"));
+
+        protocolRewards.transferExcessSupply(collector2, 3 ether);
+    }
+
     // increase balance tests
     function testExcessSupply() public {
         assertEq(protocolRewards.totalBalance(), 10 ether);
@@ -55,6 +71,18 @@ contract ProtocolRewardsTest is Test {
 
         vm.expectEmit();
         emit IncreaseBalance(collector, 5 ether);
+
+        protocolRewards.increaseBalance(collector, 5 ether);
+
+        assertEq(protocolRewards.balanceOf(collector), 5 ether);
+        assertEq(protocolRewards.totalBalance(), 15 ether);
+        assertEq(protocolRewards.excessSupply(), 15 ether);
+    }
+
+    function test_increaseBalance_with_role() public {
+        vm.prank(owner);
+        protocolRewards.grantRoles(collector2, 1);
+        vm.prank(collector2);
 
         protocolRewards.increaseBalance(collector, 5 ether);
 
