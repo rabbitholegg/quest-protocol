@@ -1,3 +1,0 @@
-solady/=lib/solady/
-solmate/=lib/solmate/src/
-forge-std/=lib/forge-std/src/
