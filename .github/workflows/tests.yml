@@ -21,6 +21,19 @@ jobs:
         with:
           node-version: 16.x
 
+      - id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - run: yarn
+      - run: yarn test
+
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -34,16 +47,3 @@ jobs:
 
       - name: "Run Forge Tests"
         run: "forge test"
-
-      - id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
-      - run: yarn
-      - run: yarn test

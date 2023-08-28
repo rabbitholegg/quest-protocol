@@ -14,6 +14,7 @@ extra_output = ["storageLayout"]
 multiline_func_header = "params_first"
 number_underscore = "thousands"
 quote_style = "double"
+libs = ["node_modules", "lib"]
 
 [rpc_endpoints]
 sepolia = "https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_SEPOLIA_API_KEY}"
