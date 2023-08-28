@@ -21,14 +21,17 @@ jobs:
         with:
           node-version: 16.x
 
-      # - name: "Install Foundry"
-      #   uses: "foundry-rs/foundry-toolchain@v1"
+      - name: "Install Foundry"
+        uses: "foundry-rs/foundry-toolchain@v1"
 
-      # - name: "Restore the cached build"
-      #   uses: "actions/cache/restore@v3"
-      #   with:
-      #     key: "foundry-build-${{ github.sha }}"
-      #     path: "out-optimized"
+      - name: "Restore the cached build"
+        uses: "actions/cache/restore@v3"
+        with:
+          key: "foundry-build-${{ github.sha }}"
+          path: "out-optimized"
+
+      - name: "Run Forge Tests"
+        run: "forge test"
 
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
