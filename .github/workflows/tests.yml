@@ -21,14 +21,16 @@ jobs:
         with:
           node-version: 16.x
 
-      - name: "Install Foundry"
-        uses: "foundry-rs/foundry-toolchain@v1"
-
-      - name: "Restore the cached build"
-        uses: "actions/cache/restore@v3"
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
         with:
-          key: "foundry-build-${{ github.sha }}"
-          path: "out-optimized"
+          version: nightly
+
+      - name: Install Dependencies
+        run: forge install
+
+      # - name: Run Lint Check
+      #   run: forge fmt --check
 
       - name: "Run Forge Tests"
         run: "forge test"
