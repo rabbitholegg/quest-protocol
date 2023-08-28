@@ -155,9 +155,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
     function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
         if (hasWithdrawn) revert AlreadyWithdrawn();
+        hasWithdrawn = true;
         rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
         rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
-        hasWithdrawn = true;
     }
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
