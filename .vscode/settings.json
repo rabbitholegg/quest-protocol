@@ -13,7 +13,6 @@
   },
   "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
   "solidity.packageDefaultDependenciesDirectory": "node_modules",
-  // "solidity.packageDefaultDependenciesDirectory": "lib",
   "editor.formatOnSave": false,
   "solidity.formatter": "forge",
   "solidity.linter": "solhint",
