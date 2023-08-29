@@ -220,7 +220,7 @@ contract ProtocolRewards is Initializable, OwnableRoles, IProtocolRewards {
             amount = balanceOf[to];
         }
 
-        balanceOf[to] -= amount;
+        _decreaseBalance(to, amount);
 
         emit Withdraw(to, to, amount);
 
