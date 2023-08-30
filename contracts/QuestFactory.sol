@@ -43,6 +43,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
+    /// @custom:oz-renamed-from mintFeeRecipient
     address public defaultMintFeeRecipient;
     uint256 private locked;
     address private questTerminalKeyContract; // deprecated
