@@ -16,12 +16,11 @@ contract ProtocolRewardsDeploy is Script {
 
         address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
         address protocolRewardsImp = address(new ProtocolRewards());
-        ERC1967Factory factory = ERC1967Factory(ERC1967FactoryConstants.ADDRESS);
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address)", owner);
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
         bytes32 salt = bytes32(bytes20(owner));
 
-        factory.deployDeterministicAndCall(protocolRewardsImp, owner, salt, initializeCallData);
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).deployDeterministicAndCall(protocolRewardsImp, owner, salt, initializeCallData);
 
         vm.stopBroadcast();
     }
@@ -38,10 +37,7 @@ contract ProtocolRewardsUpgrade is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        address protocolRewardsImp = address(new ProtocolRewards());
-        ERC1967Factory factory = ERC1967Factory(ERC1967FactoryConstants.ADDRESS);
-
-        factory.upgrade(protocolRewardsProxy, protocolRewardsImp);
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(protocolRewardsProxy, address(new ProtocolRewards()));
 
         vm.stopBroadcast();
     }

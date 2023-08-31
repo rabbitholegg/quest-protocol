@@ -21,7 +21,7 @@ contract QuestDeploy is Script {
     }
 }
 
-// # To deploy and verify Quest.sol run this command below
+// # To deploy and verify Quest1155.sol run this command below
 // forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv
 contract Quest1155Deploy is Script {
     function run() external {
