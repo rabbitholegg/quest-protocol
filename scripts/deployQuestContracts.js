@@ -9,7 +9,6 @@ async function main() {
   const Erc20Quest = await ethers.getContractFactory('Quest')
   const Erc1155Quest = await ethers.getContractFactory('Quest1155')
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
-  const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
   const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')
 
   // deploy new quest implementation
@@ -28,7 +27,7 @@ async function main() {
   // const NewImplementationAddress = await hre.upgrades.prepareUpgrade(questFactoryAddress, QuestFactory)
 
   // Validates and deploys a new implementation contract for QuestFactory
-  await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
+  // await hre.upgrades.forceImport(questFactoryAddress, QuestFactory)
   await hre.upgrades.validateUpgrade(questFactoryAddress, QuestFactory)
   const questFactoryImp = await QuestFactory.deploy()
   await questFactoryImp.deployed()

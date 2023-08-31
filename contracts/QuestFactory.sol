@@ -662,12 +662,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function processMintFee(address ref_, address _mintFeeRecipient) private {
         returnChange();
+        if (_mintFeeRecipient == address(0)) {
+            _mintFeeRecipient = defaultMintFeeRecipient;
+        }
         if (ref_ == address(0)) {
             _mintFeeRecipient.safeTransferETH(mintFee);
             return;
-        }
-        if (_mintFeeRecipient == address(0)) {
-            _mintFeeRecipient = defaultMintFeeRecipient;
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
