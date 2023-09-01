@@ -21,6 +21,7 @@ import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
 // solhint-disable-next-line max-states-count
+/// @custom:oz-upgrades-from QuestFactoryV0
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     /*//////////////////////////////////////////////////////////////
                                  USING

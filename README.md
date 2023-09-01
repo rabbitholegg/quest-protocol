@@ -45,7 +45,6 @@ Mainnet, Optimism, Polygon, Arbitrum, Base and Sepolia:
 |Contract Name|Address|
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
-|Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 |RabbitHole Tickets|0x0D380362762B0cf375227037f2217f59A4eC4b9E|
 |Protocol Rewards|0x168437d131f8deF2d94B555FF34f4539458DD6F9|
 
