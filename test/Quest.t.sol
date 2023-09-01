@@ -37,7 +37,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function setUp() public {
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
         rewardTokenAddress = address(
-            new SampleERC20(      
+            new SampleERC20(
                 DEFAULT_ERC20_NAME,
                 DEFAULT_ERC20_SYMBOL,
                 defaultTotalRewardsPlusFee,
@@ -186,7 +186,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Setup a reward token with fuzzed rewardAmountInWei
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, rewardAmountInWei, QUEST_FEE);
         rewardTokenAddress = address(
-            new SampleERC20(      
+            new SampleERC20(
                 DEFAULT_ERC20_NAME,
                 DEFAULT_ERC20_SYMBOL,
                 defaultTotalRewardsPlusFee,
@@ -293,7 +293,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Setup a reward token with fuzzed rewardAmountInWei
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(totalClaims, rewardAmountInWei, questFee);
         rewardTokenAddress = address(
-            new SampleERC20(      
+            new SampleERC20(
                 DEFAULT_ERC20_NAME,
                 DEFAULT_ERC20_SYMBOL,
                 defaultTotalRewardsPlusFee,
@@ -301,7 +301,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             )
         );
         // Get the participants starting balance
-        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
+        // uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         // Create new quest with fuzzed values
         quest = new Quest();
         quest =
@@ -378,7 +378,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
     function test_refund() public {
         address randomToken = address(
-            new SampleERC20(      
+            new SampleERC20(
                 "Random",
                 "RND",
                 defaultTotalRewardsPlusFee,
