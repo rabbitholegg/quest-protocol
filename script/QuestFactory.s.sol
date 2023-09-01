@@ -16,7 +16,7 @@ contract QuestFactoryUpgrade is Script {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
         address payable questfactoryAddress = payable(0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E);
         address proxyAdminAddress = 0xD28fbF7569f31877922cDc31a1A5B3C504E8faa1;
-        ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(payable(questfactoryAddress));
+        ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(questfactoryAddress);
 
         vm.startBroadcast(deployerPrivateKey);
 
