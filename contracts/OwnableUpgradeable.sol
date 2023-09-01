@@ -2,7 +2,7 @@
 // OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
 // Modified to pass in the owner address to the constructor
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
