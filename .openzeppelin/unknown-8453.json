@@ -1232,8 +1232,13 @@
         }
       }
     },
+<<<<<<< HEAD
     "ff2a37314e37cc1a5af685538699d2e42e0b7a3263286a9d1f30843355eddb0d": {
       "address": "0x378445fAaa7F2Dbed474625379CbC0c350d94612",
+=======
+    "9f8b819ed2e407dc174fa448b3b978ad0240e264aee1e083d8b334c3ca2e1ba7": {
+      "address": "0xD730Aef2379E8E0E5aD44A1D2e836bF7eC5e33b9",
+>>>>>>> origin/main
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -1338,7 +1343,11 @@
             "label": "quests",
             "offset": 0,
             "slot": "205",
+<<<<<<< HEAD
             "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)4667_storage)",
+=======
+            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)4656_storage)",
+>>>>>>> origin/main
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:40"
           },
@@ -1388,7 +1397,12 @@
             "slot": "211",
             "type": "t_address",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:46"
+=======
+            "src": "contracts/QuestFactory.sol:47",
+            "renamedFrom": "mintFeeRecipient"
+>>>>>>> origin/main
           },
           {
             "label": "locked",
@@ -1396,7 +1410,11 @@
             "slot": "212",
             "type": "t_uint256",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:47"
+=======
+            "src": "contracts/QuestFactory.sol:48"
+>>>>>>> origin/main
           },
           {
             "label": "questTerminalKeyContract",
@@ -1404,7 +1422,11 @@
             "slot": "213",
             "type": "t_address",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:48"
+=======
+            "src": "contracts/QuestFactory.sol:49"
+>>>>>>> origin/main
           },
           {
             "label": "nftQuestFee",
@@ -1412,7 +1434,11 @@
             "slot": "214",
             "type": "t_uint256",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:49"
+=======
+            "src": "contracts/QuestFactory.sol:50"
+>>>>>>> origin/main
           },
           {
             "label": "questNFTAddress",
@@ -1420,7 +1446,11 @@
             "slot": "215",
             "type": "t_address",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:50"
+=======
+            "src": "contracts/QuestFactory.sol:51"
+>>>>>>> origin/main
           },
           {
             "label": "ownerCollections",
@@ -1428,15 +1458,25 @@
             "slot": "216",
             "type": "t_mapping(t_address,t_array(t_address)dyn_storage)",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:51"
+=======
+            "src": "contracts/QuestFactory.sol:52"
+>>>>>>> origin/main
           },
           {
             "label": "nftQuestFeeList",
             "offset": 0,
             "slot": "217",
+<<<<<<< HEAD
             "type": "t_mapping(t_address,t_struct(NftQuestFees)4648_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:52"
+=======
+            "type": "t_mapping(t_address,t_struct(NftQuestFees)4637_storage)",
+            "contract": "QuestFactory",
+            "src": "contracts/QuestFactory.sol:53"
+>>>>>>> origin/main
           },
           {
             "label": "referralFee",
@@ -1444,7 +1484,11 @@
             "slot": "218",
             "type": "t_uint16",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:53"
+=======
+            "src": "contracts/QuestFactory.sol:54"
+>>>>>>> origin/main
           },
           {
             "label": "sablierV2LockupLinearAddress",
@@ -1452,7 +1496,11 @@
             "slot": "218",
             "type": "t_address",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:54"
+=======
+            "src": "contracts/QuestFactory.sol:55"
+>>>>>>> origin/main
           },
           {
             "label": "mintFeeRecipientList",
@@ -1460,7 +1508,11 @@
             "slot": "219",
             "type": "t_mapping(t_address,t_address)",
             "contract": "QuestFactory",
+<<<<<<< HEAD
             "src": "contracts/QuestFactory.sol:55"
+=======
+            "src": "contracts/QuestFactory.sol:56"
+>>>>>>> origin/main
           }
         ],
         "types": {
@@ -1500,7 +1552,11 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
+<<<<<<< HEAD
           "t_mapping(t_address,t_struct(NftQuestFees)4648_storage)": {
+=======
+          "t_mapping(t_address,t_struct(NftQuestFees)4637_storage)": {
+>>>>>>> origin/main
             "label": "mapping(address => struct IQuestFactory.NftQuestFees)",
             "numberOfBytes": "32"
           },
@@ -1508,7 +1564,11 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
+<<<<<<< HEAD
           "t_mapping(t_string_memory_ptr,t_struct(Quest)4667_storage)": {
+=======
+          "t_mapping(t_string_memory_ptr,t_struct(Quest)4656_storage)": {
+>>>>>>> origin/main
             "label": "mapping(string => struct IQuestFactory.Quest)",
             "numberOfBytes": "32"
           },
@@ -1520,7 +1580,11 @@
             "label": "string",
             "numberOfBytes": "32"
           },
+<<<<<<< HEAD
           "t_struct(NftQuestFees)4648_storage": {
+=======
+          "t_struct(NftQuestFees)4637_storage": {
+>>>>>>> origin/main
             "label": "struct IQuestFactory.NftQuestFees",
             "members": [
               {
@@ -1538,6 +1602,7 @@
             ],
             "numberOfBytes": "64"
           },
+<<<<<<< HEAD
           "t_struct(Quest)4667_storage": {
             "label": "struct IQuestFactory.Quest",
             "members": [
@@ -1936,6 +2001,9 @@
             "numberOfBytes": "64"
           },
           "t_struct(Quest)5445_storage": {
+=======
+          "t_struct(Quest)4656_storage": {
+>>>>>>> origin/main
             "label": "struct IQuestFactory.Quest",
             "members": [
               {

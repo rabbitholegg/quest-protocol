@@ -7536,8 +7536,8 @@
         }
       }
     },
-    "ff2a37314e37cc1a5af685538699d2e42e0b7a3263286a9d1f30843355eddb0d": {
-      "address": "0x3Dd9c4eB95518F536e5b83A92045f9229b4484E0",
+    "9f8b819ed2e407dc174fa448b3b978ad0240e264aee1e083d8b334c3ca2e1ba7": {
+      "address": "0xB00A3A3619F4E875Ac707416758C70BF22f7bFc1",
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -7642,7 +7642,7 @@
             "label": "quests",
             "offset": 0,
             "slot": "205",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)4667_storage)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(Quest)4656_storage)",
             "contract": "QuestFactory",
             "src": "contracts/QuestFactory.sol:40"
           },
@@ -7692,7 +7692,8 @@
             "slot": "211",
             "type": "t_address",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:46"
+            "src": "contracts/QuestFactory.sol:47",
+            "renamedFrom": "mintFeeRecipient"
           },
           {
             "label": "locked",
@@ -7700,7 +7701,7 @@
             "slot": "212",
             "type": "t_uint256",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:47"
+            "src": "contracts/QuestFactory.sol:48"
           },
           {
             "label": "questTerminalKeyContract",
@@ -7708,7 +7709,7 @@
             "slot": "213",
             "type": "t_address",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:48"
+            "src": "contracts/QuestFactory.sol:49"
           },
           {
             "label": "nftQuestFee",
@@ -7716,7 +7717,7 @@
             "slot": "214",
             "type": "t_uint256",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:49"
+            "src": "contracts/QuestFactory.sol:50"
           },
           {
             "label": "questNFTAddress",
@@ -7724,7 +7725,7 @@
             "slot": "215",
             "type": "t_address",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:50"
+            "src": "contracts/QuestFactory.sol:51"
           },
           {
             "label": "ownerCollections",
@@ -7732,15 +7733,15 @@
             "slot": "216",
             "type": "t_mapping(t_address,t_array(t_address)dyn_storage)",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:51"
+            "src": "contracts/QuestFactory.sol:52"
           },
           {
             "label": "nftQuestFeeList",
             "offset": 0,
             "slot": "217",
-            "type": "t_mapping(t_address,t_struct(NftQuestFees)4648_storage)",
+            "type": "t_mapping(t_address,t_struct(NftQuestFees)4637_storage)",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:52"
+            "src": "contracts/QuestFactory.sol:53"
           },
           {
             "label": "referralFee",
@@ -7748,7 +7749,7 @@
             "slot": "218",
             "type": "t_uint16",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:53"
+            "src": "contracts/QuestFactory.sol:54"
           },
           {
             "label": "sablierV2LockupLinearAddress",
@@ -7756,7 +7757,7 @@
             "slot": "218",
             "type": "t_address",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:54"
+            "src": "contracts/QuestFactory.sol:55"
           },
           {
             "label": "mintFeeRecipientList",
@@ -7764,7 +7765,7 @@
             "slot": "219",
             "type": "t_mapping(t_address,t_address)",
             "contract": "QuestFactory",
-            "src": "contracts/QuestFactory.sol:55"
+            "src": "contracts/QuestFactory.sol:56"
           }
         ],
         "types": {
@@ -7804,7 +7805,7 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(NftQuestFees)4648_storage)": {
+          "t_mapping(t_address,t_struct(NftQuestFees)4637_storage)": {
             "label": "mapping(address => struct IQuestFactory.NftQuestFees)",
             "numberOfBytes": "32"
           },
@@ -7812,7 +7813,7 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(Quest)4667_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(Quest)4656_storage)": {
             "label": "mapping(string => struct IQuestFactory.Quest)",
             "numberOfBytes": "32"
           },
@@ -7824,7 +7825,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(NftQuestFees)4648_storage": {
+          "t_struct(NftQuestFees)4637_storage": {
             "label": "struct IQuestFactory.NftQuestFees",
             "members": [
               {
@@ -7842,7 +7843,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Quest)4667_storage": {
+          "t_struct(Quest)4656_storage": {
             "label": "struct IQuestFactory.Quest",
             "members": [
               {

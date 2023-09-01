@@ -12,7 +12,7 @@
     "**/lib": true,
   },
   "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
-  "solidity.packageDefaultDependenciesDirectory": "lib",
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
   "editor.formatOnSave": false,
   "solidity.formatter": "forge",
   "solidity.linter": "solhint",

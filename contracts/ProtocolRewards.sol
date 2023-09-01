@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {Ownable} from "solady/src/auth/Ownable.sol";
+import {OwnableRoles} from "solady/src/auth/OwnableRoles.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
+/// @custom:oz-upgrades-from ProtocolRewardsV0
+contract ProtocolRewards is Initializable, OwnableRoles, IProtocolRewards {
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;
 
@@ -39,14 +40,14 @@ contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
 
     /// @notice transfer excessSupply onlyOwner
     /// @param to The address to transfer to
-    function transferExcessSupply(address to, uint256 amount) external onlyOwner {
+    function transferExcessSupply(address to, uint256 amount) external onlyOwnerOrRoles(_ROLE_0) {
         if (amount > this.excessSupply()) {
             revert INVALID_AMOUNT();
         }
         _transferExcessSupply(to, amount);
     }
 
-    /// @notice transfer excessSupply onlyOwner
+    /// @notice internal function to transfer excessSupply
     /// @param to The address to transfer to
     function _transferExcessSupply(address to, uint256 amount) internal {
         if (to == address(0)) {
@@ -75,7 +76,7 @@ contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
     /// @notice Allow admin to increase balance of an address only up the amount of excess ETH in the contract
     /// @param to The address to increase the balance of
     /// @param amount The amount to increase the balance by
-    function increaseBalance(address to, uint256 amount) external onlyOwner {
+    function increaseBalance(address to, uint256 amount) external onlyOwnerOrRoles(_ROLE_0) {
         if (amount > this.excessSupply()) {
             revert INVALID_AMOUNT();
         }
@@ -85,7 +86,7 @@ contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
     }
 
     /// @notice Increase the balance of addresses in amounts in a batch function
-    function increaseBalanceBatch(address[] calldata to, uint256[] calldata amounts) external onlyOwner {
+    function increaseBalanceBatch(address[] calldata to, uint256[] calldata amounts) external onlyOwnerOrRoles(_ROLE_0) {
         uint256 numRecipients = to.length;
 
         if (numRecipients != amounts.length) {
@@ -219,7 +220,7 @@ contract ProtocolRewards is Initializable, Ownable, IProtocolRewards {
             amount = balanceOf[to];
         }
 
-        balanceOf[to] -= amount;
+        _decreaseBalance(to, amount);
 
         emit Withdraw(to, to, amount);
 
