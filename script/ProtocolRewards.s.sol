@@ -42,3 +42,18 @@ contract ProtocolRewardsUpgrade is Script {
         vm.stopBroadcast();
     }
 }
+
+
+contract ProtocolRewardsUpdateRole is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        address payable protocolRewardsProxy = payable(0x168437d131f8deF2d94B555FF34f4539458DD6F9);
+        address roleAddress = 0x4dc20B851f8138CC4EB48121d2Cd8bde56822A44;
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        ProtocolRewards(protocolRewardsProxy).grantRoles(roleAddress, 1);
+
+        vm.stopBroadcast();
+    }
+}

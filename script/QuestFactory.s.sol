@@ -14,14 +14,14 @@ import {ProxyAdmin, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/
 contract QuestFactoryUpgrade is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
-        address questfactoryAddress = 0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E;
+        address payable questfactoryAddress = payable(0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E);
         address proxyAdminAddress = 0xD28fbF7569f31877922cDc31a1A5B3C504E8faa1;
         ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(payable(questfactoryAddress));
 
         vm.startBroadcast(deployerPrivateKey);
 
         ProxyAdmin(proxyAdminAddress).upgrade(questfactoryProxy, address(new QuestFactory()));
-        QuestFactory(payable(questfactoryAddress)).setDefaultReferralFeeRecipient(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c);
+        QuestFactory(questfactoryAddress).setDefaultReferralFeeRecipient(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c);
 
         vm.stopBroadcast();
     }
