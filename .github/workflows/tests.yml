@@ -21,15 +21,6 @@ jobs:
         with:
           node-version: 16.x
 
-      # - name: "Install Foundry"
-      #   uses: "foundry-rs/foundry-toolchain@v1"
-
-      # - name: "Restore the cached build"
-      #   uses: "actions/cache/restore@v3"
-      #   with:
-      #     key: "foundry-build-${{ github.sha }}"
-      #     path: "out-optimized"
-
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
@@ -42,3 +33,17 @@ jobs:
 
       - run: yarn
       - run: yarn test
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Dependencies
+        run: forge install
+
+      # - name: Run Lint Check
+      #   run: forge fmt --check
+
+      - name: "Run Forge Tests"
+        run: "forge test"

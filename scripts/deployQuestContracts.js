@@ -4,12 +4,10 @@ const { ethers } = require('hardhat')
 
 async function main() {
   const questFactoryAddress = '0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E' // production everywhere
-  const questTerminalKeyAddress = '0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab' // production everywhere
   const rabbitHoleTicketsAddress = '0x0D380362762B0cf375227037f2217f59A4eC4b9E' // production everywhere
   const Erc20Quest = await ethers.getContractFactory('Quest')
   const Erc1155Quest = await ethers.getContractFactory('Quest1155')
   const QuestFactory = await ethers.getContractFactory('QuestFactory')
-  const QuestTerminalKey = await ethers.getContractFactory('QuestTerminalKey')
   const RabbitHoleTickets = await ethers.getContractFactory('RabbitHoleTickets')
 
   // deploy new quest implementation

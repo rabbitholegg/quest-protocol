@@ -21,6 +21,7 @@ import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
 // solhint-disable-next-line max-states-count
+/// @custom:oz-upgrades-from QuestFactoryV0
 contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
     /*//////////////////////////////////////////////////////////////
                                  USING
@@ -43,6 +44,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
+    /// @custom:oz-renamed-from mintFeeRecipient
     address public defaultMintFeeRecipient;
     uint256 private locked;
     address private questTerminalKeyContract; // deprecated
