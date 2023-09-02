@@ -8,7 +8,7 @@ contract QuestFactoryMock {
         numberMinted = numberminted_;
     }
 
-    function getNumberMinted(string memory questId_) external view returns (uint256) {
+    function getNumberMinted(string memory) external view returns (uint256) {
         return numberMinted;
     }
 }

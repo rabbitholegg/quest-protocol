@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import {Script} from "forge-std/Script.sol";
 import {ProtocolRewards} from "../contracts/ProtocolRewards.sol";
+import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
 import {ERC1967FactoryConstants} from "solady/src/utils/ERC1967FactoryConstants.sol";
 import {ERC1967Factory} from "solady/src/utils/ERC1967Factory.sol";
 
@@ -33,11 +34,10 @@ contract ProtocolRewardsDeploy is Script {
 contract ProtocolRewardsUpgrade is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
-        address protocolRewardsProxy = 0x168437d131f8deF2d94B555FF34f4539458DD6F9;
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(protocolRewardsProxy, address(new ProtocolRewards()));
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.PROTOCOL_REWARDS_ADDRESS, address(new ProtocolRewards()));
 
         vm.stopBroadcast();
     }

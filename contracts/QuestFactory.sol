@@ -47,7 +47,8 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /// @custom:oz-renamed-from mintFeeRecipient
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    address private questTerminalKeyContract; // deprecated
+    /// @custom:oz-renamed-from questTerminalKeyContract
+    address public defaultReferralFeeRecipient;
     uint256 public nftQuestFee;
     address public questNFTAddress;
     mapping(address => address[]) public ownerCollections;
@@ -70,7 +71,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        address questTerminalKeyAddress_,
+        address defaultReferralFeeRecipientAddress_,
         address sablierV2LockupLinearAddress_,
         uint256 nftQuestFee_,
         uint16 referralFee_
@@ -83,7 +84,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = questTerminalKeyAddress_;
+        defaultReferralFeeRecipient = defaultReferralFeeRecipientAddress_;
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
@@ -413,11 +414,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         mintFeeRecipientList[address_] = mintFeeRecipient_;
     }
 
+    /// @dev set the nft quest fee for a list of addresses
+    /// @param toAddAddresses_ The list of addresses to set the nft quest fee for
+    /// @param fees_ The list of fees to set
     function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external onlyOwner {
         for (uint256 i = 0; i < toAddAddresses_.length; i++) {
             nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
         }
         emit NftQuestFeeListSet(toAddAddresses_, fees_);
+    }
+
+    /// @dev set the default referral fee recipient
+    /// @param defaultReferralFeeRecipient_ The address of the default referral fee recipient
+    function setDefaultReferralFeeRecipient(address defaultReferralFeeRecipient_) external onlyOwner {
+        defaultReferralFeeRecipient = defaultReferralFeeRecipient_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -664,9 +674,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function processMintFee(address ref_, address _mintFeeRecipient) private {
         returnChange();
+        if (_mintFeeRecipient == address(0)) {
+            _mintFeeRecipient = defaultMintFeeRecipient;
+        }
         if (ref_ == address(0)) {
-            _mintFeeRecipient.safeTransferETH(mintFee);
-            return;
+            ref_ = defaultReferralFeeRecipient;
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
