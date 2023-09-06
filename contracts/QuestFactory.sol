@@ -541,24 +541,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.mintFeeRecipient);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
 
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
             );
-
-        if (ref_ != address(0)) {
-            emit QuestClaimedReferred(
-                msg.sender,
-                currentQuest.questAddress,
-                questId_,
-                questContract_.rewardToken(),
-                questContract_.tokenId(),
-                ref_,
-                referralFee,
-                mintFee
-                );
-        }
     }
 
     /// @dev claim rewards with a referral address
@@ -582,7 +569,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.mintFeeRecipient);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
 
         emit QuestClaimed(
             msg.sender,
@@ -591,19 +578,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questContract_.rewardToken(),
             questContract_.rewardAmountInWei()
             );
-
-        if (ref_ != address(0)) {
-            emit QuestClaimedReferred(
-                msg.sender,
-                currentQuest.questAddress,
-                questId_,
-                questContract_.rewardToken(),
-                questContract_.rewardAmountInWei(),
-                ref_,
-                referralFee,
-                mintFee
-                );
-        }
     }
 
     function createERC20QuestInternal(
@@ -672,17 +646,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    function processMintFee(address ref_, address _mintFeeRecipient) private {
+    function processMintFee(address ref_, address mintFeeRecipient_) private {
         returnChange();
-        if (_mintFeeRecipient == address(0)) {
-            _mintFeeRecipient = defaultMintFeeRecipient;
+        if (mintFeeRecipient_ == address(0)) {
+            mintFeeRecipient_ = defaultMintFeeRecipient;
         }
         if (ref_ == address(0)) {
             ref_ = defaultReferralFeeRecipient;
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
-        _mintFeeRecipient.safeTransferETH(mintFee - referralAmount);
+        uint256 mintFeeAmount = mintFee - referralAmount;
+        mintFeeRecipient_.safeTransferETH(mintFeeAmount);
+
+        emit MintFeePaid(ref_, referralAmount, mintFeeRecipient_, mintFeeAmount);
     }
 
     function returnChange() private {

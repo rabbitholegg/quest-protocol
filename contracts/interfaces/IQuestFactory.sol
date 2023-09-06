@@ -74,16 +74,7 @@ interface IQuestFactory {
         address rewardToken,
         uint256 rewardAmountInWei
     );
-    event QuestClaimedReferred(
-        address indexed recipient,
-        address indexed questAddress,
-        string questId,
-        address rewardToken,
-        uint256 rewardAmountInWeiOrTokenId,
-        address referrer,
-        uint16 referralFee,
-        uint256 mintFeeEthWei
-    );
+    event MintFeePaid(address referrer, uint256 referrerAmount, address mintFeeRecipient, uint256 mintFeeRecipientAmount);
     event QuestCreated(
         address indexed creator,
         address indexed contractAddress,
