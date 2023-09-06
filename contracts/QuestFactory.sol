@@ -656,6 +656,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         }
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
+
         uint256 mintFeeAmount = mintFee - referralAmount;
         mintFeeRecipient_.safeTransferETH(mintFeeAmount);
 
