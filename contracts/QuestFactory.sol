@@ -175,7 +175,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
         currentQuest.questCreator = msg.sender;
-        currentQuest.mintFeeRecipient = getMintFeeRecipient(msg.sender);
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -545,7 +544,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
-            );
+        );
+
+        if (ref_ != address(0)) {
+            emit QuestClaimedReferred(
+                msg.sender,
+                currentQuest.questAddress,
+                questId_,
+                questContract_.rewardToken(),
+                questContract_.tokenId(),
+                ref_,
+                referralFee,
+                mintFee
+                );
+        }
     }
 
     /// @dev claim rewards with a referral address
@@ -577,7 +589,20 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             questId_,
             questContract_.rewardToken(),
             questContract_.rewardAmountInWei()
-            );
+        );
+
+        if (ref_ != address(0)) {
+            emit QuestClaimedReferred(
+                msg.sender,
+                currentQuest.questAddress,
+                questId_,
+                questContract_.rewardToken(),
+                questContract_.rewardAmountInWei(),
+                ref_,
+                referralFee,
+                mintFee
+                );
+        }
     }
 
     function createERC20QuestInternal(
@@ -622,7 +647,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questCreator = msg.sender;
-        currentQuest.mintFeeRecipient = getMintFeeRecipient(msg.sender);
         if (durationTotal_ > 0) {
             currentQuest.durationTotal = durationTotal_;
             currentQuest.questType = "erc20Stream";
@@ -648,12 +672,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
 
     function processMintFee(address ref_, address mintFeeRecipient_) private {
         returnChange();
-        if (mintFeeRecipient_ == address(0)) {
-            mintFeeRecipient_ = defaultMintFeeRecipient;
-        }
-        if (ref_ == address(0)) {
-            ref_ = defaultReferralFeeRecipient;
-        }
+        if (mintFeeRecipient_ == address(0)) mintFeeRecipient_ = defaultMintFeeRecipient;
+        if (ref_ == address(0)) ref_ = defaultReferralFeeRecipient;
+
         uint256 referralAmount = (mintFee * referralFee) / 10_000;
         ref_.safeTransferETH(referralAmount);
 
