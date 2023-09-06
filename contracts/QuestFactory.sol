@@ -540,7 +540,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator, questId_);
 
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
@@ -581,7 +581,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator);
+        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator, questId_);
 
         emit QuestClaimed(
             msg.sender,
@@ -670,7 +670,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_) private {
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private {
         returnChange();
         if (mintFeeRecipient_ == address(0)) mintFeeRecipient_ = defaultMintFeeRecipient;
         if (ref_ == address(0)) ref_ = defaultReferralFeeRecipient;
@@ -681,7 +681,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 mintFeeAmount = mintFee - referralAmount;
         mintFeeRecipient_.safeTransferETH(mintFeeAmount);
 
-        emit MintFeePaid(ref_, referralAmount, mintFeeRecipient_, mintFeeAmount);
+        emit MintFeePaid(questId_, ref_, referralAmount, mintFeeRecipient_, mintFeeAmount);
     }
 
     function returnChange() private {
