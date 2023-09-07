@@ -84,7 +84,6 @@ interface IQuestFactory {
         uint16 referralFee,
         uint256 mintFeeEthWei
     );
-    event MintFeePaid(string indexed questId, address referrer, uint256 referrerAmountWei, address mintFeeRecipient, uint256 mintFeeRecipientAmountWei);
     event QuestCreated(
         address indexed creator,
         address indexed contractAddress,
