@@ -499,19 +499,13 @@ describe('QuestFactory', () => {
         deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
           value: requiredFee + extraChange,
         })
-      ).to.emit(deployedFactoryContract, 'QuestClaimed')
-        .to.emit(deployedFactoryContract, 'MintFeePaid')
+      )
+        .to.emit(deployedFactoryContract, 'QuestClaimed')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
-        balanceBefore.add(requiredFee / 2)
+        balanceBefore.add(requiredFee)
       )
-
-      expect(await ethers.provider.getBalance(deployedFactoryContract.defaultReferralFeeRecipient())).to.equal(
-        balanceBefore.add(requiredFee / 2)
-      )
-
     })
 
     it('should transfer referral fee percentage of mintFee to referral on erc20 quest', async function () {
@@ -534,16 +528,15 @@ describe('QuestFactory', () => {
         deployedFactoryContract.connect(questUser).claim(erc20QuestId, messageHash, signature, affiliate.address, {
           value: requiredFee + extraChange,
         })
-      ).to.emit(deployedFactoryContract, 'QuestClaimed')
-        .to.emit(deployedFactoryContract, 'MintFeePaid')
+      )
+        .to.emit(deployedFactoryContract, 'QuestClaimed')
+        .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-
-      expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
-
       expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
-        mintFeeRecipientBalanceBefore.add(requiredFee / 2 - referralAmount)
+        mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
       )
+      expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
     })
   })
 
