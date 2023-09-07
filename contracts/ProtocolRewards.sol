@@ -86,6 +86,8 @@ contract ProtocolRewards is Initializable, OwnableRoles, IProtocolRewards {
     }
 
     /// @notice Increase the balance of addresses in amounts in a batch function
+    /// @param to The addresses to increase the balance of
+    /// @param amounts The amounts to increase the balance by
     function increaseBalanceBatch(address[] calldata to, uint256[] calldata amounts) external onlyOwnerOrRoles(_ROLE_0) {
         uint256 numRecipients = to.length;
 
@@ -117,11 +119,17 @@ contract ProtocolRewards is Initializable, OwnableRoles, IProtocolRewards {
         }
     }
 
+    /// @notice internal function to increase balance
+    /// @param to The address to increase the balance of
+    /// @param amount The amount to increase the balance by
     function _increaseBalance(address to, uint256 amount) internal {
         balanceOf[to] += amount;
         totalBalance += amount;
     }
 
+    /// @notice internal function to decrease balance
+    /// @param to The address to decrease the balance of
+    /// @param amount The amount to decrease the balance by
     function _decreaseBalance(address to, uint256 amount) internal {
         balanceOf[to] -= amount;
         totalBalance -= amount;

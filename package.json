@@ -8,8 +8,7 @@
   "homepage": "https://rabbithole.gg",
   "keywords": [
     "rabbitholegg",
-    "quest",
-    "erc20"
+    "quest"
   ],
   "scripts": {
     "postinstall": "typechain",
@@ -64,7 +63,6 @@
     "ethereumjs-util": "^7.0.4",
     "ethers": "^5.7.2",
     "hardhat": "^2.17.1",
-    "hardhat-deploy": "^0.11.23",
     "hardhat-gas-reporter": "^1.0.9",
     "hardhat-preprocessor": "^0.1.5",
     "husky": ">=6",

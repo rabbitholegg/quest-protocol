@@ -2,7 +2,6 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require("dotenv").config();
-require("hardhat-deploy");
 import { HardhatUserConfig } from "hardhat/types";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox"; // need to comment this out to verify on base
