@@ -163,7 +163,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
-        emit ProtocolFeeDistributed(rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
+        emit ProtocolFeeDistributed(questId, rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
     }
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.

@@ -5,7 +5,7 @@ interface IQuest {
     event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint256 timestamp);
     event JsonSpecCIDSet(string cid);
-    event ProtocolFeeDistributed(address rewardToken, address protocolFeeRecipient, uint256 protocolFeeForRecipient, address owner, uint256 remainingBalanceForOwner);
+    event ProtocolFeeDistributed(string questId, address rewardToken, address protocolFeeRecipient, uint256 protocolFeeForRecipient, address owner, uint256 remainingBalanceForOwner);
 
     error AlreadyClaimed();
     error AlreadyWithdrawn();
