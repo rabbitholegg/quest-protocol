@@ -12,6 +12,9 @@ interface IProtocolRewards {
     /// @param comment Optional user comment
     event Deposit(address indexed from, address indexed to, bytes4 indexed reason, uint256 amount, string comment);
 
+    /// @notice IncreaseBalance Event
+    /// @param to To user (within contract)
+    /// @param amount Amount of deposit
     event IncreaseBalance(address indexed to, uint256 amount);
 
     /// @notice Withdraw Event
@@ -20,6 +23,10 @@ interface IProtocolRewards {
     /// @param amount Amount of deposit
     event Withdraw(address indexed from, address indexed to, uint256 amount);
 
+    /// @notice TransferExcessSupply Event
+    /// @param from From user
+    /// @param to To user (within contract)
+    /// @param amount Amount of deposit
     event TransferExcessSupply(address indexed from, address indexed to, uint256 amount);
 
     /// @notice Cannot send to address zero
