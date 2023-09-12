@@ -85,7 +85,7 @@ interface IQuestFactory {
         uint256 mintFeeEthWei
     );
     event MintFeePaid(
-        string indexed questId,
+        string questId,
         address rabbitHoleAddress,
         uint256 rabbitHoleAmountWei,
         address questCreatorAddress,
