@@ -493,19 +493,26 @@ describe('QuestFactory', () => {
       const extraChange = 100
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
-      const balanceBefore = await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))
+      const balanceBefore = await ethers.provider.getBalance(owner.address)
+      const pRbalanceBefore = await ethers.provider.getBalance(protocolRecipient.address)
 
       await expect(
         deployedFactoryContract.connect(questUser).claimRewards(erc20QuestId, messageHash, signature, {
           value: requiredFee + extraChange,
         })
-      )
-        .to.emit(deployedFactoryContract, 'QuestClaimed')
+      ).to.emit(deployedFactoryContract, 'QuestClaimed')
+        .to.emit(deployedFactoryContract, 'MintFeePaid')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
-        balanceBefore.add(requiredFee)
+
+      expect(await ethers.provider.getBalance(owner.address)).to.equal(
+        balanceBefore.add(ethers.BigNumber.from(requiredFee).div(3))
       )
+
+      expect(await ethers.provider.getBalance(protocolRecipient.address)).to.equal(
+        pRbalanceBefore.add(ethers.BigNumber.from(requiredFee).mul(2).div(3))
+      )
+
     })
 
     it('should transfer referral fee percentage of mintFee to referral on erc20 quest', async function () {
@@ -516,27 +523,32 @@ describe('QuestFactory', () => {
       signature = await wallet.signMessage(utils.arrayify(messageHash))
       const requiredFee = 1000
       const extraChange = 100
-      const referralAmount = (requiredFee * referralFee) / 10_000
       await deployedFactoryContract.setMintFee(requiredFee)
       await time.setNextBlockTimestamp(startDate)
-      const mintFeeRecipientBalanceBefore = await ethers.provider.getBalance(
-        deployedFactoryContract.getMintFeeRecipient(owner.address)
-      )
+      const questCreatorBalanceBefore = await ethers.provider.getBalance(owner.address)
       const affiliateBalanceBefore = await ethers.provider.getBalance(affiliate.address)
+      const pRbalanceBefore = await ethers.provider.getBalance(protocolRecipient.address)
 
       await expect(
         deployedFactoryContract.connect(questUser).claim(erc20QuestId, messageHash, signature, affiliate.address, {
           value: requiredFee + extraChange,
         })
-      )
-        .to.emit(deployedFactoryContract, 'QuestClaimed')
-        .to.emit(deployedFactoryContract, 'QuestClaimedReferred')
+      ).to.emit(deployedFactoryContract, 'QuestClaimed')
+        .to.emit(deployedFactoryContract, 'MintFeePaid')
         .to.emit(deployedFactoryContract, 'ExtraMintFeeReturned')
         .withArgs(questUser.address, extraChange)
-      expect(await ethers.provider.getBalance(deployedFactoryContract.getMintFeeRecipient(owner.address))).to.equal(
-        mintFeeRecipientBalanceBefore.add(requiredFee - referralAmount)
-      )
-      expect(await ethers.provider.getBalance(affiliate.address)).to.equal(affiliateBalanceBefore.add(referralAmount))
+
+        expect(await ethers.provider.getBalance(owner.address)).to.equal(
+          questCreatorBalanceBefore.add(ethers.BigNumber.from(requiredFee).div(3))
+        )
+
+        expect(await ethers.provider.getBalance(protocolRecipient.address)).to.equal(
+          pRbalanceBefore.add(ethers.BigNumber.from(requiredFee).div(3))
+        )
+
+        expect(await ethers.provider.getBalance(affiliate.address)).to.equal(
+          affiliateBalanceBefore.add(ethers.BigNumber.from(requiredFee).div(3))
+        )
     })
   })
 
