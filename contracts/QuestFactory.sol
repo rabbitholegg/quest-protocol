@@ -554,7 +554,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questContract_.rewardToken(),
                 questContract_.tokenId(),
                 ref_,
-                referralFee,
+                3333, //referralFee,
                 mintFee
                 );
         }
@@ -599,9 +599,9 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
                 questContract_.rewardToken(),
                 questContract_.rewardAmountInWei(),
                 ref_,
-                referralFee,
+                3333, //referralFee,
                 mintFee
-                );
+            );
         }
     }
 
