@@ -675,14 +675,22 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 oneThirdMintfee = mintFee / 3;
 
         if(ref_ == address(0)){
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee * 2);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-
+            if(mintFeeRecipient_ == RHQuestCreator){
+                protocolFeeRecipient.safeTransferETH(mintFee);
+            } else {
+                protocolFeeRecipient.safeTransferETH(oneThirdMintfee * 2);
+                mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
+            }
             emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee * 2, mintFeeRecipient_, oneThirdMintfee, ref_, 0);
         } else {
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-            ref_.safeTransferETH(oneThirdMintfee);
+            if(mintFeeRecipient_ == RHQuestCreator){
+                protocolFeeRecipient.safeTransferETH(oneThirdMintfee * 2);
+                ref_.safeTransferETH(oneThirdMintfee);
+            } else {
+                protocolFeeRecipient.safeTransferETH(oneThirdMintfee);
+                mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
+                ref_.safeTransferETH(oneThirdMintfee);
+            }
 
             emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee, mintFeeRecipient_, oneThirdMintfee, ref_, oneThirdMintfee);
         }
