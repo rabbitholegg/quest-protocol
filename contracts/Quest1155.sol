@@ -135,7 +135,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     {
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
-        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
+        if (questFee > 0) {
+            uint256 oneHalfQuestFee = questFee / 2;
+            protocolFeeRecipient.safeTransferETH(oneHalfQuestFee);
+            owner().safeTransferETH(oneHalfQuestFee);
+        }
         emit ClaimedSingle(account_, rewardToken, 1);
     }
 
