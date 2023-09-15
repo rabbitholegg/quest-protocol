@@ -10,7 +10,7 @@ import {ProxyAdmin, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/
 
 // # To Upgrade QuestFactory.sol run this command below
 // ! important: make sure storage layouts are compatible first:
-// yarn clean && forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract QuestFactory
+// bun clean && forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract QuestFactory
 // forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --rpc-url sepolia --broadcast --verify -vvvv
 contract QuestFactoryUpgrade is Script {
     function run() external {

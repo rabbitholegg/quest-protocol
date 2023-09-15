@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 // Inherits
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "../OwnableUpgradeable.sol";
+import {OwnableUpgradeable} from "../libraries/OwnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /// @title QuestFactory

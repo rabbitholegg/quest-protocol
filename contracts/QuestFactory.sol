@@ -3,8 +3,8 @@ pragma solidity ^0.8.18;
 
 // Inherits
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {LegacyStorage} from "./libraries/LegacyStorage.sol";
+import {OwnableRoles} from "solady/src/auth/OwnableRoles.sol";
 // Implements
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 // Leverages
@@ -22,7 +22,7 @@ import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 /// @dev This contract is used to create quests and handle claims
 // solhint-disable-next-line max-states-count
 /// @custom:oz-upgrades-from QuestFactoryV0
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFactory {
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -76,8 +76,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         uint256 nftQuestFee_,
         uint16 referralFee_
     ) external initializer {
-        __Ownable_init(ownerAddress_);
-        __AccessControl_init();
+        _initializeOwner(ownerAddress_);
         questFee = 2000; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
@@ -328,6 +327,11 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     /*//////////////////////////////////////////////////////////////
                                   SET
     //////////////////////////////////////////////////////////////*/
+
+    /// @dev temporary function to set owner for solady ownable
+    function setOwnerOnce() external {
+        if(msg.sender == 0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c) _initializeOwner(msg.sender);
+    }
 
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
