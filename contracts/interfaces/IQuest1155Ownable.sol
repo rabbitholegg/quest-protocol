@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 import {IOwnable} from "./IOwnable.sol";
 import {IQuest1155} from "./IQuest1155.sol";
