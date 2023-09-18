@@ -151,13 +151,19 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
     }
 
-    /// @notice Function that allows either the protocol fee recipient or the owner to withdraw the remaining tokens in the contract
-    /// @dev Can only be called after the quest has ended - pays protocol fee and returns remaining tokens to owner
-    function withdrawRemainingTokens() external onlyProtocolFeeRecipientOrOwner onlyWithdrawAfterEnd {
+    /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner
+    /// @dev Can only be called after the quest has ended
+    function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
-        rewardToken.safeTransfer(protocolFeeRecipient, this.protocolFee());
-        rewardToken.safeTransfer(owner(), rewardToken.balanceOf(address(this)));
+
+        uint256 protocolFeeForRecipient = this.protocolFee() / 2;
+        rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
+
+        uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
+        rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
+
+        emit ProtocolFeeDistributed(questId, rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
     }
 
     /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
