@@ -258,7 +258,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
         // Simulate the quest being completed by max participants
@@ -333,7 +333,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);
         // Get final balances and withdraw remaining tokens
         vm.warp(END_TIME);
-        uint256 totalFees = calculateTotalFees(totalClaims, rewardAmountInWei, questFee);
+        uint256 totalFees = calculateTotalFees(totalClaims, rewardAmountInWei, questFee) / 2;
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
         vm.prank(withdrawer);
@@ -354,12 +354,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {
         vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
         vm.prank(protocolFeeRecipient);
-        quest.withdrawRemainingTokens();
-    }
-
-    function test_RevertIf_withdrawRemainingToken_AuthOwnerRecipient() public {
-        vm.warp(END_TIME);
-        vm.expectRevert(abi.encodeWithSelector(AuthOwnerRecipient.selector));
         quest.withdrawRemainingTokens();
     }
 

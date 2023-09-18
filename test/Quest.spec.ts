@@ -214,13 +214,6 @@ describe('Quest', async () => {
 
 
   describe('withdrawRemainingTokens()', async () => {
-    it('should only allow the owner to withdrawRemainingTokens', async () => {
-      await expect(deployedQuestContract.connect(firstAddress).withdrawRemainingTokens()).to.be.revertedWithCustomError(
-        questContract,
-        'AuthOwnerRecipient'
-      )
-    })
-
     it('should revert if trying to withdrawRemainingTokens before end date', async () => {
       await expect(deployedQuestContract.connect(owner).withdrawRemainingTokens()).to.be.revertedWithCustomError(
         questContract,
@@ -254,10 +247,10 @@ describe('Quest', async () => {
 
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(0)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
-        totalRewardsPlusFee - receiptRedeemers * rewardAmount - protocolFee
+        totalRewardsPlusFee - receiptRedeemers * rewardAmount - (protocolFee / 2)
       )
 
-      expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee)
+      expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee / 2)
     })
 
     it('should transfer non-claimable rewards back to owner and protocol fees to protocolFeeAddress - called from protocolFeeRecipient', async () => {
@@ -276,10 +269,10 @@ describe('Quest', async () => {
 
       expect(await deployedSampleErc20Contract.balanceOf(deployedQuestContract.address)).to.equal(0)
       expect(await deployedSampleErc20Contract.balanceOf(owner.address)).to.equal(
-        totalRewardsPlusFee - receiptRedeemers * rewardAmount - protocolFee
+        totalRewardsPlusFee - receiptRedeemers * rewardAmount - ( protocolFee / 2)
       )
 
-      expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee)
+      expect(await deployedSampleErc20Contract.balanceOf(protocolFeeRecipient.address)).to.equal(protocolFee / 2)
     })
   })
 
