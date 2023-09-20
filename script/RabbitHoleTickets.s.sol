@@ -30,8 +30,8 @@ contract RabbitHoleTicketsDeploy is Script {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
         ITransparentUpgradeableProxy RabbitHoleTicketsProxy = ITransparentUpgradeableProxy(C.RABBIT_HOLE_TICKETS_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
-        bytes memory ogData = vm.parseJson(json, "$.rabbitHoleTicketsOgImpl");
-        bytes memory data = vm.parseJson(json, "$.rabbitHoleTicketsData");
+        bytes memory ogData = vm.parseJsonBytes(json, "$.rabbitHoleTicketsOgImpl");
+        bytes memory data = vm.parseJsonBytes(json, "$.rabbitHoleTicketsData");
 
         vm.startBroadcast(deployerPrivateKey);
 

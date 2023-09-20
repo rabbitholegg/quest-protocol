@@ -7,7 +7,7 @@ import {QuestContractConstants as C} from "../contracts/libraries/QuestContractC
 contract ProxyAdminDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
-        bytes memory data = vm.parseJson(vm.readFile("script/deployDataBytes.json"), "$.proxyAdminImpl");
+        bytes memory data = vm.parseJsonBytes(vm.readFile("script/deployDataBytes.json"), "$.proxyAdminImpl");
 
         vm.startBroadcast(deployerPrivateKey);
 

@@ -30,8 +30,8 @@ contract QuestFactoryDeploy is Script {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
         ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(C.QUEST_FACTORY_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
-        bytes memory ogData = vm.parseJson(json, "$.questFactoryOgImpl");
-        bytes memory data = vm.parseJson(json, "$.questFactoryData");
+        bytes memory ogData = vm.parseJsonBytes(json, "$.questFactoryOgImpl");
+        bytes memory data = vm.parseJsonBytes(json, "$.questFactoryData");
 
         vm.startBroadcast(deployerPrivateKey);
 
