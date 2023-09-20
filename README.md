@@ -149,14 +149,26 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 ---
 
 ## Deployment
+1. Deploy the ProxyAdmin
+`forge script script/ProxyAdmin.s.sol:ProxyAdminDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+2. Deploy QuestFactory (this also upgrades it to the latest version)
+`forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+3. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
+`forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+4. Deploy Quest
+`forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+5. Deploy Quest1155
+`forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
+6. Set any storage variables manually if need be.
 
-### RabbitHoleReceipt and QuestFactory
+### Depricated hardhat-deploy method
+#### RabbitHoleReceipt and QuestFactory
 - checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
 
-### QuestTerminalKey
+#### QuestTerminalKey
 - checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
 
-### RabbitHoleTickets
+#### RabbitHoleTickets
 - checkout from sha `70a56a1567dcd9c4d6f7718388667c5e0564fb2f`
 (must add in the deploy script manually)
 
@@ -167,16 +179,14 @@ then:
 
 ## Upgrading
 
-All contracts except the Quest instances are upgradable contracts.
+important: make sure storage layouts are compatible, by running the upgrades-core validate script on the contract you are upgrading, for example:
+`forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract RabbitHoleTickets`
 
-1. `yarn hardhat run --network network_name scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js`
-   1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's
-      usually because the contract wasn't deployed by the time verification ran. You can run verification again
-      with `yarn hardhat verify --network network_name IMPLENTATION_ADDRESS` where the implementation address is in the
-      output of the upgrade script.
-2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
-   the upgrade script)
-3. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
+Then to upgrade a contract, run one of the following commands:
+`forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
 
 ---
 
