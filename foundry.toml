@@ -10,6 +10,7 @@ optimizer_runs = 1_000
 build_info = true
 extra_output = ["storageLayout"]
 libs = ["node_modules", "lib"]
+fs_permissions = [{ access = "read", path = "./"}]
 
 [fmt]
 multiline_func_header = "params_first"
