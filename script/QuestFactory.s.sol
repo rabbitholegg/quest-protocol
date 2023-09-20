@@ -20,6 +20,7 @@ contract QuestFactoryUpgrade is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         ProxyAdmin(C.PROXY_ADMIN_ADDRESS).upgrade(questfactoryProxy, address(new QuestFactory()));
+        QuestFactory(C.QUEST_FACTORY_ADDRESS).setOwnerOnce(); // only needed once, delete after run
 
         vm.stopBroadcast();
     }
