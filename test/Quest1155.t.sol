@@ -25,6 +25,7 @@ contract TestQuest1155 is Test, Errors, Events {
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
     address participant = makeAddr(("participant"));
+    address owner = makeAddr(("owner"));
 
     function setUp() public {
         questFactoryMock = address(new QuestFactoryMock());
@@ -57,7 +58,7 @@ contract TestQuest1155 is Test, Errors, Events {
         assertEq(TOKEN_ID, quest.tokenId(), "tokenId not set");
         assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
-        assertEq(address(questFactoryMock), quest.owner(), "owner should be set");
+        assertEq(questFactoryMock, quest.owner(), "owner should be set");
     }
 
     function test_RevertIf_initialize_EndTimeInPast() public {
@@ -261,20 +262,22 @@ contract TestQuest1155 is Test, Errors, Events {
         SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
+        vm.prank(owner);
         quest.queue();
 
-        uint256 ownerOGBalance = questFactoryMock.balance;
+        uint256 ownerOGBalance = owner.balance;
         vm.warp(END_TIME + 1);
         vm.prank(protocolFeeRecipient);
 
         quest.withdrawRemainingTokens();
         assertEq(
-            questFactoryMock.balance,
+            owner.balance,
             ownerOGBalance + 100000000,
             "owner should have received remaining ETH"
         );
         assertEq(
-            SampleERC1155(sampleERC1155).balanceOf(questFactoryMock, TOKEN_ID),
+            SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID),
             100000,
             "owner should have received remaining ERC1155"
         );
@@ -282,20 +285,50 @@ contract TestQuest1155 is Test, Errors, Events {
 
     // todo add fuzz test
 
-    // function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {
-    //     vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
-    //     vm.prank(protocolFeeRecipient);
-    //     quest.withdrawRemainingTokens();
-    // }
+    function test_RevertIf_withdrawRemainingToken_NotEnded() public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100000;
+        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        vm.deal(address(quest), 100000000);
+        vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
+        vm.prank(owner);
+        quest.queue();
 
-    // function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
-    //     vm.warp(END_TIME);
-    //     vm.startPrank(protocolFeeRecipient);
-    //     quest.withdrawRemainingTokens();
-    //     vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
-    //     quest.withdrawRemainingTokens();
-    //     vm.stopPrank();
-    // }
+        vm.expectRevert(abi.encodeWithSelector(NotEnded.selector));
+        vm.prank(protocolFeeRecipient);
+        quest.withdrawRemainingTokens();
+    }
+
+    function test_RevertIf_withdrawRemainingToken_NotQueued() public {
+        vm.expectRevert(abi.encodeWithSelector(NotQueued.selector));
+        vm.prank(protocolFeeRecipient);
+        quest.withdrawRemainingTokens();
+    }
+
+    function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
+        vm.warp(END_TIME);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100000;
+        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        vm.deal(address(quest), 100000000);
+        vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
+        vm.prank(owner);
+        quest.queue();
+
+        vm.warp(END_TIME + 1);
+        vm.prank(protocolFeeRecipient);
+
+        quest.withdrawRemainingTokens();
+
+        vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
+        quest.withdrawRemainingTokens();
+    }
 
     // /*//////////////////////////////////////////////////////////////
     //                         EXTERNAL VIEW
