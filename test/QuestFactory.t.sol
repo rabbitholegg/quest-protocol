@@ -68,6 +68,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(defaultReferralFeeRecipient, questFactory.defaultReferralFeeRecipient(), "defaultReferralFeeRecipient should be set");
     }
 
+    /*//////////////////////////////////////////////////////////////
+                             CREATE QUESTS
+    //////////////////////////////////////////////////////////////*/
     function test_create1155QuestAndQueue() public {
         vm.startPrank(owner);
         mintSampleERC1155(1, TOTAL_PARTICIPANTS);
@@ -137,6 +140,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                CLAIM
+    //////////////////////////////////////////////////////////////*/
     function test_claim_with_claim1155Rewards() public{
         vm.startPrank(owner);
 
