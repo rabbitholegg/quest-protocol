@@ -200,9 +200,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    /////////////
-    // helpers //
-    /////////////
+    /*//////////////////////////////////////////////////////////////
+                                HELPERS
+    //////////////////////////////////////////////////////////////*/
     function mintSampleERC1155(uint256 tokenId, uint256 amount) public {
         uint256[] memory ids = new uint256[](1);
         ids[0] = tokenId;
