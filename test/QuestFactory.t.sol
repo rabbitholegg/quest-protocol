@@ -10,15 +10,12 @@ import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/src/utils/LibClone.sol";
-import {LibString} from "solady/src/utils/LibString.sol";
-import {ECDSA} from "solady/src/utils/ECDSA.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
 contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
-    using LibString for uint256;
 
     QuestFactory questFactory;
     SampleERC1155 sampleERC1155;
@@ -158,7 +155,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.warp(START_TIME + 1);
 
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
-        bytes memory signature = signHash(msgHash);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
         questFactory.claim{value: NFT_QUEST_FEE}("questId", msgHash, signature, referrer);
@@ -187,7 +184,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.warp(START_TIME + 1);
 
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
-        bytes memory signature = signHash(msgHash);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
         questFactory.claim{value: QUEST_FEE}("questId", msgHash, signature, referrer);
@@ -206,11 +203,5 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         sampleERC1155.batchMint(owner, ids, amounts);
-    }
-
-    function signHash(bytes32 msgHash) public view returns (bytes memory) {
-        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        return abi.encodePacked(r, s, v);
     }
 }
