@@ -22,4 +22,9 @@ contract TestUtils {
     ) internal pure returns (uint256) {
         return (totalParticipants * rewardAmount * questFee) / 10_000;
     }
+
+
+  // const maxTotalRewards = calculateTotalRewards
+  // const maxProtocolReward = calculateTotalFees
+  // const transferAmount = calculateTotalRewardsPlusFee
 }
