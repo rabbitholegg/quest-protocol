@@ -73,7 +73,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     //////////////////////////////////////////////////////////////*/
     function test_create1155QuestAndQueue() public {
         vm.startPrank(owner);
-        mintSampleERC1155(1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(owner, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         address questAddress = questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
@@ -146,7 +146,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claim_with_claim1155Rewards() public{
         vm.startPrank(owner);
 
-        mintSampleERC1155(1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(owner, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
@@ -198,16 +198,5 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
 
         vm.stopPrank();
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                                HELPERS
-    //////////////////////////////////////////////////////////////*/
-    function mintSampleERC1155(uint256 tokenId, uint256 amount) public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = tokenId;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = amount;
-        sampleERC1155.batchMint(owner, ids, amounts);
     }
 }
