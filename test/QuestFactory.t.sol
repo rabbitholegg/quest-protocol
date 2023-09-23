@@ -6,6 +6,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
+import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
@@ -61,7 +62,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             REFERRAL_FEE
         );
         vm.prank(owner);
-        questFactory.setMintFee(MINT_FEE);
+        questFactory.setMintFee(MINT_FEE); // todo this should be set in initialize
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -146,6 +147,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.stopPrank();
     }
+
+    // test_RevertIf_createQuestAndQueue_reward_address_not_in_reward_allowlist
+    // test_RevertIf_createQuestAndQueue_existing_quest_id
 
     /*//////////////////////////////////////////////////////////////
                                 CLAIM
@@ -286,6 +290,43 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         // claim fee rewards
         assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
         assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2, "protocolFeeRecipient mint fee");
+
+        vm.stopPrank();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                VIEW
+    //////////////////////////////////////////////////////////////*/
+    function test_questData() public {
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        IQuestFactory.QuestData memory questData = questFactory.questData("questId");
+
+        assertEq(questData.questAddress, questAddress);
+        assertEq(questData.rewardToken, address(sampleERC20));
+        assertEq(questData.queued, true);
+        assertEq(questData.questFee, QUEST_FEE);
+        assertEq(questData.startTime, START_TIME);
+        assertEq(questData.endTime, END_TIME);
+        assertEq(questData.totalParticipants, TOTAL_PARTICIPANTS);
+        assertEq(questData.numberMinted, 0);
+        assertEq(questData.redeemedTokens, 0);
+        assertEq(questData.rewardAmountOrTokenId, REWARD_AMOUNT);
+        assertEq(questData.hasWithdrawn, false);
 
         vm.stopPrank();
     }
