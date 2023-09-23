@@ -142,11 +142,7 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_not_enough_eth() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
 
         vm.expectRevert(abi.encodeWithSelector(InsufficientETHBalance.selector));
         vm.prank(questFactoryMock);
@@ -154,11 +150,7 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_queue() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
 
         vm.prank(questFactoryMock);
@@ -172,11 +164,7 @@ contract TestQuest1155 is Test, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_singleClaim() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -204,11 +192,7 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_singleClaim_NotQuestFactory() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -218,11 +202,7 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_NotStarted() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -234,11 +214,7 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_whenNotPaused() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -255,11 +231,7 @@ contract TestQuest1155 is Test, Errors, Events {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -286,11 +258,7 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_withdrawRemainingToken_NotEnded() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -309,12 +277,7 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
-        vm.warp(END_TIME);
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100000;
-        SampleERC1155(sampleERC1155).batchMint(address(quest), ids, amounts);
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, 100000);
         vm.deal(address(quest), 100000000);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
