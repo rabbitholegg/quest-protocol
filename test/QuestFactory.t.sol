@@ -21,16 +21,18 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     SampleERC1155 sampleERC1155;
     SampleERC20 sampleERC20;
     uint256 claimSignerPrivateKey;
+    uint256 TOTAL_PARTICIPANTS = 300;
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
-    uint256 TOTAL_PARTICIPANTS = 300;
+    uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 NFT_QUEST_FEE = 10;
-    uint16 QUEST_FEE = 2000;
     uint256 REWARD_AMOUNT = 10;
-    uint40 DURATION_TOTAL = 10000;
+    uint16 QUEST_FEE = 2000;
+    uint256 MINT_FEE = 100;
     address defaultReferralFeeRecipient = makeAddr("defaultReferralFeeRecipient");
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
+    address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
     address referrer = makeAddr(("referrer"));
     address owner = makeAddr(("owner"));
@@ -40,11 +42,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory = QuestFactory(questFactoryAddress);
 
         sampleERC1155 = new SampleERC1155();
-        sampleERC20 = new SampleERC20("name", "symbol", 1000000, owner);
+        sampleERC20 = new SampleERC20("name", "symbol", 1000000, questCreator);
         Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
         claimSignerPrivateKey = claimSigner.privateKey;
         vm.deal(owner, 1000000);
         vm.deal(participant, 1000000);
+        vm.deal(questCreator, 1000000);
 
         questFactory.initialize(
             claimSigner.addr,
@@ -57,6 +60,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             NFT_QUEST_FEE,
             REFERRAL_FEE
         );
+        vm.prank(owner);
+        questFactory.setMintFee(MINT_FEE);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -72,8 +77,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
                              CREATE QUESTS
     //////////////////////////////////////////////////////////////*/
     function test_create1155QuestAndQueue() public {
-        vm.startPrank(owner);
-        sampleERC1155.mintSingle(owner, 1, TOTAL_PARTICIPANTS);
+        vm.startPrank(questCreator);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         address questAddress = questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
@@ -94,10 +100,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_createERC20StreamQuest() public {
         vm.startPrank(owner);
-
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20StreamQuest(
             address(sampleERC20),
             END_TIME,
@@ -111,16 +117,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         Quest quest = Quest(payable(questAddress));
         assertEq(quest.startTime(), START_TIME, "startTime should be set");
+        assertEq(quest.durationTotal(), DURATION_TOTAL, "durationTotal should be set");
 
         vm.stopPrank();
     }
 
     function test_createQuestAndQueue() public{
         vm.startPrank(owner);
-
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
@@ -143,10 +150,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     /*//////////////////////////////////////////////////////////////
                                 CLAIM
     //////////////////////////////////////////////////////////////*/
-    function test_claim_with_claim1155Rewards() public{
-        vm.startPrank(owner);
+    function test_claim_with_claim1155Rewards_with_referrer() public{
+        vm.startPrank(questCreator);
 
-        sampleERC1155.mintSingle(owner, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
@@ -158,25 +165,66 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "questId",
             "actionSpec"
         );
-        vm.warp(START_TIME + 1);
 
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: NFT_QUEST_FEE}("questId", msgHash, signature, referrer);
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, referrer);
 
+        // 1155 reward
         assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+
+        // claim fee & nft quset fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
 
         vm.stopPrank();
     }
 
-    function test_claim_with_claimRewards() public{
+    function test_claim_with_claim1155Rewards_without_referrer() public{
+        vm.startPrank(questCreator);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.setApprovalForAll(address(questFactory), true);
+
+        questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+            address(sampleERC1155),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            1,
+            "questId",
+            "actionSpec"
+        );
+
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+
+        // 1155 reward
+        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+
+        // claim fee & nft quset fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2 + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
+
+        vm.stopPrank();
+    }
+
+    function test_claim_with_claimRewards_with_referrer() public{
         vm.startPrank(owner);
-
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
@@ -187,15 +235,57 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "actionSpec",
             0
         );
-        vm.warp(START_TIME + 1);
 
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
         questFactory.claim{value: QUEST_FEE}("questId", msgHash, signature, referrer);
 
+        // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // claim fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocolFeeRecipient mint fee");
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        vm.stopPrank();
+    }
+
+    function test_claim_with_claimRewards_without_referrer() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claim{value: QUEST_FEE}("questId", msgHash, signature, address(0));
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // claim fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2, "protocolFeeRecipient mint fee");
 
         vm.stopPrank();
     }
