@@ -105,6 +105,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+
+        vm.expectEmit(true,false,true,true);
+        emit QuestCreatedWithAction(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT, "actionSpec");
+
         address questAddress = questFactory.createERC20StreamQuest(
             address(sampleERC20),
             END_TIME,
@@ -129,6 +133,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+
+        vm.expectEmit(true,false,true,true);
+        emit QuestCreated(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT);
+
         address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
@@ -136,7 +144,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
+            "",
             0
         );
 
