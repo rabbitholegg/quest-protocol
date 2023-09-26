@@ -101,7 +101,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         _;
     }
 
-    // string memory questId_, bytes32 hash_, bytes memory signature_, address ref_, uint256 amount_
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
         bytes memory hashc = abi.encodePacked(msg.sender, claimData_.questId);
@@ -657,6 +656,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
     }
 
+    /// @dev Internal function to create an erc20 quest
+    /// @param data_ The erc20 quest data struct
     function createERC20QuestInternal(ERC20QuestData memory data_) internal returns (address) {
         Quest storage currentQuest = quests[data_.questId];
         address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, data_.questId)));
