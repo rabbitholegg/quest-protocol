@@ -18,7 +18,6 @@ interface IQuestFactory {
     error QuestNotQueued();
     error QuestNotStarted();
     error QuestEnded();
-    error QuestTypeNotSupported();
     error Reentrancy();
     error ReferralFeeTooHigh();
     error RewardNotAllowed();
@@ -56,6 +55,26 @@ interface IQuestFactory {
         uint256 redeemedTokens;
         uint256 rewardAmountOrTokenId;
         bool hasWithdrawn;
+    }
+
+    struct ClaimData {
+        string questId;
+        bytes32 hashBytes;
+        bytes signature;
+        address ref;
+        uint256 amount;
+    }
+
+    struct ERC20QuestData {
+        address rewardTokenAddress;
+        uint256 endTime;
+        uint256 startTime;
+        uint256 totalParticipants;
+        uint256 rewardAmount;
+        string questId;
+        string actionSpec;
+        uint40 durationTotal;
+        string questType;
     }
 
     // Events

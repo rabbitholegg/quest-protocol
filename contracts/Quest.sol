@@ -137,7 +137,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_)
+    function singleClaim(address account_, uint256 amount_)
         external
         virtual
         nonReentrant
@@ -145,7 +145,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         whenNotPaused
         onlyQuestFactory
     {
-        uint256 totalRedeemableRewards = rewardAmountInWei;
+        uint256 totalRedeemableRewards = amount_ > 0 ? amount_ : rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
         emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);

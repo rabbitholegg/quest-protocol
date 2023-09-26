@@ -101,19 +101,24 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         _;
     }
 
-    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
-        Quest storage currentQuest = quests[questId_];
-        bytes32 encodedHash;
-        if (ref_ == address(0)) {
-            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_));
-        } else {
-            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_, ref_));
+    // string memory questId_, bytes32 hash_, bytes memory signature_, address ref_, uint256 amount_
+    modifier claimChecks(ClaimData memory claimData_) {
+        Quest storage currentQuest = quests[claimData_.questId];
+        bytes memory hashc = abi.encodePacked(msg.sender, claimData_.questId);
+
+        if (claimData_.ref != address(0)) {
+            hashc = abi.encodePacked(hashc, claimData_.ref);
         }
+        if (claimData_.amount > 0){
+            hashc = abi.encodePacked(hashc, claimData_.amount);
+        }
+
+        bytes32 encodedHash = keccak256(hashc);
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (encodedHash != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (encodedHash != claimData_.hashBytes) revert InvalidHash();
+        if (recoverSigner(claimData_.hashBytes, claimData_.signature) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
 
@@ -241,14 +246,54 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint40 durationTotal_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            actionSpec_,
-            durationTotal_
+            ERC20QuestData(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionSpec_,
+                durationTotal_,
+                "erc20Stream"
+            )
+        );
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
+        return newQuest;
+    }
+
+    /// @dev Create a dynamic reward quest and start it at the same time.
+    /// @notice The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionSpec_ The JSON action spec for the quest
+    /// @return address the quest contract address
+    function createERC20DynamicQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionSpec_,
+        uint40 durationTotal_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createERC20QuestInternal(
+            ERC20QuestData(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionSpec_,
+                durationTotal_,
+                "erc20Dynamic"
+            )
         );
         transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
@@ -275,14 +320,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            actionSpec_,
-            0
+            ERC20QuestData(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionSpec_,
+                0,
+                "erc20"
+            )
         );
         transferTokensAndOwnership(newQuest, rewardTokenAddress_);
         return newQuest;
@@ -298,13 +346,21 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param signature_ The signature of the hash
     /// @param ref_ The referral address
     function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
-        if (quests[questId_].questType.eq("erc20")) {
-            claimRewardsRef(questId_, hash_, signature_, ref_);
-        } else if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(questId_, hash_, signature_, ref_);
-        } else {
-            revert QuestTypeNotSupported();
+        if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
+        } else { // erc20, erc20Stream
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
         }
+    }
+
+    function claimDynamicRewards(
+        string memory questId_,
+        bytes32 hash_,
+        bytes memory signature_,
+        address ref_,
+        uint256 amount_
+    ) external payable {
+        claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, amount_));
     }
 
     /// @dev claim rewards for a quest
@@ -312,7 +368,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(questId_, hash_, signature_, address(0));
+        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
     }
 
     /// @dev claim rewards for a quest
@@ -320,7 +376,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(questId_, hash_, signature_, address(0));
+        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -524,16 +580,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     //////////////////////////////////////////////////////////////*/
 
     /// @dev claim rewards for a quest with a referral address
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claim1155RewardsRef(
-        string memory questId_,
-        bytes32 hash_,
-        bytes memory signature_,
-        address ref_
-    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
-        Quest storage currentQuest = quests[questId_];
+    /// @param claimData_ The claim data struct
+    function claim1155RewardsRef(ClaimData memory claimData_) private
+        nonReentrant
+        sufficientMintFee
+        claimChecks(claimData_)
+    {
+        Quest storage currentQuest = quests[claimData_.questId];
         IQuest1155Ownable questContract_ = IQuest1155Ownable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
@@ -543,20 +596,20 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         ++currentQuest.numberMinted;
         questContract_.singleClaim(msg.sender);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator, questId_);
+        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
 
         emit Quest1155Claimed(
-            msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
+            msg.sender, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
         );
 
-        if (ref_ != address(0)) {
+        if (claimData_.ref != address(0)) {
             emit QuestClaimedReferred(
                 msg.sender,
                 currentQuest.questAddress,
-                questId_,
+                claimData_.questId,
                 questContract_.rewardToken(),
                 questContract_.tokenId(),
-                ref_,
+                claimData_.ref,
                 3333, //referralFee,
                 mintFee
                 );
@@ -564,17 +617,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     /// @dev claim rewards with a referral address
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    /// @param ref_ The referral address
-    function claimRewardsRef(
-        string memory questId_,
-        bytes32 hash_,
-        bytes memory signature_,
-        address ref_
-    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
-        Quest storage currentQuest = quests[questId_];
+    /// @param claimData_ The claim data struct
+    function claimRewardsRef(ClaimData memory claimData_) private
+        nonReentrant
+        sufficientMintFee
+        claimChecks(claimData_)
+    {
+        Quest storage currentQuest = quests[claimData_.questId];
         IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
@@ -582,91 +631,79 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         currentQuest.addressMinted[msg.sender] = true;
         ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
+        questContract_.singleClaim(msg.sender, claimData_.amount);
 
-        if (mintFee > 0) processMintFee(ref_, currentQuest.questCreator, questId_);
+        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
 
         emit QuestClaimed(
             msg.sender,
             currentQuest.questAddress,
-            questId_,
+            claimData_.questId,
             questContract_.rewardToken(),
             questContract_.rewardAmountInWei()
         );
 
-        if (ref_ != address(0)) {
+        if (claimData_.ref != address(0)) {
             emit QuestClaimedReferred(
                 msg.sender,
                 currentQuest.questAddress,
-                questId_,
+                claimData_.questId,
                 questContract_.rewardToken(),
                 questContract_.rewardAmountInWei(),
-                ref_,
+                claimData_.ref,
                 3333, //referralFee,
                 mintFee
             );
         }
     }
 
-    function createERC20QuestInternal(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory questId_,
-        string memory actionSpec_,
-        uint40 durationTotal_
-    ) internal returns (address) {
-        Quest storage currentQuest = quests[questId_];
-        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
+    function createERC20QuestInternal(ERC20QuestData memory data_) internal returns (address) {
+        Quest storage currentQuest = quests[data_.questId];
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, data_.questId)));
 
-        if (bytes(actionSpec_).length > 0) {
+        currentQuest.questAddress = address(newQuest);
+        currentQuest.totalParticipants = data_.totalParticipants;
+        currentQuest.questCreator = msg.sender;
+        currentQuest.durationTotal = data_.durationTotal;
+        currentQuest.questType = data_.questType;
+
+        if (bytes(data_.actionSpec).length > 0) {
             emit QuestCreatedWithAction(
                 msg.sender,
                 address(newQuest),
-                questId_,
-                "erc20",
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmount_,
-                actionSpec_
-                );
+                data_.questId,
+                currentQuest.questType,
+                data_.rewardTokenAddress,
+                data_.endTime,
+                data_.startTime,
+                data_.totalParticipants,
+                data_.rewardAmount,
+                data_.actionSpec
+            );
         } else {
             emit QuestCreated(
                 msg.sender,
                 address(newQuest),
-                questId_,
-                "erc20",
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmount_
-                );
-        }
-        currentQuest.questAddress = address(newQuest);
-        currentQuest.totalParticipants = totalParticipants_;
-        currentQuest.questCreator = msg.sender;
-        if (durationTotal_ > 0) {
-            currentQuest.durationTotal = durationTotal_;
-            currentQuest.questType = "erc20Stream";
-        } else {
-            currentQuest.questType = "erc20";
+                data_.questId,
+                currentQuest.questType,
+                data_.rewardTokenAddress,
+                data_.endTime,
+                data_.startTime,
+                data_.totalParticipants,
+                data_.rewardAmount
+            );
         }
 
         IQuestOwnable(newQuest).initialize(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
+            data_.rewardTokenAddress,
+            data_.endTime,
+            data_.startTime,
+            data_.totalParticipants,
+            data_.rewardAmount,
+            data_.questId,
             questFee,
             protocolFeeRecipient,
-            durationTotal_,
+            data_.durationTotal,
             sablierV2LockupLinearAddress
         );
 

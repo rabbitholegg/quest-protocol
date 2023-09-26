@@ -163,7 +163,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         vm.prank(questFactoryMock);
         vm.expectEmit(true, true, false, false, address(quest));
         emit ClaimedSingle(participant, rewardTokenAddress, REWARD_AMOUNT_IN_WEI);
-        quest.singleClaim(participant);
+        quest.singleClaim(participant, 0);
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
             startingBalance + REWARD_AMOUNT_IN_WEI,
@@ -220,7 +220,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         vm.prank(questFactoryMock);
         vm.expectEmit(true, true, false, false, address(quest));
         emit ClaimedSingle(participant, rewardTokenAddress, rewardAmountInWei);
-        quest.singleClaim(participant);
+        quest.singleClaim(participant, 0);
         // Check that the participant received the correct amount of tokens
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
@@ -234,14 +234,14 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_RevertIf_singleClaim_NotQuestFactory() public {
         vm.warp(START_TIME);
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
-        quest.singleClaim(participant);
+        quest.singleClaim(participant, 0);
     }
 
     function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {
         vm.warp(START_TIME - 1);
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(ClaimWindowNotStarted.selector));
-        quest.singleClaim(participant);
+        quest.singleClaim(participant, 0);
     }
 
     function test_RevertIf_singleClaim_whenNotPaused() public {
@@ -249,7 +249,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.pause();
         vm.warp(START_TIME);
         vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
+        quest.singleClaim(participant, 0);
         vm.stopPrank();
     }
 
@@ -328,7 +328,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             vm.warp(START_TIME + i);
             vm.prank(questFactoryMock);
             emit ClaimedSingle(claimer, rewardTokenAddress, rewardAmountInWei);
-            quest.singleClaim(claimer);
+            quest.singleClaim(claimer, 0);
         }
         QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);
         // Get final balances and withdraw remaining tokens
