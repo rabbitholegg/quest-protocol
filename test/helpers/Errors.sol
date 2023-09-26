@@ -17,4 +17,10 @@ contract Errors {
     error AuthOwnerRecipient();
     error Unauthorized();
     error EnforcedPause();
+
+    // Quest1155
+    error InsufficientTokenBalance();
+    error InsufficientETHBalance();
+    error NotEnded();
+    error NotQueued();
 }
