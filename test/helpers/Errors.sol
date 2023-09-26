@@ -23,4 +23,7 @@ contract Errors {
     error InsufficientETHBalance();
     error NotEnded();
     error NotQueued();
+
+    // RabbitHoleTickets
+    error OnlyMinter();
 }
