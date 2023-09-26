@@ -33,4 +33,5 @@ contract Errors {
     error AddressAlreadyMinted();
     error QuestEnded();
     error InvalidMintFee();
+    error MsgValueLessThanQuestNFTFee();
 }
