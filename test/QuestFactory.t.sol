@@ -205,7 +205,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
     }
 
-    function test_revertIf_createQuestAndQueue_Erc20QuestAddressNotSet() public{
+    function test_RevertIf_createQuestAndQueue_Erc20QuestAddressNotSet() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
         questFactory.setErc20QuestAddress(address(0));
@@ -321,7 +321,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: QUEST_FEE}("questId", msgHash, signature, referrer);
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, referrer);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -357,7 +357,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: QUEST_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -367,6 +367,135 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2, "protocolFeeRecipient mint fee");
 
         vm.stopPrank();
+    }
+
+    function test_RevertIf_claim_QuestNotStarted() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.expectRevert(abi.encodeWithSelector(QuestNotStarted.selector));
+        vm.startPrank(participant);
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+    }
+
+    function test_RevertIf_claim_InvalidHash() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        vm.warp(START_TIME + 1);
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.expectRevert(abi.encodeWithSelector(InvalidHash.selector));
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+    }
+
+    function test_RevertIf_claim_AddressAlreadyMinted() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        vm.warp(START_TIME + 1);
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+
+        vm.expectRevert(abi.encodeWithSelector(AddressAlreadyMinted.selector));
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+    }
+
+    function test_RevertIf_claim_QuestEnded() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.warp(END_TIME + 1);
+        vm.startPrank(participant);
+        vm.expectRevert(abi.encodeWithSelector(QuestEnded.selector));
+        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+    }
+
+    function test_RevertIf_claim_InvalidMintFee() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        vm.expectRevert(abi.encodeWithSelector(InvalidMintFee.selector));
+        questFactory.claim{value: MINT_FEE -1}("questId", msgHash, signature, address(0));
     }
 
     /*//////////////////////////////////////////////////////////////

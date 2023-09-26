@@ -28,4 +28,9 @@ contract Errors {
     error RewardNotAllowed();
     error QuestIdUsed();
     error Erc20QuestAddressNotSet();
+    error QuestNotStarted();
+    error InvalidHash();
+    error AddressAlreadyMinted();
+    error QuestEnded();
+    error InvalidMintFee();
 }
