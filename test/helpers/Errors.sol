@@ -23,4 +23,9 @@ contract Errors {
     error InsufficientETHBalance();
     error NotEnded();
     error NotQueued();
+
+    // QuestFactory
+    error RewardNotAllowed();
+    error QuestIdUsed();
+    error Erc20QuestAddressNotSet();
 }

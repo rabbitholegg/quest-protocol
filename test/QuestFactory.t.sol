@@ -148,8 +148,75 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    // test_RevertIf_createQuestAndQueue_reward_address_not_in_reward_allowlist
-    // test_RevertIf_createQuestAndQueue_existing_quest_id
+    function test_RevertIf_createQuestAndQueue_RewardNotAllowed() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), false);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        vm.expectRevert(abi.encodeWithSelector(RewardNotAllowed.selector));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+    }
+
+    function test_RevertIf_createQuestAndQueue_QuestIdUsed() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+    }
+
+    function test_revertIf_createQuestAndQueue_Erc20QuestAddressNotSet() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+        questFactory.setErc20QuestAddress(address(0));
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+
+        vm.expectRevert(abi.encodeWithSelector(Erc20QuestAddressNotSet.selector));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+    }
 
     /*//////////////////////////////////////////////////////////////
                                 CLAIM
