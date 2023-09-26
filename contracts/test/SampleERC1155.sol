@@ -10,4 +10,12 @@ contract SampleERC1155 is ERC1155 {
     function batchMint(address to, uint256[] memory ids, uint256[] memory amounts) public {
         _batchMint(to, ids, amounts, "0x0");
     }
+
+    function mintSingle(address to, uint256 tokenId, uint256 amount) public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = tokenId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+        _batchMint(to, ids, amounts, "0x0");
+    }
 }
