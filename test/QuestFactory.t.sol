@@ -99,7 +99,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_RevertIf_reate1155QuestAndQueue_MsgValueLessThanQuestNFTFee() public {
+    function test_RevertIf_create1155QuestAndQueue_MsgValueLessThanQuestNFTFee() public {
         vm.startPrank(questCreator);
 
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
