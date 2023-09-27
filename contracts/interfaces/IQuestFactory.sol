@@ -58,6 +58,26 @@ interface IQuestFactory {
         bool hasWithdrawn;
     }
 
+    struct ClaimData {
+        string questId;
+        bytes32 hashBytes;
+        bytes signature;
+        address ref;
+        uint256 amount;
+    }
+
+    struct ERC20QuestData {
+        address rewardTokenAddress;
+        uint256 endTime;
+        uint256 startTime;
+        uint256 totalParticipants;
+        uint256 rewardAmount;
+        string questId;
+        string actionSpec;
+        uint40 durationTotal;
+        string questType;
+    }
+
     // Events
     event ExtraMintFeeReturned(address indexed recipient, uint256 amount);
     event MintFeeSet(uint256 mintFee);
