@@ -512,20 +512,24 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.claim{value: MINT_FEE -1}("questId", msgHash, signature, address(0));
     }
 
-    function test_fuzz_claim(string memory questId_, address ref_) public{
-        vm.assume(ref_ != address(0));
+    function test_fuzz_claim(string memory questId_, uint256 totalParticipants_, uint256 rewardAmount_) public{
+        totalParticipants_ = bound(totalParticipants_, 1, 1000000000);
+        rewardAmount_ = bound(rewardAmount_, 1, totalParticipants_ * 1000000000);
+
+        uint256 totalRewards = calculateTotalRewardsPlusFee(totalParticipants_, rewardAmount_, QUEST_FEE);
+        sampleERC20.mint(questCreator, totalRewards);
 
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), totalRewards);
         questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
+            totalParticipants_,
+            rewardAmount_,
             questId_,
             "actionSpec",
             0
@@ -533,19 +537,19 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, questId_, ref_));
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, questId_, referrer));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}(questId_, msgHash, signature, ref_);
+        questFactory.claim{value: MINT_FEE}(questId_, msgHash, signature, referrer);
 
         // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant), rewardAmount_, "particpiant erc20 balance");
 
         // claim fee rewards
         assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
         assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocolFeeRecipient mint fee");
-        assertEq(ref_.balance, MINT_FEE / 3, "referrer mint fee");
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
     }
 
     /*//////////////////////////////////////////////////////////////
