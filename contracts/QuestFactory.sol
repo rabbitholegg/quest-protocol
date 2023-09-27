@@ -103,7 +103,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
-        bytes memory hashc = abi.encodePacked(msg.sender, claimData_.questId);
+        bytes memory hashc = claimData_.ref != address(0) ? abi.encodePacked(msg.sender, claimData_.questId, claimData_.ref) : abi.encodePacked(msg.sender, claimData_.questId);
 
         if (claimData_.ref != address(0)) {
             hashc = abi.encodePacked(hashc, claimData_.ref);
