@@ -76,7 +76,6 @@ contract TestRabbitHoleTickets is Test, Errors, Events {
     function test_RevertIf_mint_OnlyMinter() public {
         uint256 tokenId = 1;
         uint256 amount = 1;
-        address to = makeAddr("to");
 
         vm.expectRevert(abi.encodeWithSelector(OnlyMinter.selector));
         rabbitHoletTckets.mint(to, tokenId, amount, "");
