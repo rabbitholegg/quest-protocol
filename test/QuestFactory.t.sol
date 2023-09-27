@@ -10,7 +10,7 @@ import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
@@ -125,7 +125,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
         vm.expectEmit(true,false,true,true);
-        emit QuestCreatedWithAction(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT, "actionSpec");
+        emit QuestCreatedWithAction(questCreator, address(0), "questId", "erc20Stream", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT, "actionSpec");
 
         address questAddress = questFactory.createERC20StreamQuest(
             address(sampleERC20),

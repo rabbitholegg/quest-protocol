@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {OwnableRoles} from "solady/src/auth/OwnableRoles.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 
 /// @title ProtocolRewards

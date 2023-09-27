@@ -7,8 +7,8 @@ import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
-import {LibString} from "solady/src/utils/LibString.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 

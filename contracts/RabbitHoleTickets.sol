@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {Ownable} from "solady/src/auth/Ownable.sol";
-import {ERC1155} from "solady/src/tokens/ERC1155.sol";
-import {Base64} from "solady/src/utils/Base64.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Ownable} from "solady/auth/Ownable.sol";
+import {ERC1155} from "solady/tokens/ERC1155.sol";
+import {Base64} from "solady/utils/Base64.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {
     IERC165Upgradeable,
     IERC2981Upgradeable
-} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+} from "openzeppelin-contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
 contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeable {
     /*//////////////////////////////////////////////////////////////

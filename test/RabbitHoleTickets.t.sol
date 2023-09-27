@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {RabbitHoleTickets} from "contracts/RabbitHoleTickets.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 
