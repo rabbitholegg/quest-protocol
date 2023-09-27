@@ -24,6 +24,9 @@ contract Errors {
     error NotEnded();
     error NotQueued();
 
+    // RabbitHoleTickets
+    error OnlyMinter();
+
     // QuestFactory
     error RewardNotAllowed();
     error QuestIdUsed();
