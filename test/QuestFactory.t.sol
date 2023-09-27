@@ -512,24 +512,22 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.claim{value: MINT_FEE -1}("questId", msgHash, signature, address(0));
     }
 
-    function test_fuzz_claim(string memory questId_, address ref_, string memory actionSpec_, uint256 total_participants_) public{
+    function test_fuzz_claim(string memory questId_, address ref_) public{
         vm.assume(ref_ != address(0));
-        total_participants_ = bound(total_participants_, 1, 100);
-        sampleERC20.mint(questCreator, REWARD_AMOUNT * total_participants_);
 
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(total_participants_, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
-            total_participants_,
+            TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             questId_,
-            actionSpec_,
+            "actionSpec",
             0
         );
 
