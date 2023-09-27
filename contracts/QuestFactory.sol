@@ -455,12 +455,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questCreatorAddress_ The address of the quest creator, to get the mintFee
     /// @return address the mint fee recipient
     function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
-        address _mintFeeRecipient;
-        _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
-        if (_mintFeeRecipient == address(0)) {
-            return defaultMintFeeRecipient;
-        }
-        return _mintFeeRecipient;
+        address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
+        return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
     }
 
     function getNftQuestFee(address address_) public view returns (uint256) {
