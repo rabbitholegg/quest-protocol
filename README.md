@@ -133,12 +133,15 @@ forge test
 
 ### Run test coverage report:
 
-Coming Soon
+```bash
+forge coverage --report lcov
+```
 
 ### Run gas test:
 
-Coming Soon
-
+```bash
+forge snapshot
+```
 
 ### Gotchas
 If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in Forge logging, your best bet is to search for the hex string (`ce3f0005` don't prepend `0x`) in `Errors.json` within the build artifacts - that should have most error strings in it.
