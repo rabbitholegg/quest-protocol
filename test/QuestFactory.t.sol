@@ -59,10 +59,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             defaultReferralFeeRecipient,
             address(new SablierMock()),
             NFT_QUEST_FEE,
-            REFERRAL_FEE
+            REFERRAL_FEE,
+            MINT_FEE
         );
         vm.prank(owner);
-        questFactory.setMintFee(MINT_FEE); // todo this should be set in initialize
     }
 
     /*//////////////////////////////////////////////////////////////
