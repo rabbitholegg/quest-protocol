@@ -14,22 +14,8 @@ jobs:
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v3
+              uses: oven-sh/setup-bun@v1
 
-            - name: Set Up Node.js
-              uses: actions/setup-node@v2
-              with:
-                  node-version: 16.x
-
-            - id: yarn-cache
-              run: echo "::set-output name=dir::$(yarn cache dir)"
-
-            - uses: actions/cache@v1
-              with:
-                  path: ${{ steps.yarn-cache.outputs.dir }}
-                  key: yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      yarn-
-
-            - run: yarn
+            - run: bun install
             - name: Run Solhint
-              run: yarn solhint 'contracts/**/*.sol'
+              run: bunx solhint 'contracts/**/*.sol'
