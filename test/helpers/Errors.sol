@@ -23,4 +23,18 @@ contract Errors {
     error InsufficientETHBalance();
     error NotEnded();
     error NotQueued();
+
+    // RabbitHoleTickets
+    error OnlyMinter();
+
+    // QuestFactory
+    error RewardNotAllowed();
+    error QuestIdUsed();
+    error Erc20QuestAddressNotSet();
+    error QuestNotStarted();
+    error InvalidHash();
+    error AddressAlreadyMinted();
+    error QuestEnded();
+    error InvalidMintFee();
+    error MsgValueLessThanQuestNFTFee();
 }
