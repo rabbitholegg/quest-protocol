@@ -21,4 +21,8 @@ contract SampleERC20 is ERC20 {
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
+
+    function mint(address to_, uint256 amount_) external {
+        _mint(to_, amount_);
+    }
 }

@@ -114,6 +114,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         bytes32 encodedHash = keccak256(hashc);
 
+        bytes32 encodedHash = keccak256(hashc);
+
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
         if (encodedHash != claimData_.hashBytes) revert InvalidHash();
@@ -339,6 +341,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
+
     /// @dev universal claim function for all quest types
     /// @param questId_ The id of the quest
     /// @param hash_ The hash of the message
@@ -504,12 +507,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questCreatorAddress_ The address of the quest creator, to get the mintFee
     /// @return address the mint fee recipient
     function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
-        address _mintFeeRecipient;
-        _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
-        if (_mintFeeRecipient == address(0)) {
-            return defaultMintFeeRecipient;
-        }
-        return _mintFeeRecipient;
+        address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
+        return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
     }
 
     function getNftQuestFee(address address_) public view returns (uint256) {
