@@ -62,7 +62,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             REFERRAL_FEE,
             MINT_FEE
         );
-        vm.prank(owner);
     }
 
     /*//////////////////////////////////////////////////////////////
