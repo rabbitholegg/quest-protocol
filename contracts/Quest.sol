@@ -2,18 +2,18 @@
 pragma solidity 0.8.19;
 
 // Inherits
-import {Ownable} from "solady/src/auth/Ownable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {Ownable} from "solady/auth/Ownable.sol";
+import {PausableUpgradeable} from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 // Implements
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
-import {LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {LockupLinear} from "sablier/types/DataTypes.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
-import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
-import {IERC20} from "@sablier/v2-core/src/types/Tokens.sol";
+import {ISablierV2LockupLinear} from "sablier/interfaces/ISablierV2LockupLinear.sol";
+import {IERC20} from "sablier/types/Tokens.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg

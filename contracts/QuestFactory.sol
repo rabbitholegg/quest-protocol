@@ -2,16 +2,16 @@
 pragma solidity 0.8.19;
 
 // Inherits
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LegacyStorage} from "./libraries/LegacyStorage.sol";
-import {OwnableRoles} from "solady/src/auth/OwnableRoles.sol";
+import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
 // Implements
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 // Leverages
-import {ECDSA} from "solady/src/utils/ECDSA.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
-import {LibString} from "solady/src/utils/LibString.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
+import {LibString} from "solady/utils/LibString.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // References
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";

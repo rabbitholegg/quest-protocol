@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {RabbitHoleTickets} from "contracts/RabbitHoleTickets.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 
@@ -76,7 +76,6 @@ contract TestRabbitHoleTickets is Test, Errors, Events {
     function test_RevertIf_mint_OnlyMinter() public {
         uint256 tokenId = 1;
         uint256 amount = 1;
-        address to = makeAddr("to");
 
         vm.expectRevert(abi.encodeWithSelector(OnlyMinter.selector));
         rabbitHoletTckets.mint(to, tokenId, amount, "");
