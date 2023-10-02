@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import "../contracts/ProtocolRewards.sol";
-import {ERC1967Factory} from "solady/src/utils/ERC1967Factory.sol";
+import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
 
 contract ProtocolRewardsTest is Test {
     ProtocolRewards internal protocolRewards;

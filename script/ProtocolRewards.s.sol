@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 import {Script} from "forge-std/Script.sol";
 import {ProtocolRewards} from "../contracts/ProtocolRewards.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
-import {ERC1967FactoryConstants} from "solady/src/utils/ERC1967FactoryConstants.sol";
-import {ERC1967Factory} from "solady/src/utils/ERC1967Factory.sol";
+import {ERC1967FactoryConstants} from "solady/utils/ERC1967FactoryConstants.sol";
+import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
 
 // # To deploy and verify ProtocolRewards.sol run this command below
 // forge script script/ProtocolRewards.s.sol:ProtocolRewardsDeploy --rpc-url sepolia --broadcast --verify -vvvv

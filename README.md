@@ -112,13 +112,13 @@ More reading [here](https://dev.to/jamiescript/design-patterns-in-solidity-1i28#
 ### Install dependencies
 
 ```bash
-yarn
+bun install
 ```
 
 ### Compile Contracts
 
 ```bash
-yarn compile
+forge build
 ```
 
 ---
@@ -128,21 +128,20 @@ yarn compile
 ### Run all tests:
 
 ```bash
-yarn test
+forge test
 ```
 
 ### Run test coverage report:
 
 ```bash
-yarn test:coverage
+forge coverage --report lcov
 ```
 
 ### Run gas test:
 
 ```bash
-yarn test:gas-stories
+forge snapshot
 ```
-
 
 ### Gotchas
 If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in Forge logging, your best bet is to search for the hex string (`ce3f0005` don't prepend `0x`) in `Errors.json` within the build artifacts - that should have most error strings in it.
@@ -180,7 +179,7 @@ then:
 ## Upgrading
 
 important: make sure storage layouts are compatible, by running the upgrades-core validate script on the contract you are upgrading, for example:
-`forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract RabbitHoleTickets`
+`forge clean && forge build && bunx @openzeppelin/upgrades-core validate --contract RabbitHoleTickets`
 
 Then to upgrade a contract, run one of the following commands:
 `forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
