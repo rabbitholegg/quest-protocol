@@ -74,7 +74,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address defaultReferralFeeRecipientAddress_,
         address sablierV2LockupLinearAddress_,
         uint256 nftQuestFee_,
-        uint16 referralFee_
+        uint16 referralFee_,
+        uint256 mintFee_
     ) external initializer {
         _initializeOwner(ownerAddress_);
         questFee = 2000; // in BIPS
@@ -87,6 +88,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
+        mintFee = mintFee_;
     }
 
     /*//////////////////////////////////////////////////////////////
