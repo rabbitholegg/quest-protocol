@@ -11,12 +11,14 @@ import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
 contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
+    using LibString for address;
 
     QuestFactory questFactory;
     SampleERC1155 sampleERC1155;
@@ -353,24 +355,25 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createQuestAndQueue(
+        address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
-            "questId",
+            "questIdNotUsed",
             "actionSpec",
             0
         );
+        string memory questId = questAddress.toHexString();
 
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, questId));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(questId, msgHash, signature, address(0));
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
