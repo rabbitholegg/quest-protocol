@@ -72,7 +72,6 @@ interface IQuestFactory {
         uint256 startTime;
         uint256 totalParticipants;
         uint256 rewardAmount;
-        string questId;
         string actionSpec;
         uint40 durationTotal;
         string questType;

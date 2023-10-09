@@ -30,6 +30,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
+    using LibString for address;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -95,14 +96,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
-        Quest storage currentQuest = quests[questId_];
-        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
-        if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
-        _;
-    }
-
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
         bytes memory hashc = abi.encodePacked(msg.sender, claimData_.questId);
@@ -153,7 +146,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
-    /// @param questId_ The id of the quest
+    /// @param actionSpec_ the json encoded actionSpec
     /// @return address the quest contract address
     function create1155QuestAndQueue(
         address rewardTokenAddress_,
@@ -161,16 +154,15 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        string memory questId_,
+        string memory, // was string memory questId_
         string memory actionSpec_
     ) external payable nonReentrant returns (address) {
-        Quest storage currentQuest = quests[questId_];
-
         if (msg.value < totalQuestNFTFee(totalParticipants_)) revert MsgValueLessThanQuestNFTFee();
-        if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
-        address payable newQuest =
-            payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+        address newQuest = erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
+        string memory questId = newQuest.toHexString();
+        Quest storage currentQuest = quests[questId];
+
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
@@ -196,7 +188,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             emit QuestCreatedWithAction(
                 msg.sender,
                 address(newQuest),
-                questId_,
+                questId,
                 "erc1155",
                 rewardTokenAddress_,
                 endTime_,
@@ -209,7 +201,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             emit QuestCreated(
                 msg.sender,
                 address(newQuest),
-                questId_,
+                questId,
                 "erc1155",
                 rewardTokenAddress_,
                 endTime_,
@@ -229,7 +221,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
     /// @param durationTotal_ The duration of the sablier stream
     /// @return address the quest contract address
@@ -239,10 +230,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory questId_,
+        string memory, // was questId_
         string memory actionSpec_,
         uint40 durationTotal_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external returns (address) {
+        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
+
         address newQuest = createERC20QuestInternal(
             ERC20QuestData(
                 rewardTokenAddress_,
@@ -250,7 +243,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 startTime_,
                 totalParticipants_,
                 rewardAmount_,
-                questId_,
                 actionSpec_,
                 durationTotal_,
                 "erc20Stream"
@@ -267,7 +259,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
     /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
     /// @param actionSpec_ The JSON action spec for the quest
     /// @return address the quest contract address
     function createQuestAndQueue(
@@ -276,10 +267,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 rewardAmount_,
-        string memory questId_,
+        string memory, // was questId_
         string memory actionSpec_,
         uint256
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external returns (address) {
+        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
+
         address newQuest = createERC20QuestInternal(
             ERC20QuestData(
                 rewardTokenAddress_,
@@ -287,7 +280,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 startTime_,
                 totalParticipants_,
                 rewardAmount_,
-                questId_,
                 actionSpec_,
                 0,
                 "erc20"
@@ -608,8 +600,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Internal function to create an erc20 quest
     /// @param data_ The erc20 quest data struct
     function createERC20QuestInternal(ERC20QuestData memory data_) internal returns (address) {
-        Quest storage currentQuest = quests[data_.questId];
-        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, data_.questId)));
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
+        string memory questId = newQuest.toHexString();
+        Quest storage currentQuest = quests[questId];
 
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = data_.totalParticipants;
@@ -621,7 +614,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             emit QuestCreatedWithAction(
                 msg.sender,
                 address(newQuest),
-                data_.questId,
+                questId,
                 currentQuest.questType,
                 data_.rewardTokenAddress,
                 data_.endTime,
@@ -634,7 +627,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             emit QuestCreated(
                 msg.sender,
                 address(newQuest),
-                data_.questId,
+                questId,
                 currentQuest.questType,
                 data_.rewardTokenAddress,
                 data_.endTime,
@@ -650,7 +643,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             data_.startTime,
             data_.totalParticipants,
             data_.rewardAmount,
-            data_.questId,
+            questId,
             questFee,
             protocolFeeRecipient,
             data_.durationTotal,
