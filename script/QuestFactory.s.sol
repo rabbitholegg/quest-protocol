@@ -20,7 +20,6 @@ contract QuestFactoryUpgrade is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         ProxyAdmin(C.PROXY_ADMIN_ADDRESS).upgrade(questfactoryProxy, address(new QuestFactory()));
-        QuestFactory(C.QUEST_FACTORY_ADDRESS).setOwnerOnce(); // only needed once, delete after run
 
         vm.stopBroadcast();
     }
@@ -29,6 +28,8 @@ contract QuestFactoryUpgrade is Script {
 contract QuestFactoryDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
+        address claimSigner = vm.envAddress("CLAIM_SIGNER_ADDRESS");
         ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(C.QUEST_FACTORY_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
         bytes memory ogData = vm.parseJsonBytes(json, "$.questFactoryOgImpl");
@@ -49,16 +50,16 @@ contract QuestFactoryDeploy is Script {
 
         // Initialize
         QuestFactory(C.QUEST_FACTORY_ADDRESS).initialize(
-            0x94c3e5e801830dD65CD786F2fe37e79c65DF4148, // claimSignerAddress_
-            0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c, // protocolFeeRecipient_
-            0x0000000000000000000000000000000000000000, // erc20QuestAddress_
-            0x0000000000000000000000000000000000000000, // erc1155QuestAddress_
-            0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c, // ownerAddress_
-            0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c, // defaultReferralFeeRecipientAddress_
-            0x0000000000000000000000000000000000000000, // sablierV2LockupLinearAddress_
-            500000000000000,                            // nftQuestFee_,
-            5000,                                       // referralFee_,
-            75000000000000                              // mintFee_
+            claimSigner,                        // claimSignerAddress_
+            owner,                              // protocolFeeRecipient_
+            address(new Quest()),               // erc20QuestAddress_
+            payable(address(new Quest1155())),  // erc1155QuestAddress_
+            owner,                              // ownerAddress_
+            owner,                              // defaultReferralFeeRecipientAddress_
+            address(0),                         // sablierV2LockupLinearAddress_
+            500000000000000,                    // nftQuestFee_,
+            5000,                               // referralFee_,
+            75000000000000                      // mintFee_
         );
 
         vm.stopBroadcast();

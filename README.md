@@ -40,7 +40,7 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ## Addresses
 
-Mainnet, Optimism, Polygon, Arbitrum, Base and Sepolia:
+Mainnet, Optimism, Polygon, Arbitrum, Base, Mantle and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
@@ -113,6 +113,7 @@ More reading [here](https://dev.to/jamiescript/design-patterns-in-solidity-1i28#
 
 ```bash
 bun install
+forge install
 ```
 
 ### Compile Contracts
@@ -150,18 +151,16 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 ## Deployment
 1. Deploy the ProxyAdmin
 `forge script script/ProxyAdmin.s.sol:ProxyAdminDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-2. Deploy QuestFactory (this also upgrades it to the latest version)
+2. Deploy QuestFactory (this also upgrades it to the latest version, and deployes the latest Quest and Quest1155 implementation contracts)
 `forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 3. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
 `forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-4. Deploy Quest
-`forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-5. Deploy Quest1155
-`forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
 6. Set any storage variables manually if need be.
 
 ### with mantel, add:
 `--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
+if you get `(code: -32000, message: invalid transaction: nonce too low, data: None)` try rerunning with the `--resume`` flag
+
 ### with scroll, add:
 `--legacy --verifier blockscout --verifier-url "https://blockscout.scroll.io/api?module=contract&action=verify"`
 
@@ -170,22 +169,6 @@ Note: This might not be needed, there is currently a bug in the mantle explorer 
 ```
 forge verify-contract --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify" --num-of-optimizations 999999 --chain 5000 --compiler-version "0.8.10+commit.fc410830" 0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy
 ```
-
-### Depricated hardhat-deploy method
-#### RabbitHoleReceipt and QuestFactory
-- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
-
-#### QuestTerminalKey
-- checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
-
-#### RabbitHoleTickets
-- checkout from sha `70a56a1567dcd9c4d6f7718388667c5e0564fb2f`
-(must add in the deploy script manually)
-
-then:
-- `yarn hardhat deploy --network network_name`
-- `yarn hardhat --network network_name etherscan-verify --api-key etherscan_api_key`
-
 
 ## Upgrading
 

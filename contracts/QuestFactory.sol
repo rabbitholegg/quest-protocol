@@ -335,11 +335,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                   SET
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev temporary function to set owner for solady ownable
-    function setOwnerOnce() external {
-        _initializeOwner(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c);
-    }
-
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
     function setClaimSignerAddress(address claimSignerAddress_) external onlyOwner {
