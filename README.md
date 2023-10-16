@@ -159,7 +159,7 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 
 ### with mantel, add:
 `--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
-if you get `(code: -32000, message: invalid transaction: nonce too low, data: None)` try rerunning with the `--resume`` flag
+if you get `(code: -32000, message: invalid transaction: nonce too low, data: None)` try rerunning with the `--resume` flag
 
 ### with scroll, add:
 `--legacy --verifier blockscout --verifier-url "https://blockscout.scroll.io/api?module=contract&action=verify"`
