@@ -170,7 +170,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
         address payable newQuest =
-            payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+            payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp))));
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
@@ -609,7 +609,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param data_ The erc20 quest data struct
     function createERC20QuestInternal(ERC20QuestData memory data_) internal returns (address) {
         Quest storage currentQuest = quests[data_.questId];
-        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, data_.questId)));
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
 
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = data_.totalParticipants;
