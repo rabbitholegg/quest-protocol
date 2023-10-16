@@ -39,8 +39,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public rabbitHoleReceiptContract;
-    address public rabbitHoleTicketsContract;
+    address public rabbitHoleReceiptContract; // not used
+    address public rabbitHoleTicketsContract; // not used
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
@@ -50,7 +50,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @custom:oz-renamed-from questTerminalKeyContract
     address public defaultReferralFeeRecipient;
     uint256 public nftQuestFee;
-    address public questNFTAddress;
+    address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;

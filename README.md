@@ -160,6 +160,17 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 `forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
 6. Set any storage variables manually if need be.
 
+### with mantel, add:
+`--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
+### with scroll, add:
+`--legacy --verifier blockscout --verifier-url "https://blockscout.scroll.io/api?module=contract&action=verify"`
+
+### verify OZ TransparentProxy
+Note: This might not be needed, there is currently a bug in the mantle explorer that prevents it from marking create2 contracts as contracts
+```
+forge verify-contract --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify" --num-of-optimizations 999999 --chain 5000 --compiler-version "0.8.10+commit.fc410830" 0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy
+```
+
 ### Depricated hardhat-deploy method
 #### RabbitHoleReceipt and QuestFactory
 - checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
@@ -186,6 +197,8 @@ Then to upgrade a contract, run one of the following commands:
 `forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
 `forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 `forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
+
+Note the extra options to use with mantel and scroll above.
 
 ---
 
