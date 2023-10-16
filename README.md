@@ -155,7 +155,7 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 `forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 1. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
 `forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-1. Set any storage variables manually if need be.
+1. Set any storage variables manually if need be (most likely the `protocolFeeRecipient` will need to be set)
 
 ### with mantel, add:
 `--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
