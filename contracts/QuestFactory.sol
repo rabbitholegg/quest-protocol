@@ -13,7 +13,7 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // References
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 
@@ -39,8 +39,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public rabbitHoleReceiptContract;
-    address public rabbitHoleTicketsContract;
+    address public rabbitHoleReceiptContract; // not used
+    address public rabbitHoleTicketsContract; // not used
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
@@ -50,7 +50,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @custom:oz-renamed-from questTerminalKeyContract
     address public defaultReferralFeeRecipient;
     uint256 public nftQuestFee;
-    address public questNFTAddress;
+    address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;
@@ -334,11 +334,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                   SET
     //////////////////////////////////////////////////////////////*/
-
-    /// @dev temporary function to set owner for solady ownable
-    function setOwnerOnce() external {
-        _initializeOwner(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c);
-    }
 
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer

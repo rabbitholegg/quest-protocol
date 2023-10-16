@@ -6,7 +6,7 @@ import {Quest} from "../contracts/Quest.sol";
 import {Quest1155} from "../contracts/Quest1155.sol";
 import {QuestFactory} from "../contracts/QuestFactory.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
-import {ProxyAdmin, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {ProxyAdmin, ITransparentUpgradeableProxy} from "openzeppelin-contracts/proxy/transparent/ProxyAdmin.sol";
 
 // # To Upgrade QuestFactory.sol run this command below
 // ! important: make sure storage layouts are compatible first:
@@ -20,7 +20,6 @@ contract QuestFactoryUpgrade is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         ProxyAdmin(C.PROXY_ADMIN_ADDRESS).upgrade(questfactoryProxy, address(new QuestFactory()));
-        QuestFactory(C.QUEST_FACTORY_ADDRESS).setOwnerOnce(); // only needed once, delete after run
 
         vm.stopBroadcast();
     }
@@ -29,6 +28,8 @@ contract QuestFactoryUpgrade is Script {
 contract QuestFactoryDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
+        address claimSigner = vm.envAddress("CLAIM_SIGNER_ADDRESS");
         ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(C.QUEST_FACTORY_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
         bytes memory ogData = vm.parseJsonBytes(json, "$.questFactoryOgImpl");
@@ -48,7 +49,18 @@ contract QuestFactoryDeploy is Script {
         ProxyAdmin(C.PROXY_ADMIN_ADDRESS).upgrade(questfactoryProxy, address(new QuestFactory()));
 
         // Initialize
-        QuestFactory(C.QUEST_FACTORY_ADDRESS).initialize(0x94c3e5e801830dD65CD786F2fe37e79c65DF4148,0xEC3a9c7d612E0E0326e70D97c9310A5f57f9Af9E,0x0D380362762B0cf375227037f2217f59A4eC4b9E,payable(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c),0x0000000000000000000000000000000000000000,0x0000000000000000000000000000000000000000,0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c,500000000000000,5000,75000000000000);
+        QuestFactory(C.QUEST_FACTORY_ADDRESS).initialize(
+            claimSigner,                        // claimSignerAddress_
+            owner,                              // protocolFeeRecipient_
+            address(new Quest()),               // erc20QuestAddress_
+            payable(address(new Quest1155())),  // erc1155QuestAddress_
+            owner,                              // ownerAddress_
+            owner,                              // defaultReferralFeeRecipientAddress_
+            address(0),                         // sablierV2LockupLinearAddress_
+            500000000000000,                    // nftQuestFee_,
+            5000,                               // referralFee_,
+            75000000000000                      // mintFee_
+        );
 
         vm.stopBroadcast();
     }

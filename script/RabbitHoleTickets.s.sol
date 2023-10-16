@@ -28,6 +28,7 @@ contract RabbitHoleTicketsUpgrade is Script {
 contract RabbitHoleTicketsDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
         ITransparentUpgradeableProxy RabbitHoleTicketsProxy = ITransparentUpgradeableProxy(C.RABBIT_HOLE_TICKETS_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
         bytes memory ogData = vm.parseJsonBytes(json, "$.rabbitHoleTicketsOgImpl");
@@ -47,7 +48,14 @@ contract RabbitHoleTicketsDeploy is Script {
         ProxyAdmin(C.PROXY_ADMIN_ADDRESS).upgrade(RabbitHoleTicketsProxy, address(new RabbitHoleTickets()));
 
         // Initialize
-        RabbitHoleTickets(C.RABBIT_HOLE_TICKETS_ADDRESS).initialize(0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c,0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c,100,0x017F8Ad14A2E745ea0F756Bd57CD4852400be78c,"bafkreiafob6tgwkb4jla5ent7d7rw4ps7tjdhe32tlbdenyrc3lch76qfe","bafybeietacfcrgwetjwcexdakfhmig4fgsdsb7o62n2qcpybkbiupqlkxq");
+        RabbitHoleTickets(C.RABBIT_HOLE_TICKETS_ADDRESS).initialize(
+            owner,                                                          // royaltyRecipient_
+            owner,                                                          // minterAddress_
+            100,                                                            // royaltyFee_
+            owner,                                                          // owner_
+            "bafkreiafob6tgwkb4jla5ent7d7rw4ps7tjdhe32tlbdenyrc3lch76qfe",  // imageIPFSCID_
+            "bafybeietacfcrgwetjwcexdakfhmig4fgsdsb7o62n2qcpybkbiupqlkxq"   // animationUrlIPFSCID_
+        );
 
         vm.stopBroadcast();
     }
