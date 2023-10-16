@@ -151,11 +151,11 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 ## Deployment
 1. Deploy the ProxyAdmin
 `forge script script/ProxyAdmin.s.sol:ProxyAdminDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-2. Deploy QuestFactory (this also upgrades it to the latest version, and deployes the latest Quest and Quest1155 implementation contracts)
+1. Deploy QuestFactory (this also upgrades it to the latest version, and deployes the latest Quest and Quest1155 implementation contracts)
 `forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-3. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
+1. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
 `forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-6. Set any storage variables manually if need be.
+1. Set any storage variables manually if need be.
 
 ### with mantel, add:
 `--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
