@@ -64,6 +64,7 @@ interface IQuestFactory {
         bytes signature;
         address ref;
         uint256 amount;
+        string extraData;
     }
 
     struct ERC20QuestData {
@@ -84,6 +85,13 @@ interface IQuestFactory {
     event NftQuestFeeListSet(address[] addresses, uint256[] fees);
     event NftQuestFeeSet(uint256 nftQuestFee);
 
+    event QuestClaimedData(
+        address indexed recipient,
+        address indexed questAddress,
+        string questType,
+        string questId,
+        string extraData
+    );
     event Quest1155Claimed(
         address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint256 tokenId
     );

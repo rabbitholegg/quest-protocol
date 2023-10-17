@@ -110,6 +110,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (claimData_.ref != address(0)) {
             hashc = abi.encodePacked(hashc, claimData_.ref);
         }
+        if (bytes(claimData_.extraData).length > 0){
+            hashc = abi.encodePacked(hashc, claimData_.extraData);
+        }
 
         bytes32 encodedHash = keccak256(hashc);
 
@@ -301,6 +304,19 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev universal claim function for all quest types, with extraData
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    /// @param extraData_ The extra data for the quest
+    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_, string memory extraData_) external payable {
+        if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, extraData_));
+        } else { // erc20, erc20Stream
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, extraData_));
+        }
+    }
 
     /// @dev universal claim function for all quest types
     /// @param questId_ The id of the quest
@@ -309,9 +325,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param ref_ The referral address
     function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
         if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, ""));
         } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, ""));
         }
     }
 
@@ -320,7 +336,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
+        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0, ""));
     }
 
     /// @dev claim rewards for a quest
@@ -328,7 +344,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
+        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0, ""));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -541,6 +557,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
 
+        emit QuestClaimedData(
+            msg.sender,
+            currentQuest.questAddress,
+            currentQuest.questType,
+            claimData_.questId,
+            claimData_.extraData
+        );
+
         emit Quest1155Claimed(
             msg.sender, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
         );
@@ -577,6 +601,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         questContract_.singleClaim(msg.sender);
 
         if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+
+        emit QuestClaimedData(
+            msg.sender,
+            currentQuest.questAddress,
+            currentQuest.questType,
+            claimData_.questId,
+            claimData_.extraData
+        );
 
         emit QuestClaimed(
             msg.sender,
