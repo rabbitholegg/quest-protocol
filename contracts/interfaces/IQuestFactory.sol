@@ -88,8 +88,6 @@ interface IQuestFactory {
     event QuestClaimedData(
         address indexed recipient,
         address indexed questAddress,
-        string questType,
-        string questId,
         string extraData
     );
     event Quest1155Claimed(

@@ -560,8 +560,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit QuestClaimedData(
             msg.sender,
             currentQuest.questAddress,
-            currentQuest.questType,
-            claimData_.questId,
             claimData_.extraData
         );
 
@@ -605,8 +603,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit QuestClaimedData(
             msg.sender,
             currentQuest.questAddress,
-            currentQuest.questType,
-            claimData_.questId,
             claimData_.extraData
         );
 
