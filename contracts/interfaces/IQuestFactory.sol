@@ -91,7 +91,11 @@ interface IQuestFactory {
         string extraData
     );
     event Quest1155Claimed(
-        address indexed recipient, address indexed questAddress, string questId, address rewardToken, uint256 tokenId
+        address indexed recipient,
+        address indexed questAddress,
+        string questId,
+        address rewardToken,
+        uint256 tokenId
     );
     event QuestClaimed(
         address indexed recipient,
