@@ -13,6 +13,7 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
+import {LibExtraString} from "contracts/libraries/LibExtraString.sol";
 // References
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
@@ -31,6 +32,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
+    using LibExtraString for string;
     using JSONParserLib for *; // for JSONParserLib.Item and string
 
     /*//////////////////////////////////////////////////////////////
@@ -313,8 +315,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function claim(bytes32 hash_, bytes memory signature_, string memory jsonData_) external payable {
         JSONParserLib.Item memory item = jsonData_.parse();
 
-        string memory refString = item.at('"ref"').value().decodeString();
-        address ref_ = parseAddr(refString);
+        address ref_ = item.at('"ref"').value().decodeString().stringToAddress();
         string memory questId_ = item.at('"questId"').value().decodeString();
 
         if (quests[questId_].questType.eq("erc1155")) {
@@ -323,36 +324,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, jsonData_));
         }
     }
-
-// todo put in a library contract
-function parseAddr(string memory _a) internal pure returns (address _parsedAddress) {
-    bytes memory tmp = bytes(_a);
-    require(tmp.length == 42, "Invalid input length"); // Ethereum addresses have 42 characters (40 for the address, 2 for the '0x' prefix)
-    uint160 iaddr = 0;
-    uint160 b1;
-    uint160 b2;
-    for (uint i = 2; i < 2 + 2 * 20; i += 2) {
-        iaddr *= 256;
-        b1 = uint160(uint8(tmp[i]));
-        b2 = uint160(uint8(tmp[i + 1]));
-        if ((b1 >= 97) && (b1 <= 102)) {
-            b1 -= 87;
-        } else if ((b1 >= 65) && (b1 <= 70)) {
-            b1 -= 55;
-        } else if ((b1 >= 48) && (b1 <= 57)) {
-            b1 -= 48;
-        }
-        if ((b2 >= 97) && (b2 <= 102)) {
-            b2 -= 87;
-        } else if ((b2 >= 65) && (b2 <= 70)) {
-            b2 -= 55;
-        } else if ((b2 >= 48) && (b2 <= 57)) {
-            b2 -= 48;
-        }
-        iaddr += (b1 * 16 + b2);
-    }
-    return address(iaddr);
-}
 
     /// @dev universal claim function for all quest types
     /// @param questId_ The id of the quest
