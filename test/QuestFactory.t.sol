@@ -11,12 +11,14 @@ import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
 contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
+    using LibString for address;
 
     QuestFactory questFactory;
     SampleERC1155 sampleERC1155;
@@ -337,6 +339,44 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(participant);
         questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, referrer);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // claim fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocolFeeRecipient mint fee");
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claim_with_jsonData() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId2",
+            "actionSpec",
+            0
+        );
+
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
+
+        string memory referrerString = referrer.toHexString();
+        string memory json = string(abi.encodePacked('{"ref": "', referrerString, '", "questId": "questId2"}'));
+
+        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId2", referrer, json));
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claim{value: MINT_FEE}(msgHash, signature, json);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");

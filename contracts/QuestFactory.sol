@@ -18,6 +18,9 @@ import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 
+import "forge-std/console.sol";
+
+
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
@@ -31,7 +34,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
-    using JSONParserLib for string;
+    using JSONParserLib for *; // for JSONParserLib.Item and string
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -311,11 +314,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param signature_ The signature of the hash
     /// @param jsonData_ The extra data for the quest
     function claim(bytes32 hash_, bytes memory signature_, string memory jsonData_) external payable {
-        JSONParserLib.Item memory item;
-        item = jsonData_.parse();
+        JSONParserLib.Item memory item = jsonData_.parse();
 
-        address ref_ = address(bytes20(bytes(item.at('"ref"').value())));
-        string memory questId_ = item.at('"questId"').value();
+        string memory refString = item.at('"ref"').value().decodeString();
+        address ref_ = stringToAddress(refString);
+        string memory questId_ = item.at('"questId"').value().decodeString();
+        console.log("ref_", ref_);
 
         if (quests[questId_].questType.eq("erc1155")) {
             claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, jsonData_));
@@ -323,6 +327,25 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, jsonData_));
         }
     }
+
+// todo put in a library contract
+function stringToAddress(string memory _a) public pure returns (address) {
+    bytes memory tmp = bytes(_a);
+    uint160 iaddr = 0;
+    uint160 b1;
+    uint160 b2;
+    for (uint i = 2; i < 2+2*20; i += 2) {
+        iaddr *= 256;
+        b1 = uint160(uint8(tmp[i]));
+        b2 = uint160(uint8(tmp[i+1]));
+        if ((b1 >= 97)&&(b1 <= 102)) b1 -= 87;
+        else if ((b1 >= 48)&&(b1 <= 57)) b1 -= 48;
+        if ((b2 >= 97)&&(b2 <= 102)) b2 -= 87;
+        else if ((b2 >= 48)&&(b2 <= 57)) b2 -= 48;
+        iaddr += (b1*16+b2);
+    }
+    return address(iaddr);
+}
 
     /// @dev universal claim function for all quest types
     /// @param questId_ The id of the quest
