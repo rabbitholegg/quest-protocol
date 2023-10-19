@@ -18,9 +18,6 @@ import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 
-import "forge-std/console.sol";
-
-
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
@@ -319,7 +316,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory refString = item.at('"ref"').value().decodeString();
         address ref_ = stringToAddress(refString);
         string memory questId_ = item.at('"questId"').value().decodeString();
-        console.log("ref_", ref_);
 
         if (quests[questId_].questType.eq("erc1155")) {
             claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0, jsonData_));
