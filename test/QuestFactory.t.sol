@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {Vm} from "forge-std/Vm.sol";
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
@@ -349,13 +348,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
     }
 
-    function test_claim_with_jsonData() public{
+    function test_claim_with_bytes() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createQuestAndQueue(
+        address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -369,14 +368,15 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
 
-        string memory referrerString = referrer.toHexString();
-        string memory json = string(abi.encodePacked('{"ref": "', referrerString, '", "questId": "questId2"}'));
+        string memory json = string(abi.encodePacked('{"anyting": "we want", "foo": "bar"}'));
 
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId2", referrer, json));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        bytes memory data = abi.encode(referrer, "questId2", json);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}(msgHash, signature, json);
+        vm.recordLogs();
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -385,6 +385,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
         assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocolFeeRecipient mint fee");
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        // assert QuestClaimedData event
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 6);
+        assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(abi.decode(entries[3].data, (string)), json);
     }
 
     function test_claim_with_claimRewards_without_referrer() public{
