@@ -308,7 +308,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev universal claim function for all quest types, with extraData
+    /// @dev universal claim function for all quest types, with jsonData
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     /// @param jsonData_ The extra data for the quest

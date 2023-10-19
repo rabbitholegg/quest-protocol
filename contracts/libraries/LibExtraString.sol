@@ -2,12 +2,20 @@
 pragma solidity ^0.8.19;
 
 library LibExtraString {
+    error InvalidInputLength();
+
     function stringToAddress(string memory _a) internal pure returns (address) {
         bytes memory tmp = bytes(_a);
-        require(tmp.length == 42, "Invalid input length"); // Ethereum addresses have 42 characters (40 for the address, 2 for the '0x' prefix)
+
+        // Ethereum addresses have 42 characters (40 for the address, 2 for the '0x' prefix)
+        if(tmp.length != 42) revert InvalidInputLength();
         uint160 iaddr = 0;
-        uint160 b1;
-        uint160 b2;
+        uint160 b1; // byte 1
+        uint160 b2; // byte 2
+
+        // loop through each character in the string converting each character to it's byte value
+        // start at the 3rd character to skip the '0x' prefix
+        // do two bytes at a time to turn the string into a byte array
         for (uint i = 2; i < 2 + 2 * 20; i += 2) {
             iaddr *= 256;
             b1 = uint160(uint8(tmp[i]));
