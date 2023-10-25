@@ -370,9 +370,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         string memory json = string(abi.encodePacked('{"anyting": "we want", "foo": "bar"}'));
 
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId2", referrer, json));
+        bytes memory data = abi.encode(participant, referrer, "questId2", json);
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        bytes memory data = abi.encode(referrer, "questId2", json);
 
         vm.startPrank(participant);
         vm.recordLogs();
@@ -389,6 +389,52 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 6);
+        assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(abi.decode(entries[3].data, (string)), json);
+    }
+
+    function test_claim_with_bytes_no_referrer() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId2",
+            "actionSpec",
+            0
+        );
+
+        uint256 questCreatorBeforeBalance = questCreator.balance;
+        vm.warp(START_TIME + 1);
+
+        string memory json = string(abi.encodePacked('{"anyting": "we want", "foo": "bar"}'));
+
+        bytes memory data = abi.encode(participant, address(0), "questId2", json);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        vm.recordLogs();
+        questFactory.claim{value: MINT_FEE}(signature, data);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // claim fee rewards
+        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
+        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2, "protocolFeeRecipient mint fee");
+
+        // assert QuestClaimedData event
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 5);
         assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));

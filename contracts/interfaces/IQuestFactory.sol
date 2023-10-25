@@ -63,7 +63,7 @@ interface IQuestFactory {
         bytes32 hashBytes;
         bytes signature;
         address ref;
-        uint256 amount;
+        address claimer;
         string extraData;
     }
 
