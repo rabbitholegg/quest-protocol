@@ -37,6 +37,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
     address referrer = makeAddr(("referrer"));
+    address anyone = makeAddr(("anyone"));
     address owner = makeAddr(("owner"));
 
     function setUp() public {
@@ -50,6 +51,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.deal(owner, 1000000);
         vm.deal(participant, 1000000);
         vm.deal(questCreator, 1000000);
+        vm.deal(anyone, 1000000);
 
         questFactory.initialize(
             claimSigner.addr,
@@ -368,13 +370,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
 
-        string memory json = string(abi.encodePacked('{"anyting": "we want", "foo": "bar"}'));
+        string memory json = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
 
         bytes memory data = abi.encode(participant, referrer, "questId2", json);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(anyone);
         vm.recordLogs();
         questFactory.claim{value: MINT_FEE}(signature, data);
 
@@ -396,7 +398,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     function test_claim_with_bytes_no_referrer() public{
-        vm.startPrank(owner);
+        vm.prank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
@@ -415,13 +417,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
 
-        string memory json = string(abi.encodePacked('{"anyting": "we want", "foo": "bar"}'));
+        string memory json = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
 
         bytes memory data = abi.encode(participant, address(0), "questId2", json);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(anyone);
         vm.recordLogs();
         questFactory.claim{value: MINT_FEE}(signature, data);
 
@@ -434,7 +436,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 5);
+        assertEq(entries.length, 5, "log length");
         assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
