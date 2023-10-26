@@ -374,7 +374,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         string memory initialJson = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
         string memory finalJson = string(abi.encodePacked(
-            '{"anything": "we want", "foo": "bar", "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '{"anything": "we want", "foo": "bar", "claimFee": "',
+            MINT_FEE.toString(),
+            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
             '", "value": "', (MINT_FEE / 3).toString(),
             '"}, {"name": "mintPayout", "address": "', questCreator.toHexString(),
             '", "value": "', (MINT_FEE / 3).toString(),
@@ -429,7 +431,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         string memory initialJson = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
         string memory finalJson = string(abi.encodePacked(
-            '{"anything": "we want", "foo": "bar", "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '{"anything": "we want", "foo": "bar", "claimFee": "',
+            MINT_FEE.toString(),
+            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
             '", "value": "', (MINT_FEE / 3 * 2).toString(),
             '"}, {"name": "mintPayout", "address": "', questCreator.toHexString(),
             '", "value": "', (MINT_FEE / 3).toString(),

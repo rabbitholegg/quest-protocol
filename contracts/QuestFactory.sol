@@ -705,7 +705,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
         returnChange();
-        uint256 oneThirdMintfee = mintFee / 3;
+        uint256 cachedMintFee = mintFee;
+        uint256 oneThirdMintfee = cachedMintFee / 3;
         uint256 protocolPayout;
         uint256 mintPayout;
         uint256 referrerPayout;
@@ -713,7 +714,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if(ref_ == address(0)){
             protocolPayout = oneThirdMintfee * 2;
             mintPayout = oneThirdMintfee;
-            referrerPayout = 0;
         } else {
             protocolPayout = oneThirdMintfee;
             mintPayout = oneThirdMintfee;
@@ -727,7 +727,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
 
         return string(abi.encodePacked(
-            ', "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            ', "claimFee": "', cachedMintFee.toString(),
+            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
             '", "value": "', protocolPayout.toString(),
             '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
             '", "value": "', mintPayout.toString(),
