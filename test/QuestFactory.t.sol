@@ -18,6 +18,8 @@ import {TestUtils} from "./helpers/TestUtils.sol";
 contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for address;
+    using LibString for string;
+    using LibString for uint256;
 
     QuestFactory questFactory;
     SampleERC1155 sampleERC1155;
@@ -370,9 +372,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
 
-        string memory json = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
+        string memory initialJson = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
+        string memory finalJson = string(abi.encodePacked(
+            '{"anything": "we want", "foo": "bar", "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '", "value": "', (MINT_FEE / 3).toString(),
+            '"}, {"name": "mintPayout", "address": "', questCreator.toHexString(),
+            '", "value": "', (MINT_FEE / 3).toString(),
+            '"}, {"name": "refferrerPayout", "address": "', referrer.toHexString(),
+            '", "value": "', (MINT_FEE / 3).toString(), '"}]}'
+        ));
 
-        bytes memory data = abi.encode(participant, referrer, "questId2", json);
+        bytes memory data = abi.encode(participant, referrer, "questId2", initialJson);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -394,7 +404,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[3].data, (string)), json);
+        assertEq(abi.decode(entries[3].data, (string)), finalJson);
     }
 
     function test_claim_with_bytes_no_referrer() public{
@@ -417,9 +427,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
 
-        string memory json = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
+        string memory initialJson = string(abi.encodePacked('{"anything": "we want", "foo": "bar"}'));
+        string memory finalJson = string(abi.encodePacked(
+            '{"anything": "we want", "foo": "bar", "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '", "value": "', (MINT_FEE / 3 * 2).toString(),
+            '"}, {"name": "mintPayout", "address": "', questCreator.toHexString(),
+            '", "value": "', (MINT_FEE / 3).toString(),
+            '"}, {"name": "refferrerPayout", "address": "', address(0).toHexString(),
+            '", "value": "', uint256(0).toString(), '"}]}'
+        ));
 
-        bytes memory data = abi.encode(participant, address(0), "questId2", json);
+        bytes memory data = abi.encode(participant, address(0), "questId2", initialJson);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -440,7 +458,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[3].data, (string)), json);
+        assertEq(abi.decode(entries[3].data, (string)), finalJson);
     }
 
     function test_claim_with_claimRewards_without_referrer() public{

@@ -30,6 +30,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
+    using LibString for address;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -564,7 +565,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         ++currentQuest.numberMinted;
         questContract_.singleClaim(claimData_.claimer);
 
-        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
+        }
 
         emit QuestClaimedData(
             claimData_.claimer,
@@ -607,7 +613,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         ++currentQuest.numberMinted;
         questContract_.singleClaim(claimData_.claimer);
 
-        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
+        }
 
         emit QuestClaimedData(
             claimData_.claimer,
@@ -692,30 +703,44 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private {
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
         returnChange();
         uint256 oneThirdMintfee = mintFee / 3;
+        uint256 protocolPayout;
+        uint256 mintPayout;
+        uint256 referrerPayout;
 
         if(ref_ == address(0)){
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee * 2);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-
-            emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee * 2, mintFeeRecipient_, oneThirdMintfee, ref_, 0);
+            protocolPayout = oneThirdMintfee * 2;
+            mintPayout = oneThirdMintfee;
+            referrerPayout = 0;
         } else {
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-            ref_.safeTransferETH(oneThirdMintfee);
-
-            emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee, mintFeeRecipient_, oneThirdMintfee, ref_, oneThirdMintfee);
+            protocolPayout = oneThirdMintfee;
+            mintPayout = oneThirdMintfee;
+            referrerPayout = oneThirdMintfee;
         }
+
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
+        mintFeeRecipient_.safeTransferETH(mintPayout);
+        if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
+
+        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
+
+        return string(abi.encodePacked(
+            ', "protocolFeePaid": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '", "value": "', protocolPayout.toString(),
+            '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
+            '", "value": "', mintPayout.toString(),
+            '"}, {"name": "refferrerPayout", "address": "', ref_.toHexString(),
+            '", "value": "', referrerPayout.toString(), '"}]}'
+        ));
     }
 
+    // Refund any excess payment
     function returnChange() private {
         uint256 change = msg.value - mintFee;
         if (change > 0) {
-            // Refund any excess payment
             msg.sender.safeTransferETH(change);
-            emit ExtraMintFeeReturned(msg.sender, change);
         }
     }
 
