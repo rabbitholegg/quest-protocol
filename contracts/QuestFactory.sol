@@ -577,23 +577,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             currentQuest.questAddress,
             claimData_.extraData
         );
-
-        emit Quest1155Claimed(
-            claimData_.claimer, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
-        );
-
-        if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.tokenId(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
-                );
-        }
     }
 
     /// @dev claim rewards with a referral address
@@ -625,27 +608,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             currentQuest.questAddress,
             claimData_.extraData
         );
-
-        emit QuestClaimed(
-            claimData_.claimer,
-            currentQuest.questAddress,
-            claimData_.questId,
-            questContract_.rewardToken(),
-            questContract_.rewardAmountInWei()
-        );
-
-        if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.rewardAmountInWei(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
-            );
-        }
     }
 
     /// @dev Internal function to create an erc20 quest
@@ -723,8 +685,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient.safeTransferETH(protocolPayout);
         mintFeeRecipient_.safeTransferETH(mintPayout);
         if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
-
-        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
 
         return string(abi.encodePacked(
             ', "claimFee": "', cachedMintFee.toString(),

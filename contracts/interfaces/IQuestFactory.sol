@@ -90,39 +90,6 @@ interface IQuestFactory {
         address indexed questAddress,
         string extraData
     );
-    event Quest1155Claimed(
-        address indexed recipient,
-        address indexed questAddress,
-        string questId,
-        address rewardToken,
-        uint256 tokenId
-    );
-    event QuestClaimed(
-        address indexed recipient,
-        address indexed questAddress,
-        string questId,
-        address rewardToken,
-        uint256 rewardAmountInWei
-    );
-    event QuestClaimedReferred(
-        address indexed recipient,
-        address indexed questAddress,
-        string questId,
-        address rewardToken,
-        uint256 rewardAmountInWeiOrTokenId,
-        address referrer,
-        uint16 referralFee,
-        uint256 mintFeeEthWei
-    );
-    event MintFeePaid(
-        string questId,
-        address rabbitHoleAddress,
-        uint256 rabbitHoleAmountWei,
-        address questCreatorAddress,
-        uint256 questCreatorAmountWei,
-        address referrerAddress,
-        uint256 referrerAmountWei
-    );
     event QuestCreated(
         address indexed creator,
         address indexed contractAddress,
