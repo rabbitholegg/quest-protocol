@@ -30,6 +30,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
+    using LibString for address;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -105,16 +106,20 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
-        bytes memory hashc = abi.encodePacked(msg.sender, claimData_.questId);
+        bytes memory hashc = abi.encodePacked(claimData_.claimer, claimData_.questId);
+        bytes32 encodedHash;
 
         if (claimData_.ref != address(0)) {
             hashc = abi.encodePacked(hashc, claimData_.ref);
         }
-
-        bytes32 encodedHash = keccak256(hashc);
+        if (bytes(claimData_.extraData).length > 0){
+            encodedHash = claimData_.hashBytes;
+        } else {
+            encodedHash = keccak256(hashc);
+        }
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
+        if (currentQuest.addressMinted[claimData_.claimer]) revert AddressAlreadyMinted();
         if (encodedHash != claimData_.hashBytes) revert InvalidHash();
         if (recoverSigner(claimData_.hashBytes, claimData_.signature) != claimSignerAddress) revert AddressNotSigned();
         _;
@@ -301,6 +306,27 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev universal dynamic claim function
+    /// @param signature_ The signature of the data
+    /// @param data_ The data to decode for the claim
+    function claim(bytes calldata signature_, bytes calldata data_) external payable {
+        (
+            address claimer_,
+            address ref_,
+            string memory questId_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, string, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+
+        if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
+        } else { // erc20, erc20Stream
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
+        }
+    }
 
     /// @dev universal claim function for all quest types
     /// @param questId_ The id of the quest
@@ -309,9 +335,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param ref_ The referral address
     function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
         if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
         } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, 0));
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
         }
     }
 
@@ -320,7 +346,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
+        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
     }
 
     /// @dev claim rewards for a quest
@@ -328,7 +354,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), 0));
+        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -535,19 +561,30 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
 
-        currentQuest.addressMinted[msg.sender] = true;
+        currentQuest.addressMinted[claimData_.claimer] = true;
         ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
+        questContract_.singleClaim(claimData_.claimer);
 
-        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
+        }
+
+        emit QuestClaimedData(
+            claimData_.claimer,
+            currentQuest.questAddress,
+            claimData_.extraData
+        );
 
         emit Quest1155Claimed(
-            msg.sender, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
+            claimData_.claimer, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
         );
 
         if (claimData_.ref != address(0)) {
             emit QuestClaimedReferred(
-                msg.sender,
+                claimData_.claimer,
                 currentQuest.questAddress,
                 claimData_.questId,
                 questContract_.rewardToken(),
@@ -572,14 +609,25 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
 
-        currentQuest.addressMinted[msg.sender] = true;
+        currentQuest.addressMinted[claimData_.claimer] = true;
         ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
+        questContract_.singleClaim(claimData_.claimer);
 
-        if (mintFee > 0) processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
+        }
+
+        emit QuestClaimedData(
+            claimData_.claimer,
+            currentQuest.questAddress,
+            claimData_.extraData
+        );
 
         emit QuestClaimed(
-            msg.sender,
+            claimData_.claimer,
             currentQuest.questAddress,
             claimData_.questId,
             questContract_.rewardToken(),
@@ -588,7 +636,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         if (claimData_.ref != address(0)) {
             emit QuestClaimedReferred(
-                msg.sender,
+                claimData_.claimer,
                 currentQuest.questAddress,
                 claimData_.questId,
                 questContract_.rewardToken(),
@@ -655,30 +703,45 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private {
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
         returnChange();
-        uint256 oneThirdMintfee = mintFee / 3;
+        uint256 cachedMintFee = mintFee;
+        uint256 oneThirdMintfee = cachedMintFee / 3;
+        uint256 protocolPayout;
+        uint256 mintPayout;
+        uint256 referrerPayout;
 
         if(ref_ == address(0)){
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee * 2);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-
-            emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee * 2, mintFeeRecipient_, oneThirdMintfee, ref_, 0);
+            protocolPayout = oneThirdMintfee * 2;
+            mintPayout = oneThirdMintfee;
         } else {
-            protocolFeeRecipient.safeTransferETH(oneThirdMintfee);
-            mintFeeRecipient_.safeTransferETH(oneThirdMintfee);
-            ref_.safeTransferETH(oneThirdMintfee);
-
-            emit MintFeePaid(questId_, protocolFeeRecipient, oneThirdMintfee, mintFeeRecipient_, oneThirdMintfee, ref_, oneThirdMintfee);
+            protocolPayout = oneThirdMintfee;
+            mintPayout = oneThirdMintfee;
+            referrerPayout = oneThirdMintfee;
         }
+
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
+        mintFeeRecipient_.safeTransferETH(mintPayout);
+        if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
+
+        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
+
+        return string(abi.encodePacked(
+            ', "claimFee": "', cachedMintFee.toString(),
+            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '", "value": "', protocolPayout.toString(),
+            '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
+            '", "value": "', mintPayout.toString(),
+            '"}, {"name": "refferrerPayout", "address": "', ref_.toHexString(),
+            '", "value": "', referrerPayout.toString(), '"}]}'
+        ));
     }
 
+    // Refund any excess payment
     function returnChange() private {
         uint256 change = msg.value - mintFee;
         if (change > 0) {
-            // Refund any excess payment
             msg.sender.safeTransferETH(change);
-            emit ExtraMintFeeReturned(msg.sender, change);
         }
     }
 

@@ -185,6 +185,17 @@ Note the extra options to use with mantel and scroll above.
 
 ---
 
+### NFT image IPFS CIDs
+
+red animation: bafybeietacfcrgwetjwcexdakfhmig4fgsdsb7o62n2qcpybkbiupqlkxq
+red image: bafkreiafob6tgwkb4jla5ent7d7rw4ps7tjdhe32tlbdenyrc3lch76qfe
+blue animation: bafybeib43gbmeloa6o6hs7xxwioyvduohmuf6yyu2avusjuke7delbou3m
+blue image: bafkreicoysyc5chqjntdpxiyfojoljabycedep3mssphpwv7opfqfrlwbq
+
+`https://cloudflare-ipfs.com/ipfs/` is a good public IPFS gateway
+
+---
+
 ## Audits
 
 The following auditors reviewed the protocol.
