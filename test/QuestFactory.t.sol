@@ -402,11 +402,11 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 3);
-        assertEq(entries[2].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[2].data, (string)), finalJson);
+        assertEq(entries.length, 2);
+        assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[1].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(abi.decode(entries[1].data, (string)), finalJson);
     }
 
     function test_claim_with_bytes_no_referrer() public{
@@ -458,11 +458,11 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 3, "log length");
-        assertEq(entries[2].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[2].data, (string)), finalJson);
+        assertEq(entries.length, 2, "log length");
+        assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[1].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(abi.decode(entries[1].data, (string)), finalJson);
     }
 
     function test_claim_with_claimRewards_without_referrer() public{

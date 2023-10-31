@@ -161,8 +161,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         vm.warp(START_TIME);
         vm.prank(questFactoryMock);
-        vm.expectEmit(true, true, false, false, address(quest));
-        emit ClaimedSingle(participant, rewardTokenAddress, REWARD_AMOUNT_IN_WEI);
         quest.singleClaim(participant);
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
@@ -218,8 +216,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Claim single and check for correct event logging
         vm.warp(startTime);
         vm.prank(questFactoryMock);
-        vm.expectEmit(true, true, false, false, address(quest));
-        emit ClaimedSingle(participant, rewardTokenAddress, rewardAmountInWei);
         quest.singleClaim(participant);
         // Check that the participant received the correct amount of tokens
         assertEq(
@@ -327,7 +323,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             address claimer = makeAddr(string.concat("Claimer", i.toString()));
             vm.warp(START_TIME + i);
             vm.prank(questFactoryMock);
-            emit ClaimedSingle(claimer, rewardTokenAddress, rewardAmountInWei);
             quest.singleClaim(claimer);
         }
         QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);

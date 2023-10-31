@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 interface IQuest {
-    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint256 timestamp);
     event JsonSpecCIDSet(string cid);
     event ProtocolFeeDistributed(string questId, address rewardToken, address protocolOwner, uint256 feeAmountToProtocolOwner, address questOwner, uint256 feeAmountToQuestOwner);
