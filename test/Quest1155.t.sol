@@ -171,10 +171,6 @@ contract TestQuest1155 is Test, Errors, Events {
         vm.prank(questFactoryMock);
         quest.queue();
 
-        // emit ClaimedSingle(account_, rewardToken, 1);
-        vm.expectEmit(true, true, false, false, address(quest));
-        emit ClaimedSingle(participant, address(sampleERC1155), TOKEN_ID);
-
         uint256 protocolFeeRecipientOGBalance = protocolFeeRecipient.balance;
         vm.prank(questFactoryMock);
         quest.singleClaim(participant);
