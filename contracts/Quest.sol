@@ -148,7 +148,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
-        emit ClaimedSingle(account_, rewardToken, totalRedeemableRewards);
     }
 
     /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner

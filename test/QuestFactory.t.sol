@@ -11,6 +11,7 @@ import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
+import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
@@ -19,6 +20,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for address;
     using LibString for string;
+    using JSONParserLib for string;
     using LibString for uint256;
 
     QuestFactory questFactory;
@@ -402,11 +404,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 6);
-        assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[3].data, (string)), finalJson);
+        assertEq(entries.length, 5);
+        assertEq(entries[2].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        string memory returnedJson = abi.decode(entries[2].data, (string));
+        assertEq(returnedJson, finalJson);
+        returnedJson.parse(); // This will revert with ParsingFailed() if the json is not valid
     }
 
     function test_claim_with_bytes_no_referrer() public{
@@ -458,11 +463,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert QuestClaimedData event
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 5, "log length");
-        assertEq(entries[3].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[3].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[3].topics[2], bytes32(uint256(uint160(questAddress))));
-        assertEq(abi.decode(entries[3].data, (string)), finalJson);
+        assertEq(entries.length, 4, "log length");
+        assertEq(entries[2].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        string memory returnedJson = abi.decode(entries[2].data, (string));
+        assertEq(returnedJson, finalJson);
+        returnedJson.parse(); // This will revert with ParsingFailed() if the json is not valid
     }
 
     function test_claim_with_claimRewards_without_referrer() public{
