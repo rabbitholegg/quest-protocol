@@ -732,7 +732,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             '", "value": "', protocolPayout.toString(),
             '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
             '", "value": "', mintPayout.toString(),
-            '"}, {"name": "refferrerPayout", "address": "', ref_.toHexString(),
+            '"}, {"name": "referrerPayout", "address": "', ref_.toHexString(),
             '", "value": "', referrerPayout.toString(), '"}]}'
         ));
     }
