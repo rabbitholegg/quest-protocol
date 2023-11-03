@@ -442,7 +442,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             '", "value": "', (MINT_FEE / 3 * 2).toString(),
             '"}, {"name": "mintPayout", "address": "', questCreator.toHexString(),
             '", "value": "', (MINT_FEE / 3).toString(),
-            '"}, {"name": "refferrerPayout", "address": "', address(0).toHexString(),
+            '"}, {"name": "referrerPayout", "address": "', address(0).toHexString(),
             '", "value": "', uint256(0).toString(), '"}]}'
         ));
 
