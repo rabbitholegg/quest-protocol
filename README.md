@@ -40,13 +40,13 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ## Addresses
 
-Mainnet, Optimism, Polygon, Arbitrum, and Sepolia:
+Mainnet, Optimism, Polygon, Arbitrum, Base, Mantle and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
 |Quest Factory|0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E|
-|Quest Terminal Key|0x6Fd74033a717ebb3c60c08b37A94b6CF96DE54Ab|
 |RabbitHole Tickets|0x0D380362762B0cf375227037f2217f59A4eC4b9E|
+|Protocol Rewards|0x168437d131f8deF2d94B555FF34f4539458DD6F9|
 
 ---
 
@@ -56,15 +56,34 @@ The main contracts are:
 
 - `Quest Factory` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestFactory.sol))
   - Creates new `Quest` instances of an NFT reward Quest or ERC-20 reward Quest.
-- `RabbitHole Receipt` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/RabbitHoleReceipt.sol))
-  - An ERC-721 contract that acts as a proof of on-chain activity. Claimed via usage of ECDSA sig/hash
 - `Quest` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/Quest.sol))
   - A Quest in which the reward is an ERC-20 token
 - `QuestNFT` ([code](https://github.com/rabbitholegg/quest-protocol/blob/main/contracts/QuestNFT.sol))
   - A Quest in which the reward is a NFT
-- `Quest Terminal Key` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/QuestTerminalKey.sol))
-  - A contract for gating access and handling discounts for the Quest Terminal
+- `Protocol Rewards` ([code](https://github.com/rabbitholegg/quest-protocol/tree/main/contracts/ProtocolRewards.sol))
+  - An escrow like contract in which funds are deposited into account balances.
 
+### Contract Structure
+
+Contracts are layed out in the following order:
+
+1. Use statements (i.e. `using SafeTransferLib for address;`)
+2. Contract storage - we use upgradable architecture so pay special attention to preserving the order of contract storage, and only add to the end.
+3. Contract constructors and initialization functions
+4. Modifiers
+5. External Update functions - anything that modifies contract state
+6. External View Functions - self explanatory
+7. Internal Update functions
+8. Internal View functions
+
+Interfaces should be used to hold the following:
+
+1. Events
+2. Errors
+3. Structs
+
+### Best Practices
+For anything not covered here please refer to the [Foundry Best Practices](https://book.getfoundry.sh/tutorials/best-practices) for more information.
 ---
 
 ## Patterns
@@ -93,13 +112,14 @@ More reading [here](https://dev.to/jamiescript/design-patterns-in-solidity-1i28#
 ### Install dependencies
 
 ```bash
-yarn
+bun install
+forge install
 ```
 
 ### Compile Contracts
 
 ```bash
-yarn compile
+forge build
 ```
 
 ---
@@ -109,52 +129,70 @@ yarn compile
 ### Run all tests:
 
 ```bash
-yarn test
+forge test
 ```
 
 ### Run test coverage report:
 
 ```bash
-yarn test:coverage
+forge coverage --report lcov
 ```
 
 ### Run gas test:
 
 ```bash
-yarn test:gas-stories
+forge snapshot
 ```
 
+### Gotchas
+If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in Forge logging, your best bet is to search for the hex string (`ce3f0005` don't prepend `0x`) in `Errors.json` within the build artifacts - that should have most error strings in it.
 ---
 
 ## Deployment
+1. Deploy the ProxyAdmin
+`forge script script/ProxyAdmin.s.sol:ProxyAdminDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+1. Deploy QuestFactory (this also upgrades it to the latest version, and deployes the latest Quest and Quest1155 implementation contracts)
+`forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+1. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
+`forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+1. Set any storage variables manually if need be (most likely the `protocolFeeRecipient` will need to be set)
 
-### RabbitHoleReceipt and QuestFactory
-- checkout from sha `ea60f723fadfb5f02edad862f56072c0c972cfc2`
+### with mantel, add:
+`--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
+if you get `(code: -32000, message: invalid transaction: nonce too low, data: None)` try rerunning with the `--resume` flag
 
-### QuestTerminalKey
-- checkout from sha `fbc3c0fb7fdf13713314b996fa20a2551f9d591e`
+### with scroll, add:
+`--legacy --verifier blockscout --verifier-url "https://blockscout.scroll.io/api?module=contract&action=verify"`
 
-### RabbitHoleTickets
-- checkout from sha `70a56a1567dcd9c4d6f7718388667c5e0564fb2f`
-(must add in the deploy script manually)
-
-then:
-- `yarn hardhat deploy --network network_name`
-- `yarn hardhat --network network_name etherscan-verify --api-key etherscan_api_key`
-
+### verify OZ TransparentProxy
+Note: This might not be needed, there is currently a bug in the mantle explorer that prevents it from marking create2 contracts as contracts
+```
+forge verify-contract --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify" --num-of-optimizations 999999 --chain 5000 --compiler-version "0.8.10+commit.fc410830" 0x52629961F71C1C2564C5aa22372CB1b9fa9EBA3E lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy
+```
 
 ## Upgrading
 
-All contracts except the Quest instances are upgradable contracts.
+important: make sure storage layouts are compatible, by running the upgrades-core validate script on the contract you are upgrading, for example:
+`forge clean && forge build && bunx @openzeppelin/upgrades-core validate --contract RabbitHoleTickets`
 
-1. `yarn hardhat run --network network_name scripts/upgradeQuestFactory.js` or `scripts/upgradeRabbitHoleReceipt.js`
-   1. If you get an error like `NomicLabsHardhatPluginError: Failed to send contract verification request.` It's
-      usually because the contract wasn't deployed by the time verification ran. You can run verification again
-      with `yarn hardhat verify --network network_name IMPLENTATION_ADDRESS` where the implementation address is in the
-      output of the upgrade script.
-2. go to https://defender.openzeppelin.com/#/admin and approve the upgrade proposal (the link is also in the output of
-   the upgrade script)
-3. After the upgrade proposal is approved, create a PR with the updates to the .openzeppelin/[network-name].json file.
+Then to upgrade a contract, run one of the following commands:
+`forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsUpgrade --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+`forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
+
+Note the extra options to use with mantel and scroll above.
+
+---
+
+### NFT image IPFS CIDs
+
+red animation: bafybeietacfcrgwetjwcexdakfhmig4fgsdsb7o62n2qcpybkbiupqlkxq
+red image: bafkreiafob6tgwkb4jla5ent7d7rw4ps7tjdhe32tlbdenyrc3lch76qfe
+blue animation: bafybeib43gbmeloa6o6hs7xxwioyvduohmuf6yyu2avusjuke7delbou3m
+blue image: bafkreicoysyc5chqjntdpxiyfojoljabycedep3mssphpwv7opfqfrlwbq
+
+`https://cloudflare-ipfs.com/ipfs/` is a good public IPFS gateway
 
 ---
 

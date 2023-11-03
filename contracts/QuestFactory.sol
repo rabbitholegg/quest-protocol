@@ -1,54 +1,67 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 // Inherits
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "./OwnableUpgradeable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
+import {LegacyStorage} from "./libraries/LegacyStorage.sol";
+import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
 // Implements
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 // Leverages
-import {ECDSA} from "solady/src/utils/ECDSA.sol";
-import {LibClone} from "solady/src/utils/LibClone.sol";
-import {LibString} from "solady/src/utils/LibString.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
+import {LibString} from "solady/utils/LibString.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // References
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
-import {IQuestTerminalKeyERC721} from "./interfaces/IQuestTerminalKeyERC721.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
 // solhint-disable-next-line max-states-count
-contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgradeable, IQuestFactory {
+/// @custom:oz-upgrades-from QuestFactoryV0
+contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFactory {
+    /*//////////////////////////////////////////////////////////////
+                                 USING
+    //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
     using LibClone for address;
     using LibString for string;
     using LibString for uint256;
+    using LibString for address;
 
-    // storage vars. Insert new vars at the end to keep the storage layout the same.
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
     address public claimSignerAddress;
     address public protocolFeeRecipient;
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public rabbitHoleReceiptContract;
-    address public rabbitHoleTicketsContract;
+    address public rabbitHoleReceiptContract; // not used
+    address public rabbitHoleTicketsContract; // not used
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    address public mintFeeRecipient;
+    /// @custom:oz-renamed-from mintFeeRecipient
+    address public defaultMintFeeRecipient;
     uint256 private locked;
-    IQuestTerminalKeyERC721 private questTerminalKeyContract;
+    /// @custom:oz-renamed-from questTerminalKeyContract
+    address public defaultReferralFeeRecipient;
     uint256 public nftQuestFee;
-    address public questNFTAddress;
+    address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
+    mapping(address => address) public mintFeeRecipientList;
+    // insert new vars here at the end to keep the storage layout the same
 
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
     constructor() initializer {}
@@ -59,55 +72,29 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        address questTerminalKeyAddress_,
+        address defaultReferralFeeRecipientAddress_,
         address sablierV2LockupLinearAddress_,
         uint256 nftQuestFee_,
-        uint16 referralFee_
+        uint16 referralFee_,
+        uint256 mintFee_
     ) external initializer {
-        __Ownable_init(ownerAddress_);
-        __AccessControl_init();
+        _initializeOwner(ownerAddress_);
         questFee = 2000; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyAddress_);
+        defaultReferralFeeRecipient = defaultReferralFeeRecipientAddress_;
         sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
+        mintFee = mintFee_;
     }
 
-    /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
-    /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
-    modifier nonReentrant() virtual {
-        if (locked == 0) locked = 1;
-        if (locked != 1) revert Reentrancy();
-        locked = 2;
-        _;
-        locked = 1;
-    }
-
-    modifier claimChecks(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) {
-        Quest storage currentQuest = quests[questId_];
-        bytes32 encodedHash;
-        if (ref_ == address(0)) {
-            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_));
-        } else {
-            encodedHash = keccak256(abi.encodePacked(msg.sender, questId_, ref_));
-        }
-
-        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
-        if (currentQuest.addressMinted[msg.sender]) revert AddressAlreadyMinted();
-        if (encodedHash != hash_) revert InvalidHash();
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        _;
-    }
-
-    modifier sufficientMintFee() {
-        if (msg.value < mintFee) revert InvalidMintFee();
-        _;
-    }
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
 
     modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
         Quest storage currentQuest = quests[questId_];
@@ -117,175 +104,53 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         _;
     }
 
+    modifier claimChecks(ClaimData memory claimData_) {
+        Quest storage currentQuest = quests[claimData_.questId];
+        bytes memory hashc = abi.encodePacked(claimData_.claimer, claimData_.questId);
+        bytes32 encodedHash;
+
+        if (claimData_.ref != address(0)) {
+            hashc = abi.encodePacked(hashc, claimData_.ref);
+        }
+        if (bytes(claimData_.extraData).length > 0){
+            encodedHash = claimData_.hashBytes;
+        } else {
+            encodedHash = keccak256(hashc);
+        }
+
+        if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
+        if (currentQuest.addressMinted[claimData_.claimer]) revert AddressAlreadyMinted();
+        if (encodedHash != claimData_.hashBytes) revert InvalidHash();
+        if (recoverSigner(claimData_.hashBytes, claimData_.signature) != claimSignerAddress) revert AddressNotSigned();
+        _;
+    }
+
+    /// @dev ReentrancyGuard modifier from solmate, copied here because it was added after storage layout was finalized on first deploy
+    /// @dev from https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol
+    modifier nonReentrant() virtual {
+        if (locked != 1) revert Reentrancy();
+        locked = 2;
+        _;
+        locked = 1;
+    }
+
     modifier nonZeroAddress(address address_) {
         if (address_ == address(0)) revert ZeroAddressNotAllowed();
         _;
     }
 
-    function createERC20QuestInternal(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory questId_,
-        uint256 discountTokenId_,
-        string memory actionSpec_,
-        uint40 durationTotal_
-    ) internal returns (address) {
-        Quest storage currentQuest = quests[questId_];
-        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_)));
-
-        if (bytes(actionSpec_).length > 0) {
-            emit QuestCreatedWithAction(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                "erc20",
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmount_,
-                actionSpec_
-                );
-        } else {
-            emit QuestCreated(
-                msg.sender,
-                address(newQuest),
-                questId_,
-                "erc20",
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                rewardAmount_
-                );
-        }
-        uint16 protocolFee;
-        currentQuest.questAddress = address(newQuest);
-        currentQuest.totalParticipants = totalParticipants_;
-        if (durationTotal_ > 0) {
-            currentQuest.durationTotal = durationTotal_;
-            currentQuest.questType = "erc20Stream";
-        } else {
-            currentQuest.questType = "erc20";
-        }
-
-        if (discountTokenId_ == 0) {
-            protocolFee = questFee;
-        } else {
-            protocolFee = doDiscountedFee(discountTokenId_);
-        }
-
-        IQuestOwnable(newQuest).initialize(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            protocolFee,
-            protocolFeeRecipient,
-            durationTotal_,
-            sablierV2LockupLinearAddress
-        );
-
-        return newQuest;
+    modifier sufficientMintFee() {
+        if (msg.value < mintFee) revert InvalidMintFee();
+        _;
     }
 
-    function doDiscountedFee(uint256 tokenId_) internal returns (uint16) {
-        if (questTerminalKeyContract.ownerOf(tokenId_) != msg.sender) revert AuthOwnerDiscountToken();
+    /*//////////////////////////////////////////////////////////////
+                            EXTERNAL UPDATE
+    //////////////////////////////////////////////////////////////*/
 
-        (uint16 discountPercentage,) = questTerminalKeyContract.discounts(tokenId_);
-
-        questTerminalKeyContract.incrementUsedCount(tokenId_);
-        return uint16((uint256(questFee) * (10_000 - uint256(discountPercentage))) / 10_000);
-    }
-
-    /// @dev Transfer the total transfer amount to the quest contract
-    /// @dev Contract must be approved to transfer first
-    /// @param newQuest_ The address of the new quest
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
-        address sender = msg.sender;
-        IQuestOwnable questContract = IQuestOwnable(newQuest_);
-        rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
-        questContract.transferOwnership(sender);
-    }
-
-    /// @dev Create a sablier stream reward quest and start it at the same time.
-    /// @notice The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
-    /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
-    /// @param durationTotal_ The duration of the sablier stream
-    /// @return address the quest contract address
-    function createERC20StreamQuest(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory questId_,
-        string memory actionSpec_,
-        uint256 discountTokenId_,
-        uint40 durationTotal_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            discountTokenId_,
-            actionSpec_,
-            durationTotal_
-        );
-        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
-        return newQuest;
-    }
-
-    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
-    /// @param questId_ The id of the quest
-    /// @param actionSpec_ The JSON action spec for the quest
-    /// @param discountTokenId_ The id of the discount token
-    /// @return address the quest contract address
-    function createQuestAndQueue(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 rewardAmount_,
-        string memory questId_,
-        string memory actionSpec_,
-        uint256 discountTokenId_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
-        address newQuest = createERC20QuestInternal(
-            rewardTokenAddress_,
-            endTime_,
-            startTime_,
-            totalParticipants_,
-            rewardAmount_,
-            questId_,
-            discountTokenId_,
-            actionSpec_,
-            0
-        );
-        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
-        return newQuest;
-    }
+    /*//////////////////////////////////////////////////////////////
+                                 CREATE
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param rewardTokenAddress_ The contract address of the reward token
@@ -310,11 +175,12 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
         address payable newQuest =
-            payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, questId_))));
+            payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp))));
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
         currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
+        currentQuest.questCreator = msg.sender;
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -361,53 +227,164 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return newQuest;
     }
 
-    function totalQuestNFTFee(uint256 totalParticipants_) public view returns (uint256) {
-        return totalParticipants_ * getNftQuestFee(msg.sender);
+    /// @dev Create a sablier stream reward quest and start it at the same time.
+    /// @notice The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionSpec_ The JSON action spec for the quest
+    /// @param durationTotal_ The duration of the sablier stream
+    /// @return address the quest contract address
+    function createERC20StreamQuest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionSpec_,
+        uint40 durationTotal_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createERC20QuestInternal(
+            ERC20QuestData(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionSpec_,
+                durationTotal_,
+                "erc20Stream"
+            )
+        );
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
+        return newQuest;
     }
 
-    function getNftQuestFee(address address_) public view returns (uint256) {
-        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
+    // Note: Should probably be called `createQuest()`
+    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionSpec_ The JSON action spec for the quest
+    /// @return address the quest contract address
+    function createQuestAndQueue(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionSpec_,
+        uint256
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        address newQuest = createERC20QuestInternal(
+            ERC20QuestData(
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionSpec_,
+                0,
+                "erc20"
+            )
+        );
+        transferTokensAndOwnership(newQuest, rewardTokenAddress_);
+        return newQuest;
     }
 
-    /// @dev set erc20QuestAddress
-    /// @param erc20QuestAddress_ The address of the erc20 quest
-    function setErc20QuestAddress(address erc20QuestAddress_) public onlyOwner {
-        erc20QuestAddress = erc20QuestAddress_;
+    /*//////////////////////////////////////////////////////////////
+                                 CLAIM
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev universal dynamic claim function
+    /// @param signature_ The signature of the data
+    /// @param data_ The data to decode for the claim
+    function claim(bytes calldata signature_, bytes calldata data_) external payable {
+        (
+            address claimer_,
+            address ref_,
+            string memory questId_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, string, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+
+        if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
+        } else { // erc20, erc20Stream
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
+        }
+    }
+
+    /// @dev universal claim function for all quest types
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    /// @param ref_ The referral address
+    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
+        if (quests[questId_].questType.eq("erc1155")) {
+            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
+        } else { // erc20, erc20Stream
+            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
+        }
+    }
+
+    /// @dev claim rewards for a quest
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
+    }
+
+    /// @dev claim rewards for a quest
+    /// @param questId_ The id of the quest
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
+        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                  SET
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev set the claim signer address
+    /// @param claimSignerAddress_ The address of the claim signer
+    function setClaimSignerAddress(address claimSignerAddress_) external onlyOwner {
+        claimSignerAddress = claimSignerAddress_;
     }
 
     /// @dev set erc1155QuestAddress
     /// @param erc1155QuestAddress_ The address of the erc1155 quest
-    function setErc1155QuestAddress(address erc1155QuestAddress_) public onlyOwner {
+    function setErc1155QuestAddress(address erc1155QuestAddress_) external onlyOwner {
         erc1155QuestAddress = erc1155QuestAddress_;
     }
 
-    /// @dev set the claim signer address
-    /// @param claimSignerAddress_ The address of the claim signer
-    function setClaimSignerAddress(address claimSignerAddress_) public onlyOwner {
-        claimSignerAddress = claimSignerAddress_;
+    /// @dev set erc20QuestAddress
+    /// @param erc20QuestAddress_ The address of the erc20 quest
+    function setErc20QuestAddress(address erc20QuestAddress_) external onlyOwner {
+        erc20QuestAddress = erc20QuestAddress_;
     }
 
-    /// @dev set the protocol fee recipient
-    /// @param protocolFeeRecipient_ The address of the protocol fee recipient
-    function setProtocolFeeRecipient(address protocolFeeRecipient_) public onlyOwner {
-        if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-        protocolFeeRecipient = protocolFeeRecipient_;
-    }
-
-    /// @dev set the mintFeeRecipient
-    /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setMintFeeRecipient(address mintFeeRecipient_) public onlyOwner {
-        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-        mintFeeRecipient = mintFeeRecipient_;
-    }
-
-    /// @dev get the mintFeeRecipient return the protocol fee recipient if the mint fee recipient is not set
-    /// @return address the mint fee recipient
-    function getMintFeeRecipient() public view returns (address) {
-        if (mintFeeRecipient == address(0)) {
-            return protocolFeeRecipient;
-        }
-        return mintFeeRecipient;
+    /// @dev set the mint fee
+    /// @notice the mint fee in ether
+    /// @param mintFee_ The mint fee value
+    function setMintFee(uint256 mintFee_) external onlyOwner {
+        mintFee = mintFee_;
+        emit MintFeeSet(mintFee_);
     }
 
     /// @dev set the nftQuestFee
@@ -415,6 +392,21 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
     function setNftQuestFee(uint256 nftQuestFee_) external onlyOwner {
         nftQuestFee = nftQuestFee_;
         emit NftQuestFeeSet(nftQuestFee_);
+    }
+
+    /// @dev set the protocol fee recipient
+    /// @param protocolFeeRecipient_ The address of the protocol fee recipient
+    function setProtocolFeeRecipient(address protocolFeeRecipient_) external onlyOwner {
+        if (protocolFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
+        protocolFeeRecipient = protocolFeeRecipient_;
+    }
+
+    /// @dev set the quest fee
+    /// @notice the quest fee should be in Basis Point units
+    /// @param questFee_ The quest fee value
+    function setQuestFee(uint16 questFee_) external onlyOwner {
+        if (questFee_ > 10_000) revert QuestFeeTooHigh();
+        questFee = questFee_;
     }
 
     /// @dev set the referral fee
@@ -425,33 +417,73 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         emit ReferralFeeSet(referralFee_);
     }
 
-    /// @dev set questTerminalKeyContract address
-    /// @param questTerminalKeyContract_ The address of the questTerminalKeyContract
-    function setQuestTerminalKeyContract(address questTerminalKeyContract_) external onlyOwner {
-        questTerminalKeyContract = IQuestTerminalKeyERC721(questTerminalKeyContract_);
+    /// @dev set sablierV2LockupLinearAddress
+    /// @param sablierV2LockupLinearAddress_ The address of the sablierV2LockupLinear contract
+    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external onlyOwner {
+        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
+        emit SablierV2LockupLinearAddressSet(sablierV2LockupLinearAddress_);
     }
 
     /// @dev set or remave a contract address to be used as a reward
     /// @param rewardAddress_ The contract address to set
     /// @param allowed_ Whether the contract address is allowed or not
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) public onlyOwner {
+    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external onlyOwner {
         rewardAllowlist[rewardAddress_] = allowed_;
     }
 
-    /// @dev set the quest fee
-    /// @notice the quest fee should be in Basis Point units
-    /// @param questFee_ The quest fee value
-    function setQuestFee(uint16 questFee_) public onlyOwner {
-        if (questFee_ > 10_000) revert QuestFeeTooHigh();
-        questFee = questFee_;
+    /// @dev set the mintFeeRecipient
+    /// @param mintFeeRecipient_ The address of the mint fee recipient
+    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external onlyOwner {
+        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
+        defaultMintFeeRecipient = mintFeeRecipient_;
     }
 
-    /// @dev set the mint fee
-    /// @notice the mint fee in ether
-    /// @param mintFee_ The mint fee value
-    function setMintFee(uint256 mintFee_) public onlyOwner {
-        mintFee = mintFee_;
-        emit MintFeeSet(mintFee_);
+    /// @dev set a mintFeeRecipient for a specific address
+    /// @param address_ The address of the account
+    /// @param mintFeeRecipient_ The address of the mint fee recipient
+    function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) external onlyOwner {
+        mintFeeRecipientList[address_] = mintFeeRecipient_;
+    }
+
+    /// @dev set the nft quest fee for a list of addresses
+    /// @param toAddAddresses_ The list of addresses to set the nft quest fee for
+    /// @param fees_ The list of fees to set
+    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external onlyOwner {
+        for (uint256 i = 0; i < toAddAddresses_.length; i++) {
+            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
+        }
+        emit NftQuestFeeListSet(toAddAddresses_, fees_);
+    }
+
+    /// @dev set the default referral fee recipient
+    /// @param defaultReferralFeeRecipient_ The address of the default referral fee recipient
+    function setDefaultReferralFeeRecipient(address defaultReferralFeeRecipient_) external onlyOwner {
+        defaultReferralFeeRecipient = defaultReferralFeeRecipient_;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
+    /// @dev return status of whether an address has claimed a quest
+    /// @param questId_ The id of the quest
+    /// @param address_ The address to check
+    /// @return claimed status
+    function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
+        return quests[questId_].addressMinted[address_];
+    }
+
+    /// @dev get the mintFeeRecipient return the protocol fee recipient if the mint fee recipient is not set
+    /// @param questCreatorAddress_ The address of the quest creator, to get the mintFee
+    /// @return address the mint fee recipient
+    function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
+        address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
+        return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
+    }
+
+    function getNftQuestFee(address address_) public view returns (uint256) {
+        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
     /// @notice Right now this is a misnomer - it tracks total claims vs receipts minted
@@ -488,9 +520,7 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
             thisQuest.numberMinted,
             questContract.redeemedTokens(),
             rewardAmountOrTokenId,
-            questContract.hasWithdrawn(),
-            thisQuest.questType,
-            thisQuest.durationTotal
+            questContract.hasWithdrawn()
         );
 
         return data;
@@ -503,15 +533,6 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return (currentQuest.questAddress, currentQuest.totalParticipants, currentQuest.numberMinted);
     }
 
-    /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
-    /// @dev return status of whether an address has claimed a quest
-    /// @param questId_ The id of the quest
-    /// @param address_ The address to check
-    /// @return claimed status
-    function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
-        return quests[questId_].addressMinted[address_];
-    }
-
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
@@ -519,156 +540,225 @@ contract QuestFactory is Initializable, OwnableUpgradeable, AccessControlUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
-    /// @dev universal claim function for all quest types
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    /// @param ref_ The referral address
-    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
-        if (quests[questId_].questType.eq("erc20")) {
-            claimRewardsRef(questId_, hash_, signature_, ref_);
-        } else if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(questId_, hash_, signature_, ref_);
-        } else {
-            revert QuestTypeNotSupported();
-        }
+    function totalQuestNFTFee(uint256 totalParticipants_) public view returns (uint256) {
+        return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(questId_, hash_, signature_, address(0));
-    }
-
-    /// @dev claim rewards with a referral address
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    /// @param ref_ The referral address
-    function claimRewardsRef(
-        string memory questId_,
-        bytes32 hash_,
-        bytes memory signature_,
-        address ref_
-    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
-        Quest storage currentQuest = quests[questId_];
-        IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
-
-        currentQuest.addressMinted[msg.sender] = true;
-        ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
-
-        if (mintFee > 0) processMintFee(ref_);
-
-        emit QuestClaimed(
-            msg.sender,
-            currentQuest.questAddress,
-            questId_,
-            questContract_.rewardToken(),
-            questContract_.rewardAmountInWei()
-            );
-
-        if (ref_ != address(0)) {
-            emit QuestClaimedReferred(
-                msg.sender,
-                currentQuest.questAddress,
-                questId_,
-                questContract_.rewardToken(),
-                questContract_.rewardAmountInWei(),
-                ref_,
-                referralFee,
-                mintFee
-                );
-        }
-    }
-
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(questId_, hash_, signature_, address(0));
-    }
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL UPDATE
+    //////////////////////////////////////////////////////////////*/
 
     /// @dev claim rewards for a quest with a referral address
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claim1155RewardsRef(
-        string memory questId_,
-        bytes32 hash_,
-        bytes memory signature_,
-        address ref_
-    ) private nonReentrant sufficientMintFee claimChecks(questId_, hash_, signature_, ref_) {
-        Quest storage currentQuest = quests[questId_];
+    /// @param claimData_ The claim data struct
+    function claim1155RewardsRef(ClaimData memory claimData_) private
+        nonReentrant
+        sufficientMintFee
+        claimChecks(claimData_)
+    {
+        Quest storage currentQuest = quests[claimData_.questId];
         IQuest1155Ownable questContract_ = IQuest1155Ownable(currentQuest.questAddress);
         if (!questContract_.queued()) revert QuestNotQueued();
         if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
         if (block.timestamp > questContract_.endTime()) revert QuestEnded();
 
-        currentQuest.addressMinted[msg.sender] = true;
+        currentQuest.addressMinted[claimData_.claimer] = true;
         ++currentQuest.numberMinted;
-        questContract_.singleClaim(msg.sender);
+        questContract_.singleClaim(claimData_.claimer);
 
-        if (mintFee > 0) processMintFee(ref_);
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
+        }
+
+        emit QuestClaimedData(
+            claimData_.claimer,
+            currentQuest.questAddress,
+            claimData_.extraData
+        );
 
         emit Quest1155Claimed(
-            msg.sender, currentQuest.questAddress, questId_, questContract_.rewardToken(), questContract_.tokenId()
-            );
+            claimData_.claimer, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
+        );
 
-        if (ref_ != address(0)) {
+        if (claimData_.ref != address(0)) {
             emit QuestClaimedReferred(
-                msg.sender,
+                claimData_.claimer,
                 currentQuest.questAddress,
-                questId_,
+                claimData_.questId,
                 questContract_.rewardToken(),
                 questContract_.tokenId(),
-                ref_,
-                referralFee,
+                claimData_.ref,
+                3333, //referralFee,
                 mintFee
                 );
         }
     }
 
-    function processMintFee(address ref_) private {
-        returnChange();
-        if (ref_ == address(0)) {
-            getMintFeeRecipient().safeTransferETH(mintFee);
-            return;
+    /// @dev claim rewards with a referral address
+    /// @param claimData_ The claim data struct
+    function claimRewardsRef(ClaimData memory claimData_) private
+        nonReentrant
+        sufficientMintFee
+        claimChecks(claimData_)
+    {
+        Quest storage currentQuest = quests[claimData_.questId];
+        IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
+        if (!questContract_.queued()) revert QuestNotQueued();
+        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
+        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
+
+        currentQuest.addressMinted[claimData_.claimer] = true;
+        ++currentQuest.numberMinted;
+        questContract_.singleClaim(claimData_.claimer);
+
+        if (mintFee > 0) {
+            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
+            if (bytes(claimData_.extraData).length > 0){
+                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
+            }
         }
-        uint256 referralAmount = (mintFee * referralFee) / 10_000;
-        ref_.safeTransferETH(referralAmount);
-        getMintFeeRecipient().safeTransferETH(mintFee - referralAmount);
+
+        emit QuestClaimedData(
+            claimData_.claimer,
+            currentQuest.questAddress,
+            claimData_.extraData
+        );
+
+        emit QuestClaimed(
+            claimData_.claimer,
+            currentQuest.questAddress,
+            claimData_.questId,
+            questContract_.rewardToken(),
+            questContract_.rewardAmountInWei()
+        );
+
+        if (claimData_.ref != address(0)) {
+            emit QuestClaimedReferred(
+                claimData_.claimer,
+                currentQuest.questAddress,
+                claimData_.questId,
+                questContract_.rewardToken(),
+                questContract_.rewardAmountInWei(),
+                claimData_.ref,
+                3333, //referralFee,
+                mintFee
+            );
+        }
     }
 
+    /// @dev Internal function to create an erc20 quest
+    /// @param data_ The erc20 quest data struct
+    function createERC20QuestInternal(ERC20QuestData memory data_) internal returns (address) {
+        Quest storage currentQuest = quests[data_.questId];
+        address newQuest = erc20QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
+
+        currentQuest.questAddress = address(newQuest);
+        currentQuest.totalParticipants = data_.totalParticipants;
+        currentQuest.questCreator = msg.sender;
+        currentQuest.durationTotal = data_.durationTotal;
+        currentQuest.questType = data_.questType;
+
+        if (bytes(data_.actionSpec).length > 0) {
+            emit QuestCreatedWithAction(
+                msg.sender,
+                address(newQuest),
+                data_.questId,
+                currentQuest.questType,
+                data_.rewardTokenAddress,
+                data_.endTime,
+                data_.startTime,
+                data_.totalParticipants,
+                data_.rewardAmount,
+                data_.actionSpec
+            );
+        } else {
+            emit QuestCreated(
+                msg.sender,
+                address(newQuest),
+                data_.questId,
+                currentQuest.questType,
+                data_.rewardTokenAddress,
+                data_.endTime,
+                data_.startTime,
+                data_.totalParticipants,
+                data_.rewardAmount
+            );
+        }
+
+        IQuestOwnable(newQuest).initialize(
+            data_.rewardTokenAddress,
+            data_.endTime,
+            data_.startTime,
+            data_.totalParticipants,
+            data_.rewardAmount,
+            data_.questId,
+            questFee,
+            protocolFeeRecipient,
+            data_.durationTotal,
+            sablierV2LockupLinearAddress
+        );
+
+        return newQuest;
+    }
+
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
+        returnChange();
+        uint256 cachedMintFee = mintFee;
+        uint256 oneThirdMintfee = cachedMintFee / 3;
+        uint256 protocolPayout;
+        uint256 mintPayout;
+        uint256 referrerPayout;
+
+        if(ref_ == address(0)){
+            protocolPayout = oneThirdMintfee * 2;
+            mintPayout = oneThirdMintfee;
+        } else {
+            protocolPayout = oneThirdMintfee;
+            mintPayout = oneThirdMintfee;
+            referrerPayout = oneThirdMintfee;
+        }
+
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
+        mintFeeRecipient_.safeTransferETH(mintPayout);
+        if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
+
+        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
+
+        return string(abi.encodePacked(
+            ', "claimFee": "', cachedMintFee.toString(),
+            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
+            '", "value": "', protocolPayout.toString(),
+            '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
+            '", "value": "', mintPayout.toString(),
+            '"}, {"name": "refferrerPayout", "address": "', ref_.toHexString(),
+            '", "value": "', referrerPayout.toString(), '"}]}'
+        ));
+    }
+
+    // Refund any excess payment
     function returnChange() private {
         uint256 change = msg.value - mintFee;
         if (change > 0) {
-            // Refund any excess payment
             msg.sender.safeTransferETH(change);
-            emit ExtraMintFeeReturned(msg.sender, change);
         }
     }
 
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external onlyOwner {
-        for (uint256 i = 0; i < toAddAddresses_.length; i++) {
-            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
-        }
-        emit NftQuestFeeListSet(toAddAddresses_, fees_);
+    /// @dev Transfer the total transfer amount to the quest contract
+    /// @dev Contract must be approved to transfer first
+    /// @param newQuest_ The address of the new quest
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
+        address sender = msg.sender;
+        IQuestOwnable questContract = IQuestOwnable(newQuest_);
+        rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
+        questContract.transferOwnership(sender);
     }
 
-    /// @dev set sablierV2LockupLinearAddress
-    /// @param sablierV2LockupLinearAddress_ The address of the sablierV2LockupLinear contract
-    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external onlyOwner {
-        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
-        emit SablierV2LockupLinearAddressSet(sablierV2LockupLinearAddress_);
-    }
-
+    /*//////////////////////////////////////////////////////////////
+                                DEFAULTS
+    //////////////////////////////////////////////////////////////*/
     // Receive function to receive ETH
     receive() external payable {}
 

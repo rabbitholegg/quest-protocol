@@ -11,10 +11,16 @@
     "**/typechain-types": true,
     "**/lib": true,
   },
-  "editor.formatOnSave": true,
+  "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "editor.formatOnSave": false,
   "solidity.formatter": "forge",
   "solidity.linter": "solhint",
   "[solidity]": {
       "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "solidity.compileUsingRemoteVersion": "v0.8.19+commit.7dd6d404"
+  "[markdown]": {
+    "editor.formatOnSave": false,
   }
 }

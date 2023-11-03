@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.18;
+pragma solidity 0.8.19;
 
 interface IQuest1155 {
     // Events
-    event ClaimedSingle(address indexed account, address rewardAddress, uint256 amount);
     event Queued(uint256 timestamp);
 
     // Errors
