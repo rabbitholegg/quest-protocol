@@ -5,6 +5,12 @@ interface IQuest1155 {
     // Events
     event Queued(uint256 timestamp);
 
+    event QuestClaimedData(
+        address indexed recipient,
+        address indexed questAddress,
+        string extraData
+    );
+
     // Errors
     error EndTimeInPast();
     error EndTimeLessThanOrEqualToStartTime();
@@ -16,6 +22,10 @@ interface IQuest1155 {
     error NotQuestFactory();
     error QuestEnded();
     error AlreadyWithdrawn();
+    error AddressNotSigned();
+    error InvalidMintFee();
+    error AddressAlreadyMinted();
+    error OverMaxAllowedToMint();
 
     // Initializer/Contstructor Function
     function initialize(
@@ -25,7 +35,8 @@ interface IQuest1155 {
         uint256 totalParticipants_,
         uint256 tokenId_,
         uint256 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        address claimSignerAddress_
     ) external;
 
     // Read Functions
@@ -45,4 +56,5 @@ interface IQuest1155 {
     function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
+    function claim(bytes calldata signature_, bytes calldata data_) external payable;
 }

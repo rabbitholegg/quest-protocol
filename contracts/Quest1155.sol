@@ -9,6 +9,7 @@ import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/sec
 import {Ownable} from "solady/auth/Ownable.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {QuestFactory} from "./QuestFactory.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
@@ -34,6 +35,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public redeemedTokens;
     uint256 public questFee;
+    address public claimSignerAddress;
+    mapping(address => bool) addressMinted;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -52,7 +55,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         uint256 totalParticipants_,
         uint256 tokenId_,
         uint256 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        address claimSignerAddress_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -64,6 +68,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         questFactoryContract = QuestFactory(payable(msg.sender));
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
+        claimSignerAddress = claimSignerAddress_;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -119,6 +124,49 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
+    }
+
+    /// @dev recover the signer from a hash and signature
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
+        return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
+    }
+
+    /// @dev universal dynamic claim function
+    /// @param signature_ The signature of the data
+    /// @param data_ The data to decode for the claim
+    function claim(bytes calldata signature_, bytes calldata data_) external payable
+        // nonReentrant need to be sure we don't need this
+        whenNotEnded
+        onlyStarted
+    {
+        (
+            address claimer_,
+            address ref_,
+            uint256 mintFee_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, uint256, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < mintFee_) revert InvalidMintFee();
+        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
+        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+
+        addressMinted[claimer_] = true;
+        redeemedTokens = redeemedTokens + 1;
+        _transferRewards(claimer_, 1);
+        if (ref_ != address(0)) ref_.safeTransferETH(mintFee_ / 3);
+
+        emit QuestClaimedData(
+            claimer_,
+            address(this),
+            jsonData_
+        );
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory

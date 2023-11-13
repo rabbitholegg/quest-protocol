@@ -28,6 +28,8 @@ contract TestQuest1155 is Test, Errors, Events {
     address questFactoryMock;
     address participant = makeAddr(("participant"));
     address owner = makeAddr(("owner"));
+    Vm.Wallet claimSigner = vm.createWallet("claimSigner");
+    uint256 claimSignerPrivateKey = claimSigner.privateKey;
 
     function setUp() public {
         questFactoryMock = address(new QuestFactoryMock());
@@ -36,6 +38,7 @@ contract TestQuest1155 is Test, Errors, Events {
         quest = Quest1155(questAddress);
         vm.prank(questFactoryMock);
 
+
         quest.initialize(
             sampleERC1155,
             END_TIME,
@@ -43,7 +46,8 @@ contract TestQuest1155 is Test, Errors, Events {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            claimSigner.addr
         );
 
         vm.warp(START_TIME + 1);
@@ -79,7 +83,8 @@ contract TestQuest1155 is Test, Errors, Events {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            claimSigner.addr
         );
     }
 
@@ -99,7 +104,8 @@ contract TestQuest1155 is Test, Errors, Events {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            claimSigner.addr
         );
     }
 

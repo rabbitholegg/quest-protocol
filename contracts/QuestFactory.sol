@@ -190,7 +190,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             totalParticipants_,
             tokenId_,
             getNftQuestFee(msg.sender),
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            claimSignerAddress
         );
 
         IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, "0x00");
