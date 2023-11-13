@@ -36,7 +36,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public redeemedTokens;
     uint256 public questFee;
     address public claimSignerAddress;
-    mapping(address => bool) addressMinted;
+    address[] public addressesMinted;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -154,11 +154,12 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         if (msg.value < mintFee_) revert InvalidMintFee();
-        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
-        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
 
-        addressMinted[claimer_] = true;
-        redeemedTokens = redeemedTokens + 1;
+        // below two checks must be done on BE using the addressesMinted array
+        // if (addressMinted[claimer_]) revert AddressAlreadyMinted();
+        // if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+
+        addressesMinted.push(claimer_);
         _transferRewards(claimer_, 1);
         if (ref_ != address(0)) ref_.safeTransferETH(mintFee_ / 3);
 
