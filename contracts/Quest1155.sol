@@ -154,7 +154,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         // below two checks must be done on BE using the addressesMinted array
         // if (addressMinted[claimer_]) revert AddressAlreadyMinted();
         // if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
-        // also need to be sure the time is between
+        // also need to be sure the time quest has started
 
         addressesMinted.push(claimer_);
         _transferRewards(claimer_, 1);
