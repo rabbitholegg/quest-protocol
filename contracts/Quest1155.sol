@@ -136,15 +136,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @dev universal dynamic claim function
     /// @param signature_ The signature of the data
     /// @param data_ The data to decode for the claim
-    function claim(bytes calldata signature_, bytes calldata data_) external payable
-        // nonReentrant need to be sure we don't need this
-        whenNotEnded
-        onlyStarted
-    {
+    function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
         (
             address claimer_,
             address ref_,
-            uint256 mintFee_,
+            uint256 claimFee_,
             string memory jsonData_
         ) = abi.decode(
             data_,
@@ -153,15 +149,16 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         bytes32 hash_ = keccak256(data_);
 
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        if (msg.value < mintFee_) revert InvalidMintFee();
+        if (msg.value < claimFee_) revert InvalidClaimFee();
 
         // below two checks must be done on BE using the addressesMinted array
         // if (addressMinted[claimer_]) revert AddressAlreadyMinted();
         // if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+        // also need to be sure the time is between
 
         addressesMinted.push(claimer_);
         _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(mintFee_ / 3);
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
 
         emit QuestClaimedData(
             claimer_,

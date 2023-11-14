@@ -23,7 +23,7 @@ interface IQuest1155 {
     error QuestEnded();
     error AlreadyWithdrawn();
     error AddressNotSigned();
-    error InvalidMintFee();
+    error InvalidClaimFee();
     error AddressAlreadyMinted();
     error OverMaxAllowedToMint();
 
