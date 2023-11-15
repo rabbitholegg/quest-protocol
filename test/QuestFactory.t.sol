@@ -528,7 +528,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.expectRevert(abi.encodeWithSelector(QuestNotStarted.selector));
+        vm.expectRevert(abi.encodeWithSelector(NotStarted.selector));
         vm.startPrank(participant);
         questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
     }

@@ -98,25 +98,26 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
-    /// @notice Prevents reward withdrawal until the Quest has ended
-    modifier onlyWithdrawAfterEnd() {
-        if (block.timestamp < endTime) revert NoWithdrawDuringClaim();
-        _;
-    }
-
-    /// @notice Checks if quest has started both at the function level and at the start time
-    modifier onlyQuestActive() {
-        if (block.timestamp < startTime) revert ClaimWindowNotStarted();
-        _;
-    }
-
-    modifier onlyProtocolFeeRecipientOrOwner() {
-        if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
+    /// @notice Checks if the quest end time is passed
+    modifier onlyEnded() {
+        if (block.timestamp < endTime) revert NotEnded();
         _;
     }
 
     modifier onlyQuestFactory() {
         if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
+        _;
+    }
+
+    /// @notice Checks if the quest start time is passed
+    modifier onlyStarted() {
+        if (block.timestamp < startTime) revert NotStarted();
+        _;
+    }
+
+    /// @notice Checks if the quest end time has not passed
+    modifier whenNotEnded() {
+        if (block.timestamp > endTime) revert QuestEnded();
         _;
     }
 
@@ -141,7 +142,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         external
         virtual
         nonReentrant
-        onlyQuestActive
+        onlyStarted
+        whenNotEnded
         whenNotPaused
         onlyQuestFactory
     {
@@ -152,7 +154,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner
     /// @dev Can only be called after the quest has ended
-    function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
+    function withdrawRemainingTokens() external onlyEnded {
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 

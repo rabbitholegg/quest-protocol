@@ -557,9 +557,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     {
         Quest storage currentQuest = quests[claimData_.questId];
         IQuest1155Ownable questContract_ = IQuest1155Ownable(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
 
         currentQuest.addressMinted[claimData_.claimer] = true;
         ++currentQuest.numberMinted;
@@ -605,9 +602,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     {
         Quest storage currentQuest = quests[claimData_.questId];
         IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
 
         currentQuest.addressMinted[claimData_.claimer] = true;
         ++currentQuest.numberMinted;

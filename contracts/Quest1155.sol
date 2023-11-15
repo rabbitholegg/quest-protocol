@@ -126,7 +126,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     function singleClaim(address account_)
         external
         virtual
-        nonReentrant
         whenNotPaused
         whenNotEnded
         onlyStarted
