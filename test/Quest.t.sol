@@ -233,10 +233,10 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.singleClaim(participant);
     }
 
-    function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {
+    function test_RevertIf_singleClaim_NotStarted() public {
         vm.warp(START_TIME - 1);
         vm.prank(questFactoryMock);
-        vm.expectRevert(abi.encodeWithSelector(ClaimWindowNotStarted.selector));
+        vm.expectRevert(abi.encodeWithSelector(NotStarted.selector));
         quest.singleClaim(participant);
     }
 
@@ -346,8 +346,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {
-        vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
+    function test_RevertIf_withdrawRemainingToken_NotEnded() public {
+        vm.expectRevert(abi.encodeWithSelector(NotEnded.selector));
         vm.prank(protocolFeeRecipient);
         quest.withdrawRemainingTokens();
     }
