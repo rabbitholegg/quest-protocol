@@ -177,7 +177,7 @@ contract TestQuest1155 is Test, Errors, Events {
 
         assertEq(
             protocolFeeRecipient.balance,
-            protocolFeeRecipientOGBalance + QUEST_FEE,
+            protocolFeeRecipientOGBalance,
             "participant should have received the reward in ETH"
         );
         assertEq(

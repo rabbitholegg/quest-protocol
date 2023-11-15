@@ -604,7 +604,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
 
         currentQuest.addressMinted[claimData_.claimer] = true;
-        ++currentQuest.numberMinted;
+        ++currentQuest.numberMinted; // we can remove this and look at redeemedTokens on the Quest instead
         questContract_.singleClaim(claimData_.claimer);
 
         if (mintFee > 0) {

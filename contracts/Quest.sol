@@ -141,15 +141,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     function singleClaim(address account_)
         external
         virtual
-        nonReentrant
-        onlyStarted
-        whenNotEnded
         whenNotPaused
+        whenNotEnded
+        onlyStarted
         onlyQuestFactory
     {
-        uint256 totalRedeemableRewards = rewardAmountInWei;
-        _transferRewards(account_, totalRedeemableRewards);
         redeemedTokens = redeemedTokens + 1;
+        _transferRewards(account_, rewardAmountInWei);
     }
 
     /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner
