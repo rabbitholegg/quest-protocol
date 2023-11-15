@@ -36,7 +36,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public redeemedTokens;
     uint256 public questFee;
     address public claimSignerAddress;
-    address[] public addressesMinted;
+    mapping(address => bool) public addressMinted;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @dev recover the signer from a hash and signature
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
+    function recoverSigner(bytes32 hash_, bytes calldata signature_) public view returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
@@ -150,19 +150,17 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         if (msg.value < claimFee_) revert InvalidClaimFee();
+        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
 
-        // below two checks must be done on BE using the addressesMinted array
-        // if (addressMinted[claimer_]) revert AddressAlreadyMinted();
-        // if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
-        // also need to be sure the time quest has started
-
-        addressesMinted.push(claimer_);
+        addressMinted[claimer_] = true;
+        redeemedTokens = redeemedTokens + 1;
         _transferRewards(claimer_, 1);
         if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
 
         emit QuestClaimedData(
             claimer_,
-            address(this),
+            ref_,
             jsonData_
         );
     }

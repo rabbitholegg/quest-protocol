@@ -7,7 +7,7 @@ interface IQuest1155 {
 
     event QuestClaimedData(
         address indexed recipient,
-        address indexed questAddress,
+        address indexed referrer,
         string extraData
     );
 

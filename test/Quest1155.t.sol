@@ -10,8 +10,9 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
+import {TestUtils} from "./helpers/TestUtils.sol";
 
-contract TestQuest1155 is Test, Errors, Events {
+contract TestQuest1155 is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for uint256;
 
@@ -22,12 +23,14 @@ contract TestQuest1155 is Test, Errors, Events {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 TOKEN_ID = 1;
     uint16 QUEST_FEE = 2000; // 20%
+    uint256 MINT_FEE = 100;
     uint256 MINT_AMOUNT = 100_000;
     uint256 LARGE_ETH_AMOUNT = 100_000_000;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
-    address participant = makeAddr(("participant"));
-    address owner = makeAddr(("owner"));
+    address participant = makeAddr("participant");
+    address owner = makeAddr("owner");
+    address referrer = makeAddr("referrer");
     Vm.Wallet claimSigner = vm.createWallet("claimSigner");
     uint256 claimSignerPrivateKey = claimSigner.privateKey;
 
@@ -37,7 +40,6 @@ contract TestQuest1155 is Test, Errors, Events {
         address payable questAddress = payable(address(new Quest1155()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
         quest = Quest1155(questAddress);
         vm.prank(questFactoryMock);
-
 
         quest.initialize(
             sampleERC1155,
@@ -49,6 +51,8 @@ contract TestQuest1155 is Test, Errors, Events {
             protocolFeeRecipient,
             claimSigner.addr
         );
+
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), TOKEN_ID, MINT_AMOUNT);
 
         vm.warp(START_TIME + 1);
     }
@@ -144,26 +148,44 @@ contract TestQuest1155 is Test, Errors, Events {
     // //////////////////////////////////////////////////////////////*/
 
     function test_RevertIf_not_enough_tokens() public {
+        // transfer out the token it has from setUp
+        vm.prank(address(quest));
+        SampleERC1155(sampleERC1155).safeTransferFrom(address(quest), protocolFeeRecipient, TOKEN_ID, MINT_AMOUNT, "0x0");
+
         vm.expectRevert(abi.encodeWithSelector(InsufficientTokenBalance.selector));
         vm.prank(questFactoryMock);
         quest.queue();
     }
 
     function test_RevertIf_not_enough_eth() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
-
         vm.expectRevert(abi.encodeWithSelector(InsufficientETHBalance.selector));
         vm.prank(questFactoryMock);
         quest.queue();
     }
 
     function test_queue() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
 
         vm.prank(questFactoryMock);
         quest.queue();
         assertTrue(quest.queued(), "queued should be true");
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                ClAIM
+    //////////////////////////////////////////////////////////////*/
+    function test_claim_basic() public {
+        bytes memory data = abi.encode(participant, referrer, MINT_FEE, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        quest.claim{value: MINT_FEE}(signature, data);
+
+        assertEq(
+            SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
+            1,
+            "participant should have received the reward in ERC1155"
+        );
     }
 
 
@@ -172,7 +194,6 @@ contract TestQuest1155 is Test, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_singleClaim() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -196,7 +217,6 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_singleClaim_NotQuestFactory() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -206,7 +226,6 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_NotStarted() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -218,7 +237,6 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_whenNotPaused() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -235,7 +253,6 @@ contract TestQuest1155 is Test, Errors, Events {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -262,7 +279,6 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_withdrawRemainingToken_NotEnded() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -281,7 +297,6 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
