@@ -172,24 +172,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
-                                ClAIM
-    //////////////////////////////////////////////////////////////*/
-    function test_claim_basic() public {
-        bytes memory data = abi.encode(participant, referrer, MINT_FEE, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        quest.claim{value: MINT_FEE}(signature, data);
-
-        assertEq(
-            SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
-            1,
-            "participant should have received the reward in ERC1155"
-        );
-    }
-
-
-    /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
 

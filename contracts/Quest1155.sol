@@ -133,10 +133,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
-    /// @dev universal dynamic claim function
-    /// @param signature_ The signature of the data
-    /// @param data_ The data to decode for the claim
-    function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
+    function optimizedClaim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
         (
             address claimer_,
             address ref_,
@@ -163,6 +160,59 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
             ref_,
             jsonData_
         );
+    }
+
+    function claimWithCallBack(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
+        (
+            address claimer_,
+            address ref_,
+            uint256 claimFee_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, uint256, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < claimFee_) revert InvalidClaimFee();
+        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
+
+        addressMinted[claimer_] = true;
+        redeemedTokens = redeemedTokens + 1;
+        _transferRewards(claimer_, 1);
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
+
+        questFactoryContract.claimCallBack(claimer_, address(this), jsonData_);
+    }
+
+    function claimWithCallBackThreeEvents(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
+        (
+            address claimer_,
+            address ref_,
+            address rewardToken_,
+            uint256 tokenId_,
+            uint256 claimFee_,
+            string memory questId_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, address, uint256, uint256, string, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < claimFee_) revert InvalidClaimFee();
+        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
+
+        addressMinted[claimer_] = true;
+        redeemedTokens = redeemedTokens + 1;
+        _transferRewards(claimer_, 1);
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
+
+        questFactoryContract.claimCallBackThreeEvents(address(this), claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory

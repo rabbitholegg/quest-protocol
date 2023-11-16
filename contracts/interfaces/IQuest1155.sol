@@ -56,5 +56,5 @@ interface IQuest1155 {
     function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
-    function claim(bytes calldata signature_, bytes calldata data_) external payable;
+    function optimizedClaim(bytes calldata signature_, bytes calldata data_) external payable;
 }
