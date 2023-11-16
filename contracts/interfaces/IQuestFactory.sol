@@ -23,6 +23,7 @@ interface IQuestFactory {
     error ReferralFeeTooHigh();
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
+    error QuestAddressMismatch();
 
     // Structs
 

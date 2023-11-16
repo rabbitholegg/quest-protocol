@@ -549,11 +549,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
 
-    function claimCallBack(address questAddress_, address claimer_, string calldata extraData_) external {
+    function claimCallBack(address questAddress_, address claimer_, string calldata questId_, string calldata extraData_) external {
+        Quest storage quest = quests[questId_];
+        if(quest.questAddress != questAddress_) revert QuestAddressMismatch();
+
         emit QuestClaimedData(claimer_, questAddress_, extraData_);
     }
 
     function claimCallBackThreeEvents(address questAddress_, address claimer_, address ref_, address rewardToken_, uint256 tokenId_, uint256 claimFee_, string calldata questId_, string calldata extraData_) external {
+        Quest storage quest = quests[questId_];
+        if(quest.questAddress != questAddress_) revert QuestAddressMismatch();
+
         emit QuestClaimedData(claimer_, questAddress_, extraData_);
 
         emit Quest1155Claimed(claimer_, questAddress_, questId_, rewardToken_, tokenId_);

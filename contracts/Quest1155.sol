@@ -167,10 +167,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
             address claimer_,
             address ref_,
             uint256 claimFee_,
+            string memory questId_,
             string memory jsonData_
         ) = abi.decode(
             data_,
-            (address, address, uint256, string)
+            (address, address, uint256, string, string)
         );
         bytes32 hash_ = keccak256(data_);
 
@@ -184,7 +185,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _transferRewards(claimer_, 1);
         if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
 
-        questFactoryContract.claimCallBack(claimer_, address(this), jsonData_);
+        questFactoryContract.claimCallBack(address(this), claimer_, questId_, jsonData_);
     }
 
     function claimWithCallBackThreeEvents(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
