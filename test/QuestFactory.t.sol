@@ -714,9 +714,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-
-/// test 3 variations of optimized claim functions
-    function test_optimizedClaim_on_quest1155() public{
+    function test_claim_on_quest1155() public{
         vm.startPrank(questCreator);
 
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
@@ -734,65 +732,11 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         Quest1155 quest1155 = Quest1155(payable(questAddress));
 
-        bytes memory data = abi.encode(participant, referrer, MINT_FEE, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
+        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), 1, "questId", '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        quest1155.optimizedClaim{value: MINT_FEE}(signature, data);
-
-        vm.stopPrank();
-    }
-
-    function test_claimWithCallBack_on_quest1155() public{
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        address questAddress = questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionSpec"
-        );
-
-        Quest1155 quest1155 = Quest1155(payable(questAddress));
-
-        bytes memory data = abi.encode(participant, referrer, MINT_FEE, "questId", '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        quest1155.claimWithCallBack{value: MINT_FEE}(signature, data);
-
-        vm.stopPrank();
-    }
-
-        function test_claimWithCallBackThreeEvents_on_quest1155() public{
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        address questAddress = questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionSpec"
-        );
-
-        Quest1155 quest1155 = Quest1155(payable(questAddress));
-
-        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), 1, MINT_FEE, "questId", '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        quest1155.claimWithCallBackThreeEvents{value: MINT_FEE}(signature, data);
+        quest1155.claim{value: MINT_FEE}(signature, data);
 
         vm.stopPrank();
     }

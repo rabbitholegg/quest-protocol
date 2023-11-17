@@ -189,9 +189,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             startTime_,
             totalParticipants_,
             tokenId_,
-            getNftQuestFee(msg.sender),
             protocolFeeRecipient,
-            claimSignerAddress
+            claimSignerAddress,
+            mintFee,
+            questId_
         );
 
         IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, "0x00");
@@ -545,36 +546,28 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
+    function claimCallback(address claimer_, address ref_, address rewardToken_, uint256 tokenId_, uint256 claimFee_, string calldata questId_, string calldata extraData_) external {
+        Quest storage quest = quests[questId_];
+        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
+
+        emit QuestClaimedData(claimer_, msg.sender, extraData_);
+        emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        if(ref_ != address(0)){
+            emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, claimFee_);
+            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, claimFee_ / 3); // check to be sure needed
+        }
+    }
+
+    function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
+        Quest storage quest = quests[questId_];
+        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
+
+        emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
-
-    function claimCallBack(address questAddress_, address claimer_, string calldata questId_, string calldata extraData_) external {
-        Quest storage quest = quests[questId_];
-        if(quest.questAddress != questAddress_) revert QuestAddressMismatch();
-
-        emit QuestClaimedData(claimer_, questAddress_, extraData_);
-    }
-
-    function claimCallBackThreeEvents(address questAddress_, address claimer_, address ref_, address rewardToken_, uint256 tokenId_, uint256 claimFee_, string calldata questId_, string calldata extraData_) external {
-        Quest storage quest = quests[questId_];
-        if(quest.questAddress != questAddress_) revert QuestAddressMismatch();
-
-        emit QuestClaimedData(claimer_, questAddress_, extraData_);
-
-        emit Quest1155Claimed(claimer_, questAddress_, questId_, rewardToken_, tokenId_);
-
-        emit QuestClaimedReferred(
-            claimer_,
-            questAddress_,
-            questId_,
-            rewardToken_,
-            tokenId_,
-            ref_,
-            3333, //referralFee,
-            claimFee_
-        );
-    }
 
     /// @dev claim rewards for a quest with a referral address
     /// @param claimData_ The claim data struct

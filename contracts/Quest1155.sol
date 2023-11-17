@@ -35,8 +35,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public redeemedTokens;
     uint256 public questFee;
+    uint256 public claimFee;
     address public claimSignerAddress;
     mapping(address => bool) public addressMinted;
+    string public questId;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -54,9 +56,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        uint256 questFee_,
         address protocolFeeRecipient_,
-        address claimSignerAddress_
+        address claimSignerAddress_,
+        uint256 claimFee_,
+        string calldata questId_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -66,7 +69,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         totalParticipants = totalParticipants_;
         tokenId = tokenId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
-        questFee = questFee_;
+        claimFee = claimFee_;
+        questId = questId_;
         protocolFeeRecipient = protocolFeeRecipient_;
         claimSignerAddress = claimSignerAddress_;
         _initializeOwner(msg.sender);
@@ -133,87 +137,35 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
-    function optimizedClaim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
-        (
-            address claimer_,
-            address ref_,
-            uint256 claimFee_,
-            string memory jsonData_
-        ) = abi.decode(
-            data_,
-            (address, address, uint256, string)
-        );
-        bytes32 hash_ = keccak256(data_);
-
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        if (msg.value < claimFee_) revert InvalidClaimFee();
-        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
-        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
-
-        addressMinted[claimer_] = true;
-        redeemedTokens = redeemedTokens + 1;
-        _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
-
-        emit QuestClaimedData(
-            claimer_,
-            ref_,
-            jsonData_
-        );
-    }
-
-    function claimWithCallBack(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
-        (
-            address claimer_,
-            address ref_,
-            uint256 claimFee_,
-            string memory questId_,
-            string memory jsonData_
-        ) = abi.decode(
-            data_,
-            (address, address, uint256, string, string)
-        );
-        bytes32 hash_ = keccak256(data_);
-
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        if (msg.value < claimFee_) revert InvalidClaimFee();
-        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
-        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
-
-        addressMinted[claimer_] = true;
-        redeemedTokens = redeemedTokens + 1;
-        _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
-
-        questFactoryContract.claimCallBack(address(this), claimer_, questId_, jsonData_);
-    }
-
-    function claimWithCallBackThreeEvents(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
+    function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
         (
             address claimer_,
             address ref_,
             address rewardToken_,
             uint256 tokenId_,
-            uint256 claimFee_,
-            string memory questId_,
             string memory jsonData_
         ) = abi.decode(
             data_,
-            (address, address, address, uint256, uint256, string, string)
+            (address, address, address, uint256, string)
         );
         bytes32 hash_ = keccak256(data_);
+        uint256 claimFee_ = claimFee;
+        string memory questId_ = questId;
 
         if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
         if (msg.value < claimFee_) revert InvalidClaimFee();
         if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
         if (addressMinted[claimer_]) revert AddressAlreadyMinted();
 
+        // remove when removing claim functions in factory
+        if (questFactoryContract.getAddressMinted(questId_, claimer_)) revert AddressAlreadyMinted();
+
         addressMinted[claimer_] = true;
         redeemedTokens = redeemedTokens + 1;
         _transferRewards(claimer_, 1);
         if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
 
-        questFactoryContract.claimCallBackThreeEvents(address(this), claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
+        questFactoryContract.claimCallback(claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
@@ -239,15 +191,20 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _unpause();
     }
 
-    /// @dev Function that transfers all 1155 tokens and ETH in the contract to the owner
+    /// @dev Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
     /// @notice This function can only be called after the quest end time.
-    function withdrawRemainingTokens() external nonReentrant onlyQueued onlyEnded {
+    function withdrawRemainingTokens() external onlyEnded {
         if (hasWithdrawn) revert AlreadyWithdrawn();
-
         hasWithdrawn = true;
 
-        owner().safeTransferETH(address(this).balance);
+        uint ownerPayout = (claimFee * redeemedTokens) / 3;
+        uint protocolPayout = address(this).balance - ownerPayout;
+
+        owner().safeTransferETH(ownerPayout);
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
+
+        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -256,7 +213,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() external view returns (uint256) {
-        return (totalParticipants * questFee);
+        return (totalParticipants);
     }
 
     /*//////////////////////////////////////////////////////////////

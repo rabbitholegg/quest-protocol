@@ -23,7 +23,7 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 TOKEN_ID = 1;
     uint16 QUEST_FEE = 2000; // 20%
-    uint256 MINT_FEE = 100;
+    uint256 MINT_FEE = 99;
     uint256 MINT_AMOUNT = 100_000;
     uint256 LARGE_ETH_AMOUNT = 100_000_000;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
@@ -47,9 +47,10 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
             protocolFeeRecipient,
-            claimSigner.addr
+            claimSigner.addr,
+            MINT_FEE,
+            "questId"
         );
 
         SampleERC1155(sampleERC1155).mintSingle(address(quest), TOKEN_ID, MINT_AMOUNT);
@@ -66,7 +67,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         assertEq(START_TIME, quest.startTime(), "startTime not set");
         assertEq(TOTAL_PARTICIPANTS, quest.totalParticipants(), "totalParticipants not set");
         assertEq(TOKEN_ID, quest.tokenId(), "tokenId not set");
-        assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
         assertEq(questFactoryMock, quest.owner(), "owner should be set");
     }
@@ -86,9 +86,10 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
             protocolFeeRecipient,
-            claimSigner.addr
+            claimSigner.addr,
+            MINT_FEE,
+            "questId"
         );
     }
 
@@ -107,9 +108,10 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
             protocolFeeRecipient,
-            claimSigner.addr
+            claimSigner.addr,
+            MINT_FEE,
+            "questId"
         );
     }
 
@@ -172,6 +174,23 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
+                                ClAIM
+    //////////////////////////////////////////////////////////////*/
+    function test_claim() public {
+        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), TOKEN_ID, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        quest.claim{value: MINT_FEE}(signature, data);
+
+        assertEq(
+            SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
+            1,
+            "participant should have received the reward in ERC1155"
+        );
+    }
+
+    /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
 
@@ -184,11 +203,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         vm.prank(questFactoryMock);
         quest.singleClaim(participant);
 
-        assertEq(
-            protocolFeeRecipient.balance,
-            protocolFeeRecipientOGBalance + QUEST_FEE,
-            "participant should have received the reward in ETH"
-        );
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
             1,
@@ -235,25 +249,37 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
-        vm.prank(owner);
-        quest.queue();
+        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), TOKEN_ID, 'json');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        uint256 ownerOGBalance = owner.balance;
+        quest.claim{value: MINT_FEE}(signature, data);
+
         vm.warp(END_TIME + 1);
         vm.prank(protocolFeeRecipient);
 
         quest.withdrawRemainingTokens();
+
+        assertEq(
+            referrer.balance,
+            MINT_FEE * 1 / 3,
+            "referrer should have received (claimFee * redeemedTokens) / 3 eth"
+        );
         assertEq(
             owner.balance,
-            ownerOGBalance + LARGE_ETH_AMOUNT,
+            MINT_FEE * 1 / 3,
+            "owner should have received (claimFee * redeemedTokens) / 3 eth"
+        );
+        assertEq(
+            protocolFeeRecipient.balance,
+            MINT_FEE * 1 / 3,
             "owner should have received remaining ETH"
         );
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID),
-            MINT_AMOUNT,
+            MINT_AMOUNT - 1, // -1 because we minted 1 to participant
             "owner should have received remaining ERC1155"
         );
     }
@@ -268,12 +294,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         quest.queue();
 
         vm.expectRevert(abi.encodeWithSelector(NotEnded.selector));
-        vm.prank(protocolFeeRecipient);
-        quest.withdrawRemainingTokens();
-    }
-
-    function test_RevertIf_withdrawRemainingToken_NotQueued() public {
-        vm.expectRevert(abi.encodeWithSelector(NotQueued.selector));
         vm.prank(protocolFeeRecipient);
         quest.withdrawRemainingTokens();
     }
@@ -300,7 +320,7 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
 
     function test_maxProtocolReward() public {
         assertEq(
-            quest.maxProtocolReward(), TOTAL_PARTICIPANTS * QUEST_FEE,
+            quest.maxProtocolReward(), TOTAL_PARTICIPANTS,
             "maxProtocolReward should be correct"
         );
     }

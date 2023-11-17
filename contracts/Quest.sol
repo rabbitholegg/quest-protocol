@@ -165,18 +165,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         emit ProtocolFeeDistributed(questId, rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
     }
 
-    /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
-    /// @param erc20Address_ The address of the ERC20 token to refund
-    function refund(address erc20Address_) external onlyOwner {
-        if (erc20Address_ == rewardToken) revert InvalidRefundToken();
-
-        uint256 balance = address(this).balance;
-        if (balance > 0) payable(msg.sender).transfer(balance);
-
-        uint256 erc20Balance = erc20Address_.balanceOf(address(this));
-        if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
-    }
-
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/

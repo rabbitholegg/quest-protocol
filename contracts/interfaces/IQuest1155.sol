@@ -2,6 +2,18 @@
 pragma solidity 0.8.19;
 
 interface IQuest1155 {
+    // Structs
+    struct FactoryQuest {
+        mapping(address => bool) addressMinted;
+        address questAddress;
+        uint256 totalParticipants;
+        uint256 numberMinted;
+        string questType;
+        uint40 durationTotal;
+        address questCreator;
+        address mintFeeRecipient;
+    }
+
     // Events
     event Queued(uint256 timestamp);
 
@@ -34,9 +46,10 @@ interface IQuest1155 {
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        uint256 questFee_,
         address protocolFeeRecipient_,
-        address claimSignerAddress_
+        address claimSignerAddress_,
+        uint256 claimFee_,
+        string memory questId_
     ) external;
 
     // Read Functions
@@ -56,5 +69,4 @@ interface IQuest1155 {
     function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
-    function optimizedClaim(bytes calldata signature_, bytes calldata data_) external payable;
-}
+    }

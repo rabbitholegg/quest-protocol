@@ -362,48 +362,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     /*//////////////////////////////////////////////////////////////
-                                REFUND
-    //////////////////////////////////////////////////////////////*/
-
-    function test_refund() public {
-        address randomToken = address(
-            new SampleERC20(
-                "Random",
-                "RND",
-                defaultTotalRewardsPlusFee,
-                admin
-            )
-        );
-        vm.prank(admin);
-        SampleERC20(randomToken).transfer(address(quest), defaultTotalRewardsPlusFee);
-        // Check quests balance of random token
-        assertEq(
-            SampleERC20(randomToken).balanceOf(address(quest)), defaultTotalRewardsPlusFee, "quest should have tokens"
-        );
-        // Refund random token
-        vm.prank(questFactoryMock);
-        quest.refund(randomToken);
-        // Check balances of quest and questFactory
-        assertEq(SampleERC20(randomToken).balanceOf(address(quest)), 0, "quest should have 0 tokens");
-        assertEq(
-            SampleERC20(randomToken).balanceOf(address(questFactoryMock)),
-            defaultTotalRewardsPlusFee,
-            "questFactory should have tokens"
-        );
-    }
-
-    function test_RevertIf_refund_Unauthorized() public {
-        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
-        quest.refund(rewardTokenAddress);
-    }
-
-    function test_RevertIf_refund_InvalidRefundToken() public {
-        vm.prank(questFactoryMock);
-        vm.expectRevert(abi.encodeWithSelector(InvalidRefundToken.selector));
-        quest.refund(rewardTokenAddress);
-    }
-
-    /*//////////////////////////////////////////////////////////////
                             EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
