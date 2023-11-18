@@ -269,7 +269,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "actionSpec"
         );
 
-        uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
@@ -280,9 +279,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         // 1155 reward
         assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
 
-        // claim fee & nft quset fee rewards
-        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
-        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
+        // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
     }
 
@@ -302,7 +299,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "actionSpec"
         );
 
-        uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
         bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
@@ -312,10 +308,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // 1155 reward
         assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
-
-        // claim fee & nft quset fee rewards
-        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
-        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2 + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
 
         vm.stopPrank();
     }

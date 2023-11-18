@@ -10,6 +10,7 @@ import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {LockupLinear} from "sablier/types/DataTypes.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 import {ISablierV2LockupLinear} from "sablier/interfaces/ISablierV2LockupLinear.sol";
@@ -46,6 +47,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint40 public durationTotal;
     mapping(address => uint256) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
+    uint256 public claimFee;
+    address public claimSignerAddress;
+    mapping(address => bool) public addressMinted;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -67,7 +71,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint16 questFee_,
         address protocolFeeRecipient_,
         uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_
+        address sablierV2LockupLinearAddress_,
+        address claimSignerAddress_,
+        uint256 claimFee_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -84,6 +90,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         protocolFeeRecipient = protocolFeeRecipient_;
         durationTotal = durationTotal_;
         sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
+        claimSignerAddress = claimSignerAddress_;
+        claimFee = claimFee_;
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
@@ -107,6 +115,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Checks if quest has started both at the function level and at the start time
     modifier onlyQuestActive() {
         if (block.timestamp < startTime) revert ClaimWindowNotStarted();
+        _;
+    }
+
+    /// @notice Checks if the quest end time has not passed
+    modifier whenNotEnded() {
+        if (block.timestamp > endTime) revert QuestEnded();
         _;
     }
 
@@ -150,19 +164,65 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         redeemedTokens = redeemedTokens + 1;
     }
 
-    /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner
+    /// @dev recover the signer from a hash and signature
+    /// @param hash_ The hash of the message
+    /// @param signature_ The signature of the hash
+    function recoverSigner(bytes32 hash_, bytes calldata signature_) public view returns (address) {
+        return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
+    }
+
+    function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
+        (
+            address claimer_,
+            address ref_,
+            address rewardToken_,
+            uint256 tokenId_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, address, uint256, string)
+        );
+        bytes32 hash_ = keccak256(data_);
+        uint256 claimFee_ = claimFee;
+        string memory questId_ = questId;
+
+        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < claimFee_) revert InvalidClaimFee();
+        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
+        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
+
+        // remove when removing claim functions in factory
+        if (questFactoryContract.getAddressMinted(questId_, claimer_)) revert AddressAlreadyMinted();
+
+        addressMinted[claimer_] = true;
+        redeemedTokens = redeemedTokens + 1;
+        _transferRewards(claimer_, rewardAmountInWei);
+
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
+
+        questFactoryContract.claimCallback(claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
+    }
+
+    /// @notice Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
     /// @dev Can only be called after the quest has ended
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 
+        uint256 ownerPayout = (claimFee * redeemedTokens) / 3;
+        uint256 protocolPayout = address(this).balance - ownerPayout;
+
+        owner().safeTransferETH(ownerPayout);
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
+
+        // transfer reward tokens
         uint256 protocolFeeForRecipient = this.protocolFee() / 2;
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
-        emit ProtocolFeeDistributed(questId, rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
+        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -188,13 +248,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Function that calculates the protocol fee
     function protocolFee() external view returns (uint256) {
-        return (_receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
+        return (redeemedTokens * rewardAmountInWei * questFee) / 10_000;
     }
 
     /// @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
     /// @return total number of claims submitted
     function receiptRedeemers() external view returns (uint256) {
-        return _receiptRedeemers();
+        return redeemedTokens;
     }
 
     /// @dev Returns the reward amount
@@ -237,12 +297,5 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         } else {
             rewardToken.safeTransfer(sender_, amount_);
         }
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                             INTERNAL VIEW
-    //////////////////////////////////////////////////////////////*/
-    function _receiptRedeemers() internal view returns (uint256) {
-        return questFactoryContract.getNumberMinted(questId);
     }
 }

@@ -199,7 +199,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         vm.prank(questFactoryMock);
         quest.queue();
 
-        uint256 protocolFeeRecipientOGBalance = protocolFeeRecipient.balance;
         vm.prank(questFactoryMock);
         quest.singleClaim(participant);
 

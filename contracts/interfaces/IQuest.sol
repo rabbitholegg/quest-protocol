@@ -19,6 +19,11 @@ interface IQuest {
     error NotStarted();
     error TotalAmountExceedsBalance();
     error AuthOwnerRecipient();
+    error AddressNotSigned();
+    error InvalidClaimFee();
+    error OverMaxAllowedToMint();
+    error AddressAlreadyMinted();
+    error QuestEnded();
 
     function initialize(
         address rewardTokenAddress_,
@@ -30,7 +35,9 @@ interface IQuest {
         uint16 questFee_,
         address protocolFeeRecipient_,
         uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_
+        address sablierV2LockupLinearAddress_,
+        address claimSignerAddress_,
+        uint256 claimFee_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);

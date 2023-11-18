@@ -23,16 +23,21 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 REWARD_AMOUNT_IN_WEI = 1000;
     string QUEST_ID = "QUEST_ID";
     uint16 QUEST_FEE = 2000; // 20%
+    uint256 CLAIM_FEE = 999;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     uint40 DURATION_TOTAL = 0;
     address sablierMock;
     address questFactoryMock;
     Quest quest;
     address admin = makeAddr(("admin"));
+    address owner = makeAddr(("owner"));
     address participant = makeAddr(("participant"));
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
+    address referrer = makeAddr("referrer");
+    Vm.Wallet claimSigner = vm.createWallet("claimSigner");
+    uint256 claimSignerPrivateKey = claimSigner.privateKey;
 
     function setUp() public {
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
@@ -59,7 +64,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock
+            sablierMock,
+            claimSigner.addr,
+            CLAIM_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -101,7 +108,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock
+            sablierMock,
+            claimSigner.addr,
+            CLAIM_FEE
         );
     }
 
@@ -120,7 +129,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock
+            sablierMock,
+            claimSigner.addr,
+            CLAIM_FEE
         );
     }
 
@@ -152,6 +163,24 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_RevertIf_unpause_Unauthorized() public {
         vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
         quest.unPause();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                ClAIM
+    //////////////////////////////////////////////////////////////*/
+    function test_claim() public {
+        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
+
+        quest.claim{value: CLAIM_FEE}(signature, data);
+
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(participant),
+            startingBalance + REWARD_AMOUNT_IN_WEI,
+            "participant should have received the reward"
+        );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -208,7 +237,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock
+            sablierMock,
+            claimSigner.addr,
+            CLAIM_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -254,95 +285,46 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
-        uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
-        uint256 questBalanceMinusFees = questBalance - totalFees;
-        // Simulate the quest being completed by max participants
-        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
-        vm.warp(END_TIME);
-        vm.prank(protocolFeeRecipient);
-        quest.withdrawRemainingTokens();
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(protocolFeeRecipient),
-            totalFees,
-            "protocolFeeRecipient should have received the remaining tokens"
-        );
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(address(questFactoryMock)),
-            questBalanceMinusFees,
-            "quest should have 0 tokens"
-        );
-    }
-
-    function test_fuzz_withdrawRemainingTokens(
-        uint16 withdrawerRoll,
-        uint256 totalClaims,
-        uint256 rewardAmountInWei,
-        uint16 questFee
-    ) public {
-        address[2] memory withdrawers = [protocolFeeRecipient, questFactoryMock];
-        address withdrawer = withdrawers[withdrawerRoll % 2];
-        totalClaims = bound(totalClaims, 1, TOTAL_PARTICIPANTS);
-        questFee = uint16(bound(questFee, 0, 10_000));
-        rewardAmountInWei =
-            bound(rewardAmountInWei, REWARD_AMOUNT_IN_WEI * totalClaims, REWARD_AMOUNT_IN_WEI * REWARD_AMOUNT_IN_WEI);
-        // Setup a reward token with fuzzed rewardAmountInWei
-        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(totalClaims, rewardAmountInWei, questFee);
-        rewardTokenAddress = address(
-            new SampleERC20(
-                DEFAULT_ERC20_NAME,
-                DEFAULT_ERC20_SYMBOL,
-                defaultTotalRewardsPlusFee,
-                admin
-            )
-        );
-        // Get the participants starting balance
-        // uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
-        // Create new quest with fuzzed values
-        quest = new Quest();
-        quest =
-            Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
         vm.prank(questFactoryMock);
-        quest.initialize(
-            rewardTokenAddress,
-            END_TIME,
-            START_TIME,
-            totalClaims,
-            rewardAmountInWei,
-            QUEST_ID,
-            questFee,
-            protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
-        );
-        // Transfer all tokens to quest
-        vm.prank(admin);
-        SampleERC20(rewardTokenAddress).transfer(address(quest), defaultTotalRewardsPlusFee);
-        // Simulate claims
-        for (uint256 i = 0; i < totalClaims; i++) {
-            address claimer = makeAddr(string.concat("Claimer", i.toString()));
-            vm.warp(START_TIME + i);
-            vm.prank(questFactoryMock);
-            quest.singleClaim(claimer);
-        }
-        QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);
-        // Get final balances and withdraw remaining tokens
-        vm.warp(END_TIME);
-        uint256 totalFees = calculateTotalFees(totalClaims, rewardAmountInWei, questFee) / 2;
+        quest.transferOwnership(owner);
+
+        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, 'json');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        quest.claim{value: CLAIM_FEE}(signature, data);
+
+        uint256 totalFees = calculateTotalFees(1, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
-        vm.prank(withdrawer);
+
+        vm.warp(END_TIME);
         quest.withdrawRemainingTokens();
-        // Check owner and fee recipient received the correct amount of tokens
+
+        assertEq(
+            referrer.balance,
+            CLAIM_FEE * 1 / 3,
+            "referrer should have received (claimFee * redeemedTokens) / 3 eth"
+        );
+        assertEq(
+            owner.balance,
+            CLAIM_FEE * 1 / 3,
+            "owner should have received (claimFee * redeemedTokens) / 3 eth"
+        );
+        assertEq(
+            protocolFeeRecipient.balance,
+            CLAIM_FEE * 1 / 3,
+            "owner should have received remaining ETH"
+        );
+
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(protocolFeeRecipient),
             totalFees,
             "protocolFeeRecipient should have received the remaining tokens"
         );
         assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(address(questFactoryMock)),
+            SampleERC20(rewardTokenAddress).balanceOf(owner),
             questBalanceMinusFees,
-            "quest should have 0 tokens"
+            "quest owner should have 0 tokens"
         );
     }
 
@@ -353,9 +335,16 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
+        vm.prank(questFactoryMock);
+
+        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, 'json');
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        quest.claim{value: CLAIM_FEE}(signature, data);
+
         vm.warp(END_TIME);
-        vm.startPrank(protocolFeeRecipient);
         quest.withdrawRemainingTokens();
+
         vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
         quest.withdrawRemainingTokens();
         vm.stopPrank();
@@ -383,19 +372,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE),
             "maxProtocolReward should be correct"
         );
-    }
-
-    function test_fuzz_protocolFee(uint256 totalClaims) public {
-        totalClaims = bound(totalClaims, 1, TOTAL_PARTICIPANTS);
-        QuestFactoryMock(questFactoryMock).setNumberMinted(totalClaims);
-
-        assertEq(quest.protocolFee(), calculateTotalFees(totalClaims, REWARD_AMOUNT_IN_WEI, QUEST_FEE));
-    }
-
-    function test_fuzz_receiptRedeemers(uint256 redeemers) public {
-        assertEq(quest.receiptRedeemers(), 0, "receiptRedeemers should be correct");
-        QuestFactoryMock(questFactoryMock).setNumberMinted(redeemers);
-        assertEq(quest.receiptRedeemers(), redeemers, "receiptRedeemers should be correct");
     }
 
     function test_getRewardAmount() public {

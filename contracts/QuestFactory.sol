@@ -718,7 +718,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             questFee,
             protocolFeeRecipient,
             data_.durationTotal,
-            sablierV2LockupLinearAddress
+            sablierV2LockupLinearAddress,
+            claimSignerAddress,
+            mintFee
         );
 
         return newQuest;
