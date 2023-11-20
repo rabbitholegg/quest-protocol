@@ -336,6 +336,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
     function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
         vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
 
         bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, 'json');
         bytes32 msgHash = keccak256(data);
@@ -347,7 +348,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
         quest.withdrawRemainingTokens();
-        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////
