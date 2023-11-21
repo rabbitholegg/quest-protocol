@@ -319,6 +319,42 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
     }
 
+    function claimThrough(bytes calldata signature_, bytes calldata data_) external payable {
+        (
+            address claimer_,
+            address ref_,
+            address rewardToken_,
+            uint256 tokenId_,
+            string memory questId_,
+            string memory jsonData_
+        ) = abi.decode(
+            data_,
+            (address, address, address, uint256, string, string)
+        );
+        Quest storage quest = quests[questId_];
+        uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
+
+        if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < mintFee) revert InvalidMintFee();
+        if (quest.addressMinted[claimer_]) revert AddressAlreadyMinted();
+        if (numberMintedPlusOne_ > quest.totalParticipants) revert OverMaxAllowedToMint();
+
+        quest.addressMinted[claimer_] = true;
+        quest.numberMinted = numberMintedPlusOne_;
+        quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+
+        emit QuestClaimedData(claimer_, msg.sender, jsonData_);
+        if (quest.questType.eq("erc1155")) {
+            emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        } else {
+            emit QuestClaimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        }
+        if(ref_ != address(0)){
+            emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, mintFee);
+            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3); // check to be sure needed
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////
                                   SET
     //////////////////////////////////////////////////////////////*/
@@ -511,7 +547,11 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
 
         emit QuestClaimedData(claimer_, msg.sender, extraData_);
-        emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        if (quest.questType.eq("erc1155")) {
+            emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        } else {
+            emit QuestClaimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        }
         if(ref_ != address(0)){
             emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, claimFee_);
             emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, claimFee_ / 3); // check to be sure needed

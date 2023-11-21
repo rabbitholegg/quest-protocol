@@ -168,6 +168,12 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         questFactoryContract.claimCallback(claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
     }
 
+    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
+        // note: redeemedTokens is not incremented here because it is incremented in the factory
+        _transferRewards(claimer_, 1);
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee / 3);
+    }
+
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
     function singleClaim(address account_)

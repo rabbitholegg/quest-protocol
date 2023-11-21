@@ -203,6 +203,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questFactoryContract.claimCallback(claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
     }
 
+    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
+        // note: redeemedTokens is not incremented here because it is incremented in the factory
+        _transferRewards(claimer_, rewardAmountInWei);
+        if (ref_ != address(0)) ref_.safeTransferETH(claimFee / 3);
+    }
+
     /// @notice Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
     /// @dev Can only be called after the quest has ended
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
