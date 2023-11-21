@@ -9,7 +9,6 @@ interface IQuestFactory {
     error AuthOwnerDiscountToken();
     error Deprecated();
     error Erc20QuestAddressNotSet();
-    error InvalidHash();
     error InvalidMintFee();
     error MsgValueLessThanQuestNFTFee();
     error OverMaxAllowedToMint();
@@ -163,9 +162,8 @@ interface IQuestFactory {
     // Update Functions
 
     // Claim
-    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable;
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable;
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable;
+    function claim(bytes calldata signature_, bytes calldata data_) external payable;
+
 
     // Create
     function create1155QuestAndQueue(

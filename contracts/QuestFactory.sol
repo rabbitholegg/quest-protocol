@@ -106,21 +106,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
-        bytes memory hashc = abi.encodePacked(claimData_.claimer, claimData_.questId);
-        bytes32 encodedHash;
-
-        if (claimData_.ref != address(0)) {
-            hashc = abi.encodePacked(hashc, claimData_.ref);
-        }
-        if (bytes(claimData_.extraData).length > 0){
-            encodedHash = claimData_.hashBytes;
-        } else {
-            encodedHash = keccak256(hashc);
-        }
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[claimData_.claimer]) revert AddressAlreadyMinted();
-        if (encodedHash != claimData_.hashBytes) revert InvalidHash();
         if (recoverSigner(claimData_.hashBytes, claimData_.signature) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
@@ -308,6 +296,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
+    /// TODO: Remove this function
     /// @dev universal dynamic claim function
     /// @param signature_ The signature of the data
     /// @param data_ The data to decode for the claim
@@ -328,35 +317,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         } else { // erc20, erc20Stream
             claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
         }
-    }
-
-    /// @dev universal claim function for all quest types
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    /// @param ref_ The referral address
-    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
-        if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
-        } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
-        }
-    }
-
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
-    }
-
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
     }
 
     /*//////////////////////////////////////////////////////////////

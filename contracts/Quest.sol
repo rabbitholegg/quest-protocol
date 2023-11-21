@@ -168,7 +168,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param hash_ The hash of the message
     /// @param signature_ The signature of the hash
     function recoverSigner(bytes32 hash_, bytes calldata signature_) public view returns (address) {
-        return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
+        return ECDSA.recoverCalldata(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
     function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
