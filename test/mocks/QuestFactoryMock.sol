@@ -34,8 +34,4 @@ contract QuestFactoryMock {
     function getAddressMinted(string memory, address) external pure returns (bool) {
         return false;
     }
-
-    function claimCallback(address, address, address, uint256, uint256, string calldata, string calldata) pure external {
-        return;
-    }
 }

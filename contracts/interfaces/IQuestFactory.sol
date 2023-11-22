@@ -192,6 +192,5 @@ interface IQuestFactory {
     function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external;
 
     // Callbacks
-    function claimCallback(address claimer_, address ref_, address rewardToken_, uint256 tokenId_, uint256 claimFee_, string calldata questId_, string calldata extraData_) external;
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external;
 }

@@ -540,22 +540,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
-    function claimCallback(address claimer_, address ref_, address rewardToken_, uint256 tokenId_, uint256 claimFee_, string calldata questId_, string calldata extraData_) external {
-        Quest storage quest = quests[questId_];
-        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
-
-        emit QuestClaimedData(claimer_, msg.sender, extraData_);
-        if (quest.questType.eq("erc1155")) {
-            emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
-        } else {
-            emit QuestClaimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
-        }
-        if(ref_ != address(0)){
-            emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, claimFee_);
-            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, claimFee_ / 3); // check to be sure needed
-        }
-    }
-
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
         Quest storage quest = quests[questId_];
         if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
