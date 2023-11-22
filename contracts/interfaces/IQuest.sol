@@ -35,9 +35,7 @@ interface IQuest {
         uint16 questFee_,
         address protocolFeeRecipient_,
         uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_,
-        address claimSignerAddress_,
-        uint256 claimFee_
+        address sablierV2LockupLinearAddress_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
@@ -50,6 +48,5 @@ interface IQuest {
     function totalTransferAmount() external view returns (uint256);
     function questFee() external view returns (uint16);
     function totalParticipants() external view returns (uint256);
-    function redeemedTokens() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
 }

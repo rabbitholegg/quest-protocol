@@ -23,6 +23,7 @@ interface IQuestFactory {
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
     error QuestAddressMismatch();
+    error ClaimFailed();
 
     // Structs
 
@@ -158,6 +159,7 @@ interface IQuestFactory {
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
     function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
+    function mintFee() external view returns (uint256);
 
     // Update Functions
 

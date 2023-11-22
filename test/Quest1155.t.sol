@@ -22,6 +22,7 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     uint256 START_TIME = 1_000_000;
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 TOKEN_ID = 1;
+    uint256 CLAIM_FEE = 999;
     uint16 QUEST_FEE = 2000; // 20%
     uint256 MINT_FEE = 99;
     uint256 MINT_AMOUNT = 100_000;
@@ -30,9 +31,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     address questFactoryMock;
     address participant = makeAddr("participant");
     address owner = makeAddr("owner");
-    address referrer = makeAddr("referrer");
-    Vm.Wallet claimSigner = vm.createWallet("claimSigner");
-    uint256 claimSignerPrivateKey = claimSigner.privateKey;
 
     function setUp() public {
         questFactoryMock = address(new QuestFactoryMock());
@@ -48,8 +46,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             protocolFeeRecipient,
-            claimSigner.addr,
-            MINT_FEE,
             "questId"
         );
 
@@ -87,8 +83,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             protocolFeeRecipient,
-            claimSigner.addr,
-            MINT_FEE,
             "questId"
         );
     }
@@ -109,8 +103,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
             protocolFeeRecipient,
-            claimSigner.addr,
-            MINT_FEE,
             "questId"
         );
     }
@@ -174,23 +166,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
-                                ClAIM
-    //////////////////////////////////////////////////////////////*/
-    function test_claim() public {
-        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), TOKEN_ID, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        quest.claim{value: MINT_FEE}(signature, data);
-
-        assertEq(
-            SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
-            1,
-            "participant should have received the reward in ERC1155"
-        );
-    }
-
-    /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
 
@@ -248,13 +223,14 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
+        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
-        bytes memory data = abi.encode(participant, referrer, address(sampleERC1155), TOKEN_ID, 'json');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        quest.claim{value: MINT_FEE}(signature, data);
+        // simulate ETH from TOTAL_PARTICIPANTS claims
+        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
 
         vm.warp(END_TIME + 1);
         vm.prank(protocolFeeRecipient);
@@ -262,23 +238,18 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         quest.withdrawRemainingTokens();
 
         assertEq(
-            referrer.balance,
-            MINT_FEE * 1 / 3,
-            "referrer should have received (claimFee * redeemedTokens) / 3 eth"
-        );
-        assertEq(
             owner.balance,
-            MINT_FEE * 1 / 3,
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
             "owner should have received (claimFee * redeemedTokens) / 3 eth"
         );
         assertEq(
             protocolFeeRecipient.balance,
-            MINT_FEE * 1 / 3,
-            "owner should have received remaining ETH"
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
+            "protocolFeeRecipient should have received remaining ETH"
         );
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID),
-            MINT_AMOUNT - 1, // -1 because we minted 1 to participant
+            MINT_AMOUNT,
             "owner should have received remaining ERC1155"
         );
     }

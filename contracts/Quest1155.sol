@@ -33,11 +33,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public tokenId;
-    uint256 public redeemedTokens;
     uint256 public questFee;
-    uint256 public claimFee;
-    address public claimSignerAddress;
-    mapping(address => bool) public addressMinted;
     string public questId;
     // insert new vars here at the end to keep the storage layout the same
 
@@ -57,8 +53,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         uint256 totalParticipants_,
         uint256 tokenId_,
         address protocolFeeRecipient_,
-        address claimSignerAddress_,
-        uint256 claimFee_,
         string calldata questId_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -69,10 +63,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         totalParticipants = totalParticipants_;
         tokenId = tokenId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
-        claimFee = claimFee_;
         questId = questId_;
         protocolFeeRecipient = protocolFeeRecipient_;
-        claimSignerAddress = claimSignerAddress_;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -130,48 +122,9 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         emit Queued(block.timestamp);
     }
 
-    /// @dev recover the signer from a hash and signature
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes calldata signature_) public view returns (address) {
-        return ECDSA.recoverCalldata(ECDSA.toEthSignedMessageHash(hash_), signature_);
-    }
-
-    function claim(bytes calldata signature_, bytes calldata data_) external payable whenNotEnded {
-        (
-            address claimer_,
-            address ref_,
-            address rewardToken_,
-            uint256 tokenId_,
-            string memory jsonData_
-        ) = abi.decode(
-            data_,
-            (address, address, address, uint256, string)
-        );
-        bytes32 hash_ = keccak256(data_);
-        uint256 claimFee_ = claimFee;
-        string memory questId_ = questId;
-
-        if (recoverSigner(hash_, signature_) != claimSignerAddress) revert AddressNotSigned();
-        if (msg.value < claimFee_) revert InvalidClaimFee();
-        if (redeemedTokens + 1 > totalParticipants) revert OverMaxAllowedToMint();
-        if (addressMinted[claimer_]) revert AddressAlreadyMinted();
-
-        // remove when removing claim functions in factory
-        if (questFactoryContract.getAddressMinted(questId_, claimer_)) revert AddressAlreadyMinted();
-
-        addressMinted[claimer_] = true;
-        redeemedTokens = redeemedTokens + 1;
-        _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(claimFee_ / 3);
-
-        questFactoryContract.claimCallback(claimer_, ref_, rewardToken_, tokenId_, claimFee_, questId_, jsonData_);
-    }
-
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
-        // note: redeemedTokens is not incremented here because it is incremented in the factory
         _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(claimFee / 3);
+        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
@@ -186,7 +139,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         onlyQueued
         onlyQuestFactory
     {
-        redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
         if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
     }
@@ -203,7 +155,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 
-        uint ownerPayout = (claimFee * redeemedTokens) / 3;
+        uint ownerPayout = (_claimFee() * _redeemedTokens()) / 3;
         uint protocolPayout = address(this).balance - ownerPayout;
 
         owner().safeTransferETH(ownerPayout);
@@ -220,6 +172,17 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() external view returns (uint256) {
         return (totalParticipants);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             INTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+    function _redeemedTokens() internal view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
+    }
+
+    function _claimFee() internal view returns (uint256) {
+        return questFactoryContract.mintFee();
     }
 
     /*//////////////////////////////////////////////////////////////

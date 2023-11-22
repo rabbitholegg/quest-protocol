@@ -47,8 +47,6 @@ interface IQuest1155 {
         uint256 totalParticipants_,
         uint256 tokenId_,
         address protocolFeeRecipient_,
-        address claimSignerAddress_,
-        uint256 claimFee_,
         string memory questId_
     ) external;
 

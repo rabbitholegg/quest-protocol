@@ -35,9 +35,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
-    address referrer = makeAddr("referrer");
-    Vm.Wallet claimSigner = vm.createWallet("claimSigner");
-    uint256 claimSignerPrivateKey = claimSigner.privateKey;
 
     function setUp() public {
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
@@ -64,9 +61,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock,
-            claimSigner.addr,
-            CLAIM_FEE
+            sablierMock
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -108,9 +103,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock,
-            claimSigner.addr,
-            CLAIM_FEE
+            sablierMock
         );
     }
 
@@ -129,9 +122,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock,
-            claimSigner.addr,
-            CLAIM_FEE
+            sablierMock
         );
     }
 
@@ -163,24 +154,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_RevertIf_unpause_Unauthorized() public {
         vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
         quest.unPause();
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                                ClAIM
-    //////////////////////////////////////////////////////////////*/
-    function test_claim() public {
-        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, '[{"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}, {"a":"lorem ipsum", "b": 123}]');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
-
-        quest.claim{value: CLAIM_FEE}(signature, data);
-
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(participant),
-            startingBalance + REWARD_AMOUNT_IN_WEI,
-            "participant should have received the reward"
-        );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -237,9 +210,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_FEE,
             protocolFeeRecipient,
             DURATION_TOTAL,
-            sablierMock,
-            claimSigner.addr,
-            CLAIM_FEE
+            sablierMock
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -285,15 +256,16 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
+        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
 
-        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, 'json');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        quest.claim{value: CLAIM_FEE}(signature, data);
+        // simulate ETH from TOTAL_PARTICIPANTS claims
+        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
 
-        uint256 totalFees = calculateTotalFees(1, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
+        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
 
@@ -301,18 +273,13 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.withdrawRemainingTokens();
 
         assertEq(
-            referrer.balance,
-            CLAIM_FEE * 1 / 3,
-            "referrer should have received (claimFee * redeemedTokens) / 3 eth"
-        );
-        assertEq(
             owner.balance,
-            CLAIM_FEE * 1 / 3,
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
             "owner should have received (claimFee * redeemedTokens) / 3 eth"
         );
         assertEq(
             protocolFeeRecipient.balance,
-            CLAIM_FEE * 1 / 3,
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
             "owner should have received remaining ETH"
         );
 
@@ -338,10 +305,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
 
-        bytes memory data = abi.encode(participant, referrer, rewardTokenAddress, REWARD_AMOUNT_IN_WEI, 'json');
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        quest.claim{value: CLAIM_FEE}(signature, data);
+        // simulate ETH from 1 claim
+        vm.deal(address(quest), CLAIM_FEE / 3 * 2);
 
         vm.warp(END_TIME);
         quest.withdrawRemainingTokens();
