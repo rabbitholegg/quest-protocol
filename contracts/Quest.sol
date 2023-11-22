@@ -147,13 +147,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _transferRewards(account_, totalRedeemableRewards);
     }
 
-    /// @dev recover the signer from a hash and signature
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function recoverSigner(bytes32 hash_, bytes calldata signature_) public view returns (address) {
-        return ECDSA.recoverCalldata(ECDSA.toEthSignedMessageHash(hash_), signature_);
-    }
-
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
         _transferRewards(claimer_, rewardAmountInWei);
         if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
