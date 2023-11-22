@@ -211,17 +211,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     /*//////////////////////////////////////////////////////////////
-                             INTERNAL VIEW
-    //////////////////////////////////////////////////////////////*/
-    function _redeemedTokens() internal view returns (uint256) {
-        return questFactoryContract.getNumberMinted(questId);
-    }
-
-    function _claimFee() internal view returns (uint256) {
-        return questFactoryContract.mintFee();
-    }
-
-    /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
     function _createLockupLinearStream(address recepient_, uint256 totalAmount_) internal {
@@ -251,5 +240,16 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         } else {
             rewardToken.safeTransfer(sender_, amount_);
         }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             INTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+    function _redeemedTokens() internal view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
+    }
+
+    function _claimFee() internal view returns (uint256) {
+        return questFactoryContract.mintFee();
     }
 }
