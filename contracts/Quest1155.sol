@@ -9,7 +9,6 @@ import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/sec
 import {Ownable} from "solady/auth/Ownable.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {QuestFactory} from "./QuestFactory.sol";
-import {ECDSA} from "solady/utils/ECDSA.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg

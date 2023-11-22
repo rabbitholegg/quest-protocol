@@ -10,7 +10,6 @@ import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {LockupLinear} from "sablier/types/DataTypes.sol";
-import {ECDSA} from "solady/utils/ECDSA.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 import {ISablierV2LockupLinear} from "sablier/interfaces/ISablierV2LockupLinear.sol";
