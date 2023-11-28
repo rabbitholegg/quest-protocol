@@ -350,7 +350,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
         if(ref_ != address(0)){
             emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, mintFee);
-            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3); // check to be sure needed
+            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
 
