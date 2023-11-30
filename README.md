@@ -181,13 +181,18 @@ Then to upgrade a contract, run one of the following commands:
 `forge script script/Quest.s.sol:QuestDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 `forge script script/Quest.s.sol:Quest1155Deploy --rpc-url sepolia --broadcast --verify -vvvv`
 
-or one command to run them all:
-`echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify -vvvv --rpc-url {}`
+or use xargs to deploy on every chain in one command:
+```
+echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:QuestDeploy --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:Quest1155Deploy --broadcast --verify --rpc-url {}
+```
 and for our mantle:
-`forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify -vvvv --rpc-url mantle --legacy --verifier blockscout --
-verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
+`forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url mantle --legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
 
 Note the extra options to use with mantel and scroll above.
+
+If you get a `(code: -32000, message: invalid transaction: nonce too low, data: None)` error, try running the same command with the `--resume` flag.
 
 ---
 
