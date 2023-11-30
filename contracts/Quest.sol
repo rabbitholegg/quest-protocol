@@ -37,7 +37,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint256 public rewardAmountInWei;
     bool public queued;
     string public questId;
-    uint256 public redeemedTokens;
     uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
@@ -87,8 +86,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
-        // Note: this is redundant
-        hasWithdrawn = false;
         queued = true;
         _initializeOwner(msg.sender);
         __Pausable_init();
@@ -110,8 +107,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _;
     }
 
-    modifier onlyProtocolFeeRecipientOrOwner() {
-        if (msg.sender != protocolFeeRecipient && msg.sender != owner()) revert AuthOwnerRecipient();
+    /// @notice Checks if the quest end time has not passed
+    modifier whenNotEnded() {
+        if (block.timestamp > endTime) revert QuestEnded();
         _;
     }
 
@@ -147,34 +145,33 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     {
         uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
-        redeemedTokens = redeemedTokens + 1;
     }
 
-    /// @notice Function to withdraw the remaining tokens in the contract, distributes the protocol fee and returns remaining tokens to owner
+    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
+        _transferRewards(claimer_, rewardAmountInWei);
+        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
+    }
+
+    /// @notice Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
     /// @dev Can only be called after the quest has ended
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 
+        uint256 ownerPayout = (_claimFee() * _redeemedTokens()) / 3;
+        uint256 protocolPayout = address(this).balance - ownerPayout;
+
+        owner().safeTransferETH(ownerPayout);
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
+
+        // transfer reward tokens
         uint256 protocolFeeForRecipient = this.protocolFee() / 2;
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
-        emit ProtocolFeeDistributed(questId, rewardToken, protocolFeeRecipient, protocolFeeForRecipient, owner(), remainingBalanceForOwner);
-    }
-
-    /// @dev transfer all coins and tokens that is not the rewardToken to the contract owner.
-    /// @param erc20Address_ The address of the ERC20 token to refund
-    function refund(address erc20Address_) external onlyOwner {
-        if (erc20Address_ == rewardToken) revert InvalidRefundToken();
-
-        uint256 balance = address(this).balance;
-        if (balance > 0) payable(msg.sender).transfer(balance);
-
-        uint256 erc20Balance = erc20Address_.balanceOf(address(this));
-        if (erc20Balance > 0) erc20Address_.safeTransfer(msg.sender, erc20Balance);
+        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -200,13 +197,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Function that calculates the protocol fee
     function protocolFee() external view returns (uint256) {
-        return (_receiptRedeemers() * rewardAmountInWei * questFee) / 10_000;
-    }
-
-    /// @notice This no longer indicates a number of receipts minted but gives an accurate count of total claims
-    /// @return total number of claims submitted
-    function receiptRedeemers() external view returns (uint256) {
-        return _receiptRedeemers();
+        return (_redeemedTokens() * rewardAmountInWei * questFee) / 10_000;
     }
 
     /// @dev Returns the reward amount
@@ -254,7 +245,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                              INTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
-    function _receiptRedeemers() internal view returns (uint256) {
+    function _redeemedTokens() internal view returns (uint256) {
         return questFactoryContract.getNumberMinted(questId);
+    }
+
+    function _claimFee() internal view returns (uint256) {
+        return questFactoryContract.mintFee();
     }
 }

@@ -269,20 +269,19 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "actionSpec"
         );
 
-        uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
+
+        bytes memory data = abi.encode(participant, referrer, "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, referrer);
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // 1155 reward
         assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
 
-        // claim fee & nft quset fee rewards
-        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
-        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
+        // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
     }
 
@@ -302,20 +301,16 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             "actionSpec"
         );
 
-        uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // 1155 reward
         assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
-
-        // claim fee & nft quset fee rewards
-        assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
-        assertEq(protocolFeeRecipient.balance, (MINT_FEE / 3) * 2 + NFT_QUEST_FEE, "protocolFeeRecipient mint fee");
 
         vm.stopPrank();
     }
@@ -339,11 +334,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId", referrer));
+
+        bytes memory data = abi.encode(participant, referrer, "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, referrer);
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -352,6 +349,73 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(questCreator.balance - questCreatorBeforeBalance, MINT_FEE / 3, "questCreator mint fee");
         assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocolFeeRecipient mint fee");
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claimOptimized_1155_with_ref() public{
+        vm.startPrank(questCreator);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.setApprovalForAll(address(questFactory), true);
+
+        questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+            address(sampleERC1155),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            1,
+            "questId",
+            "actionSpec"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(participant, referrer, "questId", "json",  address(sampleERC1155), 1);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
+
+        // 1155 reward
+        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+
+        // referrer payout
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claimOptimized_erc20_with_ref() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionSpec",
+            0
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 0);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        vm.startPrank(participant);
+        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // referrer payout
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        vm.stopPrank();
     }
 
     function test_claim_with_bytes() public{
@@ -492,11 +556,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+
+
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -525,37 +592,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             0
         );
 
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.expectRevert(abi.encodeWithSelector(QuestNotStarted.selector));
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
-    }
-
-    function test_RevertIf_claim_InvalidHash() public{
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-
-        vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createQuestAndQueue(
-            address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionSpec",
-            0
-        );
-
-        vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        vm.expectRevert(abi.encodeWithSelector(InvalidHash.selector));
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
     }
 
     function test_RevertIf_claim_AddressAlreadyMinted() public{
@@ -576,14 +619,15 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
 
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         vm.expectRevert(abi.encodeWithSelector(AddressAlreadyMinted.selector));
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
     }
 
     function test_RevertIf_claim_QuestEnded() public{
@@ -603,13 +647,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             0
         );
 
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.warp(END_TIME + 1);
         vm.startPrank(participant);
         vm.expectRevert(abi.encodeWithSelector(QuestEnded.selector));
-        questFactory.claim{value: MINT_FEE}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE}(signature, data);
     }
 
     function test_RevertIf_claim_InvalidMintFee() public{
@@ -629,12 +674,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             0
         );
 
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, "questId"));
+        bytes memory data = abi.encode(participant, address(0), "questId", "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
         vm.expectRevert(abi.encodeWithSelector(InvalidMintFee.selector));
-        questFactory.claim{value: MINT_FEE -1}("questId", msgHash, signature, address(0));
+        questFactory.claim{value: MINT_FEE -1}(signature, data);
     }
 
     function test_fuzz_claim(string memory questId_, uint256 totalParticipants_, uint256 rewardAmount_) public{
@@ -662,11 +708,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         uint256 questCreatorBeforeBalance = questCreator.balance;
         vm.warp(START_TIME + 1);
-        bytes32 msgHash = keccak256(abi.encodePacked(participant, questId_, referrer));
+        bytes memory data = abi.encode(participant, referrer, questId_, "json");
+        bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
-        questFactory.claim{value: MINT_FEE}(questId_, msgHash, signature, referrer);
+        questFactory.claim{value: MINT_FEE}(signature, data);
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), rewardAmount_, "particpiant erc20 balance");

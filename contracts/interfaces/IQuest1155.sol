@@ -2,8 +2,26 @@
 pragma solidity 0.8.19;
 
 interface IQuest1155 {
+    // Structs
+    struct FactoryQuest {
+        mapping(address => bool) addressMinted;
+        address questAddress;
+        uint256 totalParticipants;
+        uint256 numberMinted;
+        string questType;
+        uint40 durationTotal;
+        address questCreator;
+        address mintFeeRecipient;
+    }
+
     // Events
     event Queued(uint256 timestamp);
+
+    event QuestClaimedData(
+        address indexed recipient,
+        address indexed referrer,
+        string extraData
+    );
 
     // Errors
     error EndTimeInPast();
@@ -16,6 +34,10 @@ interface IQuest1155 {
     error NotQuestFactory();
     error QuestEnded();
     error AlreadyWithdrawn();
+    error AddressNotSigned();
+    error InvalidClaimFee();
+    error AddressAlreadyMinted();
+    error OverMaxAllowedToMint();
 
     // Initializer/Contstructor Function
     function initialize(
@@ -24,8 +46,8 @@ interface IQuest1155 {
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        uint256 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        string memory questId_
     ) external;
 
     // Read Functions
@@ -45,4 +67,4 @@ interface IQuest1155 {
     function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
-}
+    }

@@ -106,21 +106,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     modifier claimChecks(ClaimData memory claimData_) {
         Quest storage currentQuest = quests[claimData_.questId];
-        bytes memory hashc = abi.encodePacked(claimData_.claimer, claimData_.questId);
-        bytes32 encodedHash;
-
-        if (claimData_.ref != address(0)) {
-            hashc = abi.encodePacked(hashc, claimData_.ref);
-        }
-        if (bytes(claimData_.extraData).length > 0){
-            encodedHash = claimData_.hashBytes;
-        } else {
-            encodedHash = keccak256(hashc);
-        }
 
         if (currentQuest.numberMinted + 1 > currentQuest.totalParticipants) revert OverMaxAllowedToMint();
         if (currentQuest.addressMinted[claimData_.claimer]) revert AddressAlreadyMinted();
-        if (encodedHash != claimData_.hashBytes) revert InvalidHash();
         if (recoverSigner(claimData_.hashBytes, claimData_.signature) != claimSignerAddress) revert AddressNotSigned();
         _;
     }
@@ -189,8 +177,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             startTime_,
             totalParticipants_,
             tokenId_,
-            getNftQuestFee(msg.sender),
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            questId_
         );
 
         IERC1155(rewardTokenAddress_).safeTransferFrom(msg.sender, newQuest, tokenId_, totalParticipants_, "0x00");
@@ -306,6 +294,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
 
+    /// TODO: Remove this function
     /// @dev universal dynamic claim function
     /// @param signature_ The signature of the data
     /// @param data_ The data to decode for the claim
@@ -328,33 +317,41 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
     }
 
-    /// @dev universal claim function for all quest types
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    /// @param ref_ The referral address
-    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable {
-        if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
-        } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, msg.sender, ""));
+    function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
+        (
+            address claimer_,
+            address ref_,
+            string memory questId_,
+            string memory jsonData_,
+            address rewardToken_,
+            uint256 tokenId_
+        ) = abi.decode(
+            data_,
+            (address, address, string, string, address, uint256)
+        );
+        Quest storage quest = quests[questId_];
+        uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
+
+        if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
+        if (msg.value < mintFee) revert InvalidMintFee();
+        if (quest.addressMinted[claimer_]) revert AddressAlreadyMinted();
+        if (numberMintedPlusOne_ > quest.totalParticipants) revert OverMaxAllowedToMint();
+
+        quest.addressMinted[claimer_] = true;
+        quest.numberMinted = numberMintedPlusOne_;
+        (bool success_, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        if (!success_) revert ClaimFailed();
+
+        emit QuestClaimedData(claimer_, msg.sender, jsonData_);
+        if (quest.questType.eq("erc1155")) {
+            emit Quest1155Claimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
+        } else {
+            emit QuestClaimed(claimer_, msg.sender, questId_, rewardToken_, tokenId_);
         }
-    }
-
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claim1155RewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
-    }
-
-    /// @dev claim rewards for a quest
-    /// @param questId_ The id of the quest
-    /// @param hash_ The hash of the message
-    /// @param signature_ The signature of the hash
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable {
-        claimRewardsRef(ClaimData(questId_, hash_, signature_, address(0), msg.sender, ""));
+        if(ref_ != address(0)){
+            emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, mintFee);
+            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -486,8 +483,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
-    /// @notice Right now this is a misnomer - it tracks total claims vs receipts minted
-    /// @dev return the number of quest claims submitted
+    /// @dev return the number of quest claims
     /// @param questId_ The id of the quest
     /// @return uint Total quests claimed
     function getNumberMinted(string memory questId_) external view returns (uint256) {
@@ -518,7 +514,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             questContract.endTime(),
             questContract.totalParticipants(),
             thisQuest.numberMinted,
-            questContract.redeemedTokens(),
+            thisQuest.numberMinted,
             rewardAmountOrTokenId,
             questContract.hasWithdrawn()
         );
@@ -542,6 +538,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
     function totalQuestNFTFee(uint256 totalParticipants_) public view returns (uint256) {
         return totalParticipants_ * getNftQuestFee(msg.sender);
+    }
+
+    function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
+        Quest storage quest = quests[questId_];
+        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
+
+        emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
     }
 
     /*//////////////////////////////////////////////////////////////
