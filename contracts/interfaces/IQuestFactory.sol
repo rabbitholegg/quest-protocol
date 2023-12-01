@@ -9,7 +9,6 @@ interface IQuestFactory {
     error AuthOwnerDiscountToken();
     error Deprecated();
     error Erc20QuestAddressNotSet();
-    error InvalidHash();
     error InvalidMintFee();
     error MsgValueLessThanQuestNFTFee();
     error OverMaxAllowedToMint();
@@ -23,6 +22,8 @@ interface IQuestFactory {
     error ReferralFeeTooHigh();
     error RewardNotAllowed();
     error ZeroAddressNotAllowed();
+    error QuestAddressMismatch();
+    error ClaimFailed();
 
     // Structs
 
@@ -158,13 +159,13 @@ interface IQuestFactory {
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
     function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
+    function mintFee() external view returns (uint256);
 
     // Update Functions
 
     // Claim
-    function claim(string memory questId_, bytes32 hash_, bytes memory signature_, address ref_) external payable;
-    function claim1155Rewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable;
-    function claimRewards(string memory questId_, bytes32 hash_, bytes memory signature_) external payable;
+    function claim(bytes calldata signature_, bytes calldata data_) external payable;
+
 
     // Create
     function create1155QuestAndQueue(
@@ -189,4 +190,7 @@ interface IQuestFactory {
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
     function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external;
+
+    // Callbacks
+    function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external;
 }

@@ -32,8 +32,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public tokenId;
-    uint256 public redeemedTokens;
     uint256 public questFee;
+    string public questId;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -51,8 +51,8 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         uint256 startTime_,
         uint256 totalParticipants_,
         uint256 tokenId_,
-        uint256 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        string calldata questId_
     ) external initializer {
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
@@ -62,7 +62,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         totalParticipants = totalParticipants_;
         tokenId = tokenId_;
         questFactoryContract = QuestFactory(payable(msg.sender));
-        questFee = questFee_;
+        questId = questId_;
         protocolFeeRecipient = protocolFeeRecipient_;
         _initializeOwner(msg.sender);
         __Pausable_init();
@@ -121,6 +121,11 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         emit Queued(block.timestamp);
     }
 
+    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
+        _transferRewards(claimer_, 1);
+        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
+    }
+
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param account_ The account to transfer rewards to
     function singleClaim(address account_)
@@ -133,7 +138,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         onlyQueued
         onlyQuestFactory
     {
-        redeemedTokens = redeemedTokens + 1;
         _transferRewards(account_, 1);
         if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
     }
@@ -144,15 +148,20 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _unpause();
     }
 
-    /// @dev Function that transfers all 1155 tokens and ETH in the contract to the owner
+    /// @dev Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
     /// @notice This function can only be called after the quest end time.
-    function withdrawRemainingTokens() external nonReentrant onlyQueued onlyEnded {
+    function withdrawRemainingTokens() external onlyEnded {
         if (hasWithdrawn) revert AlreadyWithdrawn();
-
         hasWithdrawn = true;
 
-        owner().safeTransferETH(address(this).balance);
+        uint ownerPayout = (_claimFee() * _redeemedTokens()) / 3;
+        uint protocolPayout = address(this).balance - ownerPayout;
+
+        owner().safeTransferETH(ownerPayout);
+        protocolFeeRecipient.safeTransferETH(protocolPayout);
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
+
+        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -161,7 +170,18 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() external view returns (uint256) {
-        return (totalParticipants * questFee);
+        return (totalParticipants);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             INTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+    function _redeemedTokens() internal view returns (uint256) {
+        return questFactoryContract.getNumberMinted(questId);
+    }
+
+    function _claimFee() internal view returns (uint256) {
+        return questFactoryContract.mintFee();
     }
 
     /*//////////////////////////////////////////////////////////////

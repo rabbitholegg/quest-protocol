@@ -19,6 +19,11 @@ interface IQuest {
     error NotStarted();
     error TotalAmountExceedsBalance();
     error AuthOwnerRecipient();
+    error AddressNotSigned();
+    error InvalidClaimFee();
+    error OverMaxAllowedToMint();
+    error AddressAlreadyMinted();
+    error QuestEnded();
 
     function initialize(
         address rewardTokenAddress_,
@@ -43,6 +48,5 @@ interface IQuest {
     function totalTransferAmount() external view returns (uint256);
     function questFee() external view returns (uint16);
     function totalParticipants() external view returns (uint256);
-    function redeemedTokens() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
 }

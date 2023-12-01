@@ -10,8 +10,9 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
+import {TestUtils} from "./helpers/TestUtils.sol";
 
-contract TestQuest1155 is Test, Errors, Events {
+contract TestQuest1155 is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for uint256;
 
@@ -21,13 +22,15 @@ contract TestQuest1155 is Test, Errors, Events {
     uint256 START_TIME = 1_000_000;
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 TOKEN_ID = 1;
+    uint256 CLAIM_FEE = 999;
     uint16 QUEST_FEE = 2000; // 20%
+    uint256 MINT_FEE = 99;
     uint256 MINT_AMOUNT = 100_000;
     uint256 LARGE_ETH_AMOUNT = 100_000_000;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
-    address participant = makeAddr(("participant"));
-    address owner = makeAddr(("owner"));
+    address participant = makeAddr("participant");
+    address owner = makeAddr("owner");
 
     function setUp() public {
         questFactoryMock = address(new QuestFactoryMock());
@@ -42,9 +45,11 @@ contract TestQuest1155 is Test, Errors, Events {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            "questId"
         );
+
+        SampleERC1155(sampleERC1155).mintSingle(address(quest), TOKEN_ID, MINT_AMOUNT);
 
         vm.warp(START_TIME + 1);
     }
@@ -58,7 +63,6 @@ contract TestQuest1155 is Test, Errors, Events {
         assertEq(START_TIME, quest.startTime(), "startTime not set");
         assertEq(TOTAL_PARTICIPANTS, quest.totalParticipants(), "totalParticipants not set");
         assertEq(TOKEN_ID, quest.tokenId(), "tokenId not set");
-        assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
         assertEq(questFactoryMock, quest.owner(), "owner should be set");
     }
@@ -78,8 +82,8 @@ contract TestQuest1155 is Test, Errors, Events {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            "questId"
         );
     }
 
@@ -98,8 +102,8 @@ contract TestQuest1155 is Test, Errors, Events {
             START_TIME,
             TOTAL_PARTICIPANTS,
             TOKEN_ID,
-            QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            "questId"
         );
     }
 
@@ -138,21 +142,22 @@ contract TestQuest1155 is Test, Errors, Events {
     // //////////////////////////////////////////////////////////////*/
 
     function test_RevertIf_not_enough_tokens() public {
+        // transfer out the token it has from setUp
+        vm.prank(address(quest));
+        SampleERC1155(sampleERC1155).safeTransferFrom(address(quest), protocolFeeRecipient, TOKEN_ID, MINT_AMOUNT, "0x0");
+
         vm.expectRevert(abi.encodeWithSelector(InsufficientTokenBalance.selector));
         vm.prank(questFactoryMock);
         quest.queue();
     }
 
     function test_RevertIf_not_enough_eth() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
-
         vm.expectRevert(abi.encodeWithSelector(InsufficientETHBalance.selector));
         vm.prank(questFactoryMock);
         quest.queue();
     }
 
     function test_queue() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
 
         vm.prank(questFactoryMock);
@@ -160,26 +165,18 @@ contract TestQuest1155 is Test, Errors, Events {
         assertTrue(quest.queued(), "queued should be true");
     }
 
-
     /*//////////////////////////////////////////////////////////////
                             SINGLECLAIM
     //////////////////////////////////////////////////////////////*/
 
     function test_singleClaim() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
 
-        uint256 protocolFeeRecipientOGBalance = protocolFeeRecipient.balance;
         vm.prank(questFactoryMock);
         quest.singleClaim(participant);
 
-        assertEq(
-            protocolFeeRecipient.balance,
-            protocolFeeRecipientOGBalance + QUEST_FEE,
-            "participant should have received the reward in ETH"
-        );
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
             1,
@@ -190,7 +187,6 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_singleClaim_NotQuestFactory() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -200,7 +196,6 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_NotStarted() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -212,7 +207,6 @@ contract TestQuest1155 is Test, Errors, Events {
     }
 
     function test_RevertIf_singleClaim_whenNotPaused() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -229,22 +223,29 @@ contract TestQuest1155 is Test, Errors, Events {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
+        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
-        vm.prank(owner);
-        quest.queue();
 
-        uint256 ownerOGBalance = owner.balance;
+        // simulate ETH from TOTAL_PARTICIPANTS claims
+        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
+
         vm.warp(END_TIME + 1);
         vm.prank(protocolFeeRecipient);
 
         quest.withdrawRemainingTokens();
+
         assertEq(
             owner.balance,
-            ownerOGBalance + LARGE_ETH_AMOUNT,
-            "owner should have received remaining ETH"
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
+            "owner should have received (claimFee * redeemedTokens) / 3 eth"
+        );
+        assertEq(
+            protocolFeeRecipient.balance,
+            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
+            "protocolFeeRecipient should have received remaining ETH"
         );
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID),
@@ -256,7 +257,6 @@ contract TestQuest1155 is Test, Errors, Events {
     // todo add fuzz test
 
     function test_RevertIf_withdrawRemainingToken_NotEnded() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -268,14 +268,7 @@ contract TestQuest1155 is Test, Errors, Events {
         quest.withdrawRemainingTokens();
     }
 
-    function test_RevertIf_withdrawRemainingToken_NotQueued() public {
-        vm.expectRevert(abi.encodeWithSelector(NotQueued.selector));
-        vm.prank(protocolFeeRecipient);
-        quest.withdrawRemainingTokens();
-    }
-
     function test_RevertIf_withdrawRemainingToken_AlreadyWithdrawn() public {
-        SampleERC1155(sampleERC1155).mintSingle(address(quest), 1, MINT_AMOUNT);
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -297,7 +290,7 @@ contract TestQuest1155 is Test, Errors, Events {
 
     function test_maxProtocolReward() public {
         assertEq(
-            quest.maxProtocolReward(), TOTAL_PARTICIPANTS * QUEST_FEE,
+            quest.maxProtocolReward(), TOTAL_PARTICIPANTS,
             "maxProtocolReward should be correct"
         );
     }
