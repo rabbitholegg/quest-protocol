@@ -7,7 +7,7 @@ import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract RabbitHoleProfile is Initializable, Ownable, ERC721 {
+contract PowerPass is Initializable, Ownable, ERC721 {
     using LibString for uint256;
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -66,17 +66,17 @@ contract RabbitHoleProfile is Initializable, Ownable, ERC721 {
 
     /// @dev Returns the token collection name.
     function name() public pure override returns (string memory){
-        return "RabbitHole Profile";
+        return "RabbitHole Power Pass";
     }
 
     /// @dev Returns the token collection symbol.
     function symbol() public pure override returns (string memory){
-        return "RHP";
+        return "RHPP";
     }
 
     /// @dev Returns the Uniform Resource Identifier (URI) for token `id`.
     function tokenURI(uint256 id) public pure override returns (string memory){
-        return LibString.concat("https://api.rabbithole.gg/profiles/", id.toString());
+        return LibString.concat("https://api.rabbithole.gg/v1/powerpass/", id.toString());
     }
 
     /*//////////////////////////////////////////////////////////////
