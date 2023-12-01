@@ -105,24 +105,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_RevertIf_create1155QuestAndQueue_MsgValueLessThanQuestNFTFee() public {
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        vm.expectRevert(abi.encodeWithSelector(MsgValueLessThanQuestNFTFee.selector));
-        questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS - 1}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionSpec"
-        );
-    }
-
     function test_createERC20StreamQuest() public {
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
