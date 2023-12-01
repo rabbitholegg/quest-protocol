@@ -159,14 +159,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external payable nonReentrant returns (address) {
         Quest storage currentQuest = quests[questId_];
 
-        if (msg.value < totalQuestNFTFee(totalParticipants_)) revert MsgValueLessThanQuestNFTFee();
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
         address payable newQuest =
             payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp))));
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = totalParticipants_;
-        currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
         currentQuest.questCreator = msg.sender;
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
