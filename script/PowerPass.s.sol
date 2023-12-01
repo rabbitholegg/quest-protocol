@@ -2,14 +2,14 @@
 pragma solidity 0.8.19;
 
 import {Script} from "forge-std/Script.sol";
-import {RabbitHoleProfile} from "../contracts/RabbitHoleProfile.sol";
+import {PowerPass} from "../contracts/PowerPass.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
 import {ERC1967FactoryConstants} from "solady/utils/ERC1967FactoryConstants.sol";
 import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
 
-// # To deploy and verify RabbitHoleProfile.sol run this command below
-// forge script script/RabbitHoleProfile.s.sol:RabbitHoleProfileDeploy --rpc-url sepolia --broadcast --verify -vvvv
-contract RabbitHoleProfileDeploy is Script {
+// # To deploy and verify PowerPass.sol run this command below
+// forge script script/PowerPass.s.sol:PowerPassDeploy --rpc-url sepolia --broadcast --verify -vvvv
+contract PowerPassDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
 
@@ -21,23 +21,23 @@ contract RabbitHoleProfileDeploy is Script {
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
         bytes32 salt = bytes32(bytes20(owner));
 
-        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).deployDeterministicAndCall(address(new RabbitHoleProfile()), owner, salt, initializeCallData);
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).deployDeterministicAndCall(address(new PowerPass()), owner, salt, initializeCallData);
 
         vm.stopBroadcast();
     }
 }
 
-// to upgrade RabbitHoleProfile, run the commands below:
+// to upgrade PowerPass, run the commands below:
 // ! important: make sure storage layouts are compatible first:
-// forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract RabbitHoleProfile
-// forge script script/RabbitHoleProfile.s.sol:RabbitHoleProfileUpgrade --rpc-url sepolia --broadcast --verify -vvvv
-contract RabbitHoleProfileUpgrade is Script {
+// forge clean && forge build && npx @openzeppelin/upgrades-core validate --contract PowerPass
+// forge script script/PowerPass.s.sol:PowerPassUpgrade --rpc-url sepolia --broadcast --verify -vvvv
+contract PowerPassUpgrade is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.RABBITHOLE_PROFILE_ADDRESS, address(new RabbitHoleProfile()));
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.RABBITHOLE_PROFILE_ADDRESS, address(new PowerPass()));
 
         vm.stopBroadcast();
     }

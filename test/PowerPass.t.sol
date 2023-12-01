@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import "../contracts/RabbitHoleProfile.sol";
+import "../contracts/PowerPass.sol";
 import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
 
-contract RabbitHoleProfileTest is Test {
-    RabbitHoleProfile internal rabbitHoleProfile;
+contract PowerPassTest is Test {
+    PowerPass internal powerPass;
     ERC1967Factory internal factory;
 
     uint256 claimSignerPrivateKey;
@@ -18,15 +18,15 @@ contract RabbitHoleProfileTest is Test {
         Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
         claimSignerPrivateKey = claimSigner.privateKey;
 
-        address rabbitHoleProfileImp = address(new RabbitHoleProfile());
+        address powerPassImp = address(new PowerPass());
         factory = new ERC1967Factory();
 
-        // initializeCallData is setting up: RabbitHoleProfile.initialize(owner);
+        // initializeCallData is setting up: PowerPass.initialize(owner);
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address)", owner, claimSigner.addr);
-        address rabbitHoleProfileAddr = factory.deployAndCall(rabbitHoleProfileImp, owner, initializeCallData);
-        rabbitHoleProfile = RabbitHoleProfile(rabbitHoleProfileAddr);
+        address powerPassAddr = factory.deployAndCall(powerPassImp, owner, initializeCallData);
+        powerPass = PowerPass(powerPassAddr);
 
-        vm.label(address(rabbitHoleProfile), "RabbitHoleProfile");
+        vm.label(address(powerPass), "PowerPass");
     }
 
     // todo
