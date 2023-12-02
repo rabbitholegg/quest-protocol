@@ -38,7 +38,7 @@ contract PowerPassUpgrade is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.RABBITHOLE_PROFILE_ADDRESS, address(new PowerPass()));
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.POWER_PASS_ADDRESS, address(new PowerPass()));
 
         vm.stopBroadcast();
     }
