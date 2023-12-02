@@ -50,7 +50,10 @@ contract PowerPass is Initializable, Ownable, ERC721 {
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (balanceOf(to_) > 0) revert AddressAlreadyMinted();
 
-        _tokenIdCounter += 1;
+        unchecked {
+            _tokenIdCounter += 1;
+        }
+
         _mint(to_, _tokenIdCounter);
     }
 
