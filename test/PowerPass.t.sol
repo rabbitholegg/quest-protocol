@@ -30,7 +30,7 @@ contract PowerPassTest is Test, TestUtils {
         address powerPassImp = address(new PowerPass());
         factory = new ERC1967Factory();
 
-        // initializeCallData is setting up: PowerPass.initialize(owner);
+        // initializeCallData is setting up: PowerPass.initialize(owner, claimSignerAddr);
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address)", owner, claimSignerAddr);
         address powerPassAddr = factory.deployAndCall(powerPassImp, owner, initializeCallData);
         powerPass = PowerPass(powerPassAddr);
