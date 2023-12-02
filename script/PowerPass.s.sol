@@ -20,7 +20,7 @@ contract PowerPassDeploy is Script {
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address)", owner, claimSignerAddress);
         address powerPassImpAddress = address(new PowerPass());
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
-        bytes32 salt = bytes32(bytes20(owner));
+        bytes32 salt = bytes32(abi.encodePacked(bytes20(owner), bytes12("PowerPass")));
 
         ERC1967Factory(ERC1967FactoryConstants.ADDRESS).deployDeterministicAndCall(powerPassImpAddress, owner, salt, initializeCallData);
 
