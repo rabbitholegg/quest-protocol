@@ -5,9 +5,12 @@ import "forge-std/Test.sol";
 
 import "../contracts/PowerPass.sol";
 import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
 contract PowerPassTest is Test, TestUtils {
+    using LibString for address;
+
     error AddressNotSigned();
     error TokenNotTransferable();
     error AddressAlreadyMinted();
@@ -83,7 +86,12 @@ contract PowerPassTest is Test, TestUtils {
     }
 
     function test_tokenURI() public {
-        assertEq(powerPass.tokenURI(1), "https://api.rabbithole.gg/v1/powerpass/1");
+        bytes memory data = abi.encode(user);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        powerPass.mint(signature, data);
+
+        assertEq(powerPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/powerpass/", user.toHexString()));
     }
 
     function test_revert_if_transfer() public {
