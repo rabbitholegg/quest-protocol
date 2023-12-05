@@ -9,7 +9,9 @@ import {LibString} from "solady/utils/LibString.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
 contract PowerPassTest is Test, TestUtils {
+    using LibString for *;
     using LibString for address;
+    using LibString for uint256;
 
     error AddressNotSigned();
     error TokenNotTransferable();
@@ -91,7 +93,7 @@ contract PowerPassTest is Test, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
         powerPass.mint(signature, data);
 
-        assertEq(powerPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/powerpass/", user.toHexString()));
+        assertEq(powerPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/powerpass/", user.toHexString()).concat("?id=").concat("1"));
     }
 
     function test_revert_if_transfer() public {
