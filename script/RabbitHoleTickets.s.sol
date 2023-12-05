@@ -53,8 +53,8 @@ contract RabbitHoleTicketsDeploy is Script {
             owner,                                                          // minterAddress_
             100,                                                            // royaltyFee_
             owner,                                                          // owner_
-            "bafkreiafob6tgwkb4jla5ent7d7rw4ps7tjdhe32tlbdenyrc3lch76qfe",  // imageIPFSCID_
-            "bafybeietacfcrgwetjwcexdakfhmig4fgsdsb7o62n2qcpybkbiupqlkxq"   // animationUrlIPFSCID_
+            "bafkreicoysyc5chqjntdpxiyfojoljabycedep3mssphpwv7opfqfrlwbq",  // imageIPFSCID_ (blue)
+            "bafybeib43gbmeloa6o6hs7xxwioyvduohmuf6yyu2avusjuke7delbou3m"   // animationUrlIPFSCID_ (blue)
         );
 
         vm.stopBroadcast();
