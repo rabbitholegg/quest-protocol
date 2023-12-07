@@ -389,7 +389,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createQuestAndQueue(
+        address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -407,6 +407,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
+        vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // erc20 reward
@@ -414,6 +415,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 5);
+        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
 
         vm.stopPrank();
     }
