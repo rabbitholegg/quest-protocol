@@ -402,7 +402,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.warp(START_TIME + 1);
 
-        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 0);
+        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 1);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -418,9 +418,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 5);
+
+        // assert indexed log data
         assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
         assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        // assert non-indexed log data
+        (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
+        assertEq(questId, string("questId"));
+        assertEq(rewardToken, address(sampleERC20));
+        assertEq(rewardAmountInWei, 1);
 
         vm.stopPrank();
     }
