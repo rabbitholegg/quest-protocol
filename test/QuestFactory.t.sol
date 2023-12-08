@@ -389,7 +389,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createQuestAndQueue(
+        address questAddress = questFactory.createQuestAndQueue(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -402,11 +402,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.warp(START_TIME + 1);
 
-        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 0);
+        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 1);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant);
+        vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // erc20 reward
@@ -414,6 +415,20 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 5);
+
+        // assert indexed log data
+        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        // assert non-indexed log data
+        (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
+        assertEq(questId, string("questId"));
+        assertEq(rewardToken, address(sampleERC20));
+        assertEq(rewardAmountInWei, 1);
 
         vm.stopPrank();
     }
