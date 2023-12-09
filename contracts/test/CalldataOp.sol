@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-contract CalldataTest {
+contract CalldataOp {
     bytes public name;
 
     event Name(bytes name);
