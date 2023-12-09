@@ -2,11 +2,11 @@
 pragma solidity 0.8.19;
 
 contract CalldataTest {
-    string public name;
+    bytes public name;
 
-    event Name(string name);
+    event Name(bytes name);
 
-    constructor(string memory name_) {
+    constructor(bytes memory name_) {
         name = name_;
     }
 
@@ -14,11 +14,15 @@ contract CalldataTest {
         emit Name(name);
     }
 
-    function emitWithFromCalldata(string calldata name_) external {
+    function emitWithCalldata(bytes calldata name_) external {
         emit Name(name_);
     }
 
-    function setName(string calldata name_) external {
+    function emitWithCalldataMemory(bytes memory name_) external {
+        emit Name(name_);
+    }
+
+    function setName(bytes calldata name_) external {
         name = name_;
     }
 }
