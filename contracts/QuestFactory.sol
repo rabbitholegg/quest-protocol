@@ -293,30 +293,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
-
-    /// TODO: Remove this function
-    /// @dev universal dynamic claim function
-    /// @param signature_ The signature of the data
-    /// @param data_ The data to decode for the claim
-    function claim(bytes calldata signature_, bytes calldata data_) external payable {
-        (
-            address claimer_,
-            address ref_,
-            string memory questId_,
-            string memory jsonData_
-        ) = abi.decode(
-            data_,
-            (address, address, string, string)
-        );
-        bytes32 hash_ = keccak256(data_);
-
-        if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
-        } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
-        }
-    }
-
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
         (
             address claimer_,

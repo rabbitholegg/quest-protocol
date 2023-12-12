@@ -161,12 +161,6 @@ interface IQuestFactory {
     function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
     function mintFee() external view returns (uint256);
 
-    // Update Functions
-
-    // Claim
-    function claim(bytes calldata signature_, bytes calldata data_) external payable;
-
-
     // Create
     function create1155QuestAndQueue(
         address rewardTokenAddress_,
