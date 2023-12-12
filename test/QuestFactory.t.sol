@@ -330,7 +330,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
         assertEq(questId, string("questId"));
         assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, 1);
+        assertEq(rewardAmountInWei, REWARD_AMOUNT);
 
         vm.stopPrank();
     }
