@@ -294,7 +294,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
-    function claimCompressed(bytes compressedData) external payable {
+    function claimCompressed(bytes calldata compressedData) external payable {
         bytes memory data = LibZip.cdDecompress(compressedData);
 
         (
