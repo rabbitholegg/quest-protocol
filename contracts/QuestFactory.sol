@@ -294,30 +294,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
-
-    /// TODO: Remove this function
-    /// @dev universal dynamic claim function
-    /// @param signature_ The signature of the data
-    /// @param data_ The data to decode for the claim
-    function claim(bytes calldata signature_, bytes calldata data_) external payable {
-        (
-            address claimer_,
-            address ref_,
-            string memory questId_,
-            string memory jsonData_
-        ) = abi.decode(
-            data_,
-            (address, address, string, string)
-        );
-        bytes32 hash_ = keccak256(data_);
-
-        if (quests[questId_].questType.eq("erc1155")) {
-            claim1155RewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
-        } else { // erc20, erc20Stream
-            claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
-        }
-    }
-
     function claimCompressed(bytes compressedData) external payable {
         bytes memory data = LibZip.cdDecompress(compressedData);
 
@@ -335,20 +311,21 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         this.claimOptimized(signature, claimData);
     }
 
+
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
         (
             address claimer_,
             address ref_,
             string memory questId_,
-            string memory jsonData_,
-            address rewardToken_,
-            uint256 tokenId_
+            string memory jsonData_
         ) = abi.decode(
             data_,
-            (address, address, string, string, address, uint256)
+            (address, address, string, string)
         );
         Quest storage quest = quests[questId_];
         uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
+        address rewardToken_ = IQuestOwnable(quest.questAddress).rewardToken();
+        uint256 rewardAmountOrTokenId;
 
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (msg.value < mintFee) revert InvalidMintFee();
@@ -362,12 +339,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         emit QuestClaimedData(claimer_, msg.sender, jsonData_);
         if (quest.questType.eq("erc1155")) {
-            emit Quest1155Claimed(claimer_, quest.questAddress, questId_, rewardToken_, tokenId_);
+            rewardAmountOrTokenId = IQuest1155Ownable(quest.questAddress).tokenId();
+            emit Quest1155Claimed(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId);
         } else {
-            emit QuestClaimed(claimer_, quest.questAddress, questId_, rewardToken_, tokenId_);
+            rewardAmountOrTokenId = IQuestOwnable(quest.questAddress).rewardAmountInWei();
+            emit QuestClaimed(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId);
         }
         if(ref_ != address(0)){
-            emit QuestClaimedReferred(claimer_, msg.sender, questId_, rewardToken_, tokenId_, ref_, 3333, mintFee);
+            emit QuestClaimedReferred(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId, ref_, 3333, mintFee);
             emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
