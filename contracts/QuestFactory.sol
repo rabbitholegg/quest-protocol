@@ -299,13 +299,21 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         (
             address ref,
+            bytes32 txHash,
+            uint32 txHashChainId,
             string memory questId,
-            string memory jsonData,
             bytes memory signature
         ) = abi.decode(
             data,
-            (address, string, string, bytes)
+            (address, bytes32, uint32, string, bytes)
         );
+        jsondata = "{
+            txHash: txHash,
+            txHashChainId: txHashChainId,
+            actionType: actionType,
+            questName: questName,
+        }"
+
         bytes memory claimData = abi.encode(msg.sender, ref, questId, jsonData);
 
         this.claimOptimized(signature, claimData);
