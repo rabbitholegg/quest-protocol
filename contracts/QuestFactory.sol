@@ -300,23 +300,59 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         (
             address ref,
             bytes32 txHash,
-            uint32 txHashChainId,
-            string memory questId,
-            bytes memory signature
+            uint32 txHashChainId, // 4 bytes
+            bytes16 questid, // remove hyphens i.e. 0x3c9c10b9ab4b422e8946b99e9afa712e
+            bytes32 r,
+            bytes32 vs,
         ) = abi.decode(
             data,
             (address, bytes32, uint32, string, bytes)
         );
-        jsondata = "{
-            txHash: txHash,
-            txHashChainId: txHashChainId,
-            actionType: actionType,
-            questName: questName,
-        }"
+        // without compression is 192 length, with compression 144 length
 
-        bytes memory claimData = abi.encode(msg.sender, ref, questId, jsonData);
+        string memory questIdString = bytes16ToUUID(questid);
+        string memory jsonData = buildJsonString(uint256(txHash).toHexString(), uint256(txHashChainId).toString(), "actionType", "questName");
+        bytes memory claimData = abi.encode(msg.sender, ref, questIdString, jsonData);
 
-        this.claimOptimized(signature, claimData);
+        this.claimOptimized(abi.encodePacked(r,vs), claimData);
+    }
+
+    // {
+    //    "actionTxHashes": [txHash],
+    //    "actionNetworkChainIds": [txHashChainId],
+    //    "actionType": actionType,
+    //    "questName": questName
+    // }
+    function buildJsonString(
+        string memory txHash,
+        string memory txHashChainId,
+        string memory actionType,
+        string memory questName
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(
+            '{"actionTxHashes": ["', txHash,
+            '"], "actionNetworkChainIds": ["', txHashChainId,
+            '"], "actionType": "', actionType,
+            '", "questName": "', questName, '"}'
+        ));
+    }
+
+
+    function bytes16ToUUID(bytes16 data) public pure returns (string memory) {
+        bytes memory hexChars = "0123456789abcdef";
+        bytes memory uuid = new bytes(36); // UUID length with hyphens
+
+        for (uint256 i = 0; i < 16; i++) {
+            // Insert hyphens at the appropriate positions
+            if (i == 4 || i == 6 || i == 8 || i == 10) {
+                uuid[i * 2 + i / 4] = '-';
+            }
+
+            uuid[i * 2 + i / 4 + 1] = hexChars[uint8(data[i] >> 4)];
+            uuid[i * 2 + i / 4 + 2] = hexChars[uint8(data[i] & 0x0F)];
+        }
+
+        return string(uuid);
     }
 
 
