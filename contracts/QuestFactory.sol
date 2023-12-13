@@ -12,6 +12,7 @@ import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {LibZip} from "solady/utils/LibZip.sol";
 // References
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
@@ -315,6 +316,23 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         } else { // erc20, erc20Stream
             claimRewardsRef(ClaimData(questId_, hash_, signature_, ref_, claimer_, jsonData_));
         }
+    }
+
+    function claimCompressed(bytes compressedData) external payable {
+        bytes memory data = LibZip.cdDecompress(compressedData);
+
+        (
+            address ref,
+            string memory questId,
+            string memory jsonData,
+            bytes memory signature
+        ) = abi.decode(
+            data,
+            (address, string, string, bytes)
+        );
+        bytes memory claimData = abi.encode(msg.sender, ref, questId, jsonData);
+
+        this.claimOptimized(signature, claimData);
     }
 
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
