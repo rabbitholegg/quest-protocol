@@ -43,6 +43,8 @@ interface IQuestFactory {
         uint40 durationTotal;
         address questCreator;
         address mintFeeRecipient;
+        string actionType;
+        string questName;
     }
 
     struct QuestData {
@@ -75,7 +77,8 @@ interface IQuestFactory {
         uint256 totalParticipants;
         uint256 rewardAmount;
         string questId;
-        string actionSpec;
+        string actionType;
+        string questName;
         uint40 durationTotal;
         string questType;
     }
@@ -135,18 +138,6 @@ interface IQuestFactory {
         uint256 totalParticipants,
         uint256 rewardAmountOrTokenId
     );
-    event QuestCreatedWithAction(
-        address indexed creator,
-        address indexed contractAddress,
-        string questId,
-        string contractType,
-        address rewardTokenAddress,
-        uint256 endTime,
-        uint256 startTime,
-        uint256 totalParticipants,
-        uint256 rewardAmountOrTokenId,
-        string actionSpec
-    );
     event ReferralFeeSet(uint16 percent);
     event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
 
@@ -169,7 +160,8 @@ interface IQuestFactory {
         uint256 totalParticipants_,
         uint256 tokenId_,
         string memory questId_,
-        string memory actionSpec_
+        string memory actionType_,
+        string memory questName_
     ) external payable returns (address);
 
     // Set

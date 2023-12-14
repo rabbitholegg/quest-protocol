@@ -96,7 +96,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             1,
             "questId",
-            "actionSpec"
+            "actionType",
+            "questName"
         );
 
         Quest1155 quest1155 = Quest1155(payable(questAddress));
@@ -119,36 +120,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             1,
             "questId",
-            "actionSpec"
+            "actionType",
+            "questName"
         );
-    }
-
-    function test_createERC20StreamQuest() public {
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-
-        vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-
-        vm.expectEmit(true,false,true,true);
-        emit QuestCreatedWithAction(questCreator, address(0), "questId", "erc20Stream", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT, "actionSpec");
-
-        address questAddress = questFactory.createERC20StreamQuest(
-            address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionSpec",
-            DURATION_TOTAL
-        );
-
-        Quest quest = Quest(payable(questAddress));
-        assertEq(quest.startTime(), START_TIME, "startTime should be set");
-        assertEq(quest.durationTotal(), DURATION_TOTAL, "durationTotal should be set");
-
-        vm.stopPrank();
     }
 
     function test_createQuestAndQueue() public{
@@ -168,8 +142,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "",
-            0
+            "actionType",
+            "questName"
         );
 
         Quest quest = Quest(payable(questAddress));
@@ -194,8 +168,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
     }
 
@@ -212,8 +186,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
@@ -224,8 +198,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
     }
 
@@ -245,8 +219,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
     }
 
@@ -266,7 +240,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             1,
             "questId",
-            "actionSpec"
+            "actionType",
+            "questName"
         );
 
         vm.warp(START_TIME + 1);
@@ -298,8 +273,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
 
         vm.warp(START_TIME + 1);
@@ -351,8 +326,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             "questId",
-            "actionSpec",
-            0
+            "actionType",
+            "questName"
         );
 
         IQuestFactory.QuestData memory questData = questFactory.questData("questId");
