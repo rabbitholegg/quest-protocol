@@ -255,7 +255,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) revert("Not implemented");
 
         bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
         bytes memory dataCompressed = LibZip.cdCompress(data);
@@ -296,7 +297,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) revert("Not implemented");
 
         bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
         bytes memory dataCompressed = LibZip.cdCompress(data);
@@ -314,10 +316,11 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 5);
 
+        bytes32 questAddressBytes = bytes32(uint256(uint160(questAddress)));
         // assert indexed log data for entries[1]
         assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[1].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(entries[1].topics[2], questAddressBytes);
 
         // assert non-indexed log data for entries[1]
         (string memory jsonLog) = abi.decode(entries[1].data, (string));
@@ -326,7 +329,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         // assert indexed log data for entries[2]
         assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
         assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(entries[2].topics[2], questAddressBytes);
 
         // assert non-indexed log data for entries[2]
         (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
