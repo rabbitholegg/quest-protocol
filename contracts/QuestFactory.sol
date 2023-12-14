@@ -318,7 +318,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         (bool success_, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
         if (!success_) revert ClaimFailed();
 
-        emit QuestClaimedData(claimer_, msg.sender, jsonData_);
+        emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
             rewardAmountOrTokenId = IQuest1155Ownable(quest.questAddress).tokenId();
             emit Quest1155Claimed(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId);
