@@ -31,5 +31,4 @@ contract TestUtils is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
         return abi.encodePacked(r, s, v);
     }
-
 }

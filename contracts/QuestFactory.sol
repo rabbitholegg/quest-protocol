@@ -254,7 +254,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             address ref,
             bytes32 txHash,
             uint32 txHashChainId,
-            bytes16 questid, // remove hyphens i.e. 0x550e8400e29b41d4a716446655440000 from 550e8400-e29b-41d4-a716-446655440000
+            bytes16 questid,
             bytes32 r,
             bytes32 vs
         ) = abi.decode(
@@ -267,20 +267,20 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory jsonData = buildJsonString(uint256(txHash).toHexString(), uint256(txHashChainId).toString(), quest.actionType, quest.questName);
         bytes memory claimData = abi.encode(msg.sender, ref, questIdString, jsonData);
 
-        this.claimOptimized(abi.encodePacked(r,vs), claimData);
+        this.claimOptimized{value: msg.value}(abi.encodePacked(r,vs), claimData);
     }
 
-    // {
-    //     actionTxHashes: [actionTxHashes],
-    //     actionNetworkChainIds: [chainIds],
-    //     questName: quest.name,
-    // }
     function buildJsonString(
         string memory txHash,
         string memory txHashChainId,
         string memory actionType,
         string memory questName
     ) public pure returns (string memory) {
+        // {
+        //     actionTxHashes: ["actionTxHash1"],
+        //     actionNetworkChainIds: ["chainId1"],
+        //     questName: quest.name,
+        // }
         return string(abi.encodePacked(
             '{"actionTxHashes": ["', txHash,
             '"], "actionNetworkChainIds": ["', txHashChainId,
@@ -334,7 +334,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         (bool success_, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
         if (!success_) revert ClaimFailed();
 
-        emit QuestClaimedData(claimer_, msg.sender, jsonData_);
+        emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
             rewardAmountOrTokenId = IQuest1155Ownable(quest.questAddress).tokenId();
             emit Quest1155Claimed(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId);

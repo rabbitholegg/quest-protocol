@@ -11,6 +11,8 @@ import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
+import {LibZip} from "solady/utils/LibZip.sol";
 import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
@@ -227,6 +229,114 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     /*//////////////////////////////////////////////////////////////
                                 CLAIM
     //////////////////////////////////////////////////////////////*/
+    function test_claimCompressed_1155_with_ref() public{
+        vm.startPrank(questCreator);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.setApprovalForAll(address(questFactory), true);
+
+        questFactory.create1155QuestAndQueue{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+            address(sampleERC1155),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            1,
+            "550e8400-e29b-41d4-a716-446655440000",
+            "actionType",
+            "questName"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes16 questId = hex'550e8400e29b41d4a716446655440000';
+        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        uint32 txHashChainId = 101;
+        string memory json = '{"actionTxHashes": ["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"], "actionNetworkChainIds": ["101"], "questName": "questName", "actionType": "actionType"}';
+        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+
+        bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.startPrank(participant);
+        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
+
+        // 1155 reward
+        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+
+        // referrer payout
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claimCompressed_erc20_with_ref() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "550e8400-e29b-41d4-a716-446655440000",
+            "actionType",
+            "questName"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes16 questId = hex'550e8400e29b41d4a716446655440000';
+        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        uint32 txHashChainId = 101;
+        string memory json = '{"actionTxHashes": ["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"], "actionNetworkChainIds": ["101"], "questName": "questName", "actionType": "actionType"}';
+        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+
+        bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.startPrank(participant);
+        vm.recordLogs();
+        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // referrer payout
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 5);
+
+        // assert indexed log data for entries[1]
+        assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
+        assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[1].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        // assert non-indexed log data for entries[1]
+        (string memory jsonLog) = abi.decode(entries[1].data, (string));
+        assertEq(jsonLog, json);
+
+        // assert indexed log data for entries[2]
+        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
+
+        // assert non-indexed log data for entries[2]
+        (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
+        assertEq(questIdLog, string("550e8400-e29b-41d4-a716-446655440000"));
+        assertEq(rewardToken, address(sampleERC20));
+        assertEq(rewardAmountInWei, REWARD_AMOUNT);
+
+        vm.stopPrank();
+    }
+
     function test_claimOptimized_1155_with_ref() public{
         vm.startPrank(questCreator);
 
