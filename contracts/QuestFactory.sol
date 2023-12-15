@@ -281,29 +281,35 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CLAIM
     //////////////////////////////////////////////////////////////*/
-    function claimCompressed(bytes calldata compressedData) external payable {
-        bytes memory data = LibZip.cdDecompress(compressedData);
+    /// @dev Claim rewards for a quest
+    /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
+    function claimCompressed(bytes calldata compressedData_) external payable {
+        bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
-            bytes32 txHash,
-            bytes32 r,
-            bytes32 vs,
-            address ref,
-            bytes16 questid,
-            uint16 txHashChainId
+            bytes32 txHash_,
+            bytes32 r_,
+            bytes32 vs_,
+            address ref_,
+            bytes16 questid_,
+            uint16 txHashChainId_
         ) = abi.decode(
-            data,
+            data_,
             (bytes32, bytes32, bytes32, address, bytes16, uint16)
         );
 
-        string memory questIdString = bytes16ToUUID(questid);
-        Quest storage quest = quests[questIdString];
-        string memory jsonData = buildJsonString(uint256(txHash).toHexString(), uint256(txHashChainId).toString(), quest.actionType, quest.questName);
-        bytes memory claimData = abi.encode(msg.sender, ref, questIdString, jsonData);
+        string memory questIdString_ = bytes16ToUUID(questid_);
+        Quest storage quest_ = quests[questIdString_];
+        string memory jsonData_ = buildJsonString(uint256(txHash_).toHexString(), uint256(txHashChainId_).toString(), quest_.actionType, quest_.questName);
+        bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
-        this.claimOptimized{value: msg.value}(abi.encodePacked(r,vs), claimData);
+        this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 
+    /// @notice External use is depricated
+    /// @dev Claim rewards for a quest
+    /// @param data_ The claim data in abi encoded bytes
+    /// @param signature_ The signature of the claim data
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
         (
             address claimer_,
