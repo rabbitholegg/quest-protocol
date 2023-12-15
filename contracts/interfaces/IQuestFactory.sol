@@ -83,6 +83,17 @@ interface IQuestFactory {
         string questType;
     }
 
+    struct ERC1155QuestData {
+        address rewardTokenAddress;
+        uint256 endTime;
+        uint256 startTime;
+        uint256 totalParticipants;
+        uint256 tokenId;
+        string questId;
+        string actionType;
+        string questName;
+    }
+
     // Events
     event ExtraMintFeeReturned(address indexed recipient, uint256 amount);
     event MintFeeSet(uint256 mintFee);
@@ -160,8 +171,7 @@ interface IQuestFactory {
         uint256 totalParticipants_,
         uint256 tokenId_,
         string memory questId_,
-        string memory actionType_,
-        string memory questName_
+        string memory
     ) external payable returns (address);
 
     // Set
