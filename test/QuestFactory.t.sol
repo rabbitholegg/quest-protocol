@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
@@ -52,15 +53,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         sampleERC1155 = new SampleERC1155();
         sampleERC20 = new SampleERC20("name", "symbol", 1000000, questCreator);
-        Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
-        claimSignerPrivateKey = claimSigner.privateKey;
+        claimSignerPrivateKey = uint256(vm.envUint("CLAIM_SIGNER_TEST_PRIVATE_KEY"));
         vm.deal(owner, 1000000);
         vm.deal(participant, 1000000);
         vm.deal(questCreator, 1000000);
         vm.deal(anyone, 1000000);
 
         questFactory.initialize(
-            claimSigner.addr,
+            vm.addr(claimSignerPrivateKey),
             protocolFeeRecipient,
             address(new Quest()),
             payable(address(new Quest1155())),
@@ -251,12 +251,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes16 questId = hex'550e8400e29b41d4a716446655440000';
         bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
         uint32 txHashChainId = 101;
-        string memory json = '{"actionTxHashes": ["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"], "actionNetworkChainIds": ["101"], "questName": "questName", "actionType": "actionType"}';
+        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) revert("Not implemented");
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
 
         bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
         bytes memory dataCompressed = LibZip.cdCompress(data);
@@ -269,6 +271,47 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claimCompressed_erc20_mocked_data() public{
+        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
+        address referrerMocked = address(0);
+        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
+        uint32 txHashChainId = 1;
+        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
+        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
+        string memory actionType = "other";
+        string memory questName = "Advanced Trading with dYdX";
+        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
+        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
+
+        vm.deal(participantMocked, 1000000);
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createQuestAndQueue(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            questIdString,
+            actionType,
+            questName
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(referrerMocked, txHash, txHashChainId, questId, r, vs);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.startPrank(participantMocked);
+        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participantMocked), REWARD_AMOUNT, "particpiant erc20 balance");
     }
 
     function test_claimCompressed_erc20_with_ref() public{
@@ -293,12 +336,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes16 questId = hex'550e8400e29b41d4a716446655440000';
         bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
         uint32 txHashChainId = 101;
-        string memory json = '{"actionTxHashes": ["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"], "actionNetworkChainIds": ["101"], "questName": "questName", "actionType": "actionType"}';
+        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) revert("Not implemented");
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
 
         bytes memory data = abi.encode(referrer, txHash, txHashChainId, questId, r, s);
         bytes memory dataCompressed = LibZip.cdCompress(data);

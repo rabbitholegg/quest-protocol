@@ -279,16 +279,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         // {
         //     actionTxHashes: ["actionTxHash1"],
         //     actionNetworkChainIds: ["chainId1"],
-        //     questName: quest.name,
+        //     questName: "quest name",
+        //     actionType: "mint"
         // }
         return string(abi.encodePacked(
-            '{"actionTxHashes": ["', txHash,
-            '"], "actionNetworkChainIds": ["', txHashChainId,
-            '"], "questName": "', questName,
-            '", "actionType": "', actionType, '"}'
+            '{"actionTxHashes":["', txHash,
+            '"],"actionNetworkChainIds":[', txHashChainId,
+            '],"questName":"', questName,
+            '","actionType":"', actionType, '"}'
         ));
     }
-
 
     function bytes16ToUUID(bytes16 data) public pure returns (string memory) {
         bytes memory hexChars = "0123456789abcdef";

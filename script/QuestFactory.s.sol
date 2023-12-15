@@ -29,7 +29,7 @@ contract QuestFactoryDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
         address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
-        address claimSigner = vm.envAddress("CLAIM_SIGNER_ADDRESS");
+        address claimSigner = vm.envAddress("MAINNET_CLAIM_SIGNER_SIGNER_ADDRESS");
         ITransparentUpgradeableProxy questfactoryProxy = ITransparentUpgradeableProxy(C.QUEST_FACTORY_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
         bytes memory ogData = vm.parseJsonBytes(json, "$.questFactoryOgImpl");
