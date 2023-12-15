@@ -53,7 +53,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         sampleERC1155 = new SampleERC1155();
         sampleERC20 = new SampleERC20("name", "symbol", 1000000, questCreator);
-        claimSignerPrivateKey = uint256(vm.envUint("CLAIM_SIGNER_TEST_PRIVATE_KEY"));
+        claimSignerPrivateKey = uint256(vm.envUint("TEST_CLAIM_SIGNER_PRIVATE_KEY"));
         vm.deal(owner, 1000000);
         vm.deal(participant, 1000000);
         vm.deal(questCreator, 1000000);

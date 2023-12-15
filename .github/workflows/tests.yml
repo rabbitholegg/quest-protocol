@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ALCHEMY_MAINNET_API_KEY: ${{ secrets.ALCHEMY_MAINNET_API_KEY }}
-      CLAIM_SIGNER_TEST_PRIVATE_KEY: ${{ secrets.CLAIM_SIGNER_TEST_PRIVATE_KEY }}
+      TEST_CLAIM_SIGNER_PRIVATE_KEY: ${{ secrets.TEST_CLAIM_SIGNER_PRIVATE_KEY }}
 
     steps:
       - uses: actions/checkout@v3

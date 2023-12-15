@@ -28,7 +28,7 @@ contract RabbitHoleTicketsUpgrade is Script {
 contract RabbitHoleTicketsDeploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
-        address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
+        address owner = vm.addr(deployerPrivateKey);
         ITransparentUpgradeableProxy RabbitHoleTicketsProxy = ITransparentUpgradeableProxy(C.RABBIT_HOLE_TICKETS_ADDRESS);
         string memory json = vm.readFile("script/deployDataBytes.json");
         bytes memory ogData = vm.parseJsonBytes(json, "$.rabbitHoleTicketsOgImpl");
