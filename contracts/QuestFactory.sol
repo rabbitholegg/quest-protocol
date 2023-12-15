@@ -149,6 +149,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
     /// @param questId_ The id of the quest
     /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
     /// @return address the quest contract address
     function createERC1155Quest(
         address rewardTokenAddress_,
@@ -284,15 +285,15 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         bytes memory data = LibZip.cdDecompress(compressedData);
 
         (
-            address ref,
             bytes32 txHash,
-            uint32 txHashChainId,
-            bytes16 questid,
             bytes32 r,
-            bytes32 vs
+            bytes32 vs,
+            address ref,
+            bytes16 questid,
+            uint16 txHashChainId
         ) = abi.decode(
             data,
-            (address, bytes32, uint32, bytes16, bytes32, bytes32)
+            (bytes32, bytes32, bytes32, address, bytes16, uint16)
         );
 
         string memory questIdString = bytes16ToUUID(questid);
@@ -803,6 +804,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         ));
     }
 
+    /// @dev Convert bytes16 to a UUID string e.g. 550e8400-e29b-41d4-a716-446655440000
+    /// @param data The bytes16 data e.g. 0x550e8400e29b41d4a716446655440000
     function bytes16ToUUID(bytes16 data) internal pure returns (string memory) {
         bytes memory hexChars = "0123456789abcdef";
         bytes memory uuid = new bytes(36); // UUID length with hyphens
