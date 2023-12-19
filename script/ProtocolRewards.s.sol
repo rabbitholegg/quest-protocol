@@ -15,7 +15,7 @@ contract ProtocolRewardsDeploy is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
+        address owner = vm.addr(deployerPrivateKey);
         address protocolRewardsImp = address(new ProtocolRewards());
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address)", owner);
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
