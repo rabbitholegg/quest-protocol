@@ -292,10 +292,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             bytes32 vs_,
             address ref_,
             bytes16 questid_,
-            uint16 txHashChainId_
+            uint32 txHashChainId_
         ) = abi.decode(
             data_,
-            (bytes32, bytes32, bytes32, address, bytes16, uint16)
+            (bytes32, bytes32, bytes32, address, bytes16, uint32)
         );
 
         string memory questIdString_ = bytes16ToUUID(questid_);
