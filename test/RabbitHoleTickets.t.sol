@@ -87,7 +87,7 @@ contract TestRabbitHoleTickets is Test, Errors, Events {
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(bytes(abi.encodePacked(
-                    '{"name": "2023 RabbitHole Holiday Reward","description": "You unwrapped a Christmas gift from RabbitHole for being a loyal member and completing our 2023 Holiday campaign","image": "ipfs://bafybeigoo4rnwlmeyyq2rgcteqb3srxaida24jpiedxsoqa7cvpbjhnzni","animation_url": "ipfs://bafybeig7sfklww3qsd2yah4tottv6ewvroad5cqidvxswtdrblzvd7gf64"}'
+                    '{"name": "RabbitHole Ticket","description": "RabbitHole Tickets","image": "ipfs://bafybeigoo4rnwlmeyyq2rgcteqb3srxaida24jpiedxsoqa7cvpbjhnzni","animation_url": "ipfs://bafybeig7sfklww3qsd2yah4tottv6ewvroad5cqidvxswtdrblzvd7gf64"}'
                 )))
             )
         );
