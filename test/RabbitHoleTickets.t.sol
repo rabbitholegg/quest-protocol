@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import {RabbitHoleTickets} from "contracts/RabbitHoleTickets.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
+import {Base64} from "solady/utils/Base64.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 
@@ -79,5 +80,18 @@ contract TestRabbitHoleTickets is Test, Errors, Events {
 
         vm.expectRevert(abi.encodeWithSelector(OnlyMinter.selector));
         rabbitHoletTckets.mint(to, tokenId, amount, "");
+    }
+
+    function test_uri_token_2() public {
+        string memory expected = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(bytes(abi.encodePacked(
+                    '{"name": "RabbitHole Ticket","description": "RabbitHole Tickets","image": "ipfs://bafybeigoo4rnwlmeyyq2rgcteqb3srxaida24jpiedxsoqa7cvpbjhnzni","animation_url": "ipfs://bafybeig7sfklww3qsd2yah4tottv6ewvroad5cqidvxswtdrblzvd7gf64"}'
+                )))
+            )
+        );
+
+        assertEq(rabbitHoletTckets.uri(2), expected);
     }
 }
