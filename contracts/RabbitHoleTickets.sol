@@ -169,10 +169,10 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
         bytes memory dataURI = abi.encodePacked(
             "{",
             '"name": "',
-            "RabbitHole Ticket",
+            getNameForToken(tokenId_),
             '",',
             '"description": "',
-            "RabbitHole Tickets",
+            getDescriptionForToken(tokenId_),
             '",',
             '"image": "',
             makeIPFSUrl(getImageCidForToken(tokenId_)),
@@ -184,6 +184,22 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
         );
         // solhint-enable quotes
         return dataURI;
+    }
+
+    function getNameForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "2023 RabbitHole Holiday Reward";
+        } else {
+            return "RabbitHole Ticket";
+        }
+    }
+
+    function getDescriptionForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "You unwrapped a Christmas gift from RabbitHole for being a loyal member and completing our 2023 Holiday campaign";
+        } else {
+            return "RabbitHole Tickets";
+        }
     }
 
     function getAnimationCidForToken(uint256 tokenId_) internal view virtual returns (string memory) {
