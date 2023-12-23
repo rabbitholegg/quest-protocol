@@ -277,7 +277,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
         address referrerMocked = address(0);
         bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
-        uint16 txHashChainId = 1;
+        uint32 txHashChainId = 1;
         bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
         string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
         string memory actionType = "other";
