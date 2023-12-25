@@ -312,7 +312,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 
-    /// @notice External use is depricated:
+    /// @notice External use is depricated
     /// @dev Claim rewards for a quest
     /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
