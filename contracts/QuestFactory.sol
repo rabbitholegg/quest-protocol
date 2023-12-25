@@ -152,6 +152,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questName_ The name of the quest
     /// @return address the quest contract address
     function createERC1155Quest(
+        uint32 txHashChainId_,
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -163,6 +164,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external payable nonReentrant returns (address) {
         return createERC1155QuestInternal(
             ERC1155QuestData(
+                txHashChainId_,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -195,6 +197,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external payable nonReentrant returns (address) {
         return createERC1155QuestInternal(
             ERC1155QuestData(
+                0,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -218,6 +221,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questName_ The name of the quest
     /// @return address the quest contract address
     function createERC20Quest(
+        uint32 txHashChainId_,
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -229,6 +233,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
+                txHashChainId_,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -264,6 +269,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
+                0,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -300,13 +306,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
-        string memory jsonData_ = buildJsonString(uint256(txHash_).toHexString(32), uint256(txHashChainId_).toString(), quest_.actionType, quest_.questName);
+        string memory jsonData_ = this.buildJsonString(txHash_, txHashChainId_, quest_.actionType, quest_.questName);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
         this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 
-    /// @notice External use is depricated
+    /// @notice External use is depricated:
     /// @dev Claim rewards for a quest
     /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
@@ -517,6 +523,19 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return data;
     }
 
+    /// @param questId_ The id of the quest
+    function questJsonData(string memory questId_) external view returns (QuestJsonData memory) {
+        Quest storage thisQuest = quests[questId_];
+
+        QuestJsonData memory data = QuestJsonData(
+            thisQuest.actionType,
+            thisQuest.questName,
+            thisQuest.txHashChainId
+        );
+
+        return data;
+    }
+
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
     function questInfo(string memory questId_) external view returns (address, uint256, uint256) {
@@ -667,6 +686,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         currentQuest.questCreator = msg.sender;
         currentQuest.actionType = data_.actionType;
         currentQuest.questName = data_.questName;
+        currentQuest.txHashChainId = data_.txHashChainId;
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -711,6 +731,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         currentQuest.questType = data_.questType;
         currentQuest.actionType = data_.actionType;
         currentQuest.questName = data_.questName;
+        currentQuest.txHashChainId = data_.txHashChainId;
 
         emit QuestCreated(
             msg.sender,
@@ -795,11 +816,11 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     function buildJsonString(
-        string memory txHash,
-        string memory txHashChainId,
+        bytes32 txHash,
+        uint32 txHashChainId,
         string memory actionType,
         string memory questName
-    ) internal pure returns (string memory) {
+    ) external pure returns (string memory) {
         // {
         //     actionTxHashes: ["actionTxHash1"],
         //     actionNetworkChainIds: ["chainId1"],
@@ -807,8 +828,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         //     actionType: "mint"
         // }
         return string(abi.encodePacked(
-            '{"actionTxHashes":["', txHash,
-            '"],"actionNetworkChainIds":[', txHashChainId,
+            '{"actionTxHashes":["', uint256(txHash).toHexString(32),
+            '"],"actionNetworkChainIds":[', uint256(txHashChainId).toString(),
             '],"questName":"', questName,
             '","actionType":"', actionType, '"}'
         ));

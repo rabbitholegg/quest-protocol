@@ -9,6 +9,7 @@ import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/sec
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {LockupLinear} from "sablier/types/DataTypes.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
@@ -24,6 +25,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
                                  USING
     //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
+    using LibString for uint256;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -117,6 +119,36 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
         _;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 CLAIM
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice To save 4 more bytes move this to the fallback function
+    /// @dev Claim rewards for this quest
+    /// @dev expects the following calldata: [bytes32 txHash_, bytes32 r_, bytes32 vs_, bytes20(refAddress || null)]
+    function claim() external payable {
+        address ref_;
+
+        // Skip the first 4 bytes (function selector)
+        (bytes32 txHash_, bytes32 r_, bytes32 vs_) = abi.decode(msg.data[4:], (bytes32, bytes32, bytes32));
+
+        // Check if additional data (ref_) is present
+        if (msg.data.length > 100) { // 4 (selector) + 32 (txHash_) + 32 (r_) + 32 (vs_) = 100
+            assembly {
+                // Load the address starting from the 100th byte
+                ref_ := calldataload(100) // 100 = 4 (selector) + 32 (txHash_) + 32 (r_) + 32 (vs_)
+                ref_ := shr(96, ref_)     // Align the 20-byte address
+            }
+        }
+
+        IQuestFactory.QuestJsonData memory quest_ = questFactoryContract.questJsonData(questId);
+        string memory jsonData_ = questFactoryContract.buildJsonString(txHash_, quest_.txHashChainId, quest_.actionType, quest_.questName);
+        bytes memory claimData_ = abi.encode(msg.sender, ref_, questId, jsonData_);
+
+        questFactoryContract.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
+    }
+
 
     /*//////////////////////////////////////////////////////////////
                             EXTERNAL UPDATE

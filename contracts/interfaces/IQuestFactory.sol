@@ -45,6 +45,7 @@ interface IQuestFactory {
         address mintFeeRecipient;
         string actionType;
         string questName;
+        uint32 txHashChainId;
     }
 
     struct QuestData {
@@ -61,6 +62,12 @@ interface IQuestFactory {
         bool hasWithdrawn;
     }
 
+    struct QuestJsonData {
+        string actionType;
+        string questName;
+        uint32 txHashChainId;
+    }
+
     struct ClaimData {
         string questId;
         bytes32 hashBytes;
@@ -71,6 +78,7 @@ interface IQuestFactory {
     }
 
     struct ERC20QuestData {
+        uint32 txHashChainId;
         address rewardTokenAddress;
         uint256 endTime;
         uint256 startTime;
@@ -84,6 +92,7 @@ interface IQuestFactory {
     }
 
     struct ERC1155QuestData {
+        uint32 txHashChainId;
         address rewardTokenAddress;
         uint256 endTime;
         uint256 startTime;
@@ -162,6 +171,13 @@ interface IQuestFactory {
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
     function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
     function mintFee() external view returns (uint256);
+    function questJsonData(string memory questId_) external view returns (QuestJsonData memory);
+    function buildJsonString(
+        string memory txHash,
+        string memory txHashChainId,
+        string memory actionType,
+        string memory questName
+    ) external pure returns (string memory);
 
     // Create
     function create1155QuestAndQueue(
@@ -173,6 +189,8 @@ interface IQuestFactory {
         string memory questId_,
         string memory
     ) external payable returns (address);
+
+    function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable;
 
     // Set
     function setClaimSignerAddress(address claimSignerAddress_) external;
