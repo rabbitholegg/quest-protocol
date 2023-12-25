@@ -9,7 +9,6 @@ import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/sec
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-import {LibString} from "solady/utils/LibString.sol";
 import {LockupLinear} from "sablier/types/DataTypes.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
@@ -25,7 +24,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
                                  USING
     //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
-    using LibString for uint256;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
