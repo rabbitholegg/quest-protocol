@@ -173,8 +173,8 @@ interface IQuestFactory {
     function mintFee() external view returns (uint256);
     function questJsonData(string memory questId_) external view returns (QuestJsonData memory);
     function buildJsonString(
-        string memory txHash,
-        string memory txHashChainId,
+        bytes32 txHash,
+        uint32 txHashChainId,
         string memory actionType,
         string memory questName
     ) external pure returns (string memory);

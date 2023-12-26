@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
+import {QuestFactory} from "contracts/QuestFactory.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/utils/LibClone.sol";

@@ -124,7 +124,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice To save 4 more bytes move this to the fallback function
     /// @dev Claim rewards for this quest
-    /// @dev expects the following calldata: [bytes32 txHash_, bytes32 r_, bytes32 vs_, bytes20(refAddress || null)]
+    /// @dev expects the following calldata: bytes32 txHash_, bytes32 r_, bytes32 vs_, bytes20(refAddress || null)
     function claim() external payable {
         address ref_;
 
@@ -134,8 +134,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         // Check if additional data (ref_) is present
         if (msg.data.length > 100) { // 4 (selector) + 32 (txHash_) + 32 (r_) + 32 (vs_) = 100
             assembly {
-                // Load the address starting from the 100th byte
-                ref_ := calldataload(100) // 100 = 4 (selector) + 32 (txHash_) + 32 (r_) + 32 (vs_)
+                ref_ := calldataload(100) // Load the address starting from the 100th byte
                 ref_ := shr(96, ref_)     // Align the 20-byte address
             }
         }

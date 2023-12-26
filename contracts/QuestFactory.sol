@@ -141,76 +141,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CREATE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
-    /// @param questId_ The id of the quest
-    /// @param actionType_ The action type for the quest
-    /// @param questName_ The name of the quest
-    /// @return address the quest contract address
-    function createERC1155Quest(
-        uint32 txHashChainId_,
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 tokenId_,
-        string memory questId_,
-        string memory actionType_,
-        string memory questName_
-    ) external payable nonReentrant returns (address) {
-        return createERC1155QuestInternal(
-            ERC1155QuestData(
-                txHashChainId_,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                tokenId_,
-                questId_,
-                actionType_,
-                questName_
-            )
-        );
-    }
-
-    /// @notice Depricated
-    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
-    /// @param questId_ The id of the quest
-    /// @return address the quest contract address
-    function create1155QuestAndQueue(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 tokenId_,
-        string memory questId_,
-        string memory
-    ) external payable nonReentrant returns (address) {
-        return createERC1155QuestInternal(
-            ERC1155QuestData(
-                0,
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                tokenId_,
-                questId_,
-                "",
-                ""
-            )
-        );
-    }
-
     /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
@@ -248,15 +180,123 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
-    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
     /// @param questId_ The id of the quest
+    /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
     /// @return address the quest contract address
+    function createERC1155Quest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                txHashChainId_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                actionType_,
+                questName_
+            )
+        );
+    }
+
+    /// @notice Depricated
+    function createERC1155Quest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                actionType_,
+                questName_
+            )
+        );
+    }
+
+    /// @notice Depricated
+    function create1155QuestAndQueue(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                "",
+                ""
+            )
+        );
+    }
+
+    /// @notice Depricated
+    function createERC20Quest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        return createERC20QuestInternal(
+            ERC20QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionType_,
+                questName_,
+                0,
+                "erc20"
+            )
+        );
+    }
+
+    /// @notice Depricated
     function createQuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
