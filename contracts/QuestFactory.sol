@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+import "forge-std/console.sol";
+
 // Inherits
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {LegacyStorage} from "./libraries/LegacyStorage.sol";
@@ -284,6 +286,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        if(tx.origin != msg.sender) revert txOriginMismatch();
+
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (

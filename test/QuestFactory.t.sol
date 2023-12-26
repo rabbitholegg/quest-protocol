@@ -256,14 +256,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
 
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // 1155 reward
@@ -307,7 +305,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked);
+        vm.startPrank(participantMocked, participantMocked);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
@@ -348,7 +346,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
