@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {Ownable} from "solady/auth/Ownable.sol";
 import {PausableUpgradeable} from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {QuestClaimable} from "./libraries/QuestClaimable.sol";
 // Implements
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
@@ -19,7 +20,7 @@ import {IERC20} from "sablier/types/Tokens.sol";
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 // solhint-disable-next-line max-states-count
-contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
+contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest, QuestClaimable {
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -45,7 +46,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint40 public durationTotal;
     mapping(address => uint256) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
-    // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -117,35 +117,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (msg.sender != address(questFactoryContract)) revert NotQuestFactory();
         _;
     }
-
-    /*//////////////////////////////////////////////////////////////
-                                 CLAIM
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice To save 4 more bytes move this to the fallback function
-    /// @dev Claim rewards for this quest
-    /// @dev expects the following calldata: bytes32 txHash_, bytes32 r_, bytes32 vs_, bytes20(refAddress || null)
-    function claim() external payable {
-        address ref_;
-
-        // Skip the first 4 bytes (function selector)
-        (bytes32 txHash_, bytes32 r_, bytes32 vs_) = abi.decode(msg.data[4:], (bytes32, bytes32, bytes32));
-
-        // Check if additional data (ref_) is present
-        if (msg.data.length > 100) { // 4 (selector) + 32 (txHash_) + 32 (r_) + 32 (vs_) = 100
-            assembly {
-                ref_ := calldataload(100) // Load the address starting from the 100th byte
-                ref_ := shr(96, ref_)     // Align the 20-byte address
-            }
-        }
-
-        IQuestFactory.QuestJsonData memory quest_ = questFactoryContract.questJsonData(questId);
-        string memory jsonData_ = questFactoryContract.buildJsonString(txHash_, quest_.txHashChainId, quest_.actionType, quest_.questName);
-        bytes memory claimData_ = abi.encode(msg.sender, ref_, questId, jsonData_);
-
-        questFactoryContract.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
-    }
-
 
     /*//////////////////////////////////////////////////////////////
                             EXTERNAL UPDATE
@@ -239,6 +210,14 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return rewardToken;
     }
 
+    function getQuestFactoryContract() public view override returns (IQuestFactory){
+        return questFactoryContract;
+    }
+
+    function getQuestId() public view override returns (string memory){
+        return questId;
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
@@ -281,4 +260,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     function _claimFee() internal view returns (uint256) {
         return questFactoryContract.mintFee();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                DEFAULTS
+    //////////////////////////////////////////////////////////////*/
+    receive() external payable {}
+    fallback() external payable {}
 }

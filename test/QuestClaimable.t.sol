@@ -19,7 +19,7 @@ import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
-contract TestQuestWithFactory is Test, Errors, Events, TestUtils {
+contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for *;
     using JSONParserLib for string;

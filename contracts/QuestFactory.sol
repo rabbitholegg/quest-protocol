@@ -46,18 +46,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    /// @custom:oz-renamed-from mintFeeRecipient
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    /// @custom:oz-renamed-from questTerminalKeyContract
-    address public defaultReferralFeeRecipient;
-    uint256 public nftQuestFee;
+    address public defaultReferralFeeRecipient; // not used, todo remove references
+    uint256 public nftQuestFee; // not used, todo remove references
     address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public nftQuestFeeList;
+    mapping(address => NftQuestFees) public nftQuestFeeList; // not used, todo remove references
     uint16 public referralFee;
-    address public sablierV2LockupLinearAddress;
-    mapping(address => address) public mintFeeRecipientList;
+    address public sablierV2LockupLinearAddress; // not used, todo remove references
+    mapping(address => address) public mintFeeRecipientList; // not used, todo remove references
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
