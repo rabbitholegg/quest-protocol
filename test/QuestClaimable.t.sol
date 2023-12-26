@@ -9,11 +9,9 @@ import {QuestFactory} from "contracts/QuestFactory.sol";
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
-import {LibZip} from "solady/utils/LibZip.sol";
 import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
@@ -64,7 +62,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             payable(address(new Quest1155())),
             owner,
             defaultReferralFeeRecipient,
-            address(new SablierMock()),
+            address(0),
             NFT_QUEST_FEE,
             REFERRAL_FEE,
             MINT_FEE
@@ -72,7 +70,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
-                               CLAIM
+                             CLAIM ERC20
     //////////////////////////////////////////////////////////////*/
     function test_claim_with_referrer() public {
         vm.startPrank(owner);
@@ -107,8 +105,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
 
         vm.startPrank(participant);
         vm.recordLogs();
-        (bool success_, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success_, "low level questAddress.call failed");
+        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
+        require(success, "erc20 questAddress.call failed");
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -177,8 +175,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
 
         vm.startPrank(participant);
         vm.recordLogs();
-        (bool success_, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success_, "low level questAddress.call failed");
+        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
+        require(success, "erc20 questAddress.call failed");
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
@@ -209,4 +207,92 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
 
         vm.stopPrank();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                             CLAIM ERC1155
+    //////////////////////////////////////////////////////////////*/
+    function test_claim_1155_with_ref() public{
+        vm.startPrank(questCreator);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.setApprovalForAll(address(questFactory), true);
+
+        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+            7777777,
+            address(sampleERC1155),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            1,
+            "550e8400-e29b-41d4-a716-446655440000",
+            "actionType",
+            "questName"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}';
+        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+
+        bytes memory data = abi.encodePacked(txHash, r, s, referrer);
+        bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
+
+        vm.startPrank(participant);
+        vm.recordLogs();
+        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
+        require(success, "1155 questAddress.call failed");
+
+        // 1155 reward
+        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+
+        // referrer payout
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+    }
+
+    function test_claim_1155_without_ref() public{
+        vm.startPrank(questCreator);
+        referrer = address(0);
+
+        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.setApprovalForAll(address(questFactory), true);
+
+        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+            7777777,
+            address(sampleERC1155),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            1,
+            "550e8400-e29b-41d4-a716-446655440000",
+            "actionType",
+            "questName"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}';
+        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+
+        bytes memory data = abi.encodePacked(txHash, r, s);
+        bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
+
+        vm.startPrank(participant);
+        vm.recordLogs();
+        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
+        require(success, "1155 questAddress.call failed");
+
+        // 1155 reward
+        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+    }
+
 }
