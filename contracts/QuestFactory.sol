@@ -330,6 +330,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        if(tx.origin != msg.sender) revert txOriginMismatch();
+
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
