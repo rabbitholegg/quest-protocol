@@ -61,7 +61,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
     mapping(address => address) public mintFeeRecipientList;
-    mapping(address => bool) public isSoulbound20Approved;
+    mapping(address => uint256) public soulbound2OState;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -155,18 +155,22 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         SoulBound20 soulBound = SoulBound20(soulboundAddress);
         soulBound.initialize(address(this), address(this), name_, symbol_);
 
-        // should this be a mapping instead for faster lookups? Not sure if it's necissary that we scope points quests
-        // to only those created by the user.
-        // if it is a mapping then we might also want to keep an storage array for finding the owner's soulbound contracts by the FE
         ownerPointAddresses[msg.sender].push(soulboundAddress);
+        soulbound2OState[soulboundAddress] = 1;
+
+        // todo emit event
         return soulboundAddress;
     }
 
     // todo change from onlyOwner to role
-    function setSoulBound20AddressApproved(address soulbound20Address_) external onlyOwner {
-        // todo check if address is actually a soulbound20 contract
-
-        isSoulbound20Approved[soulbound20Address_] = true;
+    // 0 -> removed or not set
+    // 1 -> set but not verified
+    // 2 -> verified
+    function setSoulBound20AddressState(address soulbound20Address_, uint256 state_) external onlyOwner {
+        if(soulbound2OState[soulbound20Address_]){
+            soulbound2OState[soulbound20Address_] = state_;
+            // todo emit event
+        }
     }
 
 
