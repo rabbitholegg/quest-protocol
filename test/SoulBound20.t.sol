@@ -28,8 +28,8 @@ contract SoulBound20Test is Test {
     }
 
     function test_mint_revertIf_not_minter() public {
-        soulBound.mint(user1, 100);
         vm.expectRevert(SoulBound20.OnlyMinter.selector);
+        soulBound.mint(user1, 100);
     }
 
     function test_setMinterAddress() public {
@@ -40,8 +40,8 @@ contract SoulBound20Test is Test {
 
     function test_setMinterAddress_revertIf_notOwner() public {
         vm.prank(user1);
-        soulBound.setMinterAddress(user2);
         vm.expectRevert(Ownable.Unauthorized.selector);
+        soulBound.setMinterAddress(user2);
     }
 
     function test_transfer_revertIf_notAllowed() public {
