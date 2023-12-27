@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
-import "../contracts/Soulbound20.sol";
+import {Soulbound20, Ownable} from "../contracts/Soulbound20.sol";
 
 contract Soulbound20Test is Test {
     using LibClone for address;
