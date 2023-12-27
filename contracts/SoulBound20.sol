@@ -10,13 +10,15 @@ contract SoulBound20 is Initializable, Ownable, ERC20 {
     error TransferNotAllowed();
 
     event MinterAddressSet(address indexed minterAddress);
+    event TransferAllowedSet(bool transferAllowed);
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
+    bool public transferAllowed;
     address public minterAddress;
-    string public _name;
-    string public _symbol;
+    string private _name;
+    string private _symbol;
     // insert new vars here at the end to keep the storage layout the same
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -37,15 +39,12 @@ contract SoulBound20 is Initializable, Ownable, ERC20 {
         _symbol = symbol_;
     }
 
-    modifier onlyMinter() {
-        if (msg.sender != minterAddress) revert OnlyMinter();
-        _;
-    }
-
     /// @dev mint tokens, only callable by the allowed minter
     /// @param to_ the address to mint the ticket to
     /// @param amount_ the amount of the ticket to mint
-    function mint(address to_, uint256 amount_) external onlyMinter {
+    function mint(address to_, uint256 amount_) external {
+        if (msg.sender != minterAddress) revert OnlyMinter();
+
         _mint(to_, amount_);
     }
 
@@ -53,11 +52,18 @@ contract SoulBound20 is Initializable, Ownable, ERC20 {
     /*//////////////////////////////////////////////////////////////
                                   SET
     //////////////////////////////////////////////////////////////*/
-    /// @dev set the minter address
+    /// @dev set the minter address, only callable by the owner
     /// @param minterAddress_ the address of the minter
     function setMinterAddress(address minterAddress_) external onlyOwner {
         minterAddress = minterAddress_;
         emit MinterAddressSet(minterAddress_);
+    }
+
+    /// @dev set the transfer allowed bool, only callable by the owner
+    /// @param transferAllowed_ the bool to set transferAllowed to
+    function setTransferAllowed(bool transferAllowed_) external onlyOwner {
+        transferAllowed = transferAllowed_;
+        emit TransferAllowedSet(transferAllowed_);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -73,10 +79,10 @@ contract SoulBound20 is Initializable, Ownable, ERC20 {
     }
 
     /// soulbound
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
+    function _beforeTokenTransfer(address from, address to, uint256) internal virtual override {
+        if(transferAllowed) return;
+
         // only allow minting and burning
         if (from != address(0) && to != address(0)) revert TransferNotAllowed();
-
-        super._beforeTokenTransfer(from, to, amount);
     }
 }
