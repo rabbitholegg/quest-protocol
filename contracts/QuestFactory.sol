@@ -155,6 +155,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         SoulBound20 soulBound = SoulBound20(soulboundAddress);
         soulBound.initialize(address(this), address(this), name_, symbol_);
 
+        // should this be a mapping instead for faster lookups? Not sure if it's necissary that we scope points quests
+        // to only those created by the user.
+        // if it is a mapping then we might also want to keep an storage array for finding the owner's soulbound contracts by the FE
         ownerPointAddresses[msg.sender].push(soulboundAddress);
         return soulboundAddress;
     }
