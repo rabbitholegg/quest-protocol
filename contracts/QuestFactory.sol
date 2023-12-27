@@ -18,6 +18,9 @@ import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 
+// todo turn into interface
+import {SoulBound20} from "./SoulBound20.sol";
+
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
@@ -52,12 +55,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @custom:oz-renamed-from questTerminalKeyContract
     address public defaultReferralFeeRecipient;
     uint256 public nftQuestFee;
-    address public questNFTAddress; // not used
-    mapping(address => address[]) public ownerCollections;
+    address public soulbound20Address;
+    mapping(address => address[]) public ownerPointAddresses;
     mapping(address => NftQuestFees) public nftQuestFeeList;
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;
     mapping(address => address) public mintFeeRecipientList;
+    mapping(address => bool) public isSoulbound20Approved;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -140,6 +144,28 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CREATE
     //////////////////////////////////////////////////////////////*/
+
+    function createSoulbound20(
+        string memory name_,
+        string memory symbol_
+    ) external returns (address) {
+        // todo check msg.value >= create soulbound fee
+
+        address soulboundAddress = address(soulbound20Address).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
+        SoulBound20 soulBound = SoulBound20(soulboundAddress);
+        soulBound.initialize(address(this), address(this), name_, symbol_);
+
+        ownerPointAddresses[msg.sender].push(soulboundAddress);
+        return soulboundAddress;
+    }
+
+    // todo change from onlyOwner to role
+    function setSoulBound20AddressApproved(address soulbound20Address_) external onlyOwner {
+        // todo check if address is actually a soulbound20 contract
+
+        isSoulbound20Approved[soulbound20Address_] = true;
+    }
+
 
     /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param rewardTokenAddress_ The contract address of the reward token
