@@ -215,7 +215,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
+    /// @notice Deprecated
     function createERC1155Quest(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -241,7 +241,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
+    /// @notice Deprecated
     function create1155QuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -266,7 +266,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
+    /// @notice Deprecated
     function createERC20Quest(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -294,7 +294,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
+    /// @notice Deprecated
     function createQuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -352,7 +352,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 
-    /// @notice External use is depricated
+    /// @notice External use is deprecated
     /// @dev Claim rewards for a quest
     /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
