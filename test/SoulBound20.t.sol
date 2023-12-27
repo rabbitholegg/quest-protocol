@@ -3,63 +3,63 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
-import "../contracts/SoulBound20.sol";
+import "../contracts/Soulbound20.sol";
 
-contract SoulBound20Test is Test {
+contract Soulbound20Test is Test {
     using LibClone for address;
 
-    SoulBound20 soulBound;
+    Soulbound20 soulbound;
     address owner = makeAddr(("owner"));
     address minter = makeAddr(("minter"));
     address user1 = makeAddr(("user1"));
     address user2 = makeAddr(("user2 "));
 
     function setUp() public {
-        address soulBoundAddress = address(new SoulBound20()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT")));
-        soulBound = SoulBound20(soulBoundAddress);
-        soulBound.initialize(owner, minter, "SoulBound Token", "SBT");
+        address soulboundAddress = address(new Soulbound20()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT")));
+        soulbound = Soulbound20(soulboundAddress);
+        soulbound.initialize(owner, minter, "Soulbound Token", "SBT");
     }
 
     function test_mint() public {
         vm.prank(minter);
-        soulBound.mint(user1, 100);
+        soulbound.mint(user1, 100);
 
-        assertEq(soulBound.balanceOf(user1), 100);
+        assertEq(soulbound.balanceOf(user1), 100);
     }
 
     function test_mint_revertIf_not_minter() public {
-        vm.expectRevert(SoulBound20.OnlyMinter.selector);
-        soulBound.mint(user1, 100);
+        vm.expectRevert(Soulbound20.OnlyMinter.selector);
+        soulbound.mint(user1, 100);
     }
 
     function test_setMinterAddress() public {
         vm.prank(owner);
-        soulBound.setMinterAddress(user1);
-        assertEq(soulBound.minterAddress(), user1);
+        soulbound.setMinterAddress(user1);
+        assertEq(soulbound.minterAddress(), user1);
     }
 
     function test_setMinterAddress_revertIf_notOwner() public {
         vm.prank(user1);
         vm.expectRevert(Ownable.Unauthorized.selector);
-        soulBound.setMinterAddress(user2);
+        soulbound.setMinterAddress(user2);
     }
 
     function test_transfer_revertIf_notAllowed() public {
         vm.prank(minter);
-        soulBound.mint(user1, 100);
+        soulbound.mint(user1, 100);
 
-        vm.expectRevert(SoulBound20.TransferNotAllowed.selector);
-        soulBound.transfer(user2, 50);
+        vm.expectRevert(Soulbound20.TransferNotAllowed.selector);
+        soulbound.transfer(user2, 50);
     }
 
     function test_setTransferAllowed() public {
         vm.prank(owner);
-        soulBound.setTransferAllowed(true);
-        assertTrue(soulBound.transferAllowed());
+        soulbound.setTransferAllowed(true);
+        assertTrue(soulbound.transferAllowed());
 
         vm.prank(minter);
-        soulBound.mint(user1, 100);
+        soulbound.mint(user1, 100);
         vm.prank(user1);
-        soulBound.transfer(user2, 50);
+        soulbound.transfer(user2, 50);
     }
 }

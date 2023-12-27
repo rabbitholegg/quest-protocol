@@ -5,7 +5,7 @@ import {Ownable} from "solady/auth/Ownable.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract SoulBound20 is Initializable, Ownable, ERC20 {
+contract Soulbound20 is Initializable, Ownable, ERC20 {
     error OnlyMinter();
     error TransferNotAllowed();
 
