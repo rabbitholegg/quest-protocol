@@ -256,14 +256,12 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
 
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // 1155 reward
@@ -307,7 +305,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked);
+        vm.startPrank(participantMocked, participantMocked);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
@@ -334,9 +332,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.warp(START_TIME + 1);
 
         bytes16 questId = hex'550e8400e29b41d4a716446655440000';
-        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        bytes32 txHash = hex'001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
         uint32 txHashChainId = 101;
-        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
+        string memory json = '{"actionTxHashes":["0x001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
@@ -348,7 +346,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 

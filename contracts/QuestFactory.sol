@@ -284,6 +284,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        if(tx.origin != msg.sender) revert txOriginMismatch();
+
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
@@ -300,7 +302,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
-        string memory jsonData_ = buildJsonString(uint256(txHash_).toHexString(), uint256(txHashChainId_).toString(), quest_.actionType, quest_.questName);
+        string memory jsonData_ = buildJsonString(uint256(txHash_).toHexString(32), uint256(txHashChainId_).toString(), quest_.actionType, quest_.questName);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
         this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
@@ -540,6 +542,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
 
         emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
+    }
+
+    function getQuestName(string calldata questId_) external view returns (string memory) {
+        return quests[questId_].questName;
     }
 
     /*//////////////////////////////////////////////////////////////
