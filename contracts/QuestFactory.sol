@@ -216,7 +216,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     /// @notice Deprecated
-    function createERC1155QuestLegacy(
+    function createERC1155Quest(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -267,7 +267,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     /// @notice Deprecated
-    function createERC20QuestLegacy(
+    function createERC20Quest(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
