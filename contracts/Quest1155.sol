@@ -116,7 +116,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
             revert InsufficientTokenBalance();
         }
-        if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
     }

@@ -91,7 +91,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        address questAddress = questFactory.createERC1155QuestLegacy(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -108,25 +108,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_RevertIf_createERC1155Quest_MsgValueLessThanQuestNFTFee() public {
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        vm.expectRevert(abi.encodeWithSelector(MsgValueLessThanQuestNFTFee.selector));
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS - 1}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionType",
-            "questName"
-        );
-    }
-
     function test_createERC20Quest() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
@@ -137,7 +118,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.expectEmit(true,false,true,true);
         emit QuestCreated(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT);
 
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -163,7 +144,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         vm.expectRevert(abi.encodeWithSelector(RewardNotAllowed.selector));
-        questFactory.createERC20Quest(
+        questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -181,7 +162,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createERC20Quest(
+        questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -193,7 +174,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
-        questFactory.createERC20Quest(
+        questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -214,7 +195,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
         vm.expectRevert(abi.encodeWithSelector(Erc20QuestAddressNotSet.selector));
-        questFactory.createERC20Quest(
+        questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -235,7 +216,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155QuestLegacy(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -289,7 +270,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createERC20Quest(
+        questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -318,7 +299,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -389,7 +370,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155QuestLegacy(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -422,7 +403,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -475,7 +456,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20QuestLegacy(
             address(sampleERC20),
             END_TIME,
             START_TIME,

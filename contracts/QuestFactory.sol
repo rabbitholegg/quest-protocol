@@ -49,10 +49,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public defaultMintFeeRecipient;
     uint256 private locked;
     address public defaultReferralFeeRecipient; // not used, todo remove references
-    uint256 public nftQuestFee; // not used, todo remove references
+    uint256 public nftQuestFee; // not used
     address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public nftQuestFeeList; // not used, todo remove references
+    mapping(address => NftQuestFees) public nftQuestFeeList; // not used
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress; // not used, todo remove references
     mapping(address => address) public mintFeeRecipientList; // not used, todo remove references
@@ -216,7 +216,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     /// @notice Deprecated
-    function createERC1155Quest(
+    function createERC1155QuestLegacy(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -267,7 +267,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     /// @notice Deprecated
-    function createERC20Quest(
+    function createERC20QuestLegacy(
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -425,13 +425,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit MintFeeSet(mintFee_);
     }
 
-    /// @dev set the nftQuestFee
-    /// @param nftQuestFee_ The value of the nftQuestFee
-    function setNftQuestFee(uint256 nftQuestFee_) external onlyOwner {
-        nftQuestFee = nftQuestFee_;
-        emit NftQuestFeeSet(nftQuestFee_);
-    }
-
     /// @dev set the protocol fee recipient
     /// @param protocolFeeRecipient_ The address of the protocol fee recipient
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external onlyOwner {
@@ -483,16 +476,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         mintFeeRecipientList[address_] = mintFeeRecipient_;
     }
 
-    /// @dev set the nft quest fee for a list of addresses
-    /// @param toAddAddresses_ The list of addresses to set the nft quest fee for
-    /// @param fees_ The list of fees to set
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external onlyOwner {
-        for (uint256 i = 0; i < toAddAddresses_.length; i++) {
-            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
-        }
-        emit NftQuestFeeListSet(toAddAddresses_, fees_);
-    }
-
     /// @dev set the default referral fee recipient
     /// @param defaultReferralFeeRecipient_ The address of the default referral fee recipient
     function setDefaultReferralFeeRecipient(address defaultReferralFeeRecipient_) external onlyOwner {
@@ -518,10 +501,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
         address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
         return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
-    }
-
-    function getNftQuestFee(address address_) public view returns (uint256) {
-        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
     /// @dev return the number of quest claims
@@ -588,10 +567,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param signature_ The signature of the hash
     function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
-    }
-
-    function totalQuestNFTFee(uint256 totalParticipants_) public view returns (uint256) {
-        return totalParticipants_ * getNftQuestFee(msg.sender);
     }
 
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
@@ -714,14 +689,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function createERC1155QuestInternal(ERC1155QuestData memory data_) internal returns (address) {
         Quest storage currentQuest = quests[data_.questId];
 
-        if (msg.value < totalQuestNFTFee(data_.totalParticipants)) revert MsgValueLessThanQuestNFTFee();
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
         address payable newQuest =
             payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp))));
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = data_.totalParticipants;
-        currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
         currentQuest.questCreator = msg.sender;
         currentQuest.actionType = data_.actionType;

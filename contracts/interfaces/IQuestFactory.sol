@@ -165,12 +165,10 @@ interface IQuestFactory {
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
     function getMintFeeRecipient(address address_) external view returns (address);
-    function getNftQuestFee(address address_) external view returns (uint256);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
-    function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
     function mintFee() external view returns (uint256);
     function questJsonData(string memory questId_) external view returns (QuestJsonData memory);
     function buildJsonString(
@@ -199,8 +197,6 @@ interface IQuestFactory {
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
     function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
-    function setNftQuestFee(uint256 nftQuestFee_) external;
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
