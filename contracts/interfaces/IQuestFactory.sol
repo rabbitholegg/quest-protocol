@@ -25,6 +25,7 @@ interface IQuestFactory {
     error QuestAddressMismatch();
     error ClaimFailed();
     error txOriginMismatch();
+    error InvalidSoulbound20CreateFeeFee();
 
     // Structs
 
@@ -47,6 +48,12 @@ interface IQuestFactory {
         string actionType;
         string questName;
         uint32 txHashChainId;
+    }
+
+    // This struct is used in a mapping - only add new fields to the end
+    struct Soulbound20 {
+        uint256 state;
+        address creator;
     }
 
     struct QuestData {
@@ -161,16 +168,16 @@ interface IQuestFactory {
     );
     event ReferralFeeSet(uint16 percent);
     event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
+    event Soulbound20Created(address indexed soulboundAddress, address indexed creator, string name, string symbol);
+    event Soulbound20AddressStateSet(address indexed soulbound20Address, uint256 state);
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
     function getMintFeeRecipient(address address_) external view returns (address);
-    function getNftQuestFee(address address_) external view returns (uint256);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
-    function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
     function mintFee() external view returns (uint256);
     function questJsonData(string memory questId_) external view returns (QuestJsonData memory);
     function buildJsonString(
@@ -179,6 +186,8 @@ interface IQuestFactory {
         string memory actionType,
         string memory questName
     ) external pure returns (string memory);
+    // function soulbound20Creator(address soulbound20Address_) external view returns (address);
+    // function soulbound20State(address soulbound20Address_) external view returns (uint256);
 
     // Create
     function create1155QuestAndQueue(
@@ -199,8 +208,6 @@ interface IQuestFactory {
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
     function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
-    function setNftQuestFee(uint256 nftQuestFee_) external;
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;

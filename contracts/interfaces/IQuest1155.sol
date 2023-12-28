@@ -54,7 +54,6 @@ interface IQuest1155 {
     function endTime() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
 
-    function maxProtocolReward() external view returns (uint256);
     function questFee() external view returns (uint256);
     function queued() external view returns (bool);
     function startTime() external view returns (uint256);

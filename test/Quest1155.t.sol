@@ -151,12 +151,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         quest.queue();
     }
 
-    function test_RevertIf_not_enough_eth() public {
-        vm.expectRevert(abi.encodeWithSelector(InsufficientETHBalance.selector));
-        vm.prank(questFactoryMock);
-        quest.queue();
-    }
-
     function test_queue() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
 
@@ -282,16 +276,5 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
 
         vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
         quest.withdrawRemainingTokens();
-    }
-
-    // /*//////////////////////////////////////////////////////////////
-    //                         EXTERNAL VIEW
-    // //////////////////////////////////////////////////////////////*/
-
-    function test_maxProtocolReward() public {
-        assertEq(
-            quest.maxProtocolReward(), TOTAL_PARTICIPANTS,
-            "maxProtocolReward should be correct"
-        );
     }
 }

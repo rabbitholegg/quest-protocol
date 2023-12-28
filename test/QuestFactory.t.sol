@@ -7,6 +7,7 @@ import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
+import {Soulbound20 as Soulbound20Contract} from "contracts/Soulbound20.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
@@ -35,11 +36,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint256 START_TIME = 1_000_000;
     uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
-    uint256 NFT_QUEST_FEE = 10;
+    uint256 SOULBOUND20_CREATE_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
-    address defaultReferralFeeRecipient = makeAddr("defaultReferralFeeRecipient");
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -65,9 +65,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             address(new Quest()),
             payable(address(new Quest1155())),
             owner,
-            defaultReferralFeeRecipient,
+            address(new Soulbound20Contract()),
             address(new SablierMock()),
-            NFT_QUEST_FEE,
+            SOULBOUND20_CREATE_FEE,
             REFERRAL_FEE,
             MINT_FEE
         );
@@ -79,7 +79,45 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_initialize() public {
         assertEq(protocolFeeRecipient, questFactory.protocolFeeRecipient(), "protocolFeeRecipient not set");
         assertEq(owner, questFactory.owner(), "owner should be set");
-        assertEq(defaultReferralFeeRecipient, questFactory.defaultReferralFeeRecipient(), "defaultReferralFeeRecipient should be set");
+    }
+
+
+    /*//////////////////////////////////////////////////////////////
+                          CREATE Soulbound20
+    //////////////////////////////////////////////////////////////*/
+    function test_CreateSoulbound20() public {
+        uint protocolRecipientOGBalance = protocolFeeRecipient.balance;
+        vm.prank(participant);
+        address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
+
+        assertEq(protocolFeeRecipient.balance, protocolRecipientOGBalance + SOULBOUND20_CREATE_FEE);
+        assertEq(questFactory.soulbound20State(soulbound20Address), 1);
+        assertEq(questFactory.soulbound20Creator(soulbound20Address), participant);
+
+        assertEq(Soulbound20Contract(soulbound20Address).name(), "Test");
+        assertEq(Soulbound20Contract(soulbound20Address).symbol(), "TST");
+        assertEq(Soulbound20Contract(soulbound20Address).owner(), address(questFactory));
+        assertEq(Soulbound20Contract(soulbound20Address).minterAddress(), address(questFactory));
+    }
+
+    function test_SetSoulbound20AddressState() public {
+        uint state = 2;
+        vm.prank(participant);
+        address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
+
+        vm.prank(owner);
+        questFactory.setSoulbound20AddressState(soulbound20Address, state);
+
+        assertEq(questFactory.soulbound20State(soulbound20Address), state);
+    }
+
+    function test_SetSoulbound20CreateFee() public {
+        uint soulbound20CreateFee = 1 ether;
+
+        vm.prank(owner);
+        questFactory.setSoulbound20CreateFee(soulbound20CreateFee);
+
+        assertEq(questFactory.soulbound20CreateFee(), soulbound20CreateFee);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -91,7 +129,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        address questAddress = questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -106,25 +144,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(quest1155.tokenId(), 1, "tokenId should be set");
 
         vm.stopPrank();
-    }
-
-    function test_RevertIf_createERC1155Quest_MsgValueLessThanQuestNFTFee() public {
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        vm.expectRevert(abi.encodeWithSelector(MsgValueLessThanQuestNFTFee.selector));
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS - 1}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionType",
-            "questName"
-        );
     }
 
     function test_createERC20Quest() public{
@@ -235,7 +254,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -389,7 +408,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,

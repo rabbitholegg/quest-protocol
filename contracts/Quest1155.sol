@@ -33,7 +33,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public tokenId;
-    uint256 public questFee;
+    uint256 public questFee; // not used
     string public questId;
 
     /*//////////////////////////////////////////////////////////////
@@ -116,7 +116,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
             revert InsufficientTokenBalance();
         }
-        if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
     }
@@ -139,7 +138,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         onlyQuestFactory
     {
         _transferRewards(account_, 1);
-        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
     }
 
     /// @notice Unpauses the Quest
@@ -167,12 +165,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
-    /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    function maxProtocolReward() external view returns (uint256) {
-        return (totalParticipants);
-    }
-
     function getQuestFactoryContract() public view override returns (IQuestFactory){
         return questFactoryContract;
     }

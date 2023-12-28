@@ -74,11 +74,17 @@ contract Soulbound20 is Initializable, Ownable, ERC20 {
         return _name;
     }
 
+    function namez() external view returns (string memory) {
+        return _name;
+    }
+
     function symbol() public view override returns (string memory) {
         return _symbol;
     }
 
-    /// soulbound
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL OVERRIDE
+    //////////////////////////////////////////////////////////////*/
     function _beforeTokenTransfer(address from, address to, uint256) internal virtual override {
         if(transferAllowed) return;
 
