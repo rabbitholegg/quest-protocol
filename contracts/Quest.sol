@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {Ownable} from "solady/auth/Ownable.sol";
 import {PausableUpgradeable} from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {QuestClaimable} from "./libraries/QuestClaimable.sol";
 // Implements
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
@@ -19,7 +20,7 @@ import {IERC20} from "sablier/types/Tokens.sol";
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 // solhint-disable-next-line max-states-count
-contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest {
+contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest, QuestClaimable {
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -45,7 +46,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint40 public durationTotal;
     mapping(address => uint256) public streamIdForAddress;
     ISablierV2LockupLinear public sablierV2LockupLinearContract;
-    // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -210,6 +210,14 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return rewardToken;
     }
 
+    function getQuestFactoryContract() public view override returns (IQuestFactory){
+        return questFactoryContract;
+    }
+
+    function getQuestId() public view override returns (string memory){
+        return questId;
+    }
+
     /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
@@ -252,4 +260,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     function _claimFee() internal view returns (uint256) {
         return questFactoryContract.mintFee();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                DEFAULTS
+    //////////////////////////////////////////////////////////////*/
+    receive() external payable {}
+    fallback() external payable {}
 }
