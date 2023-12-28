@@ -6,6 +6,7 @@ import "forge-std/console.sol";
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
+import {Soulbound20} from "contracts/Soulbound20.sol";
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
@@ -35,7 +36,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
-    address defaultReferralFeeRecipient = makeAddr("defaultReferralFeeRecipient");
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -61,7 +61,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             address(new Quest()),
             payable(address(new Quest1155())),
             owner,
-            defaultReferralFeeRecipient,
+            address(new Soulbound20()),
             address(0),
             NFT_QUEST_FEE,
             REFERRAL_FEE,
