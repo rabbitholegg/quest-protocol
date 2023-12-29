@@ -151,7 +151,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         address soulboundAddress = address(soulbound20Address).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
         Soulbound20Contract soulbound20 = Soulbound20Contract(soulboundAddress);
-        soulbound20.initialize(address(this), address(this), name_, symbol_);
+        soulbound20.initialize(address(this), name_, symbol_);
 
         creatorSoulbound20Addresses[msg.sender].push(soulboundAddress);
         soulbound2Os[soulboundAddress].state = 1;

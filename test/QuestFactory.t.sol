@@ -97,7 +97,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(Soulbound20Contract(soulbound20Address).name(), "Test");
         assertEq(Soulbound20Contract(soulbound20Address).symbol(), "TST");
         assertEq(Soulbound20Contract(soulbound20Address).owner(), address(questFactory));
-        assertEq(Soulbound20Contract(soulbound20Address).minterAddress(), address(questFactory));
     }
 
     function test_SetSoulbound20AddressState() public {

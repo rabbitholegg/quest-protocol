@@ -25,7 +25,6 @@ contract Soulbound20Test is Test {
 
     function test_initialize() public {
         assertEq(soulbound.owner(), owner);
-        assertEq(soulbound.minterAddress(), minter);
         assertEq(soulbound.name(), "Soulbound Token");
         assertEq(soulbound.symbol(), "SBT");
     }
