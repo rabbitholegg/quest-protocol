@@ -231,6 +231,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionType_ The action type for the quest
     /// @param questName_ The name of the quest
