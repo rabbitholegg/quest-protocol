@@ -186,8 +186,6 @@ interface IQuestFactory {
         string memory actionType,
         string memory questName
     ) external pure returns (string memory);
-    // function soulbound20Creator(address soulbound20Address_) external view returns (address);
-    // function soulbound20State(address soulbound20Address_) external view returns (uint256);
 
     // Create
     function create1155QuestAndQueue(

@@ -17,9 +17,7 @@ import {LibZip} from "solady/utils/LibZip.sol";
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
-
-// todo turn into interface
-import {Soulbound20 as Soulbound20Contract} from "./Soulbound20.sol";
+import {ISoulbound20} from "./interfaces/ISoulbound20.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -152,7 +150,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if(msg.value < soulbound20CreateFee) revert InvalidSoulbound20CreateFeeFee();
 
         address soulboundAddress = address(soulbound20Address).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
-        Soulbound20Contract soulbound20 = Soulbound20Contract(soulboundAddress);
+        ISoulbound20 soulbound20 = ISoulbound20(soulboundAddress);
         soulbound20.initialize(address(this), name_, symbol_);
 
         creatorSoulbound20Addresses[msg.sender].push(soulboundAddress);
