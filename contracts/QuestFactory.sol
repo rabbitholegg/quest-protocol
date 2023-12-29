@@ -27,6 +27,8 @@ import {Soulbound20 as Soulbound20Contract} from "./Soulbound20.sol";
 // solhint-disable-next-line max-states-count
 /// @custom:oz-upgrades-from QuestFactoryV0
 contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFactory {
+    uint public constant SET_SOULBOUND_ADDRESS_STATE_ROLE = 1;
+
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -158,7 +160,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         soulbound2Os[soulboundAddress].creator = msg.sender;
         protocolFeeRecipient.safeTransferETH(soulbound20CreateFee);
 
-        emit Soulbound20Created(soulboundAddress, msg.sender, name_, symbol_);
+        emit Soulbound20Created(msg.sender, soulboundAddress, name_, symbol_);
         return soulboundAddress;
     }
 
@@ -166,7 +168,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     // 0 -> removed or not set
     // 1 -> set but not verified
     // 2 -> verified
-    function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) external onlyOwnerOrRoles(1) {
+    function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
         if(soulbound20Address_ == address(0)) revert ZeroAddressNotAllowed();
 
         soulbound2Os[soulbound20Address_].state = state_;
