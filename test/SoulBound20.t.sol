@@ -3,10 +3,11 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
-import {Soulbound20, Ownable} from "../contracts/Soulbound20.sol";
+import {Soulbound20, OwnableRoles} from "../contracts/Soulbound20.sol";
 
 contract Soulbound20Test is Test {
     using LibClone for address;
+    error Unauthorized();
 
     Soulbound20 soulbound;
     address owner = makeAddr(("owner"));
@@ -17,7 +18,9 @@ contract Soulbound20Test is Test {
     function setUp() public {
         address soulboundAddress = address(new Soulbound20()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT")));
         soulbound = Soulbound20(soulboundAddress);
-        soulbound.initialize(owner, minter, "Soulbound Token", "SBT");
+        soulbound.initialize(owner, "Soulbound Token", "SBT");
+        vm.prank(owner);
+        soulbound.grantRoles(minter, 1);
     }
 
     function test_initialize() public {
@@ -35,20 +38,8 @@ contract Soulbound20Test is Test {
     }
 
     function test_mint_revertIf_not_minter() public {
-        vm.expectRevert(Soulbound20.OnlyMinter.selector);
+        vm.expectRevert(Unauthorized.selector);
         soulbound.mint(user1, 100);
-    }
-
-    function test_setMinterAddress() public {
-        vm.prank(owner);
-        soulbound.setMinterAddress(user1);
-        assertEq(soulbound.minterAddress(), user1);
-    }
-
-    function test_setMinterAddress_revertIf_notOwner() public {
-        vm.prank(user1);
-        vm.expectRevert(Ownable.Unauthorized.selector);
-        soulbound.setMinterAddress(user2);
     }
 
     function test_transfer_revertIf_notAllowed() public {
