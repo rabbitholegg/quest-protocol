@@ -205,7 +205,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory actionType_,
         string memory questName_
     ) external returns (address) {
-        if(soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
+        if (soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         return createERC20QuestInternal(
