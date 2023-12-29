@@ -119,6 +119,30 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(questFactory.soulbound20CreateFee(), soulbound20CreateFee);
     }
 
+    function test_createERC20PointsQuest() public {
+        vm.startPrank(questCreator);
+        address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
+
+        vm.expectEmit(true,false,false,true);
+        emit QuestCreated(questCreator, address(0), "questId", "erc20Points", soulbound20Address, END_TIME, START_TIME, 0, 0);
+
+        address questAddress = questFactory.createERC20PointsQuest(
+            101,
+            soulbound20Address,
+            END_TIME,
+            START_TIME,
+            "questId",
+            "actionType",
+            "questName"
+        );
+
+        Quest quest = Quest(payable(questAddress));
+        assertEq(quest.startTime(), START_TIME, "startTime should be set");
+        assertEq(quest.queued(), true, "queued should be set");
+
+        vm.stopPrank();
+    }
+
     /*//////////////////////////////////////////////////////////////
                              CREATE QUESTS
     //////////////////////////////////////////////////////////////*/
@@ -152,7 +176,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
 
-        vm.expectEmit(true,false,true,true);
+        vm.expectEmit(true,false,false,true);
         emit QuestCreated(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT);
 
         address questAddress = questFactory.createERC20Quest(

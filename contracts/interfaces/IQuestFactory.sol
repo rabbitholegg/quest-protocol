@@ -26,6 +26,7 @@ interface IQuestFactory {
     error ClaimFailed();
     error txOriginMismatch();
     error InvalidSoulbound20CreateFeeFee();
+    error NotSoulbound20Creator();
 
     // Structs
 

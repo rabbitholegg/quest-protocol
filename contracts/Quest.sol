@@ -21,15 +21,11 @@ import {IERC20} from "sablier/types/Tokens.sol";
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
 // solhint-disable-next-line max-states-count
 contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest, QuestClaimable {
-    /*//////////////////////////////////////////////////////////////
-                                 USING
-    //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    address public rabbitHoleReceiptContract; // Deprecated - do not use
     IQuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;

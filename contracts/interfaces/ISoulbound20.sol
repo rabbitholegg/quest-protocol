@@ -6,18 +6,13 @@ interface ISoulbound20 {
     event TransferAllowedSet(bool transferAllowed);
 
     // External functions
-    function initialize(
-        address owner_,
-        string calldata name_,
-        string calldata symbol_
-    ) external;
-
+    function initialize( address owner_, string calldata name_, string calldata symbol_) external;
     function mint(address to_, uint256 amount_) external;
-
     function setTransferAllowed(bool transferAllowed_) external;
+    function grantRoles(address account_, uint256 roles_) external;
 
     // External view functions
     function name() external view returns (string memory);
-
     function symbol() external view returns (string memory);
+    function MINT_ROLE() external view returns (uint256);
 }
