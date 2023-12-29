@@ -173,7 +173,6 @@ interface IQuestFactory {
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
-    function getMintFeeRecipient(address address_) external view returns (address);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
@@ -205,7 +204,6 @@ interface IQuestFactory {
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
-    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;

@@ -49,16 +49,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    address public defaultMintFeeRecipient;
+    address public defaultMintFeeRecipient;                     // not used
     uint256 private locked;
-    address public defaultReferralFeeRecipient;                 // not used, todo remove references
+    address public defaultReferralFeeRecipient;                 // not used
     uint256 public soulbound20CreateFee;
     address public questNFTAddress;                             // not used
     mapping(address => address[]) public creatorSoulbound20Addresses;
     mapping(address => NftQuestFees) public nftQuestFeeList;    // not used
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress;                // not used, todo remove references
-    mapping(address => address) public mintFeeRecipientList;    // not used, todo remove references
+    mapping(address => address) public mintFeeRecipientList;    // not used
     mapping(address => Soulbound20) public soulbound2Os;
     // insert new vars here at the end to keep the storage layout the same
 
@@ -514,20 +514,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         rewardAllowlist[rewardAddress_] = allowed_;
     }
 
-    /// @dev set the mintFeeRecipient
-    /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external onlyOwner {
-        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-        defaultMintFeeRecipient = mintFeeRecipient_;
-    }
-
-    /// @dev set a mintFeeRecipient for a specific address
-    /// @param address_ The address of the account
-    /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) external onlyOwner {
-        mintFeeRecipientList[address_] = mintFeeRecipient_;
-    }
-
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -539,14 +525,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @return claimed status
     function getAddressMinted(string memory questId_, address address_) external view returns (bool) {
         return quests[questId_].addressMinted[address_];
-    }
-
-    /// @dev get the mintFeeRecipient return the protocol fee recipient if the mint fee recipient is not set
-    /// @param questCreatorAddress_ The address of the quest creator, to get the mintFee
-    /// @return address the mint fee recipient
-    function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
-        address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
-        return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
     }
 
     /// @dev return the number of quest claims

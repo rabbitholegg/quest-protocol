@@ -55,9 +55,9 @@ contract QuestFactoryDeploy is Script {
             address(new Quest()),               // erc20QuestAddress_
             payable(address(new Quest1155())),  // erc1155QuestAddress_
             owner,                              // ownerAddress_
-            owner,                              // defaultReferralFeeRecipientAddress_
+            address(0),                         // soulbound20Address_
             address(0),                         // sablierV2LockupLinearAddress_
-            500000000000000,                    // nftQuestFee_,
+            500000000000000,                    // soulbound20CreateFee_,
             5000,                               // referralFee_,
             75000000000000                      // mintFee_
         );
