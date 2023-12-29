@@ -124,13 +124,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
 
         vm.expectEmit(true,false,false,true);
-        emit QuestCreated(questCreator, address(0), "questId", "erc20Points", soulbound20Address, END_TIME, START_TIME, 0, 0);
+        emit QuestCreated(questCreator, address(0), "questId", "erc20Points", soulbound20Address, END_TIME, START_TIME, 0, REWARD_AMOUNT);
 
         address questAddress = questFactory.createERC20PointsQuest(
             101,
             soulbound20Address,
             END_TIME,
             START_TIME,
+            REWARD_AMOUNT,
             "questId",
             "actionType",
             "questName"

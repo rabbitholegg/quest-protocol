@@ -192,6 +192,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
+    /// @param rewardAmount_ The reward amount for an erc20 quest
     /// @param questId_ The id of the quest
     /// @param actionType_ The action type for the quest
     /// @param questName_ The name of the quest
@@ -201,11 +202,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
+        uint256 rewardAmount_,
         string memory questId_,
         string memory actionType_,
         string memory questName_
     ) external returns (address) {
-        if (soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
+        if(soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
 
         return createERC20QuestInternal(
@@ -215,7 +217,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 endTime_,
                 startTime_,
                 0, // totalParticipants is always zero for erc20Points
-                0, // rewardAmount is always zero for erc20Points
+                rewardAmount_,
                 questId_,
                 actionType_,
                 questName_,
