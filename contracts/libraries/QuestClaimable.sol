@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { IQuestFactory } from "../interfaces/IQuestFactory.sol";
+import "forge-std/console.sol";
 
 error txOriginMismatch();
 
@@ -11,7 +12,7 @@ abstract contract QuestClaimable {
     function getQuestId() public view virtual returns (string memory);
 
     function claim() external payable {
-        if(tx.origin != msg.sender) revert txOriginMismatch();
+        if(tx.origin != msg.sender && tx.origin != address(this)) revert txOriginMismatch();
 
         address ref_;
         IQuestFactory questFactoryContract = getQuestFactoryContract();
