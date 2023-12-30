@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import { IQuestFactory } from "../interfaces/IQuestFactory.sol";
-import "forge-std/console.sol";
 
 error txOriginMismatch();
 
