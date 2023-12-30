@@ -154,8 +154,8 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
     }
 
     /// @dev returns the token uri
-    function uri(uint256) public view override (ERC1155) returns (string memory) {
-        bytes memory dataURI = generateDataURI();
+    function uri(uint256 tokenId_) public view override (ERC1155) returns (string memory) {
+        bytes memory dataURI = generateDataURI(tokenId_);
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(dataURI)));
     }
 
@@ -163,29 +163,22 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
                              INTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
-    function animationUrl(string memory animationUrlIPFSCID_) internal view virtual returns (string memory) {
-        if (bytes(animationUrlIPFSCID_).length == 0) {
-            return "";
-        }
-        return string(abi.encodePacked("ipfs://", animationUrlIPFSCID_));
-    }
-
     /// @dev returns the data uri in json format
-    function generateDataURI() internal view virtual returns (bytes memory) {
+    function generateDataURI(uint256 tokenId_) internal view virtual returns (bytes memory) {
         // solhint-disable quotes
         bytes memory dataURI = abi.encodePacked(
             "{",
             '"name": "',
-            "RabbitHole Ticket",
+            getNameForToken(tokenId_),
             '",',
             '"description": "',
-            "RabbitHole Tickets",
+            getDescriptionForToken(tokenId_),
             '",',
             '"image": "',
-            tokenImage(imageIPFSCID),
+            makeIPFSUrl(getImageCidForToken(tokenId_)),
             '",',
             '"animation_url": "',
-            animationUrl(animationUrlIPFSCID),
+            makeIPFSUrl(getAnimationCidForToken(tokenId_)),
             '"',
             "}"
         );
@@ -193,7 +186,42 @@ contract RabbitHoleTickets is Initializable, Ownable, ERC1155, IERC2981Upgradeab
         return dataURI;
     }
 
-    function tokenImage(string memory imageIPFSCID_) internal view virtual returns (string memory) {
-        return string(abi.encodePacked("ipfs://", imageIPFSCID_));
+    function getNameForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "2023 RabbitHole Holiday Reward";
+        } else {
+            return "RabbitHole Ticket";
+        }
+    }
+
+    function getDescriptionForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "You unwrapped a Christmas gift from RabbitHole for being a loyal member and completing our 2023 Holiday campaign";
+        } else {
+            return "RabbitHole Tickets";
+        }
+    }
+
+    function getAnimationCidForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "bafybeig7sfklww3qsd2yah4tottv6ewvroad5cqidvxswtdrblzvd7gf64";
+        } else {
+            return animationUrlIPFSCID;
+        }
+    }
+
+    function getImageCidForToken(uint256 tokenId_) internal view virtual returns (string memory) {
+        if(tokenId_ == 2) {
+            return "bafybeigoo4rnwlmeyyq2rgcteqb3srxaida24jpiedxsoqa7cvpbjhnzni";
+        } else {
+            return imageIPFSCID;
+        }
+    }
+
+    function makeIPFSUrl(string memory ipfsCid_) internal view virtual returns (string memory) {
+        if (bytes(ipfsCid_).length == 0) {
+            return "";
+        }
+        return string(abi.encodePacked("ipfs://", ipfsCid_));
     }
 }

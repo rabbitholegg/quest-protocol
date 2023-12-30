@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
+import {QuestFactory} from "contracts/QuestFactory.sol";
 import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
@@ -48,8 +49,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
         sablierMock = address(new SablierMock());
         questFactoryMock = address(new QuestFactoryMock());
-        quest = new Quest();
-        quest = Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
         vm.prank(questFactoryMock);
         quest.initialize(
             rewardTokenAddress,
@@ -89,8 +90,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
     function test_RevertIf_initialize_EndTimeInPast() public {
         vm.warp(END_TIME + 1);
-        quest = new Quest();
-        quest = Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(EndTimeInPast.selector));
         quest.initialize(
@@ -108,8 +109,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     function test_RevertIf_initialize_EndTimeLessThanOrEqualToStartTime() public {
-        quest = new Quest();
-        quest = Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(EndTimeLessThanOrEqualToStartTime.selector));
         quest.initialize(
@@ -196,9 +197,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Get the participants starting balance
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         // Create new quest with fuzzed values
-        quest = new Quest();
-        quest =
-            Quest(address(quest).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
+        quest = Quest(questAddress);
+
         vm.prank(questFactoryMock);
         quest.initialize(
             rewardTokenAddress,

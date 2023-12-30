@@ -91,7 +91,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        address questAddress = questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -106,25 +106,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(quest1155.tokenId(), 1, "tokenId should be set");
 
         vm.stopPrank();
-    }
-
-    function test_RevertIf_createERC1155Quest_MsgValueLessThanQuestNFTFee() public {
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        vm.expectRevert(abi.encodeWithSelector(MsgValueLessThanQuestNFTFee.selector));
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS - 1}(
-            address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            1,
-            "questId",
-            "actionType",
-            "questName"
-        );
     }
 
     function test_createERC20Quest() public{
@@ -235,7 +216,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -250,20 +231,18 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         bytes16 questId = hex'550e8400e29b41d4a716446655440000';
         bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
-        uint16 txHashChainId = 1011;
-        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[1011],"questName":"questName","actionType":"actionType"}';
+        uint32 txHashChainId = 7777777;
+        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}';
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
 
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // 1155 reward
@@ -277,7 +256,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
         address referrerMocked = address(0);
         bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
-        uint16 txHashChainId = 1;
+        uint32 txHashChainId = 1;
         bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
         string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
         string memory actionType = "other";
@@ -307,7 +286,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked);
+        vm.startPrank(participantMocked, participantMocked);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
@@ -334,9 +313,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.warp(START_TIME + 1);
 
         bytes16 questId = hex'550e8400e29b41d4a716446655440000';
-        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
+        bytes32 txHash = hex'001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
         uint32 txHashChainId = 101;
-        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
+        string memory json = '{"actionTxHashes":["0x001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
@@ -348,7 +327,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
@@ -391,7 +370,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,

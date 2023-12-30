@@ -24,6 +24,7 @@ interface IQuestFactory {
     error ZeroAddressNotAllowed();
     error QuestAddressMismatch();
     error ClaimFailed();
+    error txOriginMismatch();
 
     // Structs
 
@@ -45,6 +46,7 @@ interface IQuestFactory {
         address mintFeeRecipient;
         string actionType;
         string questName;
+        uint32 txHashChainId;
     }
 
     struct QuestData {
@@ -61,6 +63,12 @@ interface IQuestFactory {
         bool hasWithdrawn;
     }
 
+    struct QuestJsonData {
+        string actionType;
+        string questName;
+        uint32 txHashChainId;
+    }
+
     struct ClaimData {
         string questId;
         bytes32 hashBytes;
@@ -71,6 +79,7 @@ interface IQuestFactory {
     }
 
     struct ERC20QuestData {
+        uint32 txHashChainId;
         address rewardTokenAddress;
         uint256 endTime;
         uint256 startTime;
@@ -84,6 +93,7 @@ interface IQuestFactory {
     }
 
     struct ERC1155QuestData {
+        uint32 txHashChainId;
         address rewardTokenAddress;
         uint256 endTime;
         uint256 startTime;
@@ -155,13 +165,18 @@ interface IQuestFactory {
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
     function getMintFeeRecipient(address address_) external view returns (address);
-    function getNftQuestFee(address address_) external view returns (uint256);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
     function recoverSigner(bytes32 hash_, bytes memory signature_) external view returns (address);
-    function totalQuestNFTFee(uint256 totalParticipants_) external view returns (uint256);
     function mintFee() external view returns (uint256);
+    function questJsonData(string memory questId_) external view returns (QuestJsonData memory);
+    function buildJsonString(
+        bytes32 txHash,
+        uint32 txHashChainId,
+        string memory actionType,
+        string memory questName
+    ) external pure returns (string memory);
 
     // Create
     function create1155QuestAndQueue(
@@ -174,14 +189,14 @@ interface IQuestFactory {
         string memory
     ) external payable returns (address);
 
+    function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable;
+
     // Set
     function setClaimSignerAddress(address claimSignerAddress_) external;
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
     function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
-    function setNftQuestFee(uint256 nftQuestFee_) external;
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;

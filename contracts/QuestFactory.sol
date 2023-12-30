@@ -46,18 +46,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    /// @custom:oz-renamed-from mintFeeRecipient
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    /// @custom:oz-renamed-from questTerminalKeyContract
-    address public defaultReferralFeeRecipient;
-    uint256 public nftQuestFee;
+    address public defaultReferralFeeRecipient; // not used, todo remove references
+    uint256 public nftQuestFee; // not used
     address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public nftQuestFeeList;
+    mapping(address => NftQuestFees) public nftQuestFeeList; // not used
     uint16 public referralFee;
-    address public sablierV2LockupLinearAddress;
-    mapping(address => address) public mintFeeRecipientList;
+    address public sablierV2LockupLinearAddress; // not used, todo remove references
+    mapping(address => address) public mintFeeRecipientList; // not used, todo remove references
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -141,73 +139,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CREATE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
-    /// @param questId_ The id of the quest
-    /// @param actionType_ The action type for the quest
-    /// @param questName_ The name of the quest
-    /// @return address the quest contract address
-    function createERC1155Quest(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 tokenId_,
-        string memory questId_,
-        string memory actionType_,
-        string memory questName_
-    ) external payable nonReentrant returns (address) {
-        return createERC1155QuestInternal(
-            ERC1155QuestData(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                tokenId_,
-                questId_,
-                actionType_,
-                questName_
-            )
-        );
-    }
-
-    /// @notice Depricated
-    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    /// @param endTime_ The end time of the quest
-    /// @param startTime_ The start time of the quest
-    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
-    /// @param questId_ The id of the quest
-    /// @return address the quest contract address
-    function create1155QuestAndQueue(
-        address rewardTokenAddress_,
-        uint256 endTime_,
-        uint256 startTime_,
-        uint256 totalParticipants_,
-        uint256 tokenId_,
-        string memory questId_,
-        string memory
-    ) external payable nonReentrant returns (address) {
-        return createERC1155QuestInternal(
-            ERC1155QuestData(
-                rewardTokenAddress_,
-                endTime_,
-                startTime_,
-                totalParticipants_,
-                tokenId_,
-                questId_,
-                "",
-                ""
-            )
-        );
-    }
-
     /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
@@ -218,6 +151,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questName_ The name of the quest
     /// @return address the quest contract address
     function createERC20Quest(
+        uint32 txHashChainId_,
         address rewardTokenAddress_,
         uint256 endTime_,
         uint256 startTime_,
@@ -229,6 +163,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
+                txHashChainId_,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -243,15 +178,123 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
-    /// @notice Depricated
-    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
     /// @param startTime_ The start time of the quest
     /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
-    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param tokenId_ The reward token id of the erc1155 at rewardTokenAddress_
     /// @param questId_ The id of the quest
+    /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
     /// @return address the quest contract address
+    function createERC1155Quest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                txHashChainId_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                actionType_,
+                questName_
+            )
+        );
+    }
+
+    /// @notice Deprecated
+    function createERC1155Quest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                actionType_,
+                questName_
+            )
+        );
+    }
+
+    /// @notice Deprecated
+    function create1155QuestAndQueue(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 tokenId_,
+        string memory questId_,
+        string memory
+    ) external payable nonReentrant returns (address) {
+        return createERC1155QuestInternal(
+            ERC1155QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                tokenId_,
+                questId_,
+                "",
+                ""
+            )
+        );
+    }
+
+    /// @notice Deprecated
+    function createERC20Quest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+        return createERC20QuestInternal(
+            ERC20QuestData(
+                0,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionType_,
+                questName_,
+                0,
+                "erc20"
+            )
+        );
+    }
+
+    /// @notice Deprecated
     function createQuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -264,6 +307,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
+                0,
                 rewardTokenAddress_,
                 endTime_,
                 startTime_,
@@ -284,6 +328,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        if(tx.origin != msg.sender) revert txOriginMismatch();
+
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
@@ -292,25 +338,27 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             bytes32 vs_,
             address ref_,
             bytes16 questid_,
-            uint16 txHashChainId_
+            uint32 txHashChainId_
         ) = abi.decode(
             data_,
-            (bytes32, bytes32, bytes32, address, bytes16, uint16)
+            (bytes32, bytes32, bytes32, address, bytes16, uint32)
         );
 
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
-        string memory jsonData_ = buildJsonString(uint256(txHash_).toHexString(), uint256(txHashChainId_).toString(), quest_.actionType, quest_.questName);
+        string memory jsonData_ = this.buildJsonString(txHash_, txHashChainId_, quest_.actionType, quest_.questName);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
         this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 
-    /// @notice External use is depricated
+    /// @notice External use is deprecated
     /// @dev Claim rewards for a quest
     /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
+        if(tx.origin != msg.sender) revert txOriginMismatch();
+
         (
             address claimer_,
             address ref_,
@@ -379,13 +427,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit MintFeeSet(mintFee_);
     }
 
-    /// @dev set the nftQuestFee
-    /// @param nftQuestFee_ The value of the nftQuestFee
-    function setNftQuestFee(uint256 nftQuestFee_) external onlyOwner {
-        nftQuestFee = nftQuestFee_;
-        emit NftQuestFeeSet(nftQuestFee_);
-    }
-
     /// @dev set the protocol fee recipient
     /// @param protocolFeeRecipient_ The address of the protocol fee recipient
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external onlyOwner {
@@ -437,16 +478,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         mintFeeRecipientList[address_] = mintFeeRecipient_;
     }
 
-    /// @dev set the nft quest fee for a list of addresses
-    /// @param toAddAddresses_ The list of addresses to set the nft quest fee for
-    /// @param fees_ The list of fees to set
-    function setNftQuestFeeList(address[] calldata toAddAddresses_, uint256[] calldata fees_) external onlyOwner {
-        for (uint256 i = 0; i < toAddAddresses_.length; i++) {
-            nftQuestFeeList[toAddAddresses_[i]] = NftQuestFees(fees_[i], true);
-        }
-        emit NftQuestFeeListSet(toAddAddresses_, fees_);
-    }
-
     /// @dev set the default referral fee recipient
     /// @param defaultReferralFeeRecipient_ The address of the default referral fee recipient
     function setDefaultReferralFeeRecipient(address defaultReferralFeeRecipient_) external onlyOwner {
@@ -472,10 +503,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function getMintFeeRecipient(address questCreatorAddress_) public view returns (address) {
         address _mintFeeRecipient = mintFeeRecipientList[questCreatorAddress_];
         return _mintFeeRecipient == address(0) ? defaultMintFeeRecipient : _mintFeeRecipient;
-    }
-
-    function getNftQuestFee(address address_) public view returns (uint256) {
-        return nftQuestFeeList[address_].exists ? nftQuestFeeList[address_].fee : nftQuestFee;
     }
 
     /// @dev return the number of quest claims
@@ -517,6 +544,19 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return data;
     }
 
+    /// @param questId_ The id of the quest
+    function questJsonData(string memory questId_) external view returns (QuestJsonData memory) {
+        Quest storage thisQuest = quests[questId_];
+
+        QuestJsonData memory data = QuestJsonData(
+            thisQuest.actionType,
+            thisQuest.questName,
+            thisQuest.txHashChainId
+        );
+
+        return data;
+    }
+
     /// @dev return data in the quest struct for a questId
     /// @param questId_ The id of the quest
     function questInfo(string memory questId_) external view returns (address, uint256, uint256) {
@@ -531,15 +571,15 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
-    function totalQuestNFTFee(uint256 totalParticipants_) public view returns (uint256) {
-        return totalParticipants_ * getNftQuestFee(msg.sender);
-    }
-
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
         Quest storage quest = quests[questId_];
         if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
 
         emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
+    }
+
+    function getQuestName(string calldata questId_) external view returns (string memory) {
+        return quests[questId_].questName;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -651,18 +691,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function createERC1155QuestInternal(ERC1155QuestData memory data_) internal returns (address) {
         Quest storage currentQuest = quests[data_.questId];
 
-        if (msg.value < totalQuestNFTFee(data_.totalParticipants)) revert MsgValueLessThanQuestNFTFee();
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
 
         address payable newQuest =
             payable(erc1155QuestAddress.cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp))));
         currentQuest.questAddress = address(newQuest);
         currentQuest.totalParticipants = data_.totalParticipants;
-        currentQuest.questAddress.safeTransferETH(msg.value);
         currentQuest.questType = "erc1155";
         currentQuest.questCreator = msg.sender;
         currentQuest.actionType = data_.actionType;
         currentQuest.questName = data_.questName;
+        currentQuest.txHashChainId = data_.txHashChainId;
         IQuest1155Ownable questContract = IQuest1155Ownable(newQuest);
 
         questContract.initialize(
@@ -707,6 +746,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         currentQuest.questType = data_.questType;
         currentQuest.actionType = data_.actionType;
         currentQuest.questName = data_.questName;
+        currentQuest.txHashChainId = data_.txHashChainId;
 
         emit QuestCreated(
             msg.sender,
@@ -791,11 +831,11 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     function buildJsonString(
-        string memory txHash,
-        string memory txHashChainId,
+        bytes32 txHash,
+        uint32 txHashChainId,
         string memory actionType,
         string memory questName
-    ) internal pure returns (string memory) {
+    ) external pure returns (string memory) {
         // {
         //     actionTxHashes: ["actionTxHash1"],
         //     actionNetworkChainIds: ["chainId1"],
@@ -803,8 +843,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         //     actionType: "mint"
         // }
         return string(abi.encodePacked(
-            '{"actionTxHashes":["', txHash,
-            '"],"actionNetworkChainIds":[', txHashChainId,
+            '{"actionTxHashes":["', uint256(txHash).toHexString(32),
+            '"],"actionNetworkChainIds":[', uint256(txHashChainId).toString(),
             '],"questName":"', questName,
             '","actionType":"', actionType, '"}'
         ));

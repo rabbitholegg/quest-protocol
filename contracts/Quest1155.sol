@@ -3,18 +3,19 @@ pragma solidity 0.8.19;
 
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuest1155} from "./interfaces/IQuest1155.sol";
+import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
+import {QuestClaimable} from "./libraries/QuestClaimable.sol";
 import {ERC1155Holder} from "openzeppelin-contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {PausableUpgradeable} from "openzeppelin-contracts-upgradeable/security/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {Ownable} from "solady/auth/Ownable.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-import {QuestFactory} from "./QuestFactory.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc1155Quest contract. It is a quest that is redeemable for ERC1155 tokens.
 /// @dev This contract will not work with RabbitHoleReceipt
-contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest1155 {
+contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQuest1155, QuestClaimable{
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -23,7 +24,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    QuestFactory public questFactoryContract;
+    IQuestFactory public questFactoryContract;
     bool public queued;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
@@ -34,7 +35,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public questFee;
     string public questId;
-    // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -61,7 +61,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         rewardToken = rewardTokenAddress_;
         totalParticipants = totalParticipants_;
         tokenId = tokenId_;
-        questFactoryContract = QuestFactory(payable(msg.sender));
+        questFactoryContract = IQuestFactory(payable(msg.sender));
         questId = questId_;
         protocolFeeRecipient = protocolFeeRecipient_;
         _initializeOwner(msg.sender);
@@ -116,7 +116,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         if (IERC1155(rewardToken).balanceOf(address(this), tokenId) < totalParticipants) {
             revert InsufficientTokenBalance();
         }
-        if (address(this).balance < this.maxProtocolReward()) revert InsufficientETHBalance();
         queued = true;
         emit Queued(block.timestamp);
     }
@@ -171,6 +170,14 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() external view returns (uint256) {
         return (totalParticipants);
+    }
+
+    function getQuestFactoryContract() public view override returns (IQuestFactory){
+        return questFactoryContract;
+    }
+
+    function getQuestId() public view override returns (string memory){
+        return questId;
     }
 
     /*//////////////////////////////////////////////////////////////
