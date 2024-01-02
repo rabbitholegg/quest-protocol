@@ -794,8 +794,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             data_.questId,
             questFee,
             protocolFeeRecipient,
-            data_.durationTotal,
-            sablierV2LockupLinearAddress
+            data_.questType
         );
 
         transferTokensAndOwnership(newQuest, data_.rewardTokenAddress);

@@ -36,6 +36,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
+    string constant QUEST_TYPE = "erc20";
 
     function setUp() public {
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
@@ -61,8 +62,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_ID,
             QUEST_FEE,
             protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            QUEST_TYPE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -81,8 +81,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         assertEq(QUEST_ID, quest.questId(), "questId not set");
         assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
-        assertEq(DURATION_TOTAL, quest.durationTotal(), "durationTotal not set");
-        assertEq(sablierMock, address(quest.sablierV2LockupLinearContract()), "sablier not set");
+        assertEq(QUEST_TYPE, quest.questType(), "questType not set");
         assertEq(questFactoryMock, address(quest.questFactoryContract()), "questFactory not set");
         assertTrue(quest.queued(), "queued should be true");
         assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
@@ -103,8 +102,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_ID,
             QUEST_FEE,
             protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            QUEST_TYPE
         );
     }
 
@@ -122,8 +120,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_ID,
             QUEST_FEE,
             protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            QUEST_TYPE
         );
     }
 
@@ -210,8 +207,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             QUEST_ID,
             QUEST_FEE,
             protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            QUEST_TYPE
         );
         // Transfer all tokens to quest
         vm.prank(admin);

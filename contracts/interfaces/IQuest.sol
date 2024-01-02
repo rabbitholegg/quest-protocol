@@ -34,8 +34,7 @@ interface IQuest {
         string memory questId_,
         uint16 questFee_,
         address protocolFeeRecipient_,
-        uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_
+        string memory questType_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
