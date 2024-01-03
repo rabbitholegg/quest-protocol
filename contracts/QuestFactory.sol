@@ -163,9 +163,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     }
 
     // external state meaning:
-    // 0 -> removed or not set
+    // 0 -> not set
     // 1 -> set but not verified
     // 2 -> verified
+    // 3 -> removed
+    // setsoulbound20Verified
+    // setSoulbound20Removed
+
     function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
         if(soulbound20Address_ == address(0)) revert ZeroAddressNotAllowed();
 
@@ -207,6 +211,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external returns (address) {
         if (soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
+        // make sure reward is not removed state (3)
 
         return createERC20QuestInternal(
             ERC20QuestData(
@@ -464,8 +469,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         quest.addressMinted[claimer_] = true;
         quest.numberMinted = numberMintedPlusOne_;
-        (bool success_, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        (bool success_, ) = quest.questAddress.call(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
         if (!success_) revert ClaimFailed();
+
+        processMintFee(ref_, quest.questCreator);
 
         emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
@@ -743,38 +750,15 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
+    function processMintFee(address ref_, address mintFeeRecipient_) internal {
         returnChange();
-        uint256 cachedMintFee = mintFee;
-        uint256 oneThirdMintfee = cachedMintFee / 3;
-        uint256 protocolPayout;
-        uint256 mintPayout;
-        uint256 referrerPayout;
+        uint256 oneThirdMintFee = mintFee / 3;
+        uint256 protocolSplit = oneThirdMintFee * 2;
+        if (ref_ != address(0)) protocolSplit = oneThirdMintFee;
 
-        if(ref_ == address(0)){
-            protocolPayout = oneThirdMintfee * 2;
-            mintPayout = oneThirdMintfee;
-        } else {
-            protocolPayout = oneThirdMintfee;
-            mintPayout = oneThirdMintfee;
-            referrerPayout = oneThirdMintfee;
-        }
-
-        protocolFeeRecipient.safeTransferETH(protocolPayout);
-        mintFeeRecipient_.safeTransferETH(mintPayout);
-        if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
-
-        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
-
-        return string(abi.encodePacked(
-            ', "claimFee": "', cachedMintFee.toString(),
-            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
-            '", "value": "', protocolPayout.toString(),
-            '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
-            '", "value": "', mintPayout.toString(),
-            '"}, {"name": "referrerPayout", "address": "', ref_.toHexString(),
-            '", "value": "', referrerPayout.toString(), '"}]}'
-        ));
+        protocolFeeRecipient.safeTransferETH(protocolSplit);
+        mintFeeRecipient_.safeTransferETH(oneThirdMintFee);
+        if(ref_ != address(0)) ref_.safeTransferETH(oneThirdMintFee);
     }
 
     // Refund any excess payment

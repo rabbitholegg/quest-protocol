@@ -63,6 +63,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
+        // validate that questType is set in a mapping
 
         // Process input parameters
         rewardToken = rewardTokenAddress_;
@@ -124,40 +125,17 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _unpause();
     }
 
-    /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
-    /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_)
-        external
-        virtual
-        nonReentrant
-        onlyQuestActive
-        whenNotPaused
-        onlyQuestFactory
-    {
-        uint256 totalRedeemableRewards = rewardAmountInWei;
-        _transferRewards(account_, totalRedeemableRewards);
-    }
-
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
-        _transferRewards(claimer_, rewardAmountInWei);
-        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
+        _transferRewards(claimer_, ref_, rewardAmountInWei);
     }
 
-    /// @notice Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
-    /// @dev Can only be called after the quest has ended
+    /// @notice Function that transfers all remaning reward tokens in the contract to the owner (creator)
+    /// @dev Can only be called after the quest has ended, and not on erc20Points types
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
+        // Todo not available for erc20Points types
+
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
-
-        uint256 ownerPayout = (_claimFee() * _redeemedTokens()) / 3;
-        uint256 protocolPayout = address(this).balance - ownerPayout;
-
-        owner().safeTransferETH(ownerPayout);
-        protocolFeeRecipient.safeTransferETH(protocolPayout);
-
-        // transfer reward tokens
-        uint256 protocolFeeForRecipient = this.protocolFee() / 2;
-        rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
@@ -216,14 +194,24 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         ISoulbound20(rewardToken).mint(sender_, amount_);
     }
 
-    /// @notice Internal function that transfers the rewards to the msg.sender
+    /// @notice Internal function that splits rewards between the sender, the owner, the protocol, and the referrer
     /// @param sender_ The address to send the rewards to
+    /// @param ref_ The address of the referrer
     /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(address sender_, uint256 amount_) internal {
+    function _transferRewards(address sender_, address ref_, uint256 amount_) internal {
+        uint256 protocolSplit = protocolSplit = amount_ * 10 / 100;
+        if (ref_ != address(0)) protocolSplit = amount_ * 5 / 100;
+
         if (questType.eq("erc20Points")) {
             _mintPoints(sender_, amount_);
+            _mintPoints(owner(), amount_ * 10 / 100);
+            _mintPoints(protocolFeeRecipient, protocolSplit);
+            if (ref_ != address(0)) _mintPoints(ref_, protocolSplit);
         } else {
             rewardToken.safeTransfer(sender_, amount_);
+            rewardToken.safeTransfer(owner(), amount_ * 10 / 100);
+            rewardToken.safeTransfer(protocolFeeRecipient, protocolSplit);
+            if (ref_ != address(0)) rewardToken.safeTransfer(ref_, protocolSplit);
         }
     }
 

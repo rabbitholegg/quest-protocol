@@ -6,8 +6,8 @@ import {TestUtils} from "./helpers/TestUtils.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
+import {Soulbound20} from "contracts/Soulbound20.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
@@ -27,7 +27,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 CLAIM_FEE = 999;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     uint40 DURATION_TOTAL = 0;
-    address sablierMock;
     address questFactoryMock;
     Quest quest;
     address admin = makeAddr(("admin"));
@@ -48,7 +47,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                 admin
             )
         );
-        sablierMock = address(new SablierMock());
         questFactoryMock = address(new QuestFactoryMock());
         address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
         quest = Quest(questAddress);
@@ -224,7 +222,46 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_singleClaim_stream() public {}
+    function test_claimFromFactory_erc20points() public {
+        address ref = makeAddr("ref");
+        address payable erc20PointsContract = payable(address(new Soulbound20()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        Soulbound20(erc20PointsContract).initialize(owner, "ERC20Points", "ERC20Points");
+        uint256 mintRole = Soulbound20(erc20PointsContract).MINT_ROLE();
+
+        questFactoryMock = address(new QuestFactoryMock());
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
+        vm.prank(questFactoryMock);
+        quest.initialize(
+            erc20PointsContract,
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            "erc20Points"
+        );
+
+        vm.prank(owner);
+        Soulbound20(erc20PointsContract).grantRoles(questAddress, mintRole);
+        vm.warp(START_TIME);
+        vm.prank(questFactoryMock);
+        quest.claimFromFactory(participant, ref);
+
+        // REWARD_AMOUNT_IN_WEI to claimer
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(participant), REWARD_AMOUNT_IN_WEI);
+
+        // REWARD_AMOUNT_IN_WEI * 10% to creator
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(owner), REWARD_AMOUNT_IN_WEI * 10 / 100);
+
+        // REWARD_AMOUNT_IN_WEI * 5% to community treasury
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(protocolFeeRecipient), REWARD_AMOUNT_IN_WEI * 5 / 100);
+
+        // REWARD_AMOUNT_IN_WEI * 5% to referrer
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(ref), REWARD_AMOUNT_IN_WEI * 5 / 100);
+    }
 
     function test_RevertIf_singleClaim_NotQuestFactory() public {
         vm.warp(START_TIME);
