@@ -126,19 +126,18 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
-        _transferRewards(claimer_, ref_, rewardAmountInWei);
+        _transferRewards(claimer_, ref_);
     }
 
     /// @notice Function that transfers all remaning reward tokens in the contract to the owner (creator)
     /// @dev Can only be called after the quest has ended, and not on erc20Points types
     function withdrawRemainingTokens() external onlyWithdrawAfterEnd {
-        // Todo not available for erc20Points types
-
+        if (questType.eq("erc20Points")) revert WithdrawNotAvailableForPoints();
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
-        rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
+        if(remainingBalanceForOwner != 0) rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -195,19 +194,18 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Internal function that splits rewards between the sender, the owner, the protocol, and the referrer
     /// @param sender_ The address to send the rewards to
     /// @param ref_ The address of the referrer
-    /// @param amount_ The amount of rewards to transfer
-    function _transferRewards(address sender_, address ref_, uint256 amount_) internal {
-        uint256 protocolSplit = amount_ * 10 / 100;
-        if (ref_ != address(0)) protocolSplit = amount_ * 5 / 100;
+    function _transferRewards(address sender_, address ref_) internal {
+        uint256 protocolSplit = rewardAmountInWei * 10 / 100;
+        if (ref_ != address(0)) protocolSplit = rewardAmountInWei * 5 / 100;
 
         if (questType.eq("erc20Points")) {
-            _mintPoints(sender_, amount_);
-            _mintPoints(owner(), amount_ * 10 / 100);
+            _mintPoints(sender_, rewardAmountInWei);
+            _mintPoints(owner(), rewardAmountInWei * 10 / 100);
             _mintPoints(protocolFeeRecipient, protocolSplit);
             if (ref_ != address(0)) _mintPoints(ref_, protocolSplit);
         } else {
-            rewardToken.safeTransfer(sender_, amount_);
-            rewardToken.safeTransfer(owner(), amount_ * 10 / 100);
+            rewardToken.safeTransfer(sender_, rewardAmountInWei);
+            rewardToken.safeTransfer(owner(), rewardAmountInWei * 10 / 100);
             rewardToken.safeTransfer(protocolFeeRecipient, protocolSplit);
             if (ref_ != address(0)) rewardToken.safeTransfer(ref_, protocolSplit);
         }

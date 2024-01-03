@@ -121,8 +121,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
     /// @param claimer_ The account to transfer rewards to
-    /// @param ref_ The account that referred the claimer
-    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
+    function claimFromFactory(address claimer_, address) external payable whenNotEnded onlyQuestFactory {
         _transferRewards(claimer_, 1);
     }
 

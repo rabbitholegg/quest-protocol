@@ -24,6 +24,7 @@ interface IQuest {
     error OverMaxAllowedToMint();
     error AddressAlreadyMinted();
     error QuestEnded();
+    error WithdrawNotAvailableForPoints();
 
     function initialize(
         address rewardTokenAddress_,
