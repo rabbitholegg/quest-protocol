@@ -216,7 +216,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest(
+        address currentQuestAddress = questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -242,7 +242,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant, participant);
+        vm.startPrank(participant, currentQuestAddress);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // 1155 reward
@@ -270,7 +270,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createERC20Quest(
+        address currentQuestAddress = questFactory.createERC20Quest(
             address(sampleERC20),
             END_TIME,
             START_TIME,
@@ -286,7 +286,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked, participantMocked);
+        vm.startPrank(participantMocked, currentQuestAddress);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
@@ -327,7 +327,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant, participant);
+        vm.startPrank(participant, questAddress);
         vm.recordLogs();
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
@@ -370,7 +370,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        questFactory.createERC1155Quest(
+        address currentQuestAddress = questFactory.createERC1155Quest(
             address(sampleERC1155),
             END_TIME,
             START_TIME,
@@ -387,7 +387,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, currentQuestAddress);
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // 1155 reward
@@ -420,7 +420,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, questAddress);
         vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 

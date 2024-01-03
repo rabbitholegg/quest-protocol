@@ -328,8 +328,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
-        if(tx.origin != msg.sender) revert txOriginMismatch();
-
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
@@ -346,6 +344,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
+
+        if(tx.origin != msg.sender && tx.origin != quest_.questAddress) revert txOriginMismatch();
+
         string memory jsonData_ = this.buildJsonString(txHash_, txHashChainId_, quest_.actionType, quest_.questName);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
@@ -357,8 +358,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
-        if(tx.origin != msg.sender) revert txOriginMismatch();
-
         (
             address claimer_,
             address ref_,
@@ -369,6 +368,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             (address, address, string, string)
         );
         Quest storage quest = quests[questId_];
+
+        if(tx.origin != msg.sender && tx.origin != address(this) && tx.origin != quest.questAddress) revert txOriginMismatch();
+
         uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
         address rewardToken_ = IQuestOwnable(quest.questAddress).rewardToken();
         uint256 rewardAmountOrTokenId;
