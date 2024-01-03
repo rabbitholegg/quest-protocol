@@ -153,13 +153,13 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            SINGLECLAIM
+                            claimFromFactory
     //////////////////////////////////////////////////////////////*/
-    function test_singleClaim() public {
+    function test_claimFromFactory() public {
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         vm.warp(START_TIME);
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
             startingBalance + REWARD_AMOUNT_IN_WEI,
@@ -167,7 +167,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_fuzz_singleClaim(
+    function test_fuzz_claimFromFactory(
         uint256 rewardAmountInWei,
         uint256 startTime,
         uint256 endTime,
@@ -192,7 +192,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Get the participants starting balance
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         // Create new quest with fuzzed values
-        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_claimFromFactory"))));
         quest = Quest(questAddress);
 
         vm.prank(questFactoryMock);
@@ -213,7 +213,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Claim single and check for correct event logging
         vm.warp(startTime);
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
         // Check that the participant received the correct amount of tokens
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
@@ -263,26 +263,17 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         assertEq(Soulbound20(erc20PointsContract).balanceOf(ref), REWARD_AMOUNT_IN_WEI * 5 / 100);
     }
 
-    function test_RevertIf_singleClaim_NotQuestFactory() public {
+    function test_RevertIf_claimFromFactory_NotQuestFactory() public {
         vm.warp(START_TIME);
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
     }
 
-    function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {
+    function test_RevertIf_claimFromFactory_ClaimWindowNotStarted() public {
         vm.warp(START_TIME - 1);
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(ClaimWindowNotStarted.selector));
-        quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_whenNotPaused() public {
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        vm.warp(START_TIME);
-        vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
-        vm.stopPrank();
+        quest.claimFromFactory(participant, address(0));
     }
 
     /*//////////////////////////////////////////////////////////////

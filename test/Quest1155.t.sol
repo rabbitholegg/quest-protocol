@@ -160,16 +160,16 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            SINGLECLAIM
+                            claimFromFactory
     //////////////////////////////////////////////////////////////*/
 
-    function test_singleClaim() public {
+    function test_claimFromFactory() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
 
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
 
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
@@ -180,16 +180,16 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
 
     // todo add fuzz test
 
-    function test_RevertIf_singleClaim_NotQuestFactory() public {
+    function test_RevertIf_claimFromFactory_NotQuestFactory() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
 
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
     }
 
-    function test_RevertIf_singleClaim_NotStarted() public {
+    function test_RevertIf_claimFromFactory_NotStarted() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
@@ -197,19 +197,7 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         vm.warp(START_TIME - 1);
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(NotStarted.selector));
-        quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_whenNotPaused() public {
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
-        vm.prank(questFactoryMock);
-        quest.queue();
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        vm.warp(START_TIME);
-        vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
-        vm.stopPrank();
+        quest.claimFromFactory(participant, address(0));
     }
 
     // /*//////////////////////////////////////////////////////////////

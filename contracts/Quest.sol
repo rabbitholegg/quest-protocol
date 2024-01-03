@@ -139,8 +139,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
-
-        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -199,7 +197,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param ref_ The address of the referrer
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, address ref_, uint256 amount_) internal {
-        uint256 protocolSplit = protocolSplit = amount_ * 10 / 100;
+        uint256 protocolSplit = amount_ * 10 / 100;
         if (ref_ != address(0)) protocolSplit = amount_ * 5 / 100;
 
         if (questType.eq("erc20Points")) {

@@ -472,7 +472,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         (bool success_, ) = quest.questAddress.call(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
         if (!success_) revert ClaimFailed();
 
-        processMintFee(ref_, quest.questCreator);
+        processMintFee(ref_, quest.questCreator, questId_);
 
         emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
@@ -484,7 +484,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
         if(ref_ != address(0)){
             emit QuestClaimedReferred(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId, ref_, 3333, mintFee);
-            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
 
@@ -640,13 +639,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
-    function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
-        Quest storage quest = quests[questId_];
-        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
-
-        emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
-    }
-
     function getQuestName(string calldata questId_) external view returns (string memory) {
         return quests[questId_].questName;
     }
@@ -750,7 +742,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_) internal {
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) internal {
         returnChange();
         uint256 oneThirdMintFee = mintFee / 3;
         uint256 protocolSplit = oneThirdMintFee * 2;
@@ -759,6 +751,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient.safeTransferETH(protocolSplit);
         mintFeeRecipient_.safeTransferETH(oneThirdMintFee);
         if(ref_ != address(0)) ref_.safeTransferETH(oneThirdMintFee);
+
+        emit MintFeePaid(questId_, protocolFeeRecipient, protocolSplit, mintFeeRecipient_, oneThirdMintFee, ref_, oneThirdMintFee);
     }
 
     // Refund any excess payment

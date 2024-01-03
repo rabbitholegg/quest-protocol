@@ -139,8 +139,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         hasWithdrawn = true;
 
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
-
-        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -62,7 +62,6 @@ interface IQuest1155 {
     // Update Functions
     function pause() external;
     function queue() external;
-    function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
     }
