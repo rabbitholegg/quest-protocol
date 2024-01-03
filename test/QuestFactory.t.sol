@@ -37,7 +37,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 SOULBOUND20_CREATE_FEE = 10;
-    uint256 REWARD_AMOUNT = 10;
+    uint256 REWARD_AMOUNT = 100;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
@@ -462,6 +462,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimOptimized_erc20_with_ref() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+        uint256 OGQuestCreatorBalance = questCreator.balance;
+        uint256 questCreator20BalanceAfterQuestCreated = sampleERC20.balanceOf(questCreator) - calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
@@ -486,14 +488,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
-        // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
-
-        // referrer payout
-        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
-
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 8);
+
+        assertEq(entries[4].topics[0], keccak256("MintFeePaid(string,address,uint256,address,uint256,address,uint256)"));
 
         // assert indexed log data
         assertEq(entries[6].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
@@ -505,6 +503,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(questId, string("questId"));
         assertEq(rewardToken, address(sampleERC20));
         assertEq(rewardAmountInWei, REWARD_AMOUNT);
+
+        // erc20 reward payouts
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(questCreator), questCreator20BalanceAfterQuestCreated + REWARD_AMOUNT * 10 / 100, "quest creator erc20 balance");
+        assertEq(sampleERC20.balanceOf(protocolFeeRecipient), REWARD_AMOUNT * 5 / 100, "protocol erc20 balance");
+        assertEq(sampleERC20.balanceOf(referrer), REWARD_AMOUNT * 5 / 100, "referrer erc20 balance");
+
+        // mint fee payouts
+        assertEq(protocolFeeRecipient.balance, MINT_FEE / 3, "protocol mint fee");
+        assertEq(questCreator.balance, OGQuestCreatorBalance + (MINT_FEE / 3), "quest creator mint fee");
+        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
 
         vm.stopPrank();
     }
