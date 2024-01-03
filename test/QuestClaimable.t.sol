@@ -13,7 +13,6 @@ import {Quest1155} from "contracts/Quest1155.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
-import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
@@ -21,7 +20,6 @@ import {TestUtils} from "./helpers/TestUtils.sol";
 contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for *;
-    using JSONParserLib for string;
 
     QuestFactory questFactory;
     SampleERC1155 sampleERC1155;

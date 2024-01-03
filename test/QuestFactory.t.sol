@@ -14,7 +14,6 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibZip} from "solady/utils/LibZip.sol";
-import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
@@ -23,7 +22,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for address;
     using LibString for string;
-    using JSONParserLib for string;
     using LibString for uint256;
 
     QuestFactory questFactory;
