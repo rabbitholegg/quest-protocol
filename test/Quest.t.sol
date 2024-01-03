@@ -283,7 +283,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
     function test_withdrawRemainingTokensQ() public {
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(owner);
-        uint256 defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        uint256 defaultTotalRewardsPlusFees = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
 
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
@@ -291,7 +291,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.withdrawRemainingTokens();
 
         // no tokens withdrawn
-        assertEq(SampleERC20(rewardTokenAddress).balanceOf(owner), defaultTotalRewardsPlusFee + startingBalance);
+        assertEq(SampleERC20(rewardTokenAddress).balanceOf(owner), defaultTotalRewardsPlusFees + startingBalance);
     }
 
     function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {
