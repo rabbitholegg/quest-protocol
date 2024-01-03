@@ -33,4 +33,3 @@ abstract contract QuestClaimable {
         questFactoryContract.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
     }
 }
-
