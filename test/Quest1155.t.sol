@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";

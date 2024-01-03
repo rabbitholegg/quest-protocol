@@ -32,7 +32,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     uint256 START_TIME = 1_000_000;
     uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
-    uint256 NFT_QUEST_FEE = 10;
+    uint256 SOULBOUND20_CREATE_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
@@ -62,8 +62,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             payable(address(new Quest1155())),
             owner,
             address(new Soulbound20()),
-            address(0),
-            NFT_QUEST_FEE,
+            SOULBOUND20_CREATE_FEE,
             REFERRAL_FEE,
             MINT_FEE
         );
@@ -211,7 +210,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        address questAddress = questFactory.createERC1155Quest(
             7777777,
             address(sampleERC1155),
             END_TIME,
@@ -252,7 +251,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
-        address questAddress = questFactory.createERC1155Quest{value: NFT_QUEST_FEE * TOTAL_PARTICIPANTS}(
+        address questAddress = questFactory.createERC1155Quest(
             7777777,
             address(sampleERC1155),
             END_TIME,

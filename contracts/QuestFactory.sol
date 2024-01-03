@@ -57,7 +57,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     mapping(address => address[]) public creatorSoulbound20Addresses;
     mapping(address => NftQuestFees) public nftQuestFeeList;    // not used
     uint16 public referralFee;
-    address public sablierV2LockupLinearAddress;                // not used, todo remove references
+    address public sablierV2LockupLinearAddress;                // not used
     mapping(address => address) public mintFeeRecipientList;    // not used
     mapping(address => Soulbound20) public soulbound2Os;
     // insert new vars here at the end to keep the storage layout the same
@@ -76,7 +76,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address payable erc1155QuestAddress_,
         address ownerAddress_,
         address soulbound20Address_,
-        address sablierV2LockupLinearAddress_,
         uint256 soulbound20CreateFee_,
         uint16 referralFee_,
         uint256 mintFee_
@@ -89,7 +88,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
         soulbound20Address = soulbound20Address_;
-        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
         soulbound20CreateFee = soulbound20CreateFee_;
         referralFee = referralFee_;
         mintFee = mintFee_;
@@ -546,13 +544,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
         referralFee = referralFee_;
         emit ReferralFeeSet(referralFee_);
-    }
-
-    /// @dev set sablierV2LockupLinearAddress
-    /// @param sablierV2LockupLinearAddress_ The address of the sablierV2LockupLinear contract
-    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external onlyOwner {
-        sablierV2LockupLinearAddress = sablierV2LockupLinearAddress_;
-        emit SablierV2LockupLinearAddressSet(sablierV2LockupLinearAddress_);
     }
 
     /// @dev set or remave a contract address to be used as a reward

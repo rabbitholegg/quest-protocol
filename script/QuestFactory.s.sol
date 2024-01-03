@@ -56,7 +56,6 @@ contract QuestFactoryDeploy is Script {
             payable(address(new Quest1155())),  // erc1155QuestAddress_
             owner,                              // ownerAddress_
             address(0),                         // soulbound20Address_
-            address(0),                         // sablierV2LockupLinearAddress_
             500000000000000,                    // soulbound20CreateFee_,
             5000,                               // referralFee_,
             75000000000000                      // mintFee_

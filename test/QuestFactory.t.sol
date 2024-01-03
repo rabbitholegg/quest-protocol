@@ -10,7 +10,6 @@ import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Soulbound20 as Soulbound20Contract} from "contracts/Soulbound20.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
@@ -66,7 +65,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             payable(address(new Quest1155())),
             owner,
             address(new Soulbound20Contract()),
-            address(new SablierMock()),
             SOULBOUND20_CREATE_FEE,
             REFERRAL_FEE,
             MINT_FEE
