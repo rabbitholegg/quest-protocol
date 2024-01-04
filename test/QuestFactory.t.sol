@@ -95,15 +95,24 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(Soulbound20Contract(soulbound20Address).owner(), address(questFactory));
     }
 
-    function test_SetSoulbound20AddressState() public {
-        uint state = 2;
+    function test_setSoulbound20Verified() public {
         vm.prank(participant);
         address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
 
         vm.prank(owner);
-        questFactory.setSoulbound20AddressState(soulbound20Address, state);
+        questFactory.setSoulbound20Verified(soulbound20Address);
 
-        assertEq(questFactory.soulbound20State(soulbound20Address), state);
+        assertEq(questFactory.soulbound20State(soulbound20Address), 2);
+    }
+
+    function test_setSoulbound20Removed() public {
+        vm.prank(participant);
+        address soulbound20Address = questFactory.createSoulbound20{value: SOULBOUND20_CREATE_FEE}("Test", "TST");
+
+        vm.prank(owner);
+        questFactory.setSoulbound20Removed(soulbound20Address);
+
+        assertEq(questFactory.soulbound20State(soulbound20Address), 3);
     }
 
     function test_SetSoulbound20CreateFee() public {

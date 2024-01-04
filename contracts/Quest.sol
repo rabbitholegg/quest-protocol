@@ -63,7 +63,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
-        // validate that questType is set in a mapping
+        if (!questType_.eq("erc20") && !questType_.eq("erc20Points")) revert InvalidQuestType();
+
 
         // Process input parameters
         rewardToken = rewardTokenAddress_;

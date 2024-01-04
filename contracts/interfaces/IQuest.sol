@@ -25,6 +25,7 @@ interface IQuest {
     error AddressAlreadyMinted();
     error QuestEnded();
     error WithdrawNotAvailableForPoints();
+    error InvalidQuestType();
 
     function initialize(
         address rewardTokenAddress_,

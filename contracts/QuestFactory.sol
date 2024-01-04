@@ -160,31 +160,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         return soulboundAddress;
     }
 
-    // external state meaning:
-    // 0 -> not set
-    // 1 -> set but not verified
-    // 2 -> verified
-    // 3 -> removed
-    // setsoulbound20Verified
-    // setSoulbound20Removed
+    function setSoulbound20Verified(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 2);
+    }
 
-    function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
-        if(soulbound20Address_ == address(0)) revert ZeroAddressNotAllowed();
-
-        soulbound2Os[soulbound20Address_].state = state_;
-        emit Soulbound20AddressStateSet(soulbound20Address_, state_);
+    function setSoulbound20Removed(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 3);
     }
 
     function setSoulbound20CreateFee(uint256 soulbound20CreateFee_) external onlyOwner {
         soulbound20CreateFee = soulbound20CreateFee_;
-    }
-
-    function soulbound20Creator(address soulbound20Address_) external view returns (address){
-        return soulbound2Os[soulbound20Address_].creator;
-    }
-
-    function soulbound20State(address soulbound20Address_) external view returns (uint256){
-        return soulbound2Os[soulbound20Address_].state;
     }
 
     /// @dev Create an erc20 points quest and start it at the same time.
@@ -559,6 +544,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
+    function soulbound20Creator(address soulbound20Address_) external view returns (address){
+        return soulbound2Os[soulbound20Address_].creator;
+    }
+
+    function soulbound20State(address soulbound20Address_) external view returns (uint256){
+        return soulbound2Os[soulbound20Address_].state;
+    }
+
     /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
     /// @dev return status of whether an address has claimed a quest
     /// @param questId_ The id of the quest
@@ -641,6 +634,16 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
+
+    /// @dev Internal function to set the state of a soulbound20 address
+    /// @param soulbound20Address_ The address of the soulbound20
+    /// @param state_ The state to set
+    function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) internal {
+        if(soulbound20Address_ == address(0)) revert ZeroAddressNotAllowed();
+
+        soulbound2Os[soulbound20Address_].state = state_;
+        emit Soulbound20AddressStateSet(soulbound20Address_, state_);
+    }
 
     /// @dev Internal function to create an erc1155 quest
     /// @param data_ The erc20 quest data struct
