@@ -194,7 +194,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     ) external returns (address) {
         if (soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
         if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
-        // make sure reward is not removed state (3)
+        if (soulbound2Os[rewardTokenAddress_].state == 3) revert Soulbound20Removed();
 
         return createERC20QuestInternal(
             ERC20QuestData(
@@ -454,12 +454,19 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (quest.addressMinted[claimer_]) revert AddressAlreadyMinted();
         if (numberMintedPlusOne_ > quest.totalParticipants) revert OverMaxAllowedToMint();
 
+        (bool isNewQuest, ) = quest.questAddress.call(abi.encodeWithSelector(bytes4(keccak256("questType()"))));
+        bool claimSuccess;
+
         quest.addressMinted[claimer_] = true;
         quest.numberMinted = numberMintedPlusOne_;
-        (bool success_, ) = quest.questAddress.call(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
-        if (!success_) revert ClaimFailed();
+        if(isNewQuest){
+            (claimSuccess, ) = quest.questAddress.call(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        }else{
+            (claimSuccess, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        }
+        if (!claimSuccess) revert ClaimFailed();
 
-        processMintFee(ref_, quest.questCreator, questId_);
+        if (isNewQuest) processMintFee(ref_, quest.questCreator, questId_);
 
         emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
@@ -471,6 +478,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
         if(ref_ != address(0)){
             emit QuestClaimedReferred(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId, ref_, 3333, mintFee);
+            if (!isNewQuest) emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
 
@@ -625,6 +633,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param signature_ The signature of the hash
     function recoverSigner(bytes32 hash_, bytes memory signature_) public view returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
+    }
+
+    function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external {
+        Quest storage quest = quests[questId_];
+        if(msg.sender != quest.questAddress) revert QuestAddressMismatch();
+
+        emit MintFeePaid(questId_, protocolFeeRecipient_, protocolPayout_, mintFeeRecipient_, mintPayout, address(0), 0);
     }
 
     function getQuestName(string calldata questId_) external view returns (string memory) {
