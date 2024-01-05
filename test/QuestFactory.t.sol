@@ -404,25 +404,25 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 8);
+        assertEq(entries.length, 9);
 
         bytes32 questAddressBytes = bytes32(uint256(uint160(questAddress)));
-        // assert indexed log data for entries[5]
-        assertEq(entries[5].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[5].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[5].topics[2], questAddressBytes);
-
-        // assert non-indexed log data for entries[5]
-        (string memory jsonLog) = abi.decode(entries[5].data, (string));
-        assertEq(jsonLog, json);
-
         // assert indexed log data for entries[6]
-        assertEq(entries[6].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[6].topics[0], keccak256("QuestClaimedData(address,address,string)"));
         assertEq(entries[6].topics[1], bytes32(uint256(uint160(participant))));
         assertEq(entries[6].topics[2], questAddressBytes);
 
         // assert non-indexed log data for entries[6]
-        (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[6].data, (string, address, uint256));
+        (string memory jsonLog) = abi.decode(entries[6].data, (string));
+        assertEq(jsonLog, json);
+
+        // assert indexed log data for entries[7]
+        assertEq(entries[7].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[7].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[7].topics[2], questAddressBytes);
+
+        // assert non-indexed log data for entries[7]
+        (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[7].data, (string, address, uint256));
         assertEq(questIdLog, string("550e8400-e29b-41d4-a716-446655440000"));
         assertEq(rewardToken, address(sampleERC20));
         assertEq(rewardAmountInWei, REWARD_AMOUNT);
@@ -494,17 +494,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 8);
+        assertEq(entries.length, 9);
 
-        assertEq(entries[4].topics[0], keccak256("MintFeePaid(string,address,uint256,address,uint256,address,uint256)"));
+        assertEq(entries[5].topics[0], keccak256("MintFeePaid(string,address,uint256,address,uint256,address,uint256)"));
 
         // assert indexed log data
-        assertEq(entries[6].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
-        assertEq(entries[6].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[6].topics[2], bytes32(uint256(uint160(questAddress))));
+        assertEq(entries[7].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
+        assertEq(entries[7].topics[1], bytes32(uint256(uint160(participant))));
+        assertEq(entries[7].topics[2], bytes32(uint256(uint160(questAddress))));
 
         // assert non-indexed log data
-        (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[6].data, (string, address, uint256));
+        (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[7].data, (string, address, uint256));
         assertEq(questId, string("questId"));
         assertEq(rewardToken, address(sampleERC20));
         assertEq(rewardAmountInWei, REWARD_AMOUNT);

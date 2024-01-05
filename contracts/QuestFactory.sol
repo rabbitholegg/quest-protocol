@@ -529,6 +529,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @notice the quest fee should be in Basis Point units
     /// @param questFee_ The quest fee value
     function setQuestFee(uint16 questFee_) external onlyOwner {
+        // Note this is assumed as 20% in the quest contract, be careful changing.
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
     }

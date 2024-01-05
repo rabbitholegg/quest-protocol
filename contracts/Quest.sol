@@ -196,6 +196,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param sender_ The address to send the rewards to
     /// @param ref_ The address of the referrer
     function _transferRewards(address sender_, address ref_) internal {
+        // this assumes static questfee of 20%
         uint256 protocolSplit = rewardAmountInWei * 10 / 100;
         if (ref_ != address(0)) protocolSplit = rewardAmountInWei * 5 / 100;
 
@@ -210,6 +211,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
             rewardToken.safeTransfer(protocolFeeRecipient, protocolSplit);
             if (ref_ != address(0)) rewardToken.safeTransfer(ref_, protocolSplit);
         }
+
+        emit ProtocolRewardsDistributed(questId, rewardToken, sender_, rewardAmountInWei, protocolFeeRecipient, protocolSplit, owner(), rewardAmountInWei * 10 / 100, ref_, protocolSplit);
     }
 
     /*//////////////////////////////////////////////////////////////

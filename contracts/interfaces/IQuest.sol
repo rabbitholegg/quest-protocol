@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 interface IQuest {
     event Queued(uint256 timestamp);
     event JsonSpecCIDSet(string cid);
-    event ProtocolFeeDistributed(string questId, address rewardToken, address protocolOwner, uint256 feeAmountToProtocolOwner, address questOwner, uint256 feeAmountToQuestOwner);
+    event ProtocolRewardsDistributed(string indexed questId, address rewardToken, address claimer, uint256 claimerSplit, address protocol, uint256 protocolSplit, address questOwner, uint256 questOwnerSplit, address referral, uint256 referralSplit);
 
     error AlreadyClaimed();
     error AlreadyWithdrawn();
