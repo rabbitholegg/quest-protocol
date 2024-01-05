@@ -162,7 +162,6 @@ interface IQuestFactory {
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
-    function getMintFeeRecipient(address address_) external view returns (address);
     function getNumberMinted(string memory questId_) external view returns (uint256);
     function questData(string memory questId_) external view returns (QuestData memory);
     function questInfo(string memory questId_) external view returns (address, uint256, uint256);
