@@ -336,7 +336,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
 
-        if(tx.origin != msg.sender && tx.origin != quest_.questAddress) revert txOriginMismatch();
+        if(tx.origin != msg.sender) revert txOriginMismatch();
 
         string memory jsonData_ = this.buildJsonString(txHash_, txHashChainId_, quest_.actionType, quest_.questName);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
@@ -360,7 +360,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
         Quest storage quest = quests[questId_];
 
-        if(tx.origin != msg.sender && tx.origin != address(this) && tx.origin != quest.questAddress) revert txOriginMismatch();
+        if(tx.origin != msg.sender && msg.sender != quest.questAddress && msg.sender != address(this)) revert txOriginMismatch();
 
         uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
         address rewardToken_ = IQuestOwnable(quest.questAddress).rewardToken();

@@ -11,7 +11,7 @@ abstract contract QuestClaimable {
     function getQuestId() public view virtual returns (string memory);
 
     function claim() external payable {
-        if(tx.origin != msg.sender && tx.origin != address(this)) revert txOriginMismatch();
+        if(tx.origin != msg.sender) revert txOriginMismatch();
 
         address ref_;
         IQuestFactory questFactoryContract = getQuestFactoryContract();
