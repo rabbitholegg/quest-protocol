@@ -9,7 +9,6 @@ import {QuestFactory} from "contracts/QuestFactory.sol";
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
@@ -33,7 +32,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
-    uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 NFT_QUEST_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
@@ -66,7 +64,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             payable(address(new Quest1155())),
             owner,
             defaultReferralFeeRecipient,
-            address(new SablierMock()),
             NFT_QUEST_FEE,
             REFERRAL_FEE,
             MINT_FEE

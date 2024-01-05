@@ -29,7 +29,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
-    uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 NFT_QUEST_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
@@ -62,7 +61,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             payable(address(new Quest1155())),
             owner,
             defaultReferralFeeRecipient,
-            address(0),
             NFT_QUEST_FEE,
             REFERRAL_FEE,
             MINT_FEE

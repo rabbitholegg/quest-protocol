@@ -88,7 +88,6 @@ interface IQuestFactory {
         string questId;
         string actionType;
         string questName;
-        uint40 durationTotal;
         string questType;
     }
 
@@ -160,7 +159,6 @@ interface IQuestFactory {
         uint256 rewardAmountOrTokenId
     );
     event ReferralFeeSet(uint16 percent);
-    event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
@@ -200,7 +198,6 @@ interface IQuestFactory {
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
-    function setSablierV2LockupLinearAddress(address sablierV2LockupLinearAddress_) external;
 
     // Callbacks
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external;
