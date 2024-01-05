@@ -33,7 +33,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public tokenId;
-    uint256 public questFee;
     string public questId;
 
     /*//////////////////////////////////////////////////////////////
@@ -120,25 +119,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         emit Queued(block.timestamp);
     }
 
-    function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
-        _transferRewards(claimer_, 1);
-        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
-    }
-
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
-    /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_)
-        external
-        virtual
-        nonReentrant
-        whenNotPaused
-        whenNotEnded
-        onlyStarted
-        onlyQueued
-        onlyQuestFactory
-    {
-        _transferRewards(account_, 1);
-        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
+    /// @param claimer_ The account to transfer rewards to
+    function claimFromFactory(address claimer_, address) external payable whenNotEnded onlyQuestFactory {
+        _transferRewards(claimer_, 1);
     }
 
     /// @notice Unpauses the Quest
@@ -147,31 +131,18 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
         _unpause();
     }
 
-    /// @dev Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
+    /// @dev Function that transfers all remaning 1155 tokens in the contract to the owner (creator)
     /// @notice This function can only be called after the quest end time.
     function withdrawRemainingTokens() external onlyEnded {
         if (hasWithdrawn) revert AlreadyWithdrawn();
         hasWithdrawn = true;
 
-        uint ownerPayout = (_claimFee() * _redeemedTokens()) / 3;
-        uint protocolPayout = address(this).balance - ownerPayout;
-
-        owner().safeTransferETH(ownerPayout);
-        protocolFeeRecipient.safeTransferETH(protocolPayout);
         _transferRewards(owner(), IERC1155(rewardToken).balanceOf(address(this), tokenId));
-
-        questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
 
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
-    /// @notice Function that gets the maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
-    function maxProtocolReward() external view returns (uint256) {
-        return (totalParticipants);
-    }
-
     function getQuestFactoryContract() public view override returns (IQuestFactory){
         return questFactoryContract;
     }

@@ -23,6 +23,12 @@ contract Soulbound20Test is Test {
         soulbound.grantRoles(minter, 1);
     }
 
+    function test_initialize() public {
+        assertEq(soulbound.owner(), owner);
+        assertEq(soulbound.name(), "Soulbound Token");
+        assertEq(soulbound.symbol(), "SBT");
+    }
+
     function test_mint() public {
         vm.prank(minter);
         soulbound.mint(user1, 100);

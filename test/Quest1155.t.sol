@@ -159,16 +159,16 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            SINGLECLAIM
+                            claimFromFactory
     //////////////////////////////////////////////////////////////*/
 
-    function test_singleClaim() public {
+    function test_claimFromFactory() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
 
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
 
         assertEq(
             SampleERC1155(sampleERC1155).balanceOf(participant, TOKEN_ID),
@@ -177,38 +177,13 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         );
     }
 
-    // todo add fuzz test
-
-    function test_RevertIf_singleClaim_NotQuestFactory() public {
+    function test_RevertIf_claimFromFactory_NotQuestFactory() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
         vm.prank(questFactoryMock);
         quest.queue();
 
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
-        quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_NotStarted() public {
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
-        vm.prank(questFactoryMock);
-        quest.queue();
-
-        vm.warp(START_TIME - 1);
-        vm.prank(questFactoryMock);
-        vm.expectRevert(abi.encodeWithSelector(NotStarted.selector));
-        quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_whenNotPaused() public {
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
-        vm.prank(questFactoryMock);
-        quest.queue();
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        vm.warp(START_TIME);
-        vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
-        vm.stopPrank();
+        quest.claimFromFactory(participant, address(0));
     }
 
     // /*//////////////////////////////////////////////////////////////
@@ -216,38 +191,16 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     // //////////////////////////////////////////////////////////////*/
 
     function test_withdrawRemainingTokens() public {
-        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
-        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
-
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
 
-        // simulate ETH from TOTAL_PARTICIPANTS claims
-        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
-
         vm.warp(END_TIME + 1);
         vm.prank(protocolFeeRecipient);
-
         quest.withdrawRemainingTokens();
 
-        assertEq(
-            owner.balance,
-            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
-            "owner should have received (claimFee * redeemedTokens) / 3 eth"
-        );
-        assertEq(
-            protocolFeeRecipient.balance,
-            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
-            "protocolFeeRecipient should have received remaining ETH"
-        );
-        assertEq(
-            SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID),
-            MINT_AMOUNT,
-            "owner should have received remaining ERC1155"
-        );
+        // no tokens withdrawn
+        assertEq(SampleERC1155(sampleERC1155).balanceOf(owner, TOKEN_ID), MINT_AMOUNT);
     }
-
-    // todo add fuzz test
 
     function test_RevertIf_withdrawRemainingToken_NotEnded() public {
         vm.deal(address(quest), LARGE_ETH_AMOUNT);
@@ -275,16 +228,5 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
 
         vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
         quest.withdrawRemainingTokens();
-    }
-
-    // /*//////////////////////////////////////////////////////////////
-    //                         EXTERNAL VIEW
-    // //////////////////////////////////////////////////////////////*/
-
-    function test_maxProtocolReward() public {
-        assertEq(
-            quest.maxProtocolReward(), TOTAL_PARTICIPANTS,
-            "maxProtocolReward should be correct"
-        );
     }
 }

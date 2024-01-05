@@ -7,6 +7,7 @@ import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
+import {Soulbound20} from "contracts/Soulbound20.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Errors} from "./helpers/Errors.sol";
@@ -27,12 +28,14 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
     Quest quest;
+    address user = makeAddr("user");
     address admin = makeAddr(("admin"));
     address owner = makeAddr(("owner"));
     address participant = makeAddr(("participant"));
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
+    string constant QUEST_TYPE = "erc20";
 
     function setUp() public {
         defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
@@ -56,7 +59,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            QUEST_TYPE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -75,6 +79,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         assertEq(QUEST_ID, quest.questId(), "questId not set");
         assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
+        assertEq(QUEST_TYPE, quest.questType(), "questType not set");
         assertEq(questFactoryMock, address(quest.questFactoryContract()), "questFactory not set");
         assertTrue(quest.queued(), "queued should be true");
         assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
@@ -94,7 +99,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            QUEST_TYPE
         );
     }
 
@@ -111,7 +117,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            QUEST_TYPE
         );
     }
 
@@ -146,13 +153,13 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            SINGLECLAIM
+                            claimFromFactory
     //////////////////////////////////////////////////////////////*/
-    function test_singleClaim() public {
+    function test_claimFromFactory() public {
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         vm.warp(START_TIME);
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
             startingBalance + REWARD_AMOUNT_IN_WEI,
@@ -160,7 +167,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_fuzz_singleClaim(
+    function test_fuzz_claimFromFactory(
         uint256 rewardAmountInWei,
         uint256 startTime,
         uint256 endTime,
@@ -185,7 +192,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Get the participants starting balance
         uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         // Create new quest with fuzzed values
-        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_singleClaim"))));
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "test_fuzz_claimFromFactory"))));
         quest = Quest(questAddress);
 
         vm.prank(questFactoryMock);
@@ -197,7 +204,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             rewardAmountInWei,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            QUEST_TYPE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -205,7 +213,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // Claim single and check for correct event logging
         vm.warp(startTime);
         vm.prank(questFactoryMock);
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
         // Check that the participant received the correct amount of tokens
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(participant),
@@ -214,72 +222,75 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_singleClaim_stream() public {}
+    function test_claimFromFactory_erc20points() public {
+        address ref = makeAddr("ref");
+        address payable erc20PointsContract = payable(address(new Soulbound20()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        Soulbound20(erc20PointsContract).initialize(owner, "ERC20Points", "ERC20Points");
+        uint256 mintRole = Soulbound20(erc20PointsContract).MINT_ROLE();
 
-    function test_RevertIf_singleClaim_NotQuestFactory() public {
+        questFactoryMock = address(new QuestFactoryMock());
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
+        vm.prank(owner);
+        quest.initialize(
+            erc20PointsContract,
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            "erc20Points"
+        );
+
+        vm.prank(owner);
+        Soulbound20(erc20PointsContract).grantRoles(questAddress, mintRole);
+        vm.warp(START_TIME);
+        vm.prank(owner);
+        quest.claimFromFactory(participant, ref);
+
+        // REWARD_AMOUNT_IN_WEI to claimer
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(participant), REWARD_AMOUNT_IN_WEI);
+
+        // REWARD_AMOUNT_IN_WEI * 10% to creator
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(owner), REWARD_AMOUNT_IN_WEI * 10 / 100);
+
+        // REWARD_AMOUNT_IN_WEI * 5% to community treasury
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(protocolFeeRecipient), REWARD_AMOUNT_IN_WEI * 5 / 100);
+
+        // REWARD_AMOUNT_IN_WEI * 5% to referrer
+        assertEq(Soulbound20(erc20PointsContract).balanceOf(ref), REWARD_AMOUNT_IN_WEI * 5 / 100);
+    }
+
+    function test_RevertIf_claimFromFactory_NotQuestFactory() public {
         vm.warp(START_TIME);
         vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
-        quest.singleClaim(participant);
+        quest.claimFromFactory(participant, address(0));
     }
 
-    function test_RevertIf_singleClaim_ClaimWindowNotStarted() public {
-        vm.warp(START_TIME - 1);
+    function test_RevertIf_claimFromFactory_QuestEnded() public {
+        vm.warp(END_TIME + 1);
         vm.prank(questFactoryMock);
-        vm.expectRevert(abi.encodeWithSelector(ClaimWindowNotStarted.selector));
-        quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_whenNotPaused() public {
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        vm.warp(START_TIME);
-        vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
-        vm.stopPrank();
+        vm.expectRevert(abi.encodeWithSelector(QuestEnded.selector));
+        quest.claimFromFactory(participant, address(0));
     }
 
     /*//////////////////////////////////////////////////////////////
                       WITHDRAWREMAININGTOKENS
     //////////////////////////////////////////////////////////////*/
 
-    function test_withdrawRemainingTokens() public {
-        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
-        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+    function test_withdrawRemainingTokensQ() public {
+        uint256 startingBalance = SampleERC20(rewardTokenAddress).balanceOf(owner);
+        uint256 defaultTotalRewardsPlusFees = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
 
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
-
-        // simulate ETH from TOTAL_PARTICIPANTS claims
-        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
-
-        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
-        uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
-        uint256 questBalanceMinusFees = questBalance - totalFees;
-
         vm.warp(END_TIME);
         quest.withdrawRemainingTokens();
 
-        assertEq(
-            owner.balance,
-            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
-            "owner should have received (claimFee * redeemedTokens) / 3 eth"
-        );
-        assertEq(
-            protocolFeeRecipient.balance,
-            CLAIM_FEE * TOTAL_PARTICIPANTS * 1 / 3,
-            "owner should have received remaining ETH"
-        );
-
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(protocolFeeRecipient),
-            totalFees,
-            "protocolFeeRecipient should have received the remaining tokens"
-        );
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(owner),
-            questBalanceMinusFees,
-            "quest owner should have 0 tokens"
-        );
+        // no tokens withdrawn
+        assertEq(SampleERC20(rewardTokenAddress).balanceOf(owner), defaultTotalRewardsPlusFees + startingBalance);
     }
 
     function test_RevertIf_withdrawRemainingToken_NoWithdrawDuringClaim() public {

@@ -53,8 +53,6 @@ interface IQuest1155 {
     function endTime() external view returns (uint256);
     function hasWithdrawn() external view returns (bool);
 
-    function maxProtocolReward() external view returns (uint256);
-    function questFee() external view returns (uint256);
     function queued() external view returns (bool);
     function startTime() external view returns (uint256);
     function tokenId() external view returns (uint256);
@@ -63,7 +61,6 @@ interface IQuest1155 {
     // Update Functions
     function pause() external;
     function queue() external;
-    function singleClaim(address account_) external;
     function unPause() external;
     function withdrawRemainingTokens() external;
     }

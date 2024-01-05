@@ -55,7 +55,8 @@ contract QuestFactoryDeploy is Script {
             address(new Quest()),               // erc20QuestAddress_
             payable(address(new Quest1155())),  // erc1155QuestAddress_
             owner,                              // ownerAddress_
-            500000000000000,                    // nftQuestFee_,
+            address(0),                         // soulbound20Address_
+            500000000000000,                    // soulbound20CreateFee_,
             5000,                               // referralFee_,
             75000000000000                      // mintFee_
         );

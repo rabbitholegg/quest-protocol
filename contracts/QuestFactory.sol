@@ -17,11 +17,14 @@ import {LibZip} from "solady/utils/LibZip.sol";
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
+import {ISoulbound20} from "./interfaces/ISoulbound20.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
 contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFactory {
+    uint public constant SET_SOULBOUND_ADDRESS_STATE_ROLE = 1;
+
     /*//////////////////////////////////////////////////////////////
                                  USING
     //////////////////////////////////////////////////////////////*/
@@ -39,21 +42,22 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public rabbitHoleReceiptContract; // not used
-    address public rabbitHoleTicketsContract; // not used
+    address public soulbound20Address;
+    address public rabbitHoleTicketsContract;                   // not used
     mapping(address => bool) public rewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
-    address public defaultMintFeeRecipient;
+    address public defaultMintFeeRecipient;                     // not used
     uint256 private locked;
-    address public defaultReferralFeeRecipient; // not used
-    uint256 public nftQuestFee; // not used
-    address public questNFTAddress; // not used
-    mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public nftQuestFeeList; // not used
+    address public defaultReferralFeeRecipient;                 // not used
+    uint256 public soulbound20CreateFee;
+    address public questNFTAddress;                             // not used
+    mapping(address => address[]) public creatorSoulbound20Addresses;
+    mapping(address => NftQuestFees) public nftQuestFeeList;    // not used
     uint16 public referralFee;
-    address public sablierV2LockupLinearAddress; // not used
-    mapping(address => address) public mintFeeRecipientList; // not used
+    address public sablierV2LockupLinearAddress;                // not used
+    mapping(address => address) public mintFeeRecipientList;    // not used
+    mapping(address => Soulbound20) public soulbound2Os;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -69,7 +73,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        uint256 nftQuestFee_,
+        address soulbound20Address_,
+        uint256 soulbound20CreateFee_,
         uint16 referralFee_,
         uint256 mintFee_
     ) external initializer {
@@ -80,7 +85,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        nftQuestFee = nftQuestFee_;
+        soulbound20Address = soulbound20Address_;
+        soulbound20CreateFee = soulbound20CreateFee_;
         referralFee = referralFee_;
         mintFee = mintFee_;
     }
@@ -132,6 +138,77 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                  CREATE
     //////////////////////////////////////////////////////////////*/
+
+    function createSoulbound20(
+        string memory name_,
+        string memory symbol_
+    ) external payable returns (address) {
+        if(msg.value < soulbound20CreateFee) revert InvalidSoulbound20CreateFeeFee();
+
+        address soulboundAddress = address(soulbound20Address).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, block.chainid, block.timestamp)));
+        ISoulbound20 soulbound20 = ISoulbound20(soulboundAddress);
+        soulbound20.initialize(address(this), name_, symbol_);
+
+        creatorSoulbound20Addresses[msg.sender].push(soulboundAddress);
+        soulbound2Os[soulboundAddress].state = 1;
+        soulbound2Os[soulboundAddress].creator = msg.sender;
+        protocolFeeRecipient.safeTransferETH(soulbound20CreateFee);
+
+        emit Soulbound20Created(msg.sender, soulboundAddress, name_, symbol_);
+        return soulboundAddress;
+    }
+
+    function setSoulbound20Verified(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 2);
+    }
+
+    function setSoulbound20Removed(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 3);
+    }
+
+    function setSoulbound20CreateFee(uint256 soulbound20CreateFee_) external onlyOwner {
+        soulbound20CreateFee = soulbound20CreateFee_;
+    }
+
+    /// @dev Create an erc20 points quest and start it at the same time.
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
+    /// @return address the quest contract address
+    function createERC20PointsQuest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external returns (address) {
+        if (soulbound2Os[rewardTokenAddress_].creator != msg.sender) revert NotSoulbound20Creator();
+        if (quests[questId_].questAddress != address(0)) revert QuestIdUsed();
+        if (soulbound2Os[rewardTokenAddress_].state == 3) revert Soulbound20Removed();
+
+        return createERC20QuestInternal(
+            ERC20QuestData(
+                txHashChainId_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                0, // totalParticipants is always zero for erc20Points
+                rewardAmount_,
+                questId_,
+                actionType_,
+                questName_,
+                "erc20Points"
+            )
+        );
+    }
 
     /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param txHashChainId_ The chain id of the chain the txHash is on
@@ -371,10 +448,19 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (quest.addressMinted[claimer_]) revert AddressAlreadyMinted();
         if (numberMintedPlusOne_ > quest.totalParticipants) revert OverMaxAllowedToMint();
 
+        (bool isNewQuest, ) = quest.questAddress.call(abi.encodeWithSelector(bytes4(keccak256("questType()"))));
+        bool claimSuccess;
+
         quest.addressMinted[claimer_] = true;
         quest.numberMinted = numberMintedPlusOne_;
-        (bool success_, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
-        if (!success_) revert ClaimFailed();
+        if(isNewQuest){
+            (claimSuccess, ) = quest.questAddress.call(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        }else{
+            (claimSuccess, ) = quest.questAddress.call{value: msg.value}(abi.encodeWithSignature("claimFromFactory(address,address)", claimer_, ref_));
+        }
+        if (!claimSuccess) revert ClaimFailed();
+
+        if (isNewQuest) processMintFee(ref_, quest.questCreator, questId_);
 
         emit QuestClaimedData(claimer_, quest.questAddress, jsonData_);
         if (quest.questType.eq("erc1155")) {
@@ -386,7 +472,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         }
         if(ref_ != address(0)){
             emit QuestClaimedReferred(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId, ref_, 3333, mintFee);
-            emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
+            if (!isNewQuest) emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
 
@@ -398,6 +484,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param claimSignerAddress_ The address of the claim signer
     function setClaimSignerAddress(address claimSignerAddress_) external onlyOwner {
         claimSignerAddress = claimSignerAddress_;
+    }
+
+    /// @dev set the erc20QuestAddress
+    /// @param soulbound20Address_ The address of the erc20 quest
+    function setSoulbound20Address(address soulbound20Address_) external onlyOwner {
+        soulbound20Address = soulbound20Address_;
     }
 
     /// @dev set erc1155QuestAddress
@@ -431,6 +523,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @notice the quest fee should be in Basis Point units
     /// @param questFee_ The quest fee value
     function setQuestFee(uint16 questFee_) external onlyOwner {
+        // Note this is assumed as 20% in the quest contract, be careful changing.
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
     }
@@ -450,16 +543,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         rewardAllowlist[rewardAddress_] = allowed_;
     }
 
-    /// @dev set the mintFeeRecipient
-    /// @param mintFeeRecipient_ The address of the mint fee recipient
-    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external onlyOwner {
-        if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
-        defaultMintFeeRecipient = mintFeeRecipient_;
-    }
-
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
+
+    function soulbound20Creator(address soulbound20Address_) external view returns (address){
+        return soulbound2Os[soulbound20Address_].creator;
+    }
+
+    function soulbound20State(address soulbound20Address_) external view returns (uint256){
+        return soulbound2Os[soulbound20Address_].state;
+    }
 
     /// @notice This function name is a bit of a misnomer - gets whether an address has claimed a quest yet.
     /// @dev return status of whether an address has claimed a quest
@@ -551,104 +645,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev claim rewards for a quest with a referral address
-    /// @param claimData_ The claim data struct
-    function claim1155RewardsRef(ClaimData memory claimData_) private
-        nonReentrant
-        sufficientMintFee
-        claimChecks(claimData_)
-    {
-        Quest storage currentQuest = quests[claimData_.questId];
-        IQuest1155Ownable questContract_ = IQuest1155Ownable(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
+    /// @dev Internal function to set the state of a soulbound20 address
+    /// @param soulbound20Address_ The address of the soulbound20
+    /// @param state_ The state to set
+    function setSoulbound20AddressState(address soulbound20Address_, uint256 state_) internal {
+        if(soulbound20Address_ == address(0)) revert ZeroAddressNotAllowed();
 
-        currentQuest.addressMinted[claimData_.claimer] = true;
-        ++currentQuest.numberMinted;
-        questContract_.singleClaim(claimData_.claimer);
-
-        if (mintFee > 0) {
-            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
-            if (bytes(claimData_.extraData).length > 0){
-                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
-            }
-        }
-
-        emit QuestClaimedData(
-            claimData_.claimer,
-            currentQuest.questAddress,
-            claimData_.extraData
-        );
-
-        emit Quest1155Claimed(
-            claimData_.claimer, currentQuest.questAddress, claimData_.questId, questContract_.rewardToken(), questContract_.tokenId()
-        );
-
-        if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.tokenId(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
-                );
-        }
-    }
-
-    /// @dev claim rewards with a referral address
-    /// @param claimData_ The claim data struct
-    function claimRewardsRef(ClaimData memory claimData_) private
-        nonReentrant
-        sufficientMintFee
-        claimChecks(claimData_)
-    {
-        Quest storage currentQuest = quests[claimData_.questId];
-        IQuestOwnable questContract_ = IQuestOwnable(currentQuest.questAddress);
-        if (!questContract_.queued()) revert QuestNotQueued();
-        if (block.timestamp < questContract_.startTime()) revert QuestNotStarted();
-        if (block.timestamp > questContract_.endTime()) revert QuestEnded();
-
-        currentQuest.addressMinted[claimData_.claimer] = true;
-        ++currentQuest.numberMinted;
-        questContract_.singleClaim(claimData_.claimer);
-
-        if (mintFee > 0) {
-            string memory newJson = processMintFee(claimData_.ref, currentQuest.questCreator, claimData_.questId);
-            if (bytes(claimData_.extraData).length > 0){
-                claimData_.extraData = claimData_.extraData.slice(0, bytes(claimData_.extraData).length -1).concat(newJson);
-            }
-        }
-
-        emit QuestClaimedData(
-            claimData_.claimer,
-            currentQuest.questAddress,
-            claimData_.extraData
-        );
-
-        emit QuestClaimed(
-            claimData_.claimer,
-            currentQuest.questAddress,
-            claimData_.questId,
-            questContract_.rewardToken(),
-            questContract_.rewardAmountInWei()
-        );
-
-        if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.rewardAmountInWei(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
-            );
-        }
+        soulbound2Os[soulbound20Address_].state = state_;
+        emit Soulbound20AddressStateSet(soulbound20Address_, state_);
     }
 
     /// @dev Internal function to create an erc1155 quest
@@ -716,7 +720,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             msg.sender,
             address(newQuest),
             data_.questId,
-            currentQuest.questType,
+            data_.questType,
             data_.rewardTokenAddress,
             data_.endTime,
             data_.startTime,
@@ -732,45 +736,30 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             data_.rewardAmount,
             data_.questId,
             questFee,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            data_.questType
         );
 
-        transferTokensAndOwnership(newQuest, data_.rewardTokenAddress);
+        if(data_.questType.eq("erc20Points")){
+            ISoulbound20(data_.rewardTokenAddress).grantRoles(newQuest, ISoulbound20(data_.rewardTokenAddress).MINT_ROLE());
+        } else {
+            data_.rewardTokenAddress.safeTransferFrom(msg.sender, newQuest, IQuestOwnable(newQuest).totalTransferAmount());
+        }
+        IQuestOwnable(newQuest).transferOwnership(msg.sender);
         return newQuest;
     }
 
-    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
+    function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) internal {
         returnChange();
-        uint256 cachedMintFee = mintFee;
-        uint256 oneThirdMintfee = cachedMintFee / 3;
-        uint256 protocolPayout;
-        uint256 mintPayout;
-        uint256 referrerPayout;
+        uint256 oneThirdMintFee = mintFee / 3;
+        uint256 protocolSplit = oneThirdMintFee * 2;
+        if (ref_ != address(0)) protocolSplit = oneThirdMintFee;
 
-        if(ref_ == address(0)){
-            protocolPayout = oneThirdMintfee * 2;
-            mintPayout = oneThirdMintfee;
-        } else {
-            protocolPayout = oneThirdMintfee;
-            mintPayout = oneThirdMintfee;
-            referrerPayout = oneThirdMintfee;
-        }
+        protocolFeeRecipient.safeTransferETH(protocolSplit);
+        mintFeeRecipient_.safeTransferETH(oneThirdMintFee);
+        if(ref_ != address(0)) ref_.safeTransferETH(oneThirdMintFee);
 
-        protocolFeeRecipient.safeTransferETH(protocolPayout);
-        mintFeeRecipient_.safeTransferETH(mintPayout);
-        if(referrerPayout != 0) ref_.safeTransferETH(referrerPayout);
-
-        emit MintFeePaid(questId_, protocolFeeRecipient, protocolPayout, mintFeeRecipient_, mintPayout, ref_, referrerPayout);
-
-        return string(abi.encodePacked(
-            ', "claimFee": "', cachedMintFee.toString(),
-            '", "claimFeePayouts": [{"name": "protocolPayout", "address": "', protocolFeeRecipient.toHexString(),
-            '", "value": "', protocolPayout.toString(),
-            '"}, {"name": "mintPayout", "address": "', mintFeeRecipient_.toHexString(),
-            '", "value": "', mintPayout.toString(),
-            '"}, {"name": "referrerPayout", "address": "', ref_.toHexString(),
-            '", "value": "', referrerPayout.toString(), '"}]}'
-        ));
+        emit MintFeePaid(questId_, protocolFeeRecipient, protocolSplit, mintFeeRecipient_, oneThirdMintFee, ref_, oneThirdMintFee);
     }
 
     // Refund any excess payment
@@ -779,17 +768,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (change > 0) {
             msg.sender.safeTransferETH(change);
         }
-    }
-
-    /// @dev Transfer the total transfer amount to the quest contract
-    /// @dev Contract must be approved to transfer first
-    /// @param newQuest_ The address of the new quest
-    /// @param rewardTokenAddress_ The contract address of the reward token
-    function transferTokensAndOwnership(address newQuest_, address rewardTokenAddress_) internal {
-        address sender = msg.sender;
-        IQuestOwnable questContract = IQuestOwnable(newQuest_);
-        rewardTokenAddress_.safeTransferFrom(sender, newQuest_, questContract.totalTransferAmount());
-        questContract.transferOwnership(sender);
     }
 
     function buildJsonString(
