@@ -6,7 +6,7 @@ import {Quest} from "../contracts/Quest.sol";
 import {Quest1155} from "../contracts/Quest1155.sol";
 import {RabbitHoleTickets} from "../contracts/RabbitHoleTickets.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
-import {ProxyAdmin, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {ProxyAdmin, ITransparentUpgradeableProxy} from "openzeppelin-contracts/proxy/transparent/ProxyAdmin.sol";
 
 // # To Upgrade RabbitHoleTickets.sol run this command below
 // ! important: make sure storage layouts are compatible first:

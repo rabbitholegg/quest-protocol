@@ -6,7 +6,6 @@ import {TestUtils} from "./helpers/TestUtils.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {Quest} from "contracts/Quest.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
@@ -26,8 +25,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint16 QUEST_FEE = 2000; // 20%
     uint256 CLAIM_FEE = 999;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
-    uint40 DURATION_TOTAL = 0;
-    address sablierMock;
     address questFactoryMock;
     Quest quest;
     address admin = makeAddr(("admin"));
@@ -47,7 +44,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                 admin
             )
         );
-        sablierMock = address(new SablierMock());
         questFactoryMock = address(new QuestFactoryMock());
         address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
         quest = Quest(questAddress);
@@ -60,9 +56,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            protocolFeeRecipient
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -81,8 +75,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         assertEq(QUEST_ID, quest.questId(), "questId not set");
         assertEq(QUEST_FEE, quest.questFee(), "questFee not set");
         assertEq(protocolFeeRecipient, quest.protocolFeeRecipient(), "protocolFeeRecipient not set");
-        assertEq(DURATION_TOTAL, quest.durationTotal(), "durationTotal not set");
-        assertEq(sablierMock, address(quest.sablierV2LockupLinearContract()), "sablier not set");
         assertEq(questFactoryMock, address(quest.questFactoryContract()), "questFactory not set");
         assertTrue(quest.queued(), "queued should be true");
         assertFalse(quest.hasWithdrawn(), "hasWithdrawn should be false");
@@ -102,9 +94,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            protocolFeeRecipient
         );
     }
 
@@ -121,9 +111,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            protocolFeeRecipient
         );
     }
 
@@ -209,9 +197,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             rewardAmountInWei,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            DURATION_TOTAL,
-            sablierMock
+            protocolFeeRecipient
         );
         // Transfer all tokens to quest
         vm.prank(admin);
