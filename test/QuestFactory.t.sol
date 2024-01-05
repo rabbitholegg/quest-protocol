@@ -37,7 +37,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
-    address defaultReferralFeeRecipient = makeAddr("defaultReferralFeeRecipient");
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -63,7 +62,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             address(new Quest()),
             payable(address(new Quest1155())),
             owner,
-            defaultReferralFeeRecipient,
             NFT_QUEST_FEE,
             REFERRAL_FEE,
             MINT_FEE
@@ -76,7 +74,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_initialize() public {
         assertEq(protocolFeeRecipient, questFactory.protocolFeeRecipient(), "protocolFeeRecipient not set");
         assertEq(owner, questFactory.owner(), "owner should be set");
-        assertEq(defaultReferralFeeRecipient, questFactory.defaultReferralFeeRecipient(), "defaultReferralFeeRecipient should be set");
     }
 
     /*//////////////////////////////////////////////////////////////

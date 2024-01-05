@@ -21,8 +21,6 @@ import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
 /// @title QuestFactory
 /// @author RabbitHole.gg
 /// @dev This contract is used to create quests and handle claims
-// solhint-disable-next-line max-states-count
-/// @custom:oz-upgrades-from QuestFactoryV0
 contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFactory {
     /*//////////////////////////////////////////////////////////////
                                  USING
@@ -48,14 +46,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     uint256 public mintFee;
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    address public defaultReferralFeeRecipient; // not used, todo remove references
+    address public defaultReferralFeeRecipient; // not used
     uint256 public nftQuestFee; // not used
     address public questNFTAddress; // not used
     mapping(address => address[]) public ownerCollections;
     mapping(address => NftQuestFees) public nftQuestFeeList; // not used
     uint16 public referralFee;
     address public sablierV2LockupLinearAddress; // not used
-    mapping(address => address) public mintFeeRecipientList; // not used, todo remove references
+    mapping(address => address) public mintFeeRecipientList; // not used
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -71,7 +69,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        address defaultReferralFeeRecipientAddress_,
         uint256 nftQuestFee_,
         uint16 referralFee_,
         uint256 mintFee_
@@ -83,7 +80,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        defaultReferralFeeRecipient = defaultReferralFeeRecipientAddress_;
         nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
         mintFee = mintFee_;
@@ -466,12 +462,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param mintFeeRecipient_ The address of the mint fee recipient
     function setMintFeeRecipientForAddress(address address_, address mintFeeRecipient_) external onlyOwner {
         mintFeeRecipientList[address_] = mintFeeRecipient_;
-    }
-
-    /// @dev set the default referral fee recipient
-    /// @param defaultReferralFeeRecipient_ The address of the default referral fee recipient
-    function setDefaultReferralFeeRecipient(address defaultReferralFeeRecipient_) external onlyOwner {
-        defaultReferralFeeRecipient = defaultReferralFeeRecipient_;
     }
 
     /*//////////////////////////////////////////////////////////////
