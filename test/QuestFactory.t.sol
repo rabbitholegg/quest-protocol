@@ -236,7 +236,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant, currentQuestAddress);
+        vm.startPrank(participant, participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // 1155 reward
@@ -280,7 +280,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked, currentQuestAddress);
+        vm.startPrank(participantMocked, participantMocked);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
@@ -321,7 +321,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
@@ -381,7 +381,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant, currentQuestAddress);
+        vm.startPrank(participant, participant);
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // 1155 reward
@@ -414,7 +414,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
