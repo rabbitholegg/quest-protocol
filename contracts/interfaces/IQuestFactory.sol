@@ -97,7 +97,6 @@ interface IQuestFactory {
         string questId;
         string actionType;
         string questName;
-        uint40 durationTotal;
         string questType;
     }
 
@@ -169,7 +168,6 @@ interface IQuestFactory {
         uint256 rewardAmountOrTokenId
     );
     event ReferralFeeSet(uint16 percent);
-    event SablierV2LockupLinearAddressSet(address sablierV2LockupLinearAddress);
     event Soulbound20Created(address indexed creator, address indexed soulboundAddress, string name, string symbol);
     event Soulbound20AddressStateSet(address indexed soulbound20Address, uint256 state);
 

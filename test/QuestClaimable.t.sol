@@ -28,7 +28,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
-    uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 SOULBOUND20_CREATE_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
@@ -97,7 +96,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encodePacked(txHash, r, s, referrer); // this trims all zeros
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
         require(success, "erc20 questAddress.call failed");
@@ -164,7 +163,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encodePacked(txHash, r, s);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
         require(success, "erc20 questAddress.call failed");
@@ -230,7 +229,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encodePacked(txHash, r, s, referrer);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
         require(success, "1155 questAddress.call failed");
@@ -271,7 +270,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encodePacked(txHash, r, s);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
-        vm.startPrank(participant, questAddress);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
         require(success, "1155 questAddress.call failed");

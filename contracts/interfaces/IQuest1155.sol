@@ -9,7 +9,6 @@ interface IQuest1155 {
         uint256 totalParticipants;
         uint256 numberMinted;
         string questType;
-        uint40 durationTotal;
         address questCreator;
         address mintFeeRecipient;
     }

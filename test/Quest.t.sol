@@ -26,7 +26,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint16 QUEST_FEE = 2000; // 20%
     uint256 CLAIM_FEE = 999;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
-    uint40 DURATION_TOTAL = 0;
     address questFactoryMock;
     Quest quest;
     address user = makeAddr("user");

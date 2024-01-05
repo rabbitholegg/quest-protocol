@@ -13,7 +13,6 @@ import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {LibString} from "solady/utils/LibString.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
-import {IERC20} from "sablier/types/Tokens.sol";
 import {ISoulbound20} from "./interfaces/ISoulbound20.sol";
 
 /// @title Quest
