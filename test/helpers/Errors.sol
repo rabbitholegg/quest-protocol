@@ -17,6 +17,7 @@ contract Errors {
     error AuthOwnerRecipient();
     error Unauthorized();
     error EnforcedPause();
+    error txOriginMismatch();
 
     // Quest1155
     error InsufficientTokenBalance();
