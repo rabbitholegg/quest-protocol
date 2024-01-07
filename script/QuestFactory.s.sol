@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {Script} from "forge-std/Script.sol";
 import {Quest} from "../contracts/Quest.sol";
 import {Quest1155} from "../contracts/Quest1155.sol";
+import {Soulbound20} from "../contracts/Soulbound20.sol";
 import {QuestFactory} from "../contracts/QuestFactory.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
 import {ProxyAdmin, ITransparentUpgradeableProxy} from "openzeppelin-contracts/proxy/transparent/ProxyAdmin.sol";
@@ -55,7 +56,8 @@ contract QuestFactoryDeploy is Script {
             address(new Quest()),               // erc20QuestAddress_
             payable(address(new Quest1155())),  // erc1155QuestAddress_
             owner,                              // ownerAddress_
-            500000000000000,                    // nftQuestFee_,
+            address(new Soulbound20()),         // soulbound20Address_
+            500000000000000,                    // soulbound20CreateFee_,
             5000,                               // referralFee_,
             75000000000000                      // mintFee_
         );

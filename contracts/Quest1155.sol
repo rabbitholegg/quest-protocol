@@ -33,7 +33,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public startTime;
     uint256 public totalParticipants;
     uint256 public tokenId;
-    uint256 public questFee;
     string public questId;
 
     /*//////////////////////////////////////////////////////////////
@@ -123,22 +122,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
         _transferRewards(claimer_, 1);
         if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
-    }
-
-    /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
-    /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_)
-        external
-        virtual
-        nonReentrant
-        whenNotPaused
-        whenNotEnded
-        onlyStarted
-        onlyQueued
-        onlyQuestFactory
-    {
-        _transferRewards(account_, 1);
-        if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
     }
 
     /// @notice Unpauses the Quest

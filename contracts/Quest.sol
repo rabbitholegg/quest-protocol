@@ -10,8 +10,10 @@ import {QuestClaimable} from "./libraries/QuestClaimable.sol";
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {LibString} from "solady/utils/LibString.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
+import {ISoulbound20} from "./interfaces/ISoulbound20.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
@@ -22,11 +24,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
                                  USING
     //////////////////////////////////////////////////////////////*/
     using SafeTransferLib for address;
+    using LibString for string;
 
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
-    address public rabbitHoleReceiptContract; // Deprecated - do not use
     IQuestFactory public questFactoryContract;
     address public rewardToken;
     uint256 public endTime;
@@ -38,8 +40,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint16 public questFee;
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
-    mapping(uint256 => bool) private claimedList;
-    mapping(address => uint256) public streamIdForAddress;
+    string public questType;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -58,11 +59,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        string memory questType_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
+        if (!questType_.eq("erc20") && !questType_.eq("erc20Points")) revert InvalidQuestType();
 
         // Process input parameters
         rewardToken = rewardTokenAddress_;
@@ -73,6 +76,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questId = questId_;
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
+        questType = questType_;
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
@@ -121,20 +125,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
     function unPause() external onlyOwner {
         _unpause();
-    }
-
-    /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
-    /// @param account_ The account to transfer rewards to
-    function singleClaim(address account_)
-        external
-        virtual
-        nonReentrant
-        onlyQuestActive
-        whenNotPaused
-        onlyQuestFactory
-    {
-        uint256 totalRedeemableRewards = rewardAmountInWei;
-        _transferRewards(account_, totalRedeemableRewards);
     }
 
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
