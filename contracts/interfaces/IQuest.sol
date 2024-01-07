@@ -23,6 +23,8 @@ interface IQuest {
     error OverMaxAllowedToMint();
     error AddressAlreadyMinted();
     error QuestEnded();
+    error WithdrawNotAvailableForPoints();
+    error InvalidQuestType();
 
     function initialize(
         address rewardTokenAddress_,
@@ -32,14 +34,14 @@ interface IQuest {
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        string memory questType_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
     function queued() external view returns (bool);
     function startTime() external view returns (uint256);
     function endTime() external view returns (uint256);
-    function singleClaim(address account) external;
     function rewardToken() external view returns (address);
     function rewardAmountInWei() external view returns (uint256);
     function totalTransferAmount() external view returns (uint256);

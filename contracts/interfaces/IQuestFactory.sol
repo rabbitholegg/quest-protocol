@@ -25,6 +25,9 @@ interface IQuestFactory {
     error QuestAddressMismatch();
     error ClaimFailed();
     error txOriginMismatch();
+    error InvalidSoulbound20CreateFeeFee();
+    error NotSoulbound20Creator();
+    error Soulbound20Removed();
 
     // Structs
 
@@ -47,6 +50,12 @@ interface IQuestFactory {
         string actionType;
         string questName;
         uint32 txHashChainId;
+    }
+
+    // This struct is used in a mapping - only add new fields to the end
+    struct Soulbound20 {
+        uint256 state;
+        address creator;
     }
 
     struct QuestData {
@@ -159,6 +168,8 @@ interface IQuestFactory {
         uint256 rewardAmountOrTokenId
     );
     event ReferralFeeSet(uint16 percent);
+    event Soulbound20Created(address indexed creator, address indexed soulboundAddress, string name, string symbol);
+    event Soulbound20AddressStateSet(address indexed soulbound20Address, uint256 state);
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
@@ -193,7 +204,6 @@ interface IQuestFactory {
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
     function setErc20QuestAddress(address erc20QuestAddress_) external;
     function setMintFee(uint256 mintFee_) external;
-    function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
     function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;

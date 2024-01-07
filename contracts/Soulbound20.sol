@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {Ownable} from "solady/auth/Ownable.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
@@ -9,7 +8,6 @@ import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
 contract Soulbound20 is Initializable, OwnableRoles, ERC20 {
     error TransferNotAllowed();
 
-    event MinterAddressSet(address indexed minterAddress);
     event TransferAllowedSet(bool transferAllowed);
 
     uint256 public constant MINT_ROLE = 1;
@@ -68,7 +66,9 @@ contract Soulbound20 is Initializable, OwnableRoles, ERC20 {
         return _symbol;
     }
 
-    /// soulbound
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL OVERRIDE
+    //////////////////////////////////////////////////////////////*/
     function _beforeTokenTransfer(address from, address to, uint256) internal virtual override {
         if(transferAllowed) return;
 

@@ -31,4 +31,19 @@ contract TestUtils is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
         return abi.encodePacked(r, s, v);
     }
+
+    function signHashReturnRS(bytes32 msgHash, uint256 privateKey)
+        internal
+        pure
+        returns (
+            bytes32,
+            bytes32
+        )
+    {
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
+        if (v != 27) s = s | bytes32(uint256(1) << 255);
+
+        return (r, s);
+    }
 }

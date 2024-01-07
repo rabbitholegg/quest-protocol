@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {Quest} from "../contracts/Quest.sol";
 import {Quest1155} from "../contracts/Quest1155.sol";
 import {QuestFactory} from "../contracts/QuestFactory.sol";
+import {Soulbound20} from "../contracts/Soulbound20.sol";
 import {QuestContractConstants as C} from "../contracts/libraries/QuestContractConstants.sol";
 
 // # To deploy and verify Quest.sol run this command below
@@ -30,6 +31,20 @@ contract Quest1155Deploy is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         QuestFactory(C.QUEST_FACTORY_ADDRESS).setErc1155QuestAddress(address(new Quest1155()));
+
+        vm.stopBroadcast();
+    }
+}
+
+// # To deploy and verify Soulbound20.sol run this command below
+// forge script script/Quest.s.sol:Soulbound20Deploy --rpc-url sepolia --broadcast --verify -vvvv
+contract Soulbound20Deploy is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        QuestFactory(C.QUEST_FACTORY_ADDRESS).setSoulbound20Address(address(new Soulbound20()));
 
         vm.stopBroadcast();
     }
