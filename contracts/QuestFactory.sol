@@ -139,6 +139,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                  CREATE
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev Create a soulbound20 contract
+    /// @param name_ The name of the soulbound20
+    /// @param symbol_ The symbol of the soulbound20
    function createSoulbound20(
         string memory name_,
         string memory symbol_
@@ -156,18 +159,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         emit Soulbound20Created(msg.sender, soulboundAddress, name_, symbol_);
         return soulboundAddress;
-    }
-
-    function setSoulbound20Verified(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
-        setSoulbound20AddressState(soulbound20Address_, 2);
-    }
-
-    function setSoulbound20Removed(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
-        setSoulbound20AddressState(soulbound20Address_, 3);
-    }
-
-    function setSoulbound20CreateFee(uint256 soulbound20CreateFee_) external onlyOwner {
-        soulbound20CreateFee = soulbound20CreateFee_;
     }
 
     /// @dev Create an erc20 points quest and start it at the same time.
@@ -470,6 +461,25 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /*//////////////////////////////////////////////////////////////
                                   SET
     //////////////////////////////////////////////////////////////*/
+
+    /// @dev set a soulbound20 address state to verified
+    /// @param soulbound20Address_ The address of the soulbound20
+    function setSoulbound20Verified(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 2);
+    }
+
+    /// @dev set a soulbound20 address state to removed
+    /// @param soulbound20Address_ The address of the soulbound20
+    function setSoulbound20Removed(address soulbound20Address_) external onlyOwnerOrRoles(SET_SOULBOUND_ADDRESS_STATE_ROLE) {
+        setSoulbound20AddressState(soulbound20Address_, 3);
+    }
+
+
+    /// @dev set the soulbound20 create fee
+    /// @param soulbound20CreateFee_ The value of the soulbound20 create fee
+    function setSoulbound20CreateFee(uint256 soulbound20CreateFee_) external onlyOwner {
+        soulbound20CreateFee = soulbound20CreateFee_;
+    }
 
     /// @dev set the claim signer address
     /// @param claimSignerAddress_ The address of the claim signer
