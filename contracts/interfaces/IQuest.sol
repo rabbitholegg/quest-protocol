@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 interface IQuest {
     event Queued(uint256 timestamp);
-    event JsonSpecCIDSet(string cid);
     event ProtocolFeeDistributed(string questId, address rewardToken, address protocolOwner, uint256 feeAmountToProtocolOwner, address questOwner, uint256 feeAmountToQuestOwner);
 
     error AlreadyClaimed();
@@ -33,9 +32,7 @@ interface IQuest {
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_,
-        uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_
+        address protocolFeeRecipient_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);

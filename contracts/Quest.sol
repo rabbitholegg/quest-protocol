@@ -10,11 +10,8 @@ import {QuestClaimable} from "./libraries/QuestClaimable.sol";
 import {IQuest} from "./interfaces/IQuest.sol";
 // Leverages
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-import {LockupLinear} from "sablier/types/DataTypes.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
-import {ISablierV2LockupLinear} from "sablier/interfaces/ISablierV2LockupLinear.sol";
-import {IERC20} from "sablier/types/Tokens.sol";
 
 /// @title Quest
 /// @author RabbitHole.gg
@@ -42,10 +39,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     bool public hasWithdrawn;
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
-    string public jsonSpecCID;
-    uint40 public durationTotal;
     mapping(address => uint256) public streamIdForAddress;
-    ISablierV2LockupLinear public sablierV2LockupLinearContract;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -64,9 +58,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_,
-        uint40 durationTotal_,
-        address sablierV2LockupLinearAddress_
+        address protocolFeeRecipient_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -81,8 +73,6 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questId = questId_;
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
-        durationTotal = durationTotal_;
-        sablierV2LockupLinearContract = ISablierV2LockupLinear(sablierV2LockupLinearAddress_);
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
@@ -221,33 +211,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                             INTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
-    function _createLockupLinearStream(address recepient_, uint256 totalAmount_) internal {
-        // Approve the Sablier contract to spend reward tokens
-        rewardToken.safeApprove(address(sablierV2LockupLinearContract), totalAmount_);
-
-        LockupLinear.CreateWithDurations memory params;
-
-        params.sender = msg.sender; // The sender will be able to cancel the stream, this is the QuestFactory contract
-        params.recipient = recepient_; // The recipient of the streamed assets
-        params.totalAmount = uint128(totalAmount_); // Total amount is the amount inclusive of all fees
-        params.asset = IERC20(rewardToken); // The streaming asset
-        params.durations = LockupLinear.Durations({cliff: 0, total: durationTotal});
-
-        // Create the Sablier stream using a function that sets the start time to `block.timestamp`
-        uint256 streamId = sablierV2LockupLinearContract.createWithDurations(params);
-
-        streamIdForAddress[recepient_] = streamId;
-    }
-
     /// @notice Internal function that transfers the rewards to the msg.sender
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        if (durationTotal > 0) {
-            _createLockupLinearStream(sender_, amount_);
-        } else {
-            rewardToken.safeTransfer(sender_, amount_);
-        }
+        rewardToken.safeTransfer(sender_, amount_);
     }
 
     /*//////////////////////////////////////////////////////////////

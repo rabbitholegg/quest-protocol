@@ -9,7 +9,6 @@ import {QuestFactory} from "contracts/QuestFactory.sol";
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
-import {SablierV2LockupLinearMock as SablierMock} from "./mocks/SablierV2LockupLinearMock.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
@@ -33,13 +32,11 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
-    uint40 DURATION_TOTAL = 10000;
     uint16 REFERRAL_FEE = 2000;
     uint256 NFT_QUEST_FEE = 10;
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
-    address defaultReferralFeeRecipient = makeAddr("defaultReferralFeeRecipient");
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -65,8 +62,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             address(new Quest()),
             payable(address(new Quest1155())),
             owner,
-            defaultReferralFeeRecipient,
-            address(new SablierMock()),
             NFT_QUEST_FEE,
             REFERRAL_FEE,
             MINT_FEE
@@ -79,7 +74,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_initialize() public {
         assertEq(protocolFeeRecipient, questFactory.protocolFeeRecipient(), "protocolFeeRecipient not set");
         assertEq(owner, questFactory.owner(), "owner should be set");
-        assertEq(defaultReferralFeeRecipient, questFactory.defaultReferralFeeRecipient(), "defaultReferralFeeRecipient should be set");
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -293,6 +287,46 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(sampleERC20.balanceOf(participantMocked), REWARD_AMOUNT, "particpiant erc20 balance");
     }
 
+    function test_claimCompressed_revert_txOriginMismatch() public{
+        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
+        address referrerMocked = address(0);
+        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
+        uint32 txHashChainId = 1;
+        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
+        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
+        string memory actionType = "other";
+        string memory questName = "Advanced Trading with dYdX";
+        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
+        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
+
+        vm.deal(participantMocked, 1000000);
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        address currentQuestAddress = questFactory.createERC20Quest(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            questIdString,
+            actionType,
+            questName
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
+        vm.startPrank(participantMocked);
+        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
+    }
+
+
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
@@ -387,7 +421,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // 1155 reward
@@ -420,7 +454,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        vm.startPrank(participant);
+        vm.startPrank(participant, participant);
         vm.recordLogs();
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
@@ -443,6 +477,44 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(questId, string("questId"));
         assertEq(rewardToken, address(sampleERC20));
         assertEq(rewardAmountInWei, REWARD_AMOUNT);
+
+        vm.stopPrank();
+    }
+
+    function test_claimOptimized_revert_txOriginMismatch() public{
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createERC20Quest(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "questId",
+            "actionType",
+            "questName"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 1);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        // tx.origin is not msg.sender fails
+        vm.startPrank(participant, anyone);
+        vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
+        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
+
+        // msg.sender as the questAddress works
+        vm.deal(questAddress, 1000000);
+        vm.startPrank(questAddress);
+        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
+
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
 
         vm.stopPrank();
     }

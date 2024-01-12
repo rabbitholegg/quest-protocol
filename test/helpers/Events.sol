@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 contract Events {
     event Queued(uint256 timestamp);
-    event JsonSpecCIDSet(string cid);
 
     // QuestFactory
     event QuestCreated(
