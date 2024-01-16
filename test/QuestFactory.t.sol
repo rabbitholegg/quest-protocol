@@ -247,18 +247,64 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     function test_claimCompressed_erc20_mocked_data() public{
-        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
-        address referrerMocked = address(0);
-        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
         uint32 txHashChainId = 1;
-        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
-        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
-        string memory actionType = "other";
-        string memory questName = "Advanced Trading with dYdX";
-        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
-        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
+        bytes32 txHash = hex'57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1';
+        bytes16 questId = hex'88e08cb195e64832845fa92ec8f2034a';
+        
+        string memory json = '{"actionTxHashes":["0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1"],"actionNetworkChainIds":[1],"questName":"Advanced Trading with dYdX","actionType":"other"}';
+        bytes memory signData = abi.encode(participant, referrer, "88e08cb1-95e6-4832-845f-a92ec8f2034a", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
 
-        vm.deal(participantMocked, 1000000);
+        vm.deal(participant, 1000000);
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createERC20Quest(
+            address(sampleERC20),
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT,
+            "88e08cb1-95e6-4832-845f-a92ec8f2034a",
+            "other",
+            "Advanced Trading with dYdX"
+        );
+
+        vm.warp(START_TIME + 1);
+
+        bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.startPrank(participant, participant);
+        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+    }
+
+    function test_claimCompressed_revert_txOriginMismatch() public{
+        bytes32 txHash = hex'57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1';
+        bytes16 questId = hex'88e08cb195e64832845fa92ec8f2034a';
+        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
+        uint32 txHashChainId = 1;
+
+        string memory json = '{"actionTxHashes":["0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1"],"actionNetworkChainIds":[1],"questName":"Advanced Trading with dYdX","actionType":"other"}';
+        bytes memory signData = abi.encode(participant, referrer, "88e08cb1-95e6-4832-845f-a92ec8f2034a", json);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
+
+        vm.deal(participant, 1000000);
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
@@ -271,58 +317,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             TOTAL_PARTICIPANTS,
             REWARD_AMOUNT,
             questIdString,
-            actionType,
-            questName
+            "other",
+            "Advanced Trading with dYdX"
         );
 
         vm.warp(START_TIME + 1);
 
-        bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
-        bytes memory dataCompressed = LibZip.cdCompress(data);
-
-        vm.startPrank(participantMocked, participantMocked);
-        questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
-
-        // erc20 reward
-        assertEq(sampleERC20.balanceOf(participantMocked), REWARD_AMOUNT, "particpiant erc20 balance");
-    }
-
-    function test_claimCompressed_revert_txOriginMismatch() public{
-        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
-        address referrerMocked = address(0);
-        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
-        uint32 txHashChainId = 1;
-        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
-        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
-        string memory actionType = "other";
-        string memory questName = "Advanced Trading with dYdX";
-        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
-        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
-
-        vm.deal(participantMocked, 1000000);
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-
-        vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        address currentQuestAddress = questFactory.createERC20Quest(
-            address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            questIdString,
-            actionType,
-            questName
-        );
-
-        vm.warp(START_TIME + 1);
-
-        bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
+        bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
-        vm.startPrank(participantMocked);
+        vm.startPrank(participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
     }
 
