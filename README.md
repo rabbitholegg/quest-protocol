@@ -122,6 +122,14 @@ forge install
 forge build
 ```
 
+### Create .env file
+
+>  this uses a compromised private key from hardhat's test node, do not use this key for anything other than automated testing!
+
+```bash
+cp .env.example .env
+sed -i '' "s/TEST_CLAIM_SIGNER_PRIVATE_KEY=/TEST_CLAIM_SIGNER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80/" .env
+```
 ---
 
 ## Testing

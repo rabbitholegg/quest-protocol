@@ -17,7 +17,8 @@ import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
-
+import {QuestData} from "./helpers/QuestData.sol";
+ 
 contract TestQuestFactory is Test, Errors, Events, TestUtils {
     using LibClone for address;
     using LibString for address;
@@ -29,14 +30,23 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     SampleERC1155 sampleERC1155;
     SampleERC20 sampleERC20;
     uint256 claimSignerPrivateKey;
-    uint256 TOTAL_PARTICIPANTS = 300;
-    uint256 END_TIME = 1_000_000_000;
-    uint256 START_TIME = 1_000_000;
     uint16 REFERRAL_FEE = 2000;
     uint256 NFT_QUEST_FEE = 10;
-    uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
+    QuestData.MockQuestData QUEST = QuestData.MockQuestData({
+        END_TIME : 1_000_000_000,
+        START_TIME : 1_000_000,
+        TOTAL_PARTICIPANTS : 300,
+        REWARD_AMOUNT : 10,
+        QUEST_ID_STRING :  "550e8400-e29b-41d4-a716-446655440000",
+        QUEST_ID : hex'550e8400e29b41d4a716446655440000',
+        ACTION_TYPE: "actionType",
+        QUEST_NAME: "questName",
+        CHAIN_ID : 7777777,
+        TX_HASH : hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516',
+        JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}'
+    });
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -82,18 +92,18 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_createERC1155Quest() public {
         vm.startPrank(questCreator);
 
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(questCreator, 1, QUEST.TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         address questAddress = questFactory.createERC1155Quest(
             address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
             1,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
         Quest1155 quest1155 = Quest1155(payable(questAddress));
@@ -107,26 +117,26 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
 
         vm.expectEmit(true,false,true,true);
-        emit QuestCreated(questCreator, address(0), "questId", "erc20", address(sampleERC20), END_TIME, START_TIME, TOTAL_PARTICIPANTS, REWARD_AMOUNT);
+        emit QuestCreated(questCreator, address(0), QUEST.QUEST_ID_STRING, "erc20", address(sampleERC20), QUEST.END_TIME, QUEST.START_TIME, QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT);
 
         address questAddress = questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
         Quest quest = Quest(payable(questAddress));
-        assertEq(quest.startTime(), START_TIME, "startTime should be set");
+        assertEq(quest.startTime(), QUEST.START_TIME, "startTime should be set");
         assertEq(quest.queued(), true, "queued should be set");
-        assertEq(sampleERC20.balanceOf(address(quest)), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE), "balance should be set");
+        assertEq(sampleERC20.balanceOf(address(quest)), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE), "balance should be set");
 
         vm.stopPrank();
     }
@@ -136,17 +146,17 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), false);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         vm.expectRevert(abi.encodeWithSelector(RewardNotAllowed.selector));
         questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
     }
 
@@ -155,28 +165,28 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
         questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
     }
 
@@ -186,18 +196,18 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setErc20QuestAddress(address(0));
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
 
         vm.expectRevert(abi.encodeWithSelector(Erc20QuestAddressNotSet.selector));
         questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
     }
 
@@ -207,33 +217,29 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimCompressed_1155_with_ref() public{
         vm.startPrank(questCreator);
 
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(questCreator, 1, QUEST.TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.createERC1155Quest(
             address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
             1,
-            "550e8400-e29b-41d4-a716-446655440000",
-            "actionType",
-            "questName"
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes16 questId = hex'550e8400e29b41d4a716446655440000';
-        bytes32 txHash = hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
-        uint32 txHashChainId = 7777777;
-        string memory json = '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}';
-        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
         if (v != 27) { s = s | bytes32(uint256(1) << 255); }
 
-        bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.startPrank(participant, participant);
@@ -247,82 +253,79 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     function test_claimCompressed_erc20_mocked_data() public{
-        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
-        address referrerMocked = address(0);
-        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
-        uint32 txHashChainId = 1;
-        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
-        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
-        string memory actionType = "other";
-        string memory questName = "Advanced Trading with dYdX";
-        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
-        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
+        
+        bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
 
-        vm.deal(participantMocked, 1000000);
+        vm.deal(participant, 1000000);
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            questIdString,
-            actionType,
-            questName
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING, 
+            QUEST.ACTION_TYPE, 
+            QUEST.QUEST_NAME
+            
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.startPrank(participantMocked, participantMocked);
+        vm.startPrank(participant, participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
-        assertEq(sampleERC20.balanceOf(participantMocked), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
     }
 
     function test_claimCompressed_revert_txOriginMismatch() public{
-        address participantMocked = 0xde967dd32C1d057B368ea9F37d70469Cd7F6bF38;
-        address referrerMocked = address(0);
-        bytes32 txHash = 0x57498a77018f78c02a0e2f0d0e4a8aab048b6e249ff936d230b7db7ca48782e1;
-        uint32 txHashChainId = 1;
-        bytes16 questId = 0x88e08cb195e64832845fa92ec8f2034a;
-        string memory questIdString = "88e08cb1-95e6-4832-845f-a92ec8f2034a";
-        string memory actionType = "other";
-        string memory questName = "Advanced Trading with dYdX";
-        bytes32 r = 0x12a1078fd9cf9bbed1fa8f00b9abd75baa6c07073706479ca25ec34f4043b327;
-        bytes32 vs = 0x5aca8bfe397d45aa673c07d2ce845cb4419eadc0cbe8977de337799a37b2e1a3;
 
-        vm.deal(participantMocked, 1000000);
+        bytes memory signData = abi.encode(participant, referrer, "88e08cb1-95e6-4832-845f-a92ec8f2034a", QUEST.JSON_MSG);
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
+        if (v != 27) {
+            s = s | bytes32(uint256(1) << 255);
+        }
+
+        vm.deal(participant, 1000000);
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
-        address currentQuestAddress = questFactory.createERC20Quest(
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            questIdString,
-            actionType,
-            questName
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(txHash, r, vs, referrerMocked, questId, txHashChainId);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
-        vm.startPrank(participantMocked);
+        vm.startPrank(participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
     }
 
@@ -332,25 +335,23 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "550e8400-e29b-41d4-a716-446655440000",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes16 questId = hex'550e8400e29b41d4a716446655440000';
-        bytes32 txHash = hex'001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516';
-        uint32 txHashChainId = 101;
-        string memory json = '{"actionTxHashes":["0x001975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[101],"questName":"questName","actionType":"actionType"}';
-        bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
+        
+     
+        bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
@@ -358,7 +359,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             s = s | bytes32(uint256(1) << 255);
         }
 
-        bytes memory data = abi.encode(txHash, r, s, referrer, questId, txHashChainId);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.startPrank(participant, participant);
@@ -366,7 +367,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
 
         // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
@@ -382,7 +383,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert non-indexed log data for entries[1]
         (string memory jsonLog) = abi.decode(entries[1].data, (string));
-        assertEq(jsonLog, json);
+        assertEq(jsonLog, QUEST.JSON_MSG);
 
         // assert indexed log data for entries[2]
         assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
@@ -391,9 +392,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert non-indexed log data for entries[2]
         (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
-        assertEq(questIdLog, string("550e8400-e29b-41d4-a716-446655440000"));
+        assertEq(questIdLog, QUEST.QUEST_ID_STRING);
         assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, REWARD_AMOUNT);
+        assertEq(rewardAmountInWei, QUEST.REWARD_AMOUNT);
 
         vm.stopPrank();
     }
@@ -401,23 +402,23 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimOptimized_1155_with_ref() public{
         vm.startPrank(questCreator);
 
-        sampleERC1155.mintSingle(questCreator, 1, TOTAL_PARTICIPANTS);
+        sampleERC1155.mintSingle(questCreator, 1, QUEST.TOTAL_PARTICIPANTS);
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.createERC1155Quest(
             address(sampleERC1155),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
             1,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(participant, referrer, "questId", "json",  address(sampleERC1155), 1);
+        bytes memory data = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, "json",  address(sampleERC1155), 1);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -436,21 +437,21 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 1);
+        bytes memory data = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, "json", address(sampleERC20), 1);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -459,7 +460,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
         // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
@@ -474,9 +475,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // assert non-indexed log data
         (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
-        assertEq(questId, string("questId"));
+        assertEq(questId, QUEST.QUEST_ID_STRING);
         assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, REWARD_AMOUNT);
+        assertEq(rewardAmountInWei, QUEST.REWARD_AMOUNT);
 
         vm.stopPrank();
     }
@@ -486,21 +487,21 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        vm.warp(START_TIME + 1);
+        vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(participant, referrer, "questId", "json", address(sampleERC20), 1);
+        bytes memory data = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, "json", address(sampleERC20), 1);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
@@ -514,7 +515,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questAddress);
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
 
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
 
         vm.stopPrank();
     }
@@ -527,30 +528,30 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
             address(sampleERC20),
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT,
-            "questId",
-            "actionType",
-            "questName"
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME
         );
 
-        IQuestFactory.QuestData memory questData = questFactory.questData("questId");
+        IQuestFactory.QuestData memory questData = questFactory.questData(QUEST.QUEST_ID_STRING);
 
         assertEq(questData.questAddress, questAddress);
         assertEq(questData.rewardToken, address(sampleERC20));
         assertEq(questData.queued, true);
         assertEq(questData.questFee, QUEST_FEE);
-        assertEq(questData.startTime, START_TIME);
-        assertEq(questData.endTime, END_TIME);
-        assertEq(questData.totalParticipants, TOTAL_PARTICIPANTS);
+        assertEq(questData.startTime, QUEST.START_TIME);
+        assertEq(questData.endTime, QUEST.END_TIME);
+        assertEq(questData.totalParticipants, QUEST.TOTAL_PARTICIPANTS);
         assertEq(questData.numberMinted, 0);
         assertEq(questData.redeemedTokens, 0);
-        assertEq(questData.rewardAmountOrTokenId, REWARD_AMOUNT);
+        assertEq(questData.rewardAmountOrTokenId, QUEST.REWARD_AMOUNT);
         assertEq(questData.hasWithdrawn, false);
 
         vm.stopPrank();
