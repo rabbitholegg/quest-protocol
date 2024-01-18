@@ -7,7 +7,7 @@ import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract PowerPass is Initializable, Ownable, ERC721 {
+contract BoostPass is Initializable, Ownable, ERC721 {
     using LibString for *;
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
@@ -69,18 +69,18 @@ contract PowerPass is Initializable, Ownable, ERC721 {
 
     /// @dev Returns the token collection name.
     function name() public pure override returns (string memory){
-        return "RabbitHole Power Pass";
+        return "Boost Pass";
     }
 
     /// @dev Returns the token collection symbol.
     function symbol() public pure override returns (string memory){
-        return "RHPP";
+        return "BP";
     }
 
     /// @dev Returns the Uniform Resource Identifier (URI) for token `id`.
     function tokenURI(uint256 id) public view override returns (string memory){
         address owner = ownerOf(id);
-        return LibString.concat("https://api.rabbithole.gg/v1/powerpass/", owner.toHexString()).concat("?id=").concat(id.toString());
+        return LibString.concat("https://api.rabbithole.gg/v1/boostpass/", owner.toHexString()).concat("?id=").concat(id.toString());
     }
 
     /*//////////////////////////////////////////////////////////////

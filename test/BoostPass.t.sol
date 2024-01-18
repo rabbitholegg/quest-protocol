@@ -3,12 +3,12 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import "../contracts/PowerPass.sol";
+import "../contracts/BoostPass.sol";
 import {ERC1967Factory} from "solady/utils/ERC1967Factory.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {TestUtils} from "./helpers/TestUtils.sol";
 
-contract PowerPassTest is Test, TestUtils {
+contract BoostPassTest is Test, TestUtils {
     using LibString for *;
     using LibString for address;
     using LibString for uint256;
@@ -17,7 +17,7 @@ contract PowerPassTest is Test, TestUtils {
     error TokenNotTransferable();
     error AddressAlreadyMinted();
 
-    PowerPass internal powerPass;
+    BoostPass internal boostPass;
     ERC1967Factory internal factory;
 
     uint256 claimSignerPrivateKey;
@@ -32,22 +32,22 @@ contract PowerPassTest is Test, TestUtils {
         claimSignerPrivateKey = claimSigner.privateKey;
         claimSignerAddr = claimSigner.addr;
 
-        address powerPassImp = address(new PowerPass());
+        address boostPassImp = address(new BoostPass());
         factory = new ERC1967Factory();
 
-        // initializeCallData is setting up: PowerPass.initialize(owner, claimSignerAddr);
+        // initializeCallData is setting up: BoostPass.initialize(owner, claimSignerAddr);
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address)", owner, claimSignerAddr);
-        address powerPassAddr = factory.deployAndCall(powerPassImp, owner, initializeCallData);
-        powerPass = PowerPass(powerPassAddr);
+        address boostPassAddr = factory.deployAndCall(boostPassImp, owner, initializeCallData);
+        boostPass = BoostPass(boostPassAddr);
 
-        vm.label(address(powerPass), "PowerPass");
+        vm.label(address(boostPass), "BoostPass");
     }
 
     function test_initialize() public {
-        assertEq(powerPass.owner(), owner);
-        assertEq(powerPass.claimSignerAddress(), claimSignerAddr);
-        assertEq(powerPass.symbol(), "RHPP");
-        assertEq(powerPass.name(), "RabbitHole Power Pass");
+        assertEq(boostPass.owner(), owner);
+        assertEq(boostPass.claimSignerAddress(), claimSignerAddr);
+        assertEq(boostPass.symbol(), "BP");
+        assertEq(boostPass.name(), "Boost Pass");
     }
 
     function test_mint() public {
@@ -55,19 +55,19 @@ contract PowerPassTest is Test, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        powerPass.mint(signature, data);
+        boostPass.mint(signature, data);
 
-        assertEq(powerPass.balanceOf(user), 1);
+        assertEq(boostPass.balanceOf(user), 1);
     }
 
     function test_mint__reverts_if_already_minted() public {
         bytes memory data = abi.encode(user);
         bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
 
-        powerPass.mint(signature, data);
+        boostPass.mint(signature, data);
 
         vm.expectRevert(abi.encodeWithSelector(AddressAlreadyMinted.selector));
-        powerPass.mint(signature, data);
+        boostPass.mint(signature, data);
     }
 
     function test_mint__reverts_if_not_signed() public {
@@ -75,34 +75,34 @@ contract PowerPassTest is Test, TestUtils {
         bytes memory badSignature = signHash(keccak256(data), 1);
 
         vm.expectRevert(abi.encodeWithSelector(AddressNotSigned.selector));
-        powerPass.mint(badSignature, data);
+        boostPass.mint(badSignature, data);
     }
 
     function test_setClaimSignerAddress() public {
-        assertEq(powerPass.claimSignerAddress(), claimSignerAddr);
+        assertEq(boostPass.claimSignerAddress(), claimSignerAddr);
 
         vm.prank(owner);
-        powerPass.setClaimSignerAddress(owner);
+        boostPass.setClaimSignerAddress(owner);
 
-        assertEq(powerPass.claimSignerAddress(), owner);
+        assertEq(boostPass.claimSignerAddress(), owner);
     }
 
     function test_tokenURI() public {
         bytes memory data = abi.encode(user);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        powerPass.mint(signature, data);
+        boostPass.mint(signature, data);
 
-        assertEq(powerPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/powerpass/", user.toHexString()).concat("?id=").concat("1"));
+        assertEq(boostPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/boostpass/", user.toHexString()).concat("?id=").concat("1"));
     }
 
     function test_revert_if_transfer() public {
         bytes memory data = abi.encode(user);
         bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
 
-        powerPass.mint(signature, data);
+        boostPass.mint(signature, data);
 
         vm.expectRevert(abi.encodeWithSelector(TokenNotTransferable.selector));
-        powerPass.transferFrom(user, owner, 1);
+        boostPass.transferFrom(user, owner, 1);
     }
 }
