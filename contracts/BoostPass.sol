@@ -14,6 +14,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     //////////////////////////////////////////////////////////////*/
     address public claimSignerAddress;
     uint256 private _tokenIdCounter;
+    uint256 public mintFee;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -21,6 +22,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     error AddressNotSigned();
     error TokenNotTransferable();
     error AddressAlreadyMinted();
+    error InvalidMintFee();
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -33,10 +35,12 @@ contract BoostPass is Initializable, Ownable, ERC721 {
 
     function initialize(
         address owner_,
-        address claimSignerAddress_
+        address claimSignerAddress_,
+        uint256 mintFee_
     ) external initializer {
         _initializeOwner(owner_);
         claimSignerAddress = claimSignerAddress_;
+        mintFee = mintFee_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -49,6 +53,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         address to_ = abi.decode(data_, (address));
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (balanceOf(to_) > 0) revert AddressAlreadyMinted();
+        if (msg.value < mintFee) revert InvalidMintFee();
 
         unchecked {
             _tokenIdCounter += 1;
@@ -61,6 +66,12 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     /// @param claimSignerAddress_ The address of the claim signer
     function setClaimSignerAddress(address claimSignerAddress_) external onlyOwner {
         claimSignerAddress = claimSignerAddress_;
+    }
+
+    /// @dev set the mint fee
+    /// @param mintFee_ The fee required to mint the Boost Pass
+    function setMintFee(uint256 mintFee_) external onlyOwner {
+        mintFee = mintFee_;
     }
 
     /*//////////////////////////////////////////////////////////////
