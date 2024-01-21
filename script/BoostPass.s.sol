@@ -17,7 +17,8 @@ contract BoostPassDeploy is Script {
 
         address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
         address claimSignerAddress = vm.envAddress("CLAIM_SIGNER_ADDRESS");
-        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address)", owner, claimSignerAddress);
+        address treasuryAddress = owner; // TODO: Replace with actual treasury address
+        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address)", owner, claimSignerAddress, 2000000000000000, treasuryAddress);
         address boostPassImpAddress = address(new BoostPass());
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
         bytes32 salt = bytes32(abi.encodePacked(bytes20(owner), bytes12("BoostPass")));
@@ -38,7 +39,7 @@ contract BoostPassUpgrade is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.POWER_PASS_ADDRESS, address(new BoostPass()));
+        ERC1967Factory(ERC1967FactoryConstants.ADDRESS).upgrade(C.BOOST_PASS_ADDRESS, address(new BoostPass()));
 
         vm.stopBroadcast();
     }
