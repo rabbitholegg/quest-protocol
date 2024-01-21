@@ -119,6 +119,24 @@ contract BoostPassTest is Test, TestUtils {
         assertEq(boostPass.claimSignerAddress(), owner);
     }
 
+    function test_setMintFee() public {
+        assertEq(boostPass.mintFee(), mintFee);
+
+        vm.prank(owner);
+        boostPass.setMintFee(100);
+
+        assertEq(boostPass.mintFee(), 100);
+    }
+
+    function test_setTreasuryAddress() public {
+        assertEq(boostPass.treasuryAddress(), treasuryAddress);
+
+        vm.prank(owner);
+        boostPass.setTreasuryAddress(owner);
+
+        assertEq(boostPass.treasuryAddress(), owner);
+    }
+
     function test_tokenURI() public {
         bytes memory data = abi.encode(user);
         bytes32 msgHash = keccak256(data);

@@ -89,6 +89,12 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         mintFee = mintFee_;
     }
 
+    /// @dev set the treasury address
+    /// @param treasuryAddress_ The address of the treasury
+    function setTreasuryAddress(address treasuryAddress_) external onlyOwner {
+        treasuryAddress = treasuryAddress_;
+    }
+
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
