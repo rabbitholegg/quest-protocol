@@ -26,11 +26,15 @@ contract BoostPassTest is Test, TestUtils {
     address internal owner;
     address internal user;
     uint256 public mintFee;
+    address public treasuryAddress;
+    address public referrerAddress;
 
     function setUp() public virtual {
         owner = makeAddr("owner");
         user = makeAddr("user");
         mintFee = 2000000000000000;
+        treasuryAddress = makeAddr("treasuryAddress");
+        referrerAddress = makeAddr("referrerAddress");
         Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
         claimSignerPrivateKey = claimSigner.privateKey;
         claimSignerAddr = claimSigner.addr;
@@ -38,8 +42,8 @@ contract BoostPassTest is Test, TestUtils {
         address boostPassImp = address(new BoostPass());
         factory = new ERC1967Factory();
 
-        // initializeCallData is setting up: BoostPass.initialize(owner, claimSignerAddr, mintFee);
-        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256)", owner, claimSignerAddr, mintFee);
+        // initializeCallData is setting up: BoostPass.initialize(owner, claimSignerAddr, mintFee, treasuryAddress);
+        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address)", owner, claimSignerAddr, mintFee, treasuryAddress);
         address boostPassAddr = factory.deployAndCall(boostPassImp, owner, initializeCallData);
         boostPass = BoostPass(boostPassAddr);
 
@@ -51,6 +55,8 @@ contract BoostPassTest is Test, TestUtils {
         assertEq(boostPass.claimSignerAddress(), claimSignerAddr);
         assertEq(boostPass.symbol(), "BP");
         assertEq(boostPass.name(), "Boost Pass");
+        assertEq(boostPass.mintFee(), mintFee);
+        assertEq(boostPass.treasuryAddress(), treasuryAddress);
     }
 
     function test_mint() public {
@@ -58,19 +64,34 @@ contract BoostPassTest is Test, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
-        boostPass.mint{value: mintFee}(signature, data);
+        boostPass.mint{value: mintFee}(signature, data, address(0));
 
         assertEq(boostPass.balanceOf(user), 1);
+        assertEq(address(treasuryAddress).balance, mintFee);
+    }
+
+    function test_mint_with_referrer() public {
+        bytes memory data = abi.encode(user);
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+        boostPass.mint{value: mintFee}(signature, data, referrerAddress);
+
+        assertEq(boostPass.balanceOf(user), 1);
+
+        uint256 referralFee = mintFee / 2;
+        assertEq(address(treasuryAddress).balance, mintFee - referralFee);
+        assertEq(address(referrerAddress).balance, referralFee);
     }
 
     function test_mint__reverts_if_already_minted() public {
         bytes memory data = abi.encode(user);
         bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
 
-        boostPass.mint{value: mintFee}(signature, data);
+        boostPass.mint{value: mintFee}(signature, data, address(0));
 
         vm.expectRevert(abi.encodeWithSelector(AddressAlreadyMinted.selector));
-        boostPass.mint{value: mintFee}(signature, data);
+        boostPass.mint{value: mintFee}(signature, data, address(0));
     }
 
     function test_mint__reverts_if_not_signed() public {
@@ -78,7 +99,7 @@ contract BoostPassTest is Test, TestUtils {
         bytes memory badSignature = signHash(keccak256(data), 1);
 
         vm.expectRevert(abi.encodeWithSelector(AddressNotSigned.selector));
-        boostPass.mint{value: mintFee}(badSignature, data);
+        boostPass.mint{value: mintFee}(badSignature, data, address(0));
     }
 
     function test_mint__reverts_if_not_enough_fee() public {
@@ -86,7 +107,7 @@ contract BoostPassTest is Test, TestUtils {
         bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidMintFee.selector));
-        boostPass.mint{value: mintFee - 1}(signature, data);
+        boostPass.mint{value: mintFee - 1}(signature, data, address(0));
     }
 
     function test_setClaimSignerAddress() public {
@@ -102,7 +123,7 @@ contract BoostPassTest is Test, TestUtils {
         bytes memory data = abi.encode(user);
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-        boostPass.mint{value: mintFee}(signature, data);
+        boostPass.mint{value: mintFee}(signature, data, address(0));
 
         assertEq(boostPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/boostpass/", user.toHexString()).concat("?id=").concat("1"));
     }
@@ -111,7 +132,7 @@ contract BoostPassTest is Test, TestUtils {
         bytes memory data = abi.encode(user);
         bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
 
-        boostPass.mint{value: mintFee}(signature, data);
+        boostPass.mint{value: mintFee}(signature, data, address(0));
 
         vm.expectRevert(abi.encodeWithSelector(TokenNotTransferable.selector));
         boostPass.transferFrom(user, owner, 1);

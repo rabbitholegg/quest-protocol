@@ -5,16 +5,19 @@ import {Ownable} from "solady/auth/Ownable.sol";
 import {ERC721} from "solady/tokens/ERC721.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibString} from "solady/utils/LibString.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract BoostPass is Initializable, Ownable, ERC721 {
     using LibString for *;
+    using SafeTransferLib for address;
     /*//////////////////////////////////////////////////////////////
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
     address public claimSignerAddress;
     uint256 private _tokenIdCounter;
     uint256 public mintFee;
+    address public treasuryAddress;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -36,11 +39,13 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     function initialize(
         address owner_,
         address claimSignerAddress_,
-        uint256 mintFee_
+        uint256 mintFee_,
+        address treasuryAddress_
     ) external initializer {
         _initializeOwner(owner_);
         claimSignerAddress = claimSignerAddress_;
         mintFee = mintFee_;
+        treasuryAddress = treasuryAddress_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -49,7 +54,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     /// @dev universal dynamic mint function
     /// @param signature_ The signature of the data
     /// @param data_ The data to decode for the claim
-    function mint(bytes calldata signature_, bytes calldata data_) external payable {
+    function mint(bytes calldata signature_, bytes calldata data_, address referrer_) external payable {
         address to_ = abi.decode(data_, (address));
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (balanceOf(to_) > 0) revert AddressAlreadyMinted();
@@ -60,6 +65,16 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         }
 
         _mint(to_, _tokenIdCounter);
+
+        uint256 referralFee = 0;
+
+        if (referrer_ != address(0)) referralFee = mintFee / 2;
+
+        if (referralFee > 0) {
+            referrer_.safeTransferETH(referralFee);
+        }
+
+        treasuryAddress.safeTransferETH(mintFee - referralFee);
     }
 
     /// @dev set the claim signer address
