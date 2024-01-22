@@ -28,6 +28,11 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     error InvalidMintFee();
 
     /*//////////////////////////////////////////////////////////////
+                                 EVENTS
+    //////////////////////////////////////////////////////////////*/
+    event BoostPassMinted(address indexed to, uint256 indexed tokenId, address indexed referrer);
+
+    /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -75,6 +80,8 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         }
 
         treasuryAddress.safeTransferETH(mintFee - referralFee);
+
+        emit BoostPassMinted(to_, _tokenIdCounter, referrer_);
     }
 
     /// @dev set the claim signer address
