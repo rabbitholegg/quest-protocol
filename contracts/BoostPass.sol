@@ -59,8 +59,8 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     /// @dev universal dynamic mint function
     /// @param signature_ The signature of the data
     /// @param data_ The data to decode for the claim
-    function mint(bytes calldata signature_, bytes calldata data_, address referrer_) external payable {
-        address to_ = abi.decode(data_, (address));
+    function mint(bytes calldata signature_, bytes calldata data_) external payable {
+        (address to_, address referrer_) = abi.decode(data_, (address, address));
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (balanceOf(to_) > 0) revert AddressAlreadyMinted();
         if (msg.value < mintFee) revert InvalidMintFee();
@@ -73,7 +73,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
 
         uint256 referralFee = 0;
 
-        if (referrer_ != address(0)) referralFee = mintFee / 2;
+        if (referrer_ != address(0) && referrer_ != to_) referralFee = mintFee / 2;
 
         if (referralFee > 0) {
             referrer_.safeTransferETH(referralFee);
