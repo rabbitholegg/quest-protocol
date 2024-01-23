@@ -31,7 +31,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
-    event BoostPassMinted(address indexed to, uint256 indexed tokenId, address indexed referrer);
+    event BoostPassMinted(address indexed minter, address indexed referrer, uint256 referrerFee, uint256 treasuryFee, uint256 tokenId);
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -75,15 +75,20 @@ contract BoostPass is Initializable, Ownable, ERC721 {
 
         uint256 referralFee = 0;
 
-        if (referrer_ != address(0) && referrer_ != to_) referralFee = mintFee / 2;
+        if (referrer_ != address(0) && referrer_ != to_) {
+            referralFee = mintFee / 2;
+        } else {
+            referrer_ = address(0);
+        }
 
         if (referralFee > 0) {
             referrer_.safeTransferETH(referralFee);
         }
 
-        treasuryAddress.safeTransferETH(mintFee - referralFee);
+        uint256 treasuryFee = mintFee - referralFee;
+        treasuryAddress.safeTransferETH(treasuryFee);
 
-        emit BoostPassMinted(to_, _tokenIdCounter, referrer_);
+        emit BoostPassMinted(to_, referrer_, referralFee, treasuryFee, _tokenIdCounter);
     }
 
     /// @dev set the claim signer address

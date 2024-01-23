@@ -19,6 +19,8 @@ contract BoostPassTest is Test, TestUtils {
     error InvalidMintFee();
     error ToAddressIsNotSender();
 
+    event BoostPassMinted(address indexed minter, address indexed referrer, uint256 referrerFee, uint256 treasuryFee, uint256 tokenId);
+
     BoostPass internal boostPass;
     ERC1967Factory internal factory;
 
@@ -67,6 +69,13 @@ contract BoostPassTest is Test, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
+        uint256 referralFee = 0;
+        uint256 treasuryFee = mintFee;
+        uint256 tokenId = 1; // assume this is the first mint
+
+        vm.expectEmit();
+        emit BoostPassMinted(user, address(0), referralFee, treasuryFee, tokenId);
+
         vm.prank(user);
         boostPass.mint{value: mintFee}(signature, data);
 
@@ -79,13 +88,19 @@ contract BoostPassTest is Test, TestUtils {
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
+        uint256 referralFee = mintFee / 2;
+        uint256 treasuryFee = mintFee - referralFee;
+        uint256 tokenId = 1; // assume this is the first mint
+
+        vm.expectEmit();
+        emit BoostPassMinted(user, referrerAddress, referralFee, treasuryFee, tokenId);
+
         vm.prank(user);
         boostPass.mint{value: mintFee}(signature, data);
 
         assertEq(boostPass.balanceOf(user), 1);
 
-        uint256 referralFee = mintFee / 2;
-        assertEq(address(treasuryAddress).balance, mintFee - referralFee);
+        assertEq(address(treasuryAddress).balance, treasuryFee);
         assertEq(address(referrerAddress).balance, referralFee);
     }
 
@@ -95,6 +110,13 @@ contract BoostPassTest is Test, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         uint256 userBalanceBefore = address(user).balance;
+
+        uint256 referralFee = 0;
+        uint256 treasuryFee = mintFee;
+        uint256 tokenId = 1; // assume this is the first mint
+
+        vm.expectEmit();
+        emit BoostPassMinted(user, address(0), referralFee, treasuryFee, tokenId);
 
         vm.prank(user);
         boostPass.mint{value: mintFee}(signature, data);
