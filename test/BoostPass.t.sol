@@ -19,6 +19,9 @@ contract BoostPassTest is Test, TestUtils {
     error InvalidMintFee();
     error ToAddressIsNotSender();
 
+    // This error exists in Solady ERC721.sol
+    error TokenDoesNotExist();
+
     event BoostPassMinted(address indexed minter, address indexed referrer, uint256 referrerFee, uint256 treasuryFee, uint256 tokenId);
 
     BoostPass internal boostPass;
@@ -201,6 +204,11 @@ contract BoostPassTest is Test, TestUtils {
         boostPass.mint{value: mintFee}(signature, data);
 
         assertEq(boostPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/boostpass/", user.toHexString()).concat("?id=").concat("1"));
+    }
+
+    function test_revert_if_token_does_not_exist() public {
+        vm.expectRevert(abi.encodeWithSelector(TokenDoesNotExist.selector));
+        boostPass.tokenURI(69);
     }
 
     function test_revert_if_transfer() public {

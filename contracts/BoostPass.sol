@@ -125,6 +125,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
 
     /// @dev Returns the Uniform Resource Identifier (URI) for token `id`.
     function tokenURI(uint256 id) public view override returns (string memory){
+        if (!_exists(id)) revert TokenDoesNotExist();
         address owner = ownerOf(id);
         return LibString.concat("https://api.rabbithole.gg/v1/boostpass/", owner.toHexString()).concat("?id=").concat(id.toString());
     }
