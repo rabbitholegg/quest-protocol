@@ -73,10 +73,12 @@ contract BoostPass is Initializable, Ownable, ERC721 {
 
         uint256 referralFee = 0;
 
-        if (referrer_ != address(0) && referrer_ != to_) {
-            referralFee = mintFee / 2;
-        } else {
+        if (referrer_ == to_) {
             referrer_ = address(0);
+        }
+
+        if (referrer_ != address(0)) {
+            referralFee = mintFee / 2;
         }
 
         if (referralFee > 0) {
