@@ -26,7 +26,6 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     error TokenNotTransferable();
     error AddressAlreadyMinted();
     error InvalidMintFee();
-    error ToAddressIsNotSender();
 
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
@@ -62,7 +61,6 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     /// @param data_ The data to decode for the claim
     function mint(bytes calldata signature_, bytes calldata data_) external payable {
         (address to_, address referrer_) = abi.decode(data_, (address, address));
-        if (to_ != msg.sender) revert ToAddressIsNotSender();
         if (recoverSigner(keccak256(data_), signature_) != claimSignerAddress) revert AddressNotSigned();
         if (balanceOf(to_) > 0) revert AddressAlreadyMinted();
         if (msg.value < mintFee) revert InvalidMintFee();

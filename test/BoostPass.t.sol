@@ -18,7 +18,7 @@ contract BoostPassTest is Test, TestUtils {
     error AddressAlreadyMinted();
     error InvalidMintFee();
     error ToAddressIsNotSender();
-
+    
     // This error exists in Solady ERC721.sol
     error TokenDoesNotExist();
 
@@ -53,6 +53,7 @@ contract BoostPassTest is Test, TestUtils {
         address boostPassAddr = factory.deployAndCall(boostPassImp, owner, initializeCallData);
         boostPass = BoostPass(boostPassAddr);
 
+        vm.deal(owner, 1 ether);
         vm.deal(user, 1 ether);
 
         vm.label(address(boostPass), "BoostPass");
@@ -107,6 +108,25 @@ contract BoostPassTest is Test, TestUtils {
         assertEq(address(referrerAddress).balance, referralFee);
     }
 
+    function test_mint_for_different_address() public {
+        bytes memory data = abi.encode(user, address(0));
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+
+
+        uint256 referralFee = 0;
+        uint256 treasuryFee = mintFee;
+        uint256 tokenId = 1; // assume this is the first mint
+
+        vm.expectEmit();
+        emit BoostPassMinted(user, address(0), referralFee, treasuryFee, tokenId);
+
+        vm.prank(owner);
+        boostPass.mint{value: mintFee}(signature, data);
+
+        assertEq(boostPass.balanceOf(user), 1);
+    }
+
     function test_mint_with_referrer_as_minter() public {
         bytes memory data = abi.encode(user, user);
         bytes32 msgHash = keccak256(data);
@@ -158,15 +178,6 @@ contract BoostPassTest is Test, TestUtils {
         vm.expectRevert(abi.encodeWithSelector(InvalidMintFee.selector));
         vm.prank(user);
         boostPass.mint{value: mintFee - 1}(signature, data);
-    }
-
-    function test_mint__reverts_if_to_address_is_not_sender() public {
-        bytes memory data = abi.encode(owner, address(0));
-        bytes memory signature = signHash(keccak256(data), claimSignerPrivateKey);
-
-        vm.expectRevert(abi.encodeWithSelector(ToAddressIsNotSender.selector));
-        vm.prank(user);
-        boostPass.mint{value: mintFee}(signature, data);
     }
 
     function test_setClaimSignerAddress() public {
