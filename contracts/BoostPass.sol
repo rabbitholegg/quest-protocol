@@ -18,6 +18,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     uint256 private _tokenIdCounter;
     uint256 public mintFee;
     address public treasuryAddress;
+    string private baseURI;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -45,12 +46,14 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         address owner_,
         address claimSignerAddress_,
         uint256 mintFee_,
-        address treasuryAddress_
+        address treasuryAddress_,
+        string memory baseURI_
     ) external initializer {
         _initializeOwner(owner_);
         claimSignerAddress = claimSignerAddress_;
         mintFee = mintFee_;
         treasuryAddress = treasuryAddress_;
+        baseURI = baseURI_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -109,6 +112,12 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         treasuryAddress = treasuryAddress_;
     }
 
+    /// @dev set the base URI
+    /// @param baseURI_ The base URI for the token
+    function setBaseURI(string memory baseURI_) external onlyOwner {
+        baseURI = baseURI_;
+    }
+
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -127,7 +136,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     function tokenURI(uint256 id) public view override returns (string memory){
         if (!_exists(id)) revert TokenDoesNotExist();
         address owner = ownerOf(id);
-        return LibString.concat("https://api.rabbithole.gg/v1/boostpass/", owner.toHexString()).concat("?id=").concat(id.toString());
+        return LibString.concat(baseURI, owner.toHexString());
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -34,6 +34,7 @@ contract BoostPassTest is Test, TestUtils {
     uint256 public mintFee;
     address public treasuryAddress;
     address public referrerAddress;
+    string private baseURI;
 
     function setUp() public virtual {
         owner = makeAddr("owner");
@@ -41,6 +42,7 @@ contract BoostPassTest is Test, TestUtils {
         mintFee = 2000000000000000;
         treasuryAddress = makeAddr("treasuryAddress");
         referrerAddress = makeAddr("referrerAddress");
+        baseURI = 'https://baseuri.com/';
         Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
         claimSignerPrivateKey = claimSigner.privateKey;
         claimSignerAddr = claimSigner.addr;
@@ -48,8 +50,8 @@ contract BoostPassTest is Test, TestUtils {
         address boostPassImp = address(new BoostPass());
         factory = new ERC1967Factory();
 
-        // initializeCallData is setting up: BoostPass.initialize(owner, claimSignerAddr, mintFee, treasuryAddress);
-        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address)", owner, claimSignerAddr, mintFee, treasuryAddress);
+        // initializeCallData is setting up: BoostPass.initialize(owner, claimSignerAddr, mintFee, treasuryAddress, baseURI);
+        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address,string)", owner, claimSignerAddr, mintFee, treasuryAddress, baseURI);
         address boostPassAddr = factory.deployAndCall(boostPassImp, owner, initializeCallData);
         boostPass = BoostPass(boostPassAddr);
 
@@ -214,7 +216,7 @@ contract BoostPassTest is Test, TestUtils {
         vm.prank(user);
         boostPass.mint{value: mintFee}(signature, data);
 
-        assertEq(boostPass.tokenURI(1), LibString.concat("https://api.rabbithole.gg/v1/boostpass/", user.toHexString()).concat("?id=").concat("1"));
+        assertEq(boostPass.tokenURI(1), LibString.concat(baseURI, user.toHexString()));
     }
 
     function test_revert_if_token_does_not_exist() public {
