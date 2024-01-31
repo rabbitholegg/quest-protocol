@@ -6,12 +6,9 @@ import {ERC721} from "solady/tokens/ERC721.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-import {SafeCastLib} from "solady/utils/SafeCastLib.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Votes} from "openzeppelin-contracts/governance/utils/Votes.sol";
-import {EIP712} from "openzeppelin-contracts/utils/cryptography/EIP712.sol";
 
-contract BoostPass is Initializable, Ownable, ERC721, Votes {
+contract BoostPass is Initializable, Ownable, ERC721 {
     using LibString for *;
     using SafeTransferLib for address;
     /*//////////////////////////////////////////////////////////////
@@ -41,7 +38,7 @@ contract BoostPass is Initializable, Ownable, ERC721, Votes {
     //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
-    constructor() EIP712("BoostPass", "1") {
+    constructor() {
         _disableInitializers();
     }
 
@@ -142,14 +139,6 @@ contract BoostPass is Initializable, Ownable, ERC721, Votes {
         return LibString.concat(baseURI, owner.toHexString());
     }
 
-    function clock() public view virtual override returns (uint48) {
-        return SafeCastLib.toUint48(block.timestamp);
-    }
-
-    function CLOCK_MODE() public view virtual override returns (string memory) {
-        return "mode=timestamp";
-    }
-
     /*//////////////////////////////////////////////////////////////
                              INTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -164,22 +153,7 @@ contract BoostPass is Initializable, Ownable, ERC721, Votes {
     /// @dev soulbound tokens are not transferable
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if (from != address(0)) revert TokenNotTransferable();
-        ERC721._beforeTokenTransfer(from, to, tokenId);
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 firstTokenId
-    ) internal virtual override {
-        if (from == address(0)) {
-            _transferVotingUnits(from, to, 1);
-            ERC721._afterTokenTransfer(from, to, firstTokenId);
-        }
-    }
-
-    function _getVotingUnits(address account) internal view override returns (uint256) {
-        return balanceOf(account);
-    }
 }
-
