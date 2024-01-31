@@ -19,10 +19,10 @@ contract BoostPassDeploy is Script {
         address claimSignerAddress = vm.envAddress("CLAIM_SIGNER_ADDRESS");
         address treasuryAddress = owner; // TODO: Replace with actual treasury address
         string memory baseURI = "https://api.rabbithole.gg/v1/boost-pass/"; // TODO: Replace with actual baseURI
-        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address, string)", owner, claimSignerAddress, 2000000000000000, treasuryAddress, baseURI);
+        bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address,string)", owner, claimSignerAddress, 2000000000000000, treasuryAddress, baseURI);
         address boostPassImpAddress = address(new BoostPass());
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
-        bytes32 salt = bytes32(abi.encodePacked(bytes20(owner), bytes12("BoostPass")));
+        bytes32 salt = bytes32(abi.encodePacked(bytes20(owner), bytes12("BoostPass3")));
 
         ERC1967Factory(ERC1967FactoryConstants.ADDRESS).deployDeterministicAndCall(boostPassImpAddress, owner, salt, initializeCallData);
 
