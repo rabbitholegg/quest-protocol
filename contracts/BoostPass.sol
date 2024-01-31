@@ -8,9 +8,10 @@ import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {SafeCastLib} from "solady/utils/SafeCastLib.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
-import {VotesUpgradeable} from "openzeppelin-contracts-upgradeable/governance/utils/VotesUpgradeable.sol";
+import {Votes} from "openzeppelin-contracts/governance/utils/Votes.sol";
+import {EIP712} from "openzeppelin-contracts/utils/cryptography/EIP712.sol";
 
-contract BoostPass is Initializable, Ownable, ERC721, VotesUpgradeable {
+contract BoostPass is Initializable, Ownable, ERC721, Votes {
     using LibString for *;
     using SafeTransferLib for address;
     /*//////////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@ contract BoostPass is Initializable, Ownable, ERC721, VotesUpgradeable {
     //////////////////////////////////////////////////////////////*/
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line func-visibility
-    constructor() {
+    constructor() EIP712("BoostPass", "1") {
         _disableInitializers();
     }
 
