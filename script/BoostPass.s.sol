@@ -17,8 +17,8 @@ contract BoostPassDeploy is Script {
 
         address owner = vm.envAddress("MAINNET_PRIVATE_KEY_PUBLIC_ADDRESS");
         address claimSignerAddress = vm.envAddress("CLAIM_SIGNER_ADDRESS");
-        address treasuryAddress = owner; // TODO: Replace with actual treasury address
-        string memory baseURI = "https://api.rabbithole.gg/v1/boost-pass/"; // TODO: Replace with actual baseURI
+        address treasuryAddress = 0x48E6a039bcF6d99806Ce4595fC59e4A7C0CaAB19; // llama treasury address
+        string memory baseURI = "https://api.rabbithole.gg/v1/boost-pass/";
         bytes memory initializeCallData = abi.encodeWithSignature("initialize(address,address,uint256,address,string)", owner, claimSignerAddress, 2000000000000000, treasuryAddress, baseURI);
         address boostPassImpAddress = address(new BoostPass());
         // The factory will revert if the the caller is not the first 20 bytes of the salt; preventing front-running
