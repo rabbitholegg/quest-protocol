@@ -12,6 +12,7 @@ extra_output = ["storageLayout"]
 libs = ["node_modules", "lib"]
 fs_permissions = [{ access = "read", path = "./"}]
 gas_reports = ["Quest", "Quest1155", "QuestFactory"]
+via_ir = true
 
 [fmt]
 multiline_func_header = "params_first"
