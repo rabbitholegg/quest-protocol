@@ -13,6 +13,7 @@ contract QuestData is Test {
         bytes16 QUEST_ID;
         string  ACTION_TYPE;
         string QUEST_NAME;
+        string PROJECT_NAME;
         uint32 CHAIN_ID;
         bytes32 TX_HASH;
         string  JSON_MSG;

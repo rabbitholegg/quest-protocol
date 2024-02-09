@@ -8,8 +8,12 @@ contract Events {
     event QuestCreated(
         address indexed creator,
         address indexed contractAddress,
+        string projectName,
+        string questName,
         string questId,
         string questType,
+        string actionType,
+        uint32 chainId,
         address rewardToken,
         uint256 endTime,
         uint256 startTime,

@@ -83,7 +83,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             REWARD_AMOUNT,
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
-            "questName"
+            "questName",
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);
@@ -153,7 +154,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             REWARD_AMOUNT,
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
-            "questName"
+            "questName",
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);
@@ -222,7 +224,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             1,
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
-            "questName"
+            "questName",
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);
@@ -266,7 +269,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             1,
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
-            "questName"
+            "questName",
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);
