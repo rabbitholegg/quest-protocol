@@ -43,6 +43,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         QUEST_ID : hex'550e8400e29b41d4a716446655440000',
         ACTION_TYPE: "actionType",
         QUEST_NAME: "questName",
+        PROJECT_NAME: "projectName",
         CHAIN_ID : 7777777,
         TX_HASH : hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516',
         JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}'
@@ -103,7 +104,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             1,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         Quest1155 quest1155 = Quest1155(payable(questAddress));
@@ -120,9 +122,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
 
         vm.expectEmit(true,false,true,true);
-        emit QuestCreated(questCreator, address(0), QUEST.QUEST_ID_STRING, "erc20", address(sampleERC20), QUEST.END_TIME, QUEST.START_TIME, QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT);
+        emit QuestCreated(questCreator, address(0), QUEST.PROJECT_NAME, QUEST.QUEST_NAME, QUEST.QUEST_ID_STRING, "erc20", QUEST.ACTION_TYPE, QUEST.CHAIN_ID, address(sampleERC20), QUEST.END_TIME, QUEST.START_TIME, QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT);
 
         address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -130,7 +133,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         Quest quest = Quest(payable(questAddress));
@@ -149,6 +153,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         vm.expectRevert(abi.encodeWithSelector(RewardNotAllowed.selector));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -156,7 +161,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
     }
 
@@ -167,6 +173,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -174,11 +181,13 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -186,7 +195,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
     }
 
@@ -200,6 +210,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.expectRevert(abi.encodeWithSelector(Erc20QuestAddressNotSet.selector));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -207,7 +218,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
     }
 
@@ -221,6 +233,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.createERC1155Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC1155),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -228,7 +241,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             1,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -269,6 +283,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -276,8 +291,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING, 
             QUEST.ACTION_TYPE, 
-            QUEST.QUEST_NAME
-            
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -309,6 +324,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -316,7 +332,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -337,6 +354,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -344,7 +362,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -406,6 +425,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC1155.setApprovalForAll(address(questFactory), true);
 
         questFactory.createERC1155Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC1155),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -413,7 +433,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             1,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -439,6 +460,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -446,7 +468,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -489,6 +512,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -496,7 +520,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -530,6 +555,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
             QUEST.START_TIME,
@@ -537,7 +563,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.REWARD_AMOUNT,
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
         );
 
         IQuestFactory.QuestData memory questData = questFactory.questData(QUEST.QUEST_ID_STRING);

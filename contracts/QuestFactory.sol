@@ -153,7 +153,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 rewardAmount_,
         string memory questId_,
         string memory actionType_,
-        string memory questName_
+        string memory questName_,
+        string memory projectName_
     ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
@@ -166,7 +167,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 questId_,
                 actionType_,
                 questName_,
-                "erc20"
+                "erc20",
+                projectName_
             )
         );
     }
@@ -191,7 +193,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 tokenId_,
         string memory questId_,
         string memory actionType_,
-        string memory questName_
+        string memory questName_,
+        string memory projectName_
     ) external payable nonReentrant returns (address) {
         return createERC1155QuestInternal(
             ERC1155QuestData(
@@ -203,7 +206,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 tokenId_,
                 questId_,
                 actionType_,
-                questName_
+                questName_,
+                projectName_
             )
         );
     }
@@ -217,7 +221,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 tokenId_,
         string memory questId_,
         string memory actionType_,
-        string memory questName_
+        string memory questName_,
+        string memory projectName_
     ) external payable nonReentrant returns (address) {
         return createERC1155QuestInternal(
             ERC1155QuestData(
@@ -229,7 +234,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 tokenId_,
                 questId_,
                 actionType_,
-                questName_
+                questName_,
+                projectName_
             )
         );
     }
@@ -253,6 +259,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 totalParticipants_,
                 tokenId_,
                 questId_,
+                "",
                 "",
                 ""
             )
@@ -281,7 +288,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 questId_,
                 actionType_,
                 questName_,
-                "erc20"
+                "erc20",
+                ""
             )
         );
     }
@@ -308,7 +316,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 questId_,
                 "",
                 "",
-                "erc20"
+                "erc20",
+                ""
             )
         );
     }
@@ -686,8 +695,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit QuestCreated(
             msg.sender,
             address(newQuest),
+            data_.projectName,
+            data_.questName,
             data_.questId,
-            "erc1155",
+            currentQuest.questType,
+            data_.actionType,
+            data_.txHashChainId,
             data_.rewardTokenAddress,
             data_.endTime,
             data_.startTime,
@@ -715,8 +728,12 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         emit QuestCreated(
             msg.sender,
             address(newQuest),
+            data_.projectName,
+            data_.questName,
             data_.questId,
             currentQuest.questType,
+            data_.actionType,
+            data_.txHashChainId,
             data_.rewardTokenAddress,
             data_.endTime,
             data_.startTime,
