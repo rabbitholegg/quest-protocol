@@ -7,6 +7,7 @@ import {ECDSA} from "solady/utils/ECDSA.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
+import {BoostPassVotes} from "./BoostPassVotes.sol";
 
 contract BoostPass is Initializable, Ownable, ERC721 {
     using LibString for *;
@@ -19,6 +20,7 @@ contract BoostPass is Initializable, Ownable, ERC721 {
     uint256 public mintFee;
     address public treasuryAddress;
     string private baseURI;
+    address private boostPassVotesAddress;
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -118,6 +120,10 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         baseURI = baseURI_;
     }
 
+    function setBoostPassVotesAddress(address boostPassVotesAddress_) external onlyOwner {
+        boostPassVotesAddress = boostPassVotesAddress_;
+    }
+
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -156,4 +162,9 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
+    function _afterTokenTransfer(address from, address to, uint256 /*tokenId*/) internal override {
+        if (boostPassVotesAddress != address(0)) {
+            BoostPassVotes(boostPassVotesAddress).afterTokenTransfer(from, to);
+        }
+    }
 }
