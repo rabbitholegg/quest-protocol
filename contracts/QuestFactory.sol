@@ -815,6 +815,15 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory actionType,
         string memory questName
     ) external pure returns (string memory) {
+        return _buildJsonString(txHash, txHashChainId, actionType, questName);
+    }
+
+    function _buildJsonString(
+        bytes32 txHash,
+        uint32 txHashChainId,
+        string memory actionType,
+        string memory questName
+    ) internal pure returns (string memory) {
         // {
         //     actionTxHashes: ["actionTxHash1"],
         //     actionNetworkChainIds: ["chainId1"],
