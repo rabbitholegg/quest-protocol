@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.19;
 
+// solhint-disable no-global-import, no-console
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
+
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
 import {QuestFactory} from "contracts/QuestFactory.sol";
@@ -46,7 +48,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         PROJECT_NAME: "projectName",
         CHAIN_ID : 7777777,
         TX_HASH : hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516',
-        JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"questName":"questName","actionType":"actionType"}'
+        JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"actionType":"actionType"}'
     });
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
