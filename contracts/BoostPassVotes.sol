@@ -51,7 +51,7 @@ contract BoostPassVotes is Context, EIP712, IERC5805 {
     }
 
     function getVotes(address account) external view returns (uint256) {
-        return BoostPass(boostPassAddress).balanceOf(account);
+        return _delegateCheckpoints[account].latest() + BoostPass(boostPassAddress).balanceOf(account);
     }
 
     function getPastVotes(address account, uint256 timepoint) public view returns (uint256) {
@@ -113,11 +113,11 @@ contract BoostPassVotes is Context, EIP712, IERC5805 {
         if (from == address(0)) {
             _push(_totalCheckpoints, _add, SafeCastLib.toUint224(amount));
         }
-        // we may not need this if we only allow mint
         if (to == address(0)) {
             _push(_totalCheckpoints, _subtract, SafeCastLib.toUint224(amount));
         }
-        _moveDelegateVotes(delegates(from), delegates(to), amount);
+        // we don't need to move delegate votes upon mint
+        // _moveDelegateVotes(delegates(from), delegates(to), amount);
     }
 
     function _moveDelegateVotes(address from, address to, uint256 amount) private {

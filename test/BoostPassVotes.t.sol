@@ -19,26 +19,17 @@ contract BoostPassVotesTest is Test, TestUtils {
     using LibString for address;
     using LibString for uint256;
 
-    error AddressNotSigned();
-    error TokenNotTransferable();
-    error AddressAlreadyMinted();
-    error InvalidMintFee();
-    error ToAddressIsNotSender();
-    
-    // This error exists in Solady ERC721.sol
-    error TokenDoesNotExist();
-
-    event BoostPassMinted(address indexed minter, address indexed referrer, uint256 referrerFee, uint256 treasuryFee, uint256 tokenId);
-
     BoostPass internal boostPass;
     ERC1967Factory internal factory;
     BoostPassVotes internal boostPassVotes;
     MyGovernor internal myGovernor;
+    ERC20 internal dai;
 
     uint256 claimSignerPrivateKey;
     address internal claimSignerAddr;
     address internal owner;
     address internal minter;
+    address internal delegatee;
     uint256 internal sepoliaFork;
     uint256 internal arbitrumFork;
 
@@ -65,29 +56,27 @@ contract BoostPassVotesTest is Test, TestUtils {
         vm.label(boostPassVotesAddr, "BoostPassVotes");
 
         minter = makeAddr('minter');
+        delegatee = makeAddr('delegatee');
         vm.deal(minter, 1 ether);
+        vm.deal(delegatee, 1 ether);
 
         // deploy MyGovernor contract
         myGovernor = new MyGovernor(IVotes(boostPassVotesAddr));
         address myGovernorAddr = address(myGovernor);
         vm.label(myGovernorAddr, "MyGovernor");
 
+        assertEq(boostPassVotes.getVotes(minter), 0);
+
         // upgrade BoostPass contract
         factory = ERC1967Factory(ERC1967FactoryConstants.ADDRESS);
         vm.startPrank(owner);
         factory.upgrade(boostPassAddr, address(new BoostPass()));
-        vm.stopPrank();
-    }
-
-    function test_proposal_execution() public {
-        vm.selectFork(sepoliaFork);
-
-        assertEq(boostPassVotes.getVotes(minter), 0);
 
         // manually set claimSignerAddress so that we can mint on this fork
-        vm.prank(owner);
         boostPass.setClaimSignerAddress(claimSignerAddr);
         assertEq(boostPass.claimSignerAddress(), claimSignerAddr);
+
+        vm.stopPrank();
 
         // mint a BoostPass
         bytes memory data = abi.encode(minter, address(0));
@@ -101,16 +90,19 @@ contract BoostPassVotesTest is Test, TestUtils {
         assertEq(boostPassVotes.getVotes(minter), 1);
 
         // use DAI and send it to the governor contract
-        address daiAddress = 0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6;
-        ERC20 DAI = ERC20(daiAddress);
-        deal(address(DAI), address(myGovernor), 10 ether);
-
+        address daiAddress = 0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6; // https://sepolia.etherscan.io/address/0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6
+        dai = ERC20(daiAddress);
+        deal(address(dai), address(myGovernor), 10 ether);
+    }
+  
+    function test_proposal_execution() public {
+        vm.selectFork(sepoliaFork);
 
         // create proposal
         bytes memory transferCallData = abi.encodeWithSignature("transfer(address,uint256)", owner, 1 ether);
         vm.prank(owner);
         address[] memory targets = new address[](1);
-        targets[0] = daiAddress;
+        targets[0] = address(dai);
         uint256[] memory values = new uint256[](1);
         values[0] = 0;
         bytes[] memory calldatas = new bytes[](1);
@@ -130,6 +122,27 @@ contract BoostPassVotesTest is Test, TestUtils {
         uint256 successfulProposalId = myGovernor.execute(targets, values, calldatas, keccak256(abi.encodePacked(description)));
 
         assertEq(successfulProposalId, proposalId);
-        assertEq(DAI.balanceOf(owner), 1 ether);
+        assertEq(dai.balanceOf(owner), 1 ether);
+    }
+
+    function test_delegate() public {
+        vm.selectFork(sepoliaFork);
+
+        // delegate votes
+        vm.prank(minter);
+        boostPassVotes.delegate(delegatee);
+        assertEq(boostPassVotes.delegates(minter), delegatee);
+        assertEq(boostPassVotes.getVotes(delegatee), 1);
+
+        // delegatee should mint and increase voting power
+        bytes memory data = abi.encode(delegatee, address(0));
+        bytes32 msgHash = keccak256(data);
+        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
+        uint256 mintFee = boostPass.mintFee();
+        vm.prank(delegatee);
+        boostPass.mint{value: mintFee}(signature, data);
+
+        assertEq(boostPass.balanceOf(delegatee), 1);
+        assertEq(boostPassVotes.getVotes(delegatee), 2);
     }
 }
