@@ -347,17 +347,27 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
 
         if(tx.origin != msg.sender) revert txOriginMismatch();
 
-        string memory jsonData_ = this.buildJsonString(txHash_, txHashChainId_, quest_.actionType, quest_.questName);
+        string memory jsonData_ = _buildJsonString(txHash_, txHashChainId_, quest_.actionType);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
-        this.claimOptimized{value: msg.value}(abi.encodePacked(r_,vs_), claimData_);
+        _claimOptimized(abi.encodePacked(r_,vs_), claimData_);
     }
 
     /// @notice External use is deprecated
     /// @dev Claim rewards for a quest
-    /// @param data_ The claim data in abi encoded bytes
     /// @param signature_ The signature of the claim data
+    /// @param data_ The claim data in abi encoded bytes
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
+        _claimOptimized(signature_, data_);
+    }
+
+    /// @dev Claim rewards for a quest
+    /// @param signature_ The signature of the claim data
+    /// @param data_ The claim data in abi encoded bytes
+    function _claimOptimized(
+        bytes memory signature_,
+        bytes memory data_
+    ) internal {
         (
             address claimer_,
             address ref_,
@@ -809,23 +819,40 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         questContract.transferOwnership(sender);
     }
 
+    /// @dev Build the expected json string for a quest
+    /// @param txHash The transaction hash
+    /// @param txHashChainId The chain id of the transaction hash
+    /// @param actionType The action type for the quest
+    /// @param -deprecated- The name of the quest
+    /// @return string The json string
     function buildJsonString(
         bytes32 txHash,
         uint32 txHashChainId,
         string memory actionType,
-        string memory questName
+        string memory // questName - not used
     ) external pure returns (string memory) {
+        return _buildJsonString(txHash, txHashChainId, actionType);
+    }
+
+    /// @dev Build the expected json string for a quest
+    /// @param txHash The transaction hash
+    /// @param txHashChainId The chain id of the transaction hash
+    /// @param actionType The action type for the quest
+    /// @return string The json string
+    function _buildJsonString(
+        bytes32 txHash,
+        uint32 txHashChainId,
+        string memory actionType
+    ) internal pure returns (string memory) {
         // {
         //     actionTxHashes: ["actionTxHash1"],
         //     actionNetworkChainIds: ["chainId1"],
-        //     questName: "quest name",
         //     actionType: "mint"
         // }
         return string(abi.encodePacked(
             '{"actionTxHashes":["', uint256(txHash).toHexString(32),
             '"],"actionNetworkChainIds":[', uint256(txHashChainId).toString(),
-            '],"questName":"', questName,
-            '","actionType":"', actionType, '"}'
+            '],"actionType":"', actionType, '"}'
         ));
     }
 
