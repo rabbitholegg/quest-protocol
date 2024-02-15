@@ -63,3 +63,21 @@ contract QuestFactoryDeploy is Script {
         vm.stopBroadcast();
     }
 }
+
+contract QuestFactoryWhitelistToken is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("MAINNET_PRIVATE_KEY");
+        // Chang this value to whitelist other tokens
+        address TOKEN_TO_WHITELIST = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
+        vm.startBroadcast(deployerPrivateKey);
+
+
+        // Initialize
+        QuestFactory(C.QUEST_FACTORY_ADDRESS).setRewardAllowlistAddress(
+            TOKEN_TO_WHITELIST,
+            true
+        );
+
+        vm.stopBroadcast();
+    }
+}
