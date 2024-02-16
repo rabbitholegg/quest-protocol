@@ -156,6 +156,11 @@ contract BoostPass is Initializable, Ownable, ERC721 {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(hash_), signature_);
     }
 
+    /// @dev Returns the total supply of Boost Passes
+    function totalSupply() public view returns (uint256) {
+        return _tokenIdCounter;
+    }
+
     /// @dev soulbound tokens are not transferable
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if (from != address(0)) revert TokenNotTransferable();

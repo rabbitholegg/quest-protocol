@@ -36,6 +36,11 @@ contract BoostPassVotesTest is Test, TestUtils {
 
     Vm.Wallet internal minter;
 
+    error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
+    error VotesExpiredSignature(uint256 expiry);
+    error MsgSenderIsNotBoostPass();
+    error MsgSenderIsNotBoostPassOwner();
+
     function setUp() public virtual {
         string memory SEPOLIA_RPC_URL = vm.envString("ALCHEMY_SEPOLIA_RPC");
         // string memory ARBITRUM_RPC_URL = vm.envString("ALCHEMY_ARBITRUM_RPC");
@@ -80,9 +85,15 @@ contract BoostPassVotesTest is Test, TestUtils {
         boostPass.setClaimSignerAddress(claimSignerAddr);
         assertEq(boostPass.claimSignerAddress(), claimSignerAddr);
 
+        vm.warp(block.timestamp + 1);
+
+        // set timestamp and supply
+        boostPassVotes.setTimestampAndSupply();
+
         vm.stopPrank();
 
-        // mint a BoostPass
+        assertEq(boostPassVotes.boostPassSupplyAtCheckpoint(), boostPass.totalSupply());
+     
         bytes memory data = abi.encode(minterAddress, address(0));
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
@@ -92,11 +103,17 @@ contract BoostPassVotesTest is Test, TestUtils {
 
         assertEq(boostPass.balanceOf(minterAddress), 1);
         assertEq(boostPassVotes.getVotes(minterAddress), 1);
+    function test_set_timestamp_and_supply() public {
+        assertEq(block.number, 5296315);
+        assertEq(boostPassVotes.boostPassSupplyAtCheckpoint(), boostPass.totalSupply()); // account for mint that happens in setUp
 
-        // use DAI and send it to the governor contract
-        address daiAddress = 0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6; // https://sepolia.etherscan.io/address/0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6
-        dai = ERC20(daiAddress);
-        deal(address(dai), address(myGovernor), 10 ether);
+        vm.expectRevert(MsgSenderIsNotBoostPassOwner.selector);
+        boostPassVotes.setTimestampAndSupply();
+
+        vm.startPrank(owner);
+        boostPassVotes.setTimestampAndSupply();
+    }
+
     }
   
     function test_proposal_execution() public {

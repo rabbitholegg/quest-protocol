@@ -24,8 +24,11 @@ contract BoostPassVotes is Context, EIP712, IERC5805 {
     mapping(address => Counters.Counter) private _nonces;
 
     address public boostPassAddress;
+    uint256 public boostPassCheckpoint;
+    uint256 public boostPassSupplyAtCheckpoint;
 
     error MsgSenderIsNotBoostPass();
+    error MsgSenderIsNotBoostPassOwner();
 
     // errors grabbed from OZ v5 Votes.sol 
     error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
@@ -38,8 +41,20 @@ contract BoostPassVotes is Context, EIP712, IERC5805 {
         _;
     }
 
+    modifier onlyBoostPassOwner() {
+        if (msg.sender != BoostPass(boostPassAddress).owner()) {
+            revert MsgSenderIsNotBoostPassOwner();
+        }
+        _;
+    }
+
     constructor(address boostPassAddress_) EIP712("BoostPassVotes", "1") {
         boostPassAddress = boostPassAddress_;
+    }
+
+    function setTimestampAndSupply() external onlyBoostPassOwner {
+        boostPassCheckpoint = block.timestamp;
+        boostPassSupplyAtCheckpoint = BoostPass(boostPassAddress).totalSupply();
     }
 
     function clock() public view returns (uint48) {
