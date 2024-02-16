@@ -14,7 +14,6 @@ import {TestUtils} from "./helpers/TestUtils.sol";
 import {IVotes} from "openzeppelin-contracts/governance/utils/IVotes.sol";
 import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 
-// TODO: Make notes of which block the forked tests are running on
 contract BoostPassVotesTest is Test, TestUtils {
     using LibString for *;
     using LibString for address;
@@ -43,15 +42,18 @@ contract BoostPassVotesTest is Test, TestUtils {
 
     function setUp() public virtual {
         string memory SEPOLIA_RPC_URL = vm.envString("ALCHEMY_SEPOLIA_RPC");
-        // string memory ARBITRUM_RPC_URL = vm.envString("ALCHEMY_ARBITRUM_RPC");
         sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
+
+        // string memory ARBITRUM_RPC_URL = vm.envString("ALCHEMY_ARBITRUM_RPC");
         // arbitrumFork = vm.createFork(ARBITRUM_RPC_URL);
    
+        vm.selectFork(sepoliaFork);
+        vm.rollFork(5296315); // arbitrary block number used for fork-testing
+
         address boostPassAddr = 0x0Bd0E39db7F3557Ae9c071209b7B26808157a0Aa;
         boostPass = BoostPass(boostPassAddr);
         vm.label(address(boostPass), "BoostPass");
 
-        vm.selectFork(sepoliaFork);
         owner = boostPass.owner();
 
         Vm.Wallet memory claimSigner = vm.createWallet("claimSigner");
@@ -90,10 +92,19 @@ contract BoostPassVotesTest is Test, TestUtils {
         // set timestamp and supply
         boostPassVotes.setTimestampAndSupply();
 
+        vm.warp(block.timestamp + 1);
+
         vm.stopPrank();
 
         assertEq(boostPassVotes.boostPassSupplyAtCheckpoint(), boostPass.totalSupply());
      
+        // use DAI and send it to the governor contract
+        address daiAddress = 0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6; // https://sepolia.etherscan.io/address/0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6
+        dai = ERC20(daiAddress);
+        deal(address(dai), address(myGovernor), 10 ether);
+    }
+
+    function mint_boost_pass() internal {
         bytes memory data = abi.encode(minterAddress, address(0));
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
@@ -103,6 +114,8 @@ contract BoostPassVotesTest is Test, TestUtils {
 
         assertEq(boostPass.balanceOf(minterAddress), 1);
         assertEq(boostPassVotes.getVotes(minterAddress), 1);
+    }
+
     function test_set_timestamp_and_supply() public {
         assertEq(block.number, 5296315);
         assertEq(boostPassVotes.boostPassSupplyAtCheckpoint(), boostPass.totalSupply()); // account for mint that happens in setUp
@@ -114,10 +127,49 @@ contract BoostPassVotesTest is Test, TestUtils {
         boostPassVotes.setTimestampAndSupply();
     }
 
+    function test_get_past_votes() public {
+        // get votes before upgrade
+        uint256 previousTimepoint = boostPassVotes.boostPassCheckpoint() - 1;
+        assertEq(boostPassVotes.getPastVotes(minterAddress, previousTimepoint), 0);
+
+        mint_boost_pass();
+
+        vm.warp(block.timestamp + 1);
+
+        // get votes after upgrade (revert)
+        uint256 timepoint = boostPassVotes.clock();
+        vm.expectRevert(abi.encodeWithSelector(ERC5805FutureLookup.selector, timepoint, timepoint));
+        boostPassVotes.getPastTotalSupply(timepoint);
+    }
+
+    function test_get_past_total_supply() public {
+        uint256 totalSupplyBeforeMint = boostPass.totalSupply();
+
+        mint_boost_pass();
+
+        vm.warp(block.timestamp + 1);
+
+        // get supply before upgrade
+        uint256 previousTimepoint = boostPassVotes.boostPassCheckpoint() - 1;
+        assertEq(boostPassVotes.getPastTotalSupply(previousTimepoint), totalSupplyBeforeMint);
+
+        // get supply after upgrade (revert)
+        uint256 timepoint = boostPassVotes.clock();
+        vm.expectRevert(abi.encodeWithSelector(ERC5805FutureLookup.selector, timepoint, timepoint));
+        boostPassVotes.getPastTotalSupply(timepoint);
+
+        // get supply after upgrade
+        vm.warp(block.timestamp + 1);
+        assertEq(boostPassVotes.getPastTotalSupply(timepoint), boostPass.totalSupply());
+    }
+
+    function test_after_token_transfer() public {
+        vm.expectRevert(MsgSenderIsNotBoostPass.selector);
+        boostPassVotes.afterTokenTransfer(address(0), address(0));
     }
   
     function test_proposal_execution() public {
-        vm.selectFork(sepoliaFork);
+        mint_boost_pass();
 
         // create proposal
         bytes memory transferCallData = abi.encodeWithSignature("transfer(address,uint256)", owner, 1 ether);
@@ -147,7 +199,7 @@ contract BoostPassVotesTest is Test, TestUtils {
     }
 
     function test_delegate() public {
-        vm.selectFork(sepoliaFork);
+        mint_boost_pass();
 
         // delegate votes
         vm.prank(minterAddress);
@@ -163,12 +215,23 @@ contract BoostPassVotesTest is Test, TestUtils {
         vm.prank(delegatee);
         boostPass.mint{value: mintFee}(signature, data);
 
+        // test multiple delegates
+        address delegatee2 = makeAddr('delegatee2');
+        vm.deal(delegatee2, 1 ether);
+        bytes memory data2 = abi.encode(delegatee2, address(0));
+        bytes32 msgHash2 = keccak256(data2);
+        bytes memory signature2 = signHash(msgHash2, claimSignerPrivateKey);
+        vm.startPrank(delegatee2);
+        boostPass.mint{value: mintFee}(signature2, data2);
+        boostPassVotes.delegate(delegatee);
+        vm.stopPrank();
+
         assertEq(boostPass.balanceOf(delegatee), 1);
-        assertEq(boostPassVotes.getVotes(delegatee), 2);
+        assertEq(boostPassVotes.getVotes(delegatee), 3);
     }
 
     function test_delegate_by_sig() public {
-        vm.selectFork(sepoliaFork);
+        mint_boost_pass();
 
         // Generate a signature for delegation
         bytes32 delegationByteHash = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
@@ -184,7 +247,7 @@ contract BoostPassVotesTest is Test, TestUtils {
         assertEq(boostPassVotes.delegates(minterAddress), delegatee);
         assertEq(boostPassVotes.getVotes(delegatee), 1);
 
-        // Delegatee should mint and increase voting power
+        // delegatee should mint and increase voting power
         bytes memory data = abi.encode(delegatee, address(0));
         bytes32 msgHash = keccak256(data);
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);

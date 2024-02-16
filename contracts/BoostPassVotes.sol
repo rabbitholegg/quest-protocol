@@ -90,7 +90,17 @@ contract BoostPassVotes is Context, EIP712, IERC5805 {
             revert ERC5805FutureLookup(timepoint, currentTimepoint);
         }
 
-        return _totalCheckpoints.upperLookupRecent(SafeCastLib.toUint32(timepoint));
+        if (timepoint <= boostPassCheckpoint) {
+            return boostPassSupplyAtCheckpoint;
+        }
+
+        uint256 pastTotalSupply = _totalCheckpoints.upperLookupRecent(SafeCastLib.toUint32(timepoint));
+        
+        if (pastTotalSupply != 0) {
+            return pastTotalSupply;
+        }
+
+        return BoostPass(boostPassAddress).totalSupply();
     }
 
     function delegates(address account) public view returns (address) {
