@@ -31,4 +31,15 @@ contract TestUtils is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
         return abi.encodePacked(r, s, v);
     }
+
+    function getSplitSignature(uint256 privateKey, bytes32 msgHash) internal pure returns (bytes memory _signature, bytes32 _r, bytes32 _vs) {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, msgHash);
+
+        uint8 normalizedV = v - 27;
+        bytes32 shiftedV = bytes32(uint256(normalizedV) << 255);
+
+        _signature = abi.encodePacked(r, s, v);
+        _r = r;
+        _vs = shiftedV | s;
+    }
 }

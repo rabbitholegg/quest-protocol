@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.19;
 
-// solhint-disable no-global-import, no-console
+// solhint-disable no-global-import
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
 
 import {SampleERC1155} from "contracts/test/SampleERC1155.sol";
 import {SampleERC20} from "contracts/test/SampleERC20.sol";
@@ -13,7 +12,7 @@ import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
-import {ECDSA} from "solady/utils/ECDSA.sol";
+import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
 import {Events} from "./helpers/Events.sol";
@@ -96,46 +95,15 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encodePacked(txHash, r, s, referrer); // this trims all zeros
+        bytes memory data = abi.encodePacked(txHash, r, vs, referrer);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
         vm.startPrank(participant, participant);
         vm.recordLogs();
+        vm.expectRevert(IQuestFactory.Deprecated.selector);
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success, "erc20 questAddress.call failed");
-
-        // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
-
-        // referrer payout
-        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 5);
-
-        bytes32 questAddressBytes = bytes32(uint256(uint160(questAddress)));
-        // assert indexed log data for entries[1]
-        assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[1].topics[2], questAddressBytes);
-
-        // assert non-indexed log data for entries[1]
-        (string memory jsonLog) = abi.decode(entries[1].data, (string));
-        assertEq(jsonLog, json);
-
-        // assert indexed log data for entries[2]
-        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
-        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], questAddressBytes);
-
-        // assert non-indexed log data for entries[2]
-        (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
-        assertEq(questIdLog, string("550e8400-e29b-41d4-a716-446655440000"));
-        assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, REWARD_AMOUNT);
 
         vm.stopPrank();
     }
@@ -167,43 +135,15 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encodePacked(txHash, r, s);
+        bytes memory data = abi.encodePacked(txHash, r, vs);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
         vm.startPrank(participant, participant);
         vm.recordLogs();
+        vm.expectRevert(IQuestFactory.Deprecated.selector);
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success, "erc20 questAddress.call failed");
-
-        // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), REWARD_AMOUNT, "particpiant erc20 balance");
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 3);
-
-        bytes32 questAddressBytes = bytes32(uint256(uint160(questAddress)));
-        // assert indexed log data for entries[1]
-        assertEq(entries[1].topics[0], keccak256("QuestClaimedData(address,address,string)"));
-        assertEq(entries[1].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[1].topics[2], questAddressBytes);
-
-        // assert non-indexed log data for entries[1]
-        (string memory jsonLog) = abi.decode(entries[1].data, (string));
-        assertEq(jsonLog, json);
-
-        // assert indexed log data for entries[2]
-        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
-        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], questAddressBytes);
-
-        // assert non-indexed log data for entries[2]
-        (string memory questIdLog, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
-        assertEq(questIdLog, string("550e8400-e29b-41d4-a716-446655440000"));
-        assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, REWARD_AMOUNT);
 
         vm.stopPrank();
     }
@@ -237,22 +177,17 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encodePacked(txHash, r, s, referrer);
+        bytes memory data = abi.encodePacked(txHash, r, vs, referrer);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
         vm.startPrank(participant, participant);
         vm.recordLogs();
+        vm.expectRevert(IQuestFactory.Deprecated.selector);
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success, "1155 questAddress.call failed");
 
-        // 1155 reward
-        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
-
-        // referrer payout
-        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+        vm.stopPrank();
     }
 
     function test_claim_1155_without_ref() public{
@@ -282,19 +217,17 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "550e8400-e29b-41d4-a716-446655440000", json);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encodePacked(txHash, r, s);
+        bytes memory data = abi.encodePacked(txHash, r, vs);
         bytes memory payload = abi.encodePacked(abi.encodeWithSignature("claim()"), data);
 
         vm.startPrank(participant, participant);
         vm.recordLogs();
+        vm.expectRevert(IQuestFactory.Deprecated.selector);
         (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        require(success, "1155 questAddress.call failed");
 
-        // 1155 reward
-        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
+        vm.stopPrank();
     }
 
 }
