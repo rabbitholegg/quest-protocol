@@ -160,6 +160,7 @@ contract BoostPassVotesTest is Test, TestUtils {
 
         // get supply after upgrade
         vm.warp(block.timestamp + 1);
+        // FIXME: Supply should be 43, but remains 42
         assertEq(boostPassVotes.getPastTotalSupply(timepoint), boostPass.totalSupply());
     }
 
