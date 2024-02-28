@@ -8,4 +8,6 @@ library QuestContractConstants {
     address internal constant PROTOCOL_REWARDS_ADDRESS = 0x168437d131f8deF2d94B555FF34f4539458DD6F9;
     address internal constant PROXY_ADMIN_ADDRESS = 0xD28fbF7569f31877922cDc31a1A5B3C504E8faa1;
     address internal constant DETERMINISTIC_DEPLOY_PROXY = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+    address internal constant POWER_PASS_ADDRESS = 0xE13fbb9590CB72ba5cC7B0DEcc9dFf8027a7Fc9D; // unused
+    address internal constant BOOST_PASS_ADDRESS = 0x0Bd0E39db7F3557Ae9c071209b7B26808157a0Aa;
 }
