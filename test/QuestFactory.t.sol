@@ -268,7 +268,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     function test_claimCompressed_erc20_mocked_data() public{
-        
         bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
@@ -306,8 +305,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     function test_claimCompressed_revert_txOriginMismatch() public{
-
-        bytes memory signData = abi.encode(participant, referrer, "88e08cb1-95e6-4832-845f-a92ec8f2034a", QUEST.JSON_MSG);
+        bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
         (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
@@ -336,7 +334,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
-        vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
         vm.startPrank(participant);
         questFactory.claimCompressed{value: MINT_FEE}(dataCompressed);
     }
@@ -362,8 +359,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
 
         vm.warp(QUEST.START_TIME + 1);
-
-        
      
         bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
