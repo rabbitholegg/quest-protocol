@@ -13,7 +13,7 @@ import {Quest} from "contracts/Quest.sol";
 import {Quest1155} from "contracts/Quest1155.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
-import {ECDSA} from "solady/utils/ECDSA.sol";
+import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import {LibZip} from "solady/utils/LibZip.sol";
 import {JSONParserLib} from "solady/utils/JSONParserLib.sol";
 import {Errors} from "./helpers/Errors.sol";
@@ -252,10 +252,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) { s = s | bytes32(uint256(1) << 255); }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.startPrank(participant, participant);
@@ -273,10 +272,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
         vm.deal(participant, 1000000);
         vm.startPrank(owner);
@@ -299,7 +295,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.startPrank(participant, participant);
@@ -314,10 +310,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, "88e08cb1-95e6-4832-845f-a92ec8f2034a", QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
         vm.deal(participant, 1000000);
         vm.startPrank(owner);
@@ -340,7 +333,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.warp(QUEST.START_TIME + 1);
 
-        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
@@ -375,12 +368,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
         bytes32 msgHash = keccak256(signData);
         bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(claimSignerPrivateKey, digest);
-        if (v != 27) {
-            s = s | bytes32(uint256(1) << 255);
-        }
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
-        bytes memory data = abi.encode(QUEST.TX_HASH, r, s, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
         bytes memory dataCompressed = LibZip.cdCompress(data);
 
         vm.startPrank(participant, participant);
@@ -420,42 +410,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_claimOptimized_1155_with_ref() public{
-        vm.startPrank(questCreator);
-
-        sampleERC1155.mintSingle(questCreator, 1, QUEST.TOTAL_PARTICIPANTS);
-        sampleERC1155.setApprovalForAll(address(questFactory), true);
-
-        questFactory.createERC1155Quest(
-            QUEST.CHAIN_ID,
-            address(sampleERC1155),
-            QUEST.END_TIME,
-            QUEST.START_TIME,
-            QUEST.TOTAL_PARTICIPANTS,
-            1,
-            QUEST.QUEST_ID_STRING,
-            QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
-        );
-
-        vm.warp(QUEST.START_TIME + 1);
-
-        bytes memory data = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, "json",  address(sampleERC1155), 1);
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        vm.startPrank(participant, participant);
-        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
-
-        // 1155 reward
-        assertEq(sampleERC1155.balanceOf(participant, 1), 1, "particpiant erc1155 balance");
-
-        // referrer payout
-        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
-    }
-
-    function test_claimOptimized_erc20_with_ref() public{
+    function test_claimOptimized_revert_deprecated() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
@@ -481,70 +436,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
 
         vm.startPrank(participant, participant);
-        vm.recordLogs();
+        vm.expectRevert(abi.encodeWithSelector(IQuestFactory.Deprecated.selector));
         questFactory.claimOptimized{value: MINT_FEE}(signature, data);
-
-        // erc20 reward
-        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
-
-        // referrer payout
-        assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        assertEq(entries.length, 5);
-
-        // assert indexed log data
-        assertEq(entries[2].topics[0], keccak256("QuestClaimed(address,address,string,address,uint256)"));
-        assertEq(entries[2].topics[1], bytes32(uint256(uint160(participant))));
-        assertEq(entries[2].topics[2], bytes32(uint256(uint160(questAddress))));
-
-        // assert non-indexed log data
-        (string memory questId, address rewardToken, uint256 rewardAmountInWei) = abi.decode(entries[2].data, (string, address, uint256));
-        assertEq(questId, QUEST.QUEST_ID_STRING);
-        assertEq(rewardToken, address(sampleERC20));
-        assertEq(rewardAmountInWei, QUEST.REWARD_AMOUNT);
-
-        vm.stopPrank();
-    }
-
-    function test_claimOptimized_revert_txOriginMismatch() public{
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-
-        vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
-        address questAddress = questFactory.createERC20Quest(
-            QUEST.CHAIN_ID,
-            address(sampleERC20),
-            QUEST.END_TIME,
-            QUEST.START_TIME,
-            QUEST.TOTAL_PARTICIPANTS,
-            QUEST.REWARD_AMOUNT,
-            QUEST.QUEST_ID_STRING,
-            QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
-        );
-
-        vm.warp(QUEST.START_TIME + 1);
-
-        bytes memory data = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, "json", address(sampleERC20), 1);
-        bytes32 msgHash = keccak256(data);
-        bytes memory signature = signHash(msgHash, claimSignerPrivateKey);
-
-        // tx.origin is not msg.sender fails
-        vm.startPrank(participant, anyone);
-        vm.expectRevert(abi.encodeWithSelector(txOriginMismatch.selector));
-        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
-
-        // msg.sender as the questAddress works
-        vm.deal(questAddress, 1000000);
-        vm.startPrank(questAddress);
-        questFactory.claimOptimized{value: MINT_FEE}(signature, data);
-
-        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
-
-        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////

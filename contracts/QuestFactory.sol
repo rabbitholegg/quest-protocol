@@ -8,7 +8,7 @@ import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
 // Implements
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
 // Leverages
-import {ECDSA} from "solady/utils/ECDSA.sol";
+import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
@@ -350,15 +350,25 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory jsonData_ = _buildJsonString(txHash_, txHashChainId_, quest_.actionType);
         bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
 
-        _claimOptimized(abi.encodePacked(r_,vs_), claimData_);
+        // Since `vs_` includes `s` and the bit for `v`, we can extract `s` by masking out the `v` bit.
+        bytes32 s = vs_ & bytes32(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+
+        // Now extract the `v` by shifting `vs_` right by 255 bits and casting to a uint8
+        uint8 v = uint8((uint256(vs_) >> 255));
+
+        // If `v` is less than 27 (which means it's either 0, 1, or invalid), add 27 to push it into range (27, 28)
+        // Note that if `v` was neither 0 nor 1, this will push it out of range, and the signature will be invalid
+        if (v < 27) v += 27;
+
+        _claimOptimized(abi.encodePacked(r_, s, v), claimData_);
     }
 
     /// @notice External use is deprecated
     /// @dev Claim rewards for a quest
-    /// @param signature_ The signature of the claim data
-    /// @param data_ The claim data in abi encoded bytes
-    function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable {
-        _claimOptimized(signature_, data_);
+    /// @param -DEPRECATED- signature_ The signature of the claim data
+    /// @param -DEPRECATED- data_ The claim data in abi encoded bytes
+    function claimOptimized(bytes calldata, bytes calldata) external payable {
+        revert Deprecated();
     }
 
     /// @dev Claim rewards for a quest
