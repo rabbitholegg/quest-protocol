@@ -304,6 +304,44 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
     }
 
+    function test_claimCompressedRef_erc20_mocked_data() public{
+        bytes memory signData = abi.encode(participant, referrer, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
+        
+        bytes32 msgHash = keccak256(signData);
+        bytes32 digest = ECDSA.toEthSignedMessageHash(msgHash);
+        (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
+
+        vm.deal(participant, 1000000);
+        vm.startPrank(owner);
+        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
+        questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
+            address(sampleERC20),
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING, 
+            QUEST.ACTION_TYPE, 
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
+        );
+
+        vm.warp(QUEST.START_TIME + 1);
+
+        bytes memory data = abi.encode(QUEST.TX_HASH, r, vs, referrer, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory dataCompressed = LibZip.cdCompress(data);
+
+        vm.startPrank(anyone, anyone);
+        questFactory.claimCompressedRef{value: MINT_FEE}(dataCompressed, participant);
+
+        // erc20 reward
+        assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
+    }
+
 
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(owner);
