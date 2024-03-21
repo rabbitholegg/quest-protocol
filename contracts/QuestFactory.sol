@@ -89,10 +89,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
+    modifier checkQuest(string memory questId_) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
         if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
         _;
     }
@@ -155,7 +154,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory actionType_,
         string memory questName_,
         string memory projectName_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 txHashChainId_,
@@ -276,7 +275,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questId_,
         string memory actionType_,
         string memory questName_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 0,
@@ -304,7 +303,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questId_,
         string memory,
         uint256
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 0,

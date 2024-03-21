@@ -20,7 +20,6 @@ interface IQuestFactory {
     error QuestTypeNotSupported();
     error Reentrancy();
     error ReferralFeeTooHigh();
-    error RewardNotAllowed();
     error ZeroAddressNotAllowed();
     error QuestAddressMismatch();
     error ClaimFailed();
