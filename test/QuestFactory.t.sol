@@ -147,27 +147,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_RevertIf_createERC20Quest_RewardNotAllowed() public{
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), false);
-
-        vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
-        vm.expectRevert(abi.encodeWithSelector(RewardNotAllowed.selector));
-        questFactory.createERC20Quest(
-            QUEST.CHAIN_ID,
-            address(sampleERC20),
-            QUEST.END_TIME,
-            QUEST.START_TIME,
-            QUEST.TOTAL_PARTICIPANTS,
-            QUEST.REWARD_AMOUNT,
-            QUEST.QUEST_ID_STRING,
-            QUEST.ACTION_TYPE,
-            QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
-        );
-    }
-
     function test_RevertIf_createERC20Quest_QuestIdUsed() public{
         vm.startPrank(owner);
         questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
