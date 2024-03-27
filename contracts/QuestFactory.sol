@@ -41,7 +41,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     mapping(string => Quest) public quests;
     address public rabbitHoleReceiptContract; // not used
     address public rabbitHoleTicketsContract; // not used
-    mapping(address => bool) public rewardAllowlist;
+    mapping(address => bool) public __deprecatedrewardAllowlist;
     uint16 public questFee;
     uint256 public mintFee;
     address public defaultMintFeeRecipient;
