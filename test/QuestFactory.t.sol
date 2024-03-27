@@ -406,8 +406,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
                                 VIEW
     //////////////////////////////////////////////////////////////*/
     function test_questData() public {
-        vm.startPrank(owner);
-
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
