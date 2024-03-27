@@ -118,7 +118,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_createERC20Quest() public{
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -149,7 +148,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_RevertIf_createERC20Quest_QuestIdUsed() public{
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -183,7 +181,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_RevertIf_createERC20Quest_Erc20QuestAddressNotSet() public{
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
         questFactory.setErc20QuestAddress(address(0));
 
         vm.startPrank(questCreator);
@@ -255,7 +252,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.deal(participant, 1000000);
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -293,7 +289,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.deal(participant, 1000000);
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -323,7 +318,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -391,7 +385,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
     function test_claimOptimized_revert_deprecated() public{
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
@@ -424,7 +417,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     //////////////////////////////////////////////////////////////*/
     function test_questData() public {
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));

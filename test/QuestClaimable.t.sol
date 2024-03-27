@@ -71,7 +71,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     //////////////////////////////////////////////////////////////*/
     function test_claim_with_referrer() public {
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
@@ -110,7 +109,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
 
     function test_claim_without_referrer() public {
         vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
         referrer = address(0);
 
         vm.startPrank(questCreator);
