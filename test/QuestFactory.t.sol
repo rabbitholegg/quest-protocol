@@ -378,7 +378,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimOptimized_revert_deprecated() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        questFactory.createERC20Quest(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
