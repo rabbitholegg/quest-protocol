@@ -39,21 +39,21 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public __deprecated_rabbitHoleReceiptContract; // not used
-    address public __deprecated_rabbitHoleTicketsContract; // not used
-    mapping(address => bool) public __deprecated_rewardAllowlist; // not used
+    address private __deprecated_rabbitHoleReceiptContract; // not used
+    address private __deprecated_rabbitHoleTicketsContract; // not used
+    mapping(address => bool) private __deprecated_rewardAllowlist; // not used
     uint16 public questFee;
     uint256 public mintFee;
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    address public __deprecated_defaultReferralFeeRecipient; // not used
-    uint256 public __deprecated_nftQuestFee; // not used
-    address public __deprecated_questNFTAddress; // not used
-    mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public __deprecated_nftQuestFeeList; // not used
+    address private __deprecated_defaultReferralFeeRecipient; // not used
+    uint256 private __deprecated_nftQuestFee; // not used
+    address private __deprecated_questNFTAddress; // not used
+    mapping(address => address[]) private ownerCollections;
+    mapping(address => NftQuestFees) private __deprecated_nftQuestFeeList; // not used
     uint16 public referralFee;
-    address public __deprecated_sablierV2LockupLinearAddress; // not used
-    mapping(address => address) public __deprecated_mintFeeRecipientList; // not used
+    address private __deprecated_sablierV2LockupLinearAddress; // not used
+    mapping(address => address) private __deprecated_mintFeeRecipientList; // not used
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
