@@ -282,7 +282,6 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         (, bytes32 r, bytes32 vs) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest);
 
         vm.deal(participant, 1000000);
-        vm.startPrank(owner);
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
