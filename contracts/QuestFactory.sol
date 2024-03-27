@@ -69,7 +69,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        uint256 nftQuestFee_,
+        uint256,
         uint16 referralFee_,
         uint256 mintFee_
     ) external initializer {
@@ -80,7 +80,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
         mintFee = mintFee_;
     }
@@ -469,13 +468,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
         referralFee = referralFee_;
         emit ReferralFeeSet(referralFee_);
-    }
-
-    /// @dev set or remave a contract address to be used as a reward
-    /// @param rewardAddress_ The contract address to set
-    /// @param allowed_ Whether the contract address is allowed or not
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external onlyOwner {
-        rewardAllowlist[rewardAddress_] = allowed_;
     }
 
     /// @dev set the mintFeeRecipient
