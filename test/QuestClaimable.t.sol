@@ -100,8 +100,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        assertFalse(success, "claim failed");
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
@@ -137,8 +136,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-        assertFalse(success, "claim failed");
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
