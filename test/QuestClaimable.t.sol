@@ -70,9 +70,6 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
                              CLAIM ERC20
     //////////////////////////////////////////////////////////////*/
     function test_claim_with_referrer() public {
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
-
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
@@ -103,16 +100,12 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
     function test_claim_without_referrer() public {
-        vm.startPrank(owner);
-        questFactory.setRewardAllowlistAddress(address(sampleERC20), true);
         referrer = address(0);
-
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
         address questAddress = questFactory.createERC20Quest(
@@ -143,8 +136,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
@@ -185,8 +177,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
@@ -225,8 +216,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         vm.startPrank(participant, participant);
         vm.recordLogs();
         vm.expectRevert(IQuestFactory.Deprecated.selector);
-        (bool success, ) = questAddress.call{value: MINT_FEE}(payload);
-
+        questAddress.call{value: MINT_FEE}(payload);
         vm.stopPrank();
     }
 
