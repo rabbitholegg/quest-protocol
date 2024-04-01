@@ -33,7 +33,7 @@
         "type": "0x02",
         "from": "0x017f8ad14a2e745ea0f756bd57cd4852400be78c",
         "to": "0xd28fbf7569f31877922cdc31a1a5b3c504e8faa1",
-        "gas": "0xd0bd",
+        "gas": "0xd0ac",
         "value": "0x0",
         "data": "0x99a88ec400000000000000000000000052629961f71c1c2564c5aa22372cb1b9fa9eba3e0000000000000000000000001e65fbd38d829264093c2d67ea1f9b60d9cd27ed",
         "nonce": "0x17e",

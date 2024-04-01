@@ -21,6 +21,7 @@
     },
     {
       "hash": "0x03ac2cb316a0375928c04c9f9febfb2cb577d07964cfd4e8f83f7b1487253ac2",
+
       "transactionType": "CALL",
       "contractName": "ProxyAdmin",
       "contractAddress": "0xD28fbF7569f31877922cDc31a1A5B3C504E8faa1",
@@ -96,6 +97,7 @@
           "blockNumber": "0xc056c4",
           "transactionHash": "0x03ac2cb316a0375928c04c9f9febfb2cb577d07964cfd4e8f83f7b1487253ac2",
           "transactionIndex": "0xa",
+
           "logIndex": "0x18",
           "removed": false
         }

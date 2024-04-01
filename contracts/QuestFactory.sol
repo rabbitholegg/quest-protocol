@@ -326,6 +326,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        _claimCompressed(compressedData_, msg.sender);
+    }
+
+    function claimCompressedRef(bytes calldata compressedData_, address claimer) external payable {
+        _claimCompressed(compressedData_, claimer);
+    }
+
+    /// @dev Claim rewards for a quest
+    /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
+    /// @param claimer The address of the claimer - where rewards are sent
+    function _claimCompressed(bytes calldata compressedData_, address claimer) internal {
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
@@ -343,10 +354,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
 
-        if(tx.origin != msg.sender) revert txOriginMismatch();
-
         string memory jsonData_ = _buildJsonString(txHash_, txHashChainId_, quest_.actionType);
-        bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
+        bytes memory claimData_ = abi.encode(claimer, ref_, questIdString_, jsonData_);
 
         // Since `vs_` includes `s` and the bit for `v`, we can extract `s` by masking out the `v` bit.
         bytes32 s = vs_ & bytes32(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
@@ -386,8 +395,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             (address, address, string, string)
         );
         Quest storage quest = quests[questId_];
-
-        if(tx.origin != msg.sender && msg.sender != quest.questAddress && msg.sender != address(this)) revert txOriginMismatch();
 
         uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
         address rewardToken_ = IQuestOwnable(quest.questAddress).rewardToken();
