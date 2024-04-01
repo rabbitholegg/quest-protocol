@@ -20,7 +20,6 @@ interface IQuestFactory {
     error QuestTypeNotSupported();
     error Reentrancy();
     error ReferralFeeTooHigh();
-    error RewardNotAllowed();
     error ZeroAddressNotAllowed();
     error QuestAddressMismatch();
     error ClaimFailed();
@@ -202,7 +201,6 @@ interface IQuestFactory {
     function setDefaultMintFeeRecipient(address mintFeeRecipient_) external;
     function setProtocolFeeRecipient(address protocolFeeRecipient_) external;
     function setQuestFee(uint16 questFee_) external;
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external;
 
     // Callbacks
     function withdrawCallback(string calldata questId_, address protocolFeeRecipient_, uint protocolPayout_, address mintFeeRecipient_, uint mintPayout) external;
