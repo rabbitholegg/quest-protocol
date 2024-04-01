@@ -40,7 +40,7 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ## Addresses
 
-Mainnet, Optimism, Polygon, Arbitrum, Base, Mantle and Sepolia:
+Mainnet, Optimism, Polygon, Arbitrum, Base, Blast, Mantle and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
@@ -192,9 +192,9 @@ Then to upgrade a contract, run one of the following commands:
 
 or use xargs to deploy on every chain in one command:
 ```
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url {}
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:QuestDeploy --broadcast --verify --rpc-url {}
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:Quest1155Deploy --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/Quest.s.sol:QuestDeploy --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/Quest.s.sol:Quest1155Deploy --broadcast --verify --rpc-url {}
 ```
 and for our mantle:
 `forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url mantle --legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
