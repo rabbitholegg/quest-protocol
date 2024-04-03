@@ -29,7 +29,6 @@ contract Errors {
     error OnlyMinter();
 
     // QuestFactory
-    error RewardNotAllowed();
     error QuestIdUsed();
     error Erc20QuestAddressNotSet();
     error QuestNotStarted();

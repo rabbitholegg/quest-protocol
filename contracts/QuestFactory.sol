@@ -39,21 +39,21 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address public erc20QuestAddress;
     address public erc1155QuestAddress;
     mapping(string => Quest) public quests;
-    address public rabbitHoleReceiptContract; // not used
-    address public rabbitHoleTicketsContract; // not used
-    mapping(address => bool) public rewardAllowlist;
+    address private __deprecated_rabbitHoleReceiptContract; // not used
+    address private __deprecated_rabbitHoleTicketsContract; // not used
+    mapping(address => bool) private __deprecated_rewardAllowlist; // not used
     uint16 public questFee;
     uint256 public mintFee;
     address public defaultMintFeeRecipient;
     uint256 private locked;
-    address public defaultReferralFeeRecipient; // not used
-    uint256 public nftQuestFee; // not used
-    address public questNFTAddress; // not used
-    mapping(address => address[]) public ownerCollections;
-    mapping(address => NftQuestFees) public nftQuestFeeList; // not used
+    address private __deprecated_defaultReferralFeeRecipient; // not used
+    uint256 private __deprecated_nftQuestFee; // not used
+    address private __deprecated_questNFTAddress; // not used
+    mapping(address => address[]) private ownerCollections;
+    mapping(address => NftQuestFees) private __deprecated_nftQuestFeeList; // not used
     uint16 public referralFee;
-    address public sablierV2LockupLinearAddress; // not used
-    mapping(address => address) public mintFeeRecipientList; // not used
+    address private __deprecated_sablierV2LockupLinearAddress; // not used
+    mapping(address => address) private __deprecated_mintFeeRecipientList; // not used
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         address erc20QuestAddress_,
         address payable erc1155QuestAddress_,
         address ownerAddress_,
-        uint256 nftQuestFee_,
+        uint256,
         uint16 referralFee_,
         uint256 mintFee_
     ) external initializer {
@@ -80,7 +80,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         protocolFeeRecipient = protocolFeeRecipient_;
         erc20QuestAddress = erc20QuestAddress_;
         erc1155QuestAddress = erc1155QuestAddress_;
-        nftQuestFee = nftQuestFee_;
         referralFee = referralFee_;
         mintFee = mintFee_;
     }
@@ -89,10 +88,9 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier checkQuest(string memory questId_, address rewardTokenAddress_) {
+    modifier checkQuest(string memory questId_) {
         Quest storage currentQuest = quests[questId_];
         if (currentQuest.questAddress != address(0)) revert QuestIdUsed();
-        if (!rewardAllowlist[rewardTokenAddress_]) revert RewardNotAllowed();
         if (erc20QuestAddress == address(0)) revert Erc20QuestAddressNotSet();
         _;
     }
@@ -155,7 +153,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory actionType_,
         string memory questName_,
         string memory projectName_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 txHashChainId_,
@@ -276,7 +274,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questId_,
         string memory actionType_,
         string memory questName_
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 0,
@@ -304,7 +302,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questId_,
         string memory,
         uint256
-    ) external checkQuest(questId_, rewardTokenAddress_) returns (address) {
+    ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
                 0,
@@ -328,6 +326,17 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     function claimCompressed(bytes calldata compressedData_) external payable {
+        _claimCompressed(compressedData_, msg.sender);
+    }
+
+    function claimCompressedRef(bytes calldata compressedData_, address claimer) external payable {
+        _claimCompressed(compressedData_, claimer);
+    }
+
+    /// @dev Claim rewards for a quest
+    /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
+    /// @param claimer The address of the claimer - where rewards are sent
+    function _claimCompressed(bytes calldata compressedData_, address claimer) internal {
         bytes memory data_ = LibZip.cdDecompress(compressedData_);
 
         (
@@ -345,10 +354,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questIdString_ = bytes16ToUUID(questid_);
         Quest storage quest_ = quests[questIdString_];
 
-        if(tx.origin != msg.sender) revert txOriginMismatch();
-
         string memory jsonData_ = _buildJsonString(txHash_, txHashChainId_, quest_.actionType);
-        bytes memory claimData_ = abi.encode(msg.sender, ref_, questIdString_, jsonData_);
+        bytes memory claimData_ = abi.encode(claimer, ref_, questIdString_, jsonData_);
 
         // Since `vs_` includes `s` and the bit for `v`, we can extract `s` by masking out the `v` bit.
         bytes32 s = vs_ & bytes32(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
@@ -388,8 +395,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             (address, address, string, string)
         );
         Quest storage quest = quests[questId_];
-
-        if(tx.origin != msg.sender && msg.sender != quest.questAddress && msg.sender != address(this)) revert txOriginMismatch();
 
         uint256 numberMintedPlusOne_ = quest.numberMinted + 1;
         address rewardToken_ = IQuestOwnable(quest.questAddress).rewardToken();
@@ -470,13 +475,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         if (referralFee_ > 10_000) revert ReferralFeeTooHigh();
         referralFee = referralFee_;
         emit ReferralFeeSet(referralFee_);
-    }
-
-    /// @dev set or remave a contract address to be used as a reward
-    /// @param rewardAddress_ The contract address to set
-    /// @param allowed_ Whether the contract address is allowed or not
-    function setRewardAllowlistAddress(address rewardAddress_, bool allowed_) external onlyOwner {
-        rewardAllowlist[rewardAddress_] = allowed_;
     }
 
     /// @dev set the mintFeeRecipient
