@@ -30,6 +30,7 @@ optimism = "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_API_KEY}"
 base = "https://radial-alien-bush.base-mainnet.quiknode.pro/${QUICKNODE_BASE_API_KEY}/"
 mantle = "https://rpc.mantle.xyz/"
 scroll = "https://rpc.scroll.io/"
+blast = "https://restless-divine-meme.blast-mainnet.quiknode.pro/${QUICKNODE_BLAST_API_KEY}/"
 zora = "https://rpc.zora.co"
 
 [etherscan]

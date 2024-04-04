@@ -40,7 +40,7 @@ For more information on all docs related to the Quest Protocol, see the document
 
 ## Addresses
 
-Mainnet, Optimism, Polygon, Arbitrum, Base, Mantle and Sepolia:
+Mainnet, Optimism, Polygon, Arbitrum, Base, Blast, Mantle and Sepolia:
 
 |Contract Name|Address|
 |-------------|-------|
@@ -164,7 +164,10 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 `forge script script/QuestFactory.s.sol:QuestFactoryDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 1. Deploy RabbitHoleTickets (this also upgrades it to the latest version)
 `forge script script/RabbitHoleTickets.s.sol:RabbitHoleTicketsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
-1. Set any storage variables manually if need be (most likely the `protocolFeeRecipient` will need to be set)
+1. Deploy the ProtocolRewards
+`forge script script/ProtocolRewards.s.sol:ProtocolRewardsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
+1. Set any storage variables manually if needed
+
 
 ### with mantel, add:
 `--legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
@@ -192,9 +195,9 @@ Then to upgrade a contract, run one of the following commands:
 
 or use xargs to deploy on every chain in one command:
 ```
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url {}
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:QuestDeploy --broadcast --verify --rpc-url {}
-echo "sepolia mainnet arbitrum optimism polygon base" | xargs -n 1 -I {} forge script script/Quest.s.sol:Quest1155Deploy --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/Quest.s.sol:QuestDeploy --broadcast --verify --rpc-url {}
+echo "sepolia mainnet arbitrum optimism polygon base blast" | xargs -n 1 -I {} forge script script/Quest.s.sol:Quest1155Deploy --broadcast --verify --rpc-url {}
 ```
 and for our mantle:
 `forge script script/QuestFactory.s.sol:QuestFactoryUpgrade --broadcast --verify --rpc-url mantle --legacy --verifier blockscout --verifier-url "https://explorer.mantle.xyz/api?module=contract&action=verify"`
