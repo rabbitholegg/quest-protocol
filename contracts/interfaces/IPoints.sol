@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
 /// @title IPoints
 /// @notice Interface for the Points contract to track soulbound points on-chain.
