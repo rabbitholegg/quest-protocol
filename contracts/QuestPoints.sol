@@ -76,7 +76,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
-        pointsContract = IPoints(questFactoryContract.pointsContract());
+        pointsContract = IPoints(rewardTokenAddress_);
         queued = true;
         _initializeOwner(msg.sender);
         __Pausable_init();
@@ -157,10 +157,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         // transfer reward tokens
         uint256 protocolFeeForRecipient = this.protocolFee() / 2;
-        rewardToken.issue(protocolFeeRecipient, protocolFeeForRecipient);
+        pointsContract.issue(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
-        rewardToken.issue(owner(), remainingBalanceForOwner);
+        pointsContract.issue(owner(), remainingBalanceForOwner);
 
         questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
     }
@@ -216,7 +216,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param sender_ The address to send the rewards to
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
-        rewardToken.issue(sender_, amount_);
+        pointsContract.issue(sender_, amount_);
     }
 
     /*//////////////////////////////////////////////////////////////
