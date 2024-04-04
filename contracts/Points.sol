@@ -13,6 +13,7 @@ contract Points is ERC20, Initializable, OwnableRoles {
 
     /// @notice The role for issuing points
     uint256 public constant ISSUER_ROLE = 1 << 1;
+    uint256 public constant GRANT_ISSUER_ROLE = 1 << 2;
 
     /// @notice Thrown when an attempt is made to transfer points
     error NonTransferable();
@@ -20,14 +21,14 @@ contract Points is ERC20, Initializable, OwnableRoles {
     /// @notice Initialize the Points contract
     /// @param name_ The name of the token
     /// @param symbol_ The symbol of the token
-    /// @param minter_ The initial holder of the minter role
+    /// @param grantIssuer_ The initial holder of the minter role
     function initialize(string memory name_, string memory symbol_, address grantIssuer_) external initializer {
         _initializeOwner(msg.sender);
 
         _name = name_;
         _symbol = symbol_;
 
-        _grantRoles(questFactory_, GRANT_ISSUER_ROLE);
+        _grantRoles(grantIssuer_, GRANT_ISSUER_ROLE);
     }
 
     /// @notice Issue `amount` points and assign them to `to`
