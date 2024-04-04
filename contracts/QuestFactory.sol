@@ -17,6 +17,7 @@ import {LibZip} from "solady/utils/LibZip.sol";
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
+import {IPoints} from "./interfaces/IPoints.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -169,6 +170,48 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 projectName_
             )
         );
+    }
+
+    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
+    /// @return address the quest contract address
+    function createPointsQuest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_,
+        string memory projectName_
+    ) external checkQuest(questId_) returns (address) {
+        address quest = createERC20QuestInternal(
+            ERC20QuestData(
+                txHashChainId_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionType_,
+                questName_,
+                "erc20",
+                projectName_
+            )
+        );
+        IPoints(rewardTokenAddress_).grantIssuerRole(quest);
+        return quest;
     }
 
     /// @dev Create an erc1155 quest and start it at the same time. The function will transfer the reward amount to the quest contract
