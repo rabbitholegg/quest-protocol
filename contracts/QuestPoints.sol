@@ -12,7 +12,7 @@ import {IQuest} from "./interfaces/IQuest.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // References
 import {IQuestFactory} from "./interfaces/IQuestFactory.sol";
-
+import {IPoints} from "./interfaces/IPoints.sol";
 /// @title Quest
 /// @author RabbitHole.gg
 /// @notice This contract is the Erc20Quest contract. It is a quest that is redeemable for ERC20 tokens
