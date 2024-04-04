@@ -20,16 +20,18 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 END_TIME = 1_000_000_000;
     uint256 START_TIME = 1_000_000;
     uint256 TOTAL_PARTICIPANTS = 300;
-    uint256 REWARD_AMOUNT_IN_WEI = 1000;
+    uint256 REWARD_AMOUNT_IN_WEI = 10_000_000_000;
     string QUEST_ID = "QUEST_ID";
     uint16 QUEST_FEE = 2000; // 20%
     uint256 CLAIM_FEE = 999;
+    uint256 REFERRAL_REWARD_FEE = 500; // 5%
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
     Quest quest;
     address admin = makeAddr(("admin"));
     address owner = makeAddr(("owner"));
     address participant = makeAddr(("participant"));
+    address referrer = makeAddr(("referrer"));
     uint256 defaultTotalRewardsPlusFee;
     string constant DEFAULT_ERC20_NAME = "RewardToken";
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
@@ -56,7 +58,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -94,7 +97,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
     }
 
@@ -111,7 +115,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
     }
 
@@ -197,7 +202,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             rewardAmountInWei,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -303,6 +309,62 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     }
 
     /*//////////////////////////////////////////////////////////////
+                        CLAIM REFERRAL FEES
+    //////////////////////////////////////////////////////////////*/
+
+    function test_claimReferralFees() public {
+        vm.warp(START_TIME);
+        vm.prank(questFactoryMock);
+        quest.claimFromFactory(participant, referrer);
+
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(participant),
+            quest.getRewardAmount(),
+            "participant should get the reward amount"
+        );
+        assertEq(
+            quest.getReferralAmount(referrer),
+            quest.referralRewardAmount(),
+            "referrer should increase referral rewards after claim"
+        );
+        assertEq(
+            quest.referralClaimTotal(),
+            quest.referralRewardAmount(),
+            "referral claims for all referrers should equal the reward amount (single claim)"
+        );
+
+        vm.warp(END_TIME);
+        vm.prank(referrer);
+        quest.claimReferralFees(referrer);
+
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(referrer),
+            quest.referralRewardAmount(),
+            "referrer should claim their allocated referral rewards"
+        );
+    }
+
+    function test_RevertIf_test_claimReferralFees_NoWithdrawDuringClaim() public {
+        vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
+        vm.prank(referrer);
+        quest.claimReferralFees(referrer);
+    }
+
+    function test_RevertIf_test_claimReferralFees_AlreadyWithdrawn() public {
+        vm.warp(START_TIME);
+        vm.prank(questFactoryMock);
+        quest.claimFromFactory(participant, referrer);
+
+        vm.warp(END_TIME);
+        vm.prank(referrer);
+        quest.claimReferralFees(referrer);
+
+        vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
+        vm.prank(referrer);
+        quest.claimReferralFees(referrer);
+    }
+
+    /*//////////////////////////////////////////////////////////////
                             EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
@@ -332,5 +394,9 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
     function test_getRewardToken() public {
         assertEq(quest.getRewardToken(), rewardTokenAddress, "getRewardToken should be correct");
+    }
+
+    function test_getReferralRewardFee() public {
+        assertEq(quest.referralRewardFee(), REFERRAL_REWARD_FEE, "referralRewardFee should be correct");
     }
 }

@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 interface IQuest {
     event Queued(uint256 timestamp);
     event ProtocolFeeDistributed(string questId, address rewardToken, address protocolOwner, uint256 feeAmountToProtocolOwner, address questOwner, uint256 feeAmountToQuestOwner);
+    event ClaimedReferralFees(address recipient, address tokenAddress, uint256 feeAmount);
 
     error AlreadyClaimed();
     error AlreadyWithdrawn();
@@ -23,6 +24,7 @@ interface IQuest {
     error OverMaxAllowedToMint();
     error AddressAlreadyMinted();
     error QuestEnded();
+    error ReferralRewardFeeTooHigh();
 
     function initialize(
         address rewardTokenAddress_,
@@ -32,7 +34,8 @@ interface IQuest {
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        uint256 referralRewardFee_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);

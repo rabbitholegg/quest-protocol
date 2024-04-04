@@ -40,6 +40,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     address public protocolFeeRecipient;
     mapping(uint256 => bool) private claimedList;
     mapping(address => uint256) public streamIdForAddress;
+    uint256 public referralRewardFee;
+    uint256 public referralClaimTotal;
+    mapping (address => uint256) private referralClaimAmounts;
+    mapping (address => bool) private referrerHasClaimed;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -58,11 +62,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        uint256 referralRewardFee_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
+        if (referralRewardFee_ > 500) revert ReferralRewardFeeTooHigh(); // Maximum 5%
 
         // Process input parameters
         rewardToken = rewardTokenAddress_;
@@ -73,10 +79,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questId = questId_;
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
+        referralRewardFee = referralRewardFee_;
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
         queued = true;
+        referralClaimTotal = 0;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -135,11 +143,17 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     {
         uint256 totalRedeemableRewards = rewardAmountInWei;
         _transferRewards(account_, totalRedeemableRewards);
+
     }
 
     function claimFromFactory(address claimer_, address ref_) external payable whenNotEnded onlyQuestFactory {
         _transferRewards(claimer_, rewardAmountInWei);
-        if (ref_ != address(0)) ref_.safeTransferETH(_claimFee() / 3);
+        if (ref_ != address(0)) {
+            ref_.safeTransferETH(_claimFee() / 3);
+            uint256 referralAmount = this.referralRewardAmount();
+            referralClaimTotal += referralAmount;
+            referralClaimAmounts[ref_] += referralAmount;
+        }
     }
 
     /// @notice Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner
@@ -162,6 +176,17 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
         questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
+    }
+
+    function claimReferralFees(address referrer) external onlyWithdrawAfterEnd {
+        if (referrerHasClaimed[referrer] == true) revert AlreadyWithdrawn();
+
+        uint256 referrerClaimAmount = referralClaimAmounts[referrer];
+        if (referrerClaimAmount > 0) {
+            rewardToken.safeTransfer(referrer, referrerClaimAmount);
+            referrerHasClaimed[referrer] = true;
+            emit ClaimedReferralFees(referrer, address(rewardToken), referrerClaimAmount);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -188,6 +213,14 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Function that calculates the protocol fee
     function protocolFee() external view returns (uint256) {
         return (_redeemedTokens() * rewardAmountInWei * questFee) / 10_000;
+    }
+
+    function referralRewardAmount() external view returns (uint256) {
+        return (referralRewardFee * rewardAmountInWei) / 10_000;
+    }
+
+    function getReferralAmount(address referrer) external view returns (uint256) {
+        return referralClaimAmounts[referrer];
     }
 
     /// @dev Returns the reward amount

@@ -18,6 +18,7 @@ contract QuestData is Test {
         bytes32 TX_HASH;
         string  JSON_MSG;
         uint256 REWARD_AMOUNT;
+        uint256 REFERRAL_REWARD_FEE;
     }
   
 }

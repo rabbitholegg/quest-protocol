@@ -40,7 +40,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         END_TIME : 1_000_000_000,
         START_TIME : 1_000_000,
         TOTAL_PARTICIPANTS : 300,
-        REWARD_AMOUNT : 10,
+        REWARD_AMOUNT : 10_000_000_000,
         QUEST_ID_STRING :  "550e8400-e29b-41d4-a716-446655440000",
         QUEST_ID : hex'550e8400e29b41d4a716446655440000',
         ACTION_TYPE: "actionType",
@@ -48,7 +48,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         PROJECT_NAME: "projectName",
         CHAIN_ID : 7777777,
         TX_HASH : hex'7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516',
-        JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"actionType":"actionType"}'
+        JSON_MSG : '{"actionTxHashes":["0x7e1975a6bf513022a8cc382a3cdb1e1dbcd58ebb1cb9abf11e64aadb21262516"],"actionNetworkChainIds":[7777777],"actionType":"actionType"}',
+        REFERRAL_REWARD_FEE: 500
     });
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
@@ -62,7 +63,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         questFactory = QuestFactory(questFactoryAddress);
 
         sampleERC1155 = new SampleERC1155();
-        sampleERC20 = new SampleERC20("name", "symbol", 1000000, questCreator);
+        sampleERC20 = new SampleERC20("name", "symbol", calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE), questCreator);
         claimSignerPrivateKey = uint256(vm.envUint("TEST_CLAIM_SIGNER_PRIVATE_KEY"));
         vm.deal(owner, 1000000);
         vm.deal(participant, 1000000);
@@ -133,7 +134,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         Quest quest = Quest(payable(questAddress));
@@ -157,7 +159,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
@@ -171,7 +174,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
     }
 
@@ -193,7 +197,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
     }
 
@@ -248,7 +253,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.deal(participant, 1000000);
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Quest(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -258,7 +263,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING, 
             QUEST.ACTION_TYPE, 
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -271,6 +277,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
+
+        // referrer claimable amount
+        assertEq(Quest(payable(questAddress)).getReferralAmount(referrer), Quest(payable(questAddress)).referralRewardAmount());
     }
 
     function test_claimCompressedRef_erc20_mocked_data() public{
@@ -284,7 +293,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
-        questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Quest(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -294,7 +303,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING, 
             QUEST.ACTION_TYPE, 
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -307,8 +317,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // erc20 reward
         assertEq(sampleERC20.balanceOf(participant), QUEST.REWARD_AMOUNT, "particpiant erc20 balance");
-    }
 
+        // referrer claimable amount
+        assertEq(Quest(payable(questAddress)).getReferralAmount(referrer), Quest(payable(questAddress)).referralRewardAmount());
+    }
 
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(questCreator);
@@ -323,7 +335,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -345,6 +358,9 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         // referrer payout
         assertEq(referrer.balance, MINT_FEE / 3, "referrer mint fee");
+        
+        // referrer claimable amount
+        assertEq(Quest(payable(questAddress)).getReferralAmount(referrer), Quest(payable(questAddress)).referralRewardAmount());
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 5);
@@ -386,7 +402,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         vm.warp(QUEST.START_TIME + 1);
@@ -416,7 +433,8 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
             QUEST.QUEST_ID_STRING,
             QUEST.ACTION_TYPE,
             QUEST.QUEST_NAME,
-            QUEST.PROJECT_NAME
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
         );
 
         IQuestFactory.QuestData memory questData = questFactory.questData(QUEST.QUEST_ID_STRING);
