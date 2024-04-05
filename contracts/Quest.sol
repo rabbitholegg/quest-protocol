@@ -214,7 +214,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     }
 
     function referralRewardAmount() external view returns (uint256) {
-        return (referralRewardFee * rewardAmountInWei) / 10_000;
+        return _referralRewardAmount();
     }
 
     function getReferralAmount(address referrer) external view returns (uint256) {
@@ -252,7 +252,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @notice Internal function to update the referral reward amount
     /// @param referrer_ The address of the referrer
     function _updateReferralTokenAmount(address referrer_) internal {
-        uint256 referralAmount = this.referralRewardAmount();
+        uint256 referralAmount = _referralRewardAmount();
         referralClaimTotal += referralAmount;
         referralClaimAmounts[referrer_] += referralAmount;
     }
@@ -266,6 +266,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     function _claimFee() internal view returns (uint256) {
         return questFactoryContract.mintFee();
+    }
+
+    function _referralRewardAmount() internal view returns (uint256) {
+        return (referralRewardFee * rewardAmountInWei) / 10_000;
     }
 
     /*//////////////////////////////////////////////////////////////
