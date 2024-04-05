@@ -17,6 +17,7 @@ import {LibZip} from "solady/utils/LibZip.sol";
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IQuestOwnable} from "./interfaces/IQuestOwnable.sol";
 import {IQuest1155Ownable} from "./interfaces/IQuest1155Ownable.sol";
+import {Quest as QuestContract} from "./Quest.sol";
 
 /// @title QuestFactory
 /// @author RabbitHole.gg
@@ -54,6 +55,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     uint16 public referralFee;
     address private __deprecated_sablierV2LockupLinearAddress; // not used
     mapping(address => address) private __deprecated_mintFeeRecipientList; // not used
+    uint256 public referralRewardTimestamp;
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -82,6 +84,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         erc1155QuestAddress = erc1155QuestAddress_;
         referralFee = referralFee_;
         mintFee = mintFee_;
+        referralRewardTimestamp = block.timestamp;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -425,7 +428,29 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             emit QuestClaimed(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId);
         }
         if(ref_ != address(0)){
-            emit QuestClaimedReferred(claimer_, quest.questAddress, questId_, rewardToken_, rewardAmountOrTokenId, ref_, 3333, mintFee);
+            if (IQuestOwnable(quest.questAddress).startTime() > referralRewardTimestamp) {
+                emit QuestClaimReferred(
+                    claimer_,
+                    quest.questAddress,
+                    questId_,
+                    rewardToken_,
+                    rewardAmountOrTokenId,
+                    ref_, 3333,
+                    mintFee,
+                    QuestContract(payable(quest.questAddress)).referralRewardFee(),
+                    QuestContract(payable(quest.questAddress)).referralRewardAmount())
+                ;
+            } else {
+                emit QuestClaimedReferred(
+                    claimer_,
+                    quest.questAddress,
+                    questId_,
+                    rewardToken_,
+                    rewardAmountOrTokenId,
+                    ref_, 3333,
+                    mintFee
+                );
+            }
             emit MintFeePaid(questId_, address(0), 0, address(0), 0, ref_, mintFee / 3);
         }
     }
@@ -488,6 +513,10 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function setDefaultMintFeeRecipient(address mintFeeRecipient_) external onlyOwner {
         if (mintFeeRecipient_ == address(0)) revert AddressZeroNotAllowed();
         defaultMintFeeRecipient = mintFeeRecipient_;
+    }
+
+    function setReferralRewardTimestamp(uint256 timestamp_) external onlyOwner {
+        referralRewardTimestamp = timestamp_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -619,16 +648,31 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
 
         if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.tokenId(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
+            if (IQuestOwnable(currentQuest.questAddress).startTime() > referralRewardTimestamp) {
+                emit QuestClaimReferred(
+                    claimData_.claimer,
+                    currentQuest.questAddress,
+                    claimData_.questId,
+                    questContract_.rewardToken(),
+                    questContract_.tokenId(),
+                    claimData_.ref,
+                    3333, //referralFee,
+                    mintFee,
+                    0,
+                    0
                 );
+            } else {
+                emit QuestClaimedReferred(
+                    claimData_.claimer,
+                    currentQuest.questAddress,
+                    claimData_.questId,
+                    questContract_.rewardToken(),
+                    questContract_.tokenId(),
+                    claimData_.ref,
+                    3333, //referralFee,
+                    mintFee
+                );
+            }
         }
     }
 
@@ -671,16 +715,31 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
 
         if (claimData_.ref != address(0)) {
-            emit QuestClaimedReferred(
-                claimData_.claimer,
-                currentQuest.questAddress,
-                claimData_.questId,
-                questContract_.rewardToken(),
-                questContract_.rewardAmountInWei(),
-                claimData_.ref,
-                3333, //referralFee,
-                mintFee
-            );
+            if (IQuestOwnable(currentQuest.questAddress).startTime() > referralRewardTimestamp) {
+                emit QuestClaimReferred(
+                    claimData_.claimer,
+                    currentQuest.questAddress,
+                    claimData_.questId,
+                    questContract_.rewardToken(),
+                    questContract_.rewardAmountInWei(),
+                    claimData_.ref,
+                    3333, //referralFee,
+                    mintFee,
+                    0,
+                    0
+                );
+            } else {
+                emit QuestClaimedReferred(
+                    claimData_.claimer,
+                    currentQuest.questAddress,
+                    claimData_.questId,
+                    questContract_.rewardToken(),
+                    questContract_.rewardAmountInWei(),
+                    claimData_.ref,
+                    3333, //referralFee,
+                    mintFee
+                );
+            }
         }
     }
 
