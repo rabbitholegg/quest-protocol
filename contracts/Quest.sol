@@ -180,11 +180,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         if (referrerHasClaimed[referrer] == true) revert AlreadyWithdrawn();
 
         uint256 referrerClaimAmount = referralClaimAmounts[referrer];
-        if (referrerClaimAmount > 0) {
-            rewardToken.safeTransfer(referrer, referrerClaimAmount);
-            referrerHasClaimed[referrer] = true;
-            emit ClaimedReferralFees(referrer, address(rewardToken), referrerClaimAmount);
-        }
+        if (referrerClaimAmount == 0) revert NoReferralFees();
+
+        rewardToken.safeTransfer(referrer, referrerClaimAmount);
+        referrerHasClaimed[referrer] = true;
+        emit ClaimedReferralFees(referrer, address(rewardToken), referrerClaimAmount);
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -19,6 +19,10 @@ contract Errors {
     error EnforcedPause();
     error txOriginMismatch();
 
+    // Quest
+    error ReferralRewardFeeTooHigh();
+    error NoReferralFees();
+
     // Quest1155
     error InsufficientTokenBalance();
     error InsufficientETHBalance();

@@ -25,6 +25,7 @@ interface IQuest {
     error AddressAlreadyMinted();
     error QuestEnded();
     error ReferralRewardFeeTooHigh();
+    error NoReferralFees();
 
     function initialize(
         address rewardTokenAddress_,

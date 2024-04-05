@@ -120,6 +120,24 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
+    function test_RevertIf_initialize_ReferralRewardFeeTooHigh() public {
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
+        vm.prank(questFactoryMock);
+        vm.expectRevert(abi.encodeWithSelector(ReferralRewardFeeTooHigh.selector));
+        quest.initialize(
+            rewardTokenAddress,
+            END_TIME,
+            START_TIME,
+            TOTAL_PARTICIPANTS,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            600
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////
                                 PAUSE
     //////////////////////////////////////////////////////////////*/
@@ -390,6 +408,17 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         quest.claimReferralFees(referrer);
 
         vm.expectRevert(abi.encodeWithSelector(AlreadyWithdrawn.selector));
+        vm.prank(referrer);
+        quest.claimReferralFees(referrer);
+    }
+
+    function test_RevertIf_test_claimReferralFees_NoReferralFees() public {
+        vm.warp(START_TIME);
+        vm.prank(questFactoryMock);
+        quest.claimFromFactory(participant, participant);
+
+        vm.expectRevert(abi.encodeWithSelector(NoReferralFees.selector));
+        vm.warp(END_TIME);
         vm.prank(referrer);
         quest.claimReferralFees(referrer);
     }
