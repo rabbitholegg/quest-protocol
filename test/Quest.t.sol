@@ -330,7 +330,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                         CLAIM REFERRAL FEES
     //////////////////////////////////////////////////////////////*/
 
-    function test_claimReferralFees() public {
+    function test_fuzz_claimReferralFees(uint96 timestamp) public {
+        vm.assume(timestamp > END_TIME);
         QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
         QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
 
@@ -360,7 +361,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             "referral claims for all referrers should equal the reward amount (single claim)"
         );
 
-        vm.warp(END_TIME);
+        vm.warp(timestamp);
         vm.prank(referrer);
         quest.claimReferralFees(referrer);
 
