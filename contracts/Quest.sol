@@ -150,9 +150,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         _transferRewards(claimer_, rewardAmountInWei);
         if (ref_ != address(0)) {
             ref_.safeTransferETH(_claimFee() / 3);
-            uint256 referralAmount = this.referralRewardAmount();
-            referralClaimTotal += referralAmount;
-            referralClaimAmounts[ref_] += referralAmount;
+            _updateReferralTokenAmount(ref_);
         }
     }
 
@@ -169,7 +167,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         protocolFeeRecipient.safeTransferETH(protocolPayout);
 
         // transfer reward tokens
-        uint256 protocolFeeForRecipient = this.protocolFee() / 2;
+        uint256 protocolFeeForRecipient = (this.protocolFee() / 2) - referralClaimTotal;
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
@@ -249,6 +247,14 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @param amount_ The amount of rewards to transfer
     function _transferRewards(address sender_, uint256 amount_) internal {
         rewardToken.safeTransfer(sender_, amount_);
+    }
+
+    /// @notice Internal function to update the referral reward amount
+    /// @param referrer_ The address of the referrer
+    function _updateReferralTokenAmount(address referrer_) internal {
+        uint256 referralAmount = this.referralRewardAmount();
+        referralClaimTotal += referralAmount;
+        referralClaimAmounts[referrer_] += referralAmount;
     }
 
     /*//////////////////////////////////////////////////////////////

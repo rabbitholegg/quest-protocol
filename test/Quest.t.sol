@@ -313,6 +313,15 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     //////////////////////////////////////////////////////////////*/
 
     function test_claimReferralFees() public {
+        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+
+        vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
+
+        // simulate ETH from TOTAL_PARTICIPANTS claims
+        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
+
         vm.warp(START_TIME);
         vm.prank(questFactoryMock);
         quest.claimFromFactory(participant, referrer);
@@ -341,6 +350,27 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             SampleERC20(rewardTokenAddress).balanceOf(referrer),
             quest.referralRewardAmount(),
             "referrer should claim their allocated referral rewards"
+        );
+
+        // verify that withdrawals can still work
+        quest.withdrawRemainingTokens();
+
+        uint256 participantBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
+        uint256 protocolFeeRecipientBalance = SampleERC20(rewardTokenAddress).balanceOf(quest.protocolFeeRecipient());
+        uint256 ownerBalance = SampleERC20(rewardTokenAddress).balanceOf(owner);
+        uint256 referrerBalance = SampleERC20(rewardTokenAddress).balanceOf(referrer);
+        uint256 total = participantBalance + ownerBalance + referrerBalance + protocolFeeRecipientBalance;
+
+        assertEq(
+            protocolFeeRecipientBalance,
+            (quest.protocolFee() / 2) - quest.referralClaimTotal(),
+            "Protocol fee recipient should get their share of the rewards"
+        );
+
+        assertEq(
+            ownerBalance,
+            total - participantBalance - referrerBalance - protocolFeeRecipientBalance,
+            "Owner balance should have the unclaimed funds returned"
         );
     }
 
