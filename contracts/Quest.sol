@@ -184,7 +184,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         rewardToken.safeTransfer(referrer, referrerClaimAmount);
         referrerHasClaimed[referrer] = true;
-        emit ClaimedReferralFees(referrer, address(rewardToken), referrerClaimAmount);
+        emit ClaimedReferralFees(questId, referrer, address(rewardToken), referrerClaimAmount);
     }
 
     /*//////////////////////////////////////////////////////////////
