@@ -330,36 +330,77 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                         CLAIM REFERRAL FEES
     //////////////////////////////////////////////////////////////*/
 
-    function test_fuzz_claimReferralFees(uint96 timestamp) public {
-        vm.assume(timestamp > END_TIME);
+    function test_fuzz_claimReferralFees(uint96 timestamp, uint256 participants, uint256 referralRewardFee) public {
+        timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
+        participants = bound(participants, 1, TOTAL_PARTICIPANTS);
+        referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
+
+
+        vm.startPrank(admin);
+        // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        rewardTokenAddress = address(
+            new SampleERC20(
+                DEFAULT_ERC20_NAME,
+                DEFAULT_ERC20_SYMBOL,
+                defaultTotalRewardsPlusFee,
+                admin
+            )
+        );
+        questFactoryMock = address(new QuestFactoryMock());
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
+        vm.stopPrank();
+        vm.prank(questFactoryMock);
+        quest.initialize(
+            rewardTokenAddress,
+            timestamp,
+            START_TIME,
+            participants,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            referralRewardFee
+        );
+
+        vm.startPrank(admin);
+        // Set all mocked values in the quest factory
         QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
-        QuestFactoryMock(questFactoryMock).setNumberMinted(TOTAL_PARTICIPANTS);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(participants);
+        // Transfer all tokens to quest
+        SampleERC20(rewardTokenAddress).transfer(address(quest), defaultTotalRewardsPlusFee);
+        vm.stopPrank();
 
         vm.prank(questFactoryMock);
         quest.transferOwnership(owner);
 
         // simulate ETH from TOTAL_PARTICIPANTS claims
-        vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
+        vm.deal(address(quest), (CLAIM_FEE * participants * 2) / 3);
 
         vm.warp(START_TIME);
-        vm.prank(questFactoryMock);
-        quest.claimFromFactory(participant, referrer);
+        for(uint256 i = 1; i <= participants; i++) {
+            participant = makeAddr(i.toString());
+            vm.prank(questFactoryMock);
 
-        assertEq(
-            SampleERC20(rewardTokenAddress).balanceOf(participant),
-            quest.getRewardAmount(),
-            "participant should get the reward amount"
-        );
-        assertEq(
-            quest.getReferralAmount(referrer),
-            quest.referralRewardAmount(),
-            "referrer should increase referral rewards after claim"
-        );
-        assertEq(
-            quest.referralClaimTotal(),
-            quest.referralRewardAmount(),
-            "referral claims for all referrers should equal the reward amount (single claim)"
-        );
+            quest.claimFromFactory(participant, referrer);
+            assertEq(
+                SampleERC20(rewardTokenAddress).balanceOf(participant),
+                quest.getRewardAmount(),
+                "participant should get the reward amount"
+            );
+            assertEq(
+                quest.getReferralAmount(referrer),
+                quest.referralRewardAmount() * i,
+                "referrer should increase referral rewards after claim"
+            );
+            assertEq(
+                quest.referralClaimTotal(),
+                quest.referralRewardAmount() * i,
+                "referral claims for all referrers should equal the reward amount (single claim)"
+            );
+        }
+
 
         vm.warp(timestamp);
         vm.prank(referrer);
@@ -367,7 +408,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         assertEq(
             SampleERC20(rewardTokenAddress).balanceOf(referrer),
-            quest.referralRewardAmount(),
+            quest.referralRewardAmount() * participants,
             "referrer should claim their allocated referral rewards"
         );
 
