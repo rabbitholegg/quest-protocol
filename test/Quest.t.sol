@@ -401,9 +401,18 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             );
         }
 
-
         vm.warp(timestamp);
         vm.prank(referrer);
+
+        // verify that withdrawals can still work
+        quest.withdrawRemainingTokens();
+
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(address(quest)),
+            quest.referralClaimTotal(),
+            "expected to have referralClaimTotal() amount left inside the contract"
+        );
+
         quest.claimReferralFees(referrer);
 
         assertEq(
@@ -411,9 +420,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             quest.referralRewardAmount() * participants,
             "referrer should claim their allocated referral rewards"
         );
-
-        // verify that withdrawals can still work
-        quest.withdrawRemainingTokens();
 
         uint256 participantBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
         uint256 protocolFeeRecipientBalance = SampleERC20(rewardTokenAddress).balanceOf(quest.protocolFeeRecipient());

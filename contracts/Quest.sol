@@ -170,7 +170,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 protocolFeeForRecipient = (this.protocolFee() / 2) - referralClaimTotal;
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
-        uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this));
+        uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this)) - referralClaimTotal;
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
         questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
