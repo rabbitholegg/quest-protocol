@@ -440,6 +440,110 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
+    function test_fuzz_claimReferralFees_withdrawAfterClaim(uint96 timestamp, uint256 participants, uint256 referralRewardFee) public {
+        timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
+        participants = bound(participants, 1, TOTAL_PARTICIPANTS);
+        referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
+
+
+        vm.startPrank(admin);
+        // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        rewardTokenAddress = address(
+            new SampleERC20(
+                DEFAULT_ERC20_NAME,
+                DEFAULT_ERC20_SYMBOL,
+                defaultTotalRewardsPlusFee,
+                admin
+            )
+        );
+        questFactoryMock = address(new QuestFactoryMock());
+        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
+        quest = Quest(questAddress);
+        vm.stopPrank();
+        vm.prank(questFactoryMock);
+        quest.initialize(
+            rewardTokenAddress,
+            timestamp,
+            START_TIME,
+            participants,
+            REWARD_AMOUNT_IN_WEI,
+            QUEST_ID,
+            QUEST_FEE,
+            protocolFeeRecipient,
+            referralRewardFee
+        );
+
+        vm.startPrank(admin);
+        // Set all mocked values in the quest factory
+        QuestFactoryMock(questFactoryMock).setMintFee(CLAIM_FEE);
+        QuestFactoryMock(questFactoryMock).setNumberMinted(participants);
+        // Transfer all tokens to quest
+        SampleERC20(rewardTokenAddress).transfer(address(quest), defaultTotalRewardsPlusFee);
+        vm.stopPrank();
+
+        vm.prank(questFactoryMock);
+        quest.transferOwnership(owner);
+
+        // simulate ETH from TOTAL_PARTICIPANTS claims
+        vm.deal(address(quest), (CLAIM_FEE * participants * 2) / 3);
+
+        vm.warp(START_TIME);
+        for(uint256 i = 1; i <= participants; i++) {
+            participant = makeAddr(i.toString());
+            vm.prank(questFactoryMock);
+
+            quest.claimFromFactory(participant, referrer);
+            assertEq(
+                SampleERC20(rewardTokenAddress).balanceOf(participant),
+                quest.getRewardAmount(),
+                "participant should get the reward amount"
+            );
+            assertEq(
+                quest.getReferralAmount(referrer),
+                quest.referralRewardAmount() * i,
+                "referrer should increase referral rewards after claim"
+            );
+            assertEq(
+                quest.referralClaimTotal(),
+                quest.referralRewardAmount() * i,
+                "referral claims for all referrers should equal the reward amount (single claim)"
+            );
+        }
+
+        vm.warp(timestamp);
+        vm.prank(referrer);
+
+        quest.claimReferralFees(referrer);
+
+        // verify that withdrawals can still work
+        quest.withdrawRemainingTokens();
+
+        assertEq(
+            SampleERC20(rewardTokenAddress).balanceOf(referrer),
+            quest.referralRewardAmount() * participants,
+            "referrer should claim their allocated referral rewards"
+        );
+
+        uint256 participantBalance = SampleERC20(rewardTokenAddress).balanceOf(participant);
+        uint256 protocolFeeRecipientBalance = SampleERC20(rewardTokenAddress).balanceOf(quest.protocolFeeRecipient());
+        uint256 ownerBalance = SampleERC20(rewardTokenAddress).balanceOf(owner);
+        uint256 referrerBalance = SampleERC20(rewardTokenAddress).balanceOf(referrer);
+        uint256 total = participantBalance + ownerBalance + referrerBalance + protocolFeeRecipientBalance;
+
+        assertEq(
+            protocolFeeRecipientBalance,
+            (quest.protocolFee() / 2) - quest.referralClaimTotal(),
+            "Protocol fee recipient should get their share of the rewards"
+        );
+
+        assertEq(
+            ownerBalance,
+            total - participantBalance - referrerBalance - protocolFeeRecipientBalance,
+            "Owner balance should have the unclaimed funds returned"
+        );
+    }
+
     function test_RevertIf_test_claimReferralFees_NoWithdrawDuringClaim() public {
         vm.expectRevert(abi.encodeWithSelector(NoWithdrawDuringClaim.selector));
         vm.prank(referrer);

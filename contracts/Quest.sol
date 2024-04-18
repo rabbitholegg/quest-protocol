@@ -44,6 +44,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     uint256 public referralClaimTotal;
     mapping (address => uint256) private referralClaimAmounts;
     mapping (address => bool) private referrerHasClaimed;
+    uint256 public totalReferralsFeesClaimed;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -85,6 +86,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questFactoryContract = IQuestFactory(payable(msg.sender));
         queued = true;
         referralClaimTotal = 0;
+        totalReferralsFeesClaimed = 0;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -170,7 +172,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 protocolFeeForRecipient = (this.protocolFee() / 2) - referralClaimTotal;
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
-        uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this)) - referralClaimTotal;
+        uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this)) - (referralClaimTotal - totalReferralsFeesClaimed);
         rewardToken.safeTransfer(owner(), remainingBalanceForOwner);
 
         questFactoryContract.withdrawCallback(questId, protocolFeeRecipient, protocolPayout, address(owner()), ownerPayout);
@@ -184,6 +186,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
         rewardToken.safeTransfer(referrer, referrerClaimAmount);
         referrerHasClaimed[referrer] = true;
+        totalReferralsFeesClaimed += referrerClaimAmount;
         emit ClaimedReferralFees(questId, referrer, address(rewardToken), referrerClaimAmount);
     }
 
