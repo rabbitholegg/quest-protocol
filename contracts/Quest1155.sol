@@ -35,6 +35,7 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public questFee;
     string public questId;
+    uint256 public referralRewardFee;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
@@ -178,6 +179,10 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
 
     function getQuestId() public view override returns (string memory){
         return questId;
+    }
+
+    function referralRewardAmount() external pure returns (uint256) {
+        return 0;
     }
 
     /*//////////////////////////////////////////////////////////////

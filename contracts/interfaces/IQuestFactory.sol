@@ -89,6 +89,7 @@ interface IQuestFactory {
         string questName;
         string questType;
         string projectName;
+        uint256 referralRewardFee;
     }
 
     struct ERC1155QuestData {
@@ -138,6 +139,18 @@ interface IQuestFactory {
         address referrer,
         uint16 referralFee,
         uint256 mintFeeEthWei
+    );
+    event QuestClaimReferred(
+        address indexed recipient,
+        address indexed questAddress,
+        string questId,
+        address rewardToken,
+        uint256 rewardAmountInWeiOrTokenId,
+        address referrer,
+        uint16 referralFee,
+        uint256 mintFeeEthWei,
+        uint256 tokenReferralFee,
+        uint256 referralClaimAmount
     );
     event MintFeePaid(
         string questId,

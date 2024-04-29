@@ -82,7 +82,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
             "questName",
-            "projectName"
+            "projectName",
+            500
         );
 
         vm.warp(START_TIME + 1);
@@ -118,7 +119,8 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
             "questName",
-            "projectName"
+            "projectName",
+            500
         );
 
         vm.warp(START_TIME + 1);
