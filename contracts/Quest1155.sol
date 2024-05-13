@@ -105,10 +105,12 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     /*//////////////////////////////////////////////////////////////
                             EXTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
-    /// @notice Pauses the Quest
-    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function pause() external onlyOwner onlyStarted {
+
+    /// @notice Cancels the Quest by setting the end time to 15 minutes from the current time and pausing the Quest. If the Quest has not yet started, it will end immediately.
+    /// @dev Only the owner of the Quest can call this function.
+    function cancel() external onlyOwner whenNotPaused whenNotEnded {
         _pause();
+        endTime = startTime > block.timestamp ? block.timestamp : block.timestamp + 15 minutes;
     }
 
     /// @notice Queues the quest by marking it ready to start at the contract level. Marking a quest as queued does not mean that it is live. It also requires that the start time has passed
@@ -140,12 +142,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     {
         _transferRewards(account_, 1);
         if (questFee > 0) protocolFeeRecipient.safeTransferETH(questFee);
-    }
-
-    /// @notice Unpauses the Quest
-    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() external onlyOwner onlyStarted {
-        _unpause();
     }
 
     /// @dev Function that transfers all 1155 tokens in the contract to the owner (creator), and eth to the protocol fee recipient and the owner

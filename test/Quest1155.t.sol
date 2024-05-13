@@ -109,31 +109,22 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
     /*//////////////////////////////////////////////////////////////
                                 PAUSE
     //////////////////////////////////////////////////////////////*/
-    function test_pause() public {
+    function test_cancel() public {
         vm.prank(questFactoryMock);
-        quest.pause();
+        quest.cancel();
         assertTrue(quest.paused(), "paused should be true");
+        assertEq(quest.endTime(), block.timestamp + 15 minutes, "endTime should be 15 minutes from now");
     }
 
-    function test_RevertIf_pause_Unauthorized() public {
+    function test_cancel_notStarted() public {
+        vm.warp(START_TIME - 1);
         vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
-        quest.pause();
+        quest.cancel();
     }
 
-    /*//////////////////////////////////////////////////////////////
-                              UNPAUSE
-    //////////////////////////////////////////////////////////////*/
-    function test_unpause() public {
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        quest.unPause();
-        assertFalse(quest.paused(), "paused should be false");
-        vm.stopPrank();
-    }
-
-    function test_RevertIf_unpause_Unauthorized() public {
+    function test_RevertIf_cancel_Unauthorized() public {
         vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
-        quest.unPause();
+        quest.cancel();
     }
 
     // /*//////////////////////////////////////////////////////////////
@@ -197,18 +188,6 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
         vm.prank(questFactoryMock);
         vm.expectRevert(abi.encodeWithSelector(NotStarted.selector));
         quest.singleClaim(participant);
-    }
-
-    function test_RevertIf_singleClaim_whenNotPaused() public {
-        vm.deal(address(quest), LARGE_ETH_AMOUNT);
-        vm.prank(questFactoryMock);
-        quest.queue();
-        vm.startPrank(questFactoryMock);
-        quest.pause();
-        vm.warp(START_TIME);
-        vm.expectRevert("Pausable: paused");
-        quest.singleClaim(participant);
-        vm.stopPrank();
     }
 
     // /*//////////////////////////////////////////////////////////////

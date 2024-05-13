@@ -121,16 +121,12 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                             EXTERNAL UPDATE
     //////////////////////////////////////////////////////////////*/
-    /// @notice Pauses the Quest
-    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function pause() external onlyOwner {
-        _pause();
-    }
 
-    /// @notice Unpauses the Quest
-    /// @dev Only the owner of the Quest can call this function. Also requires that the Quest has started (not by date, but by calling the start function)
-    function unPause() external onlyOwner {
-        _unpause();
+    /// @notice Cancels the Quest by setting the end time to 15 minutes from the current time and pausing the Quest. If the Quest has not yet started, it will end immediately.
+    /// @dev Only the owner of the Quest can call this function.
+    function cancel() external onlyOwner whenNotPaused whenNotEnded {
+        _pause();
+        endTime = startTime > block.timestamp ? block.timestamp : block.timestamp + 15 minutes;
     }
 
     /// @dev transfers rewards to the account, can only be called once per account per quest and only by the quest factory
