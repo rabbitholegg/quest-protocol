@@ -118,12 +118,21 @@ contract TestQuest1155 is Test, Errors, Events, TestUtils {
 
     function test_cancel_notStarted() public {
         vm.warp(START_TIME - 1);
-        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
+        vm.prank(questFactoryMock);
+        quest.cancel();
+        assertEq(quest.endTime(), block.timestamp, "endTime should be now");
+    }
+
+    function test_cancel_alreadyCanceled() public {
+        vm.prank(questFactoryMock);
+        quest.cancel();
+        vm.expectRevert("Pausable: paused");
+        vm.prank(questFactoryMock);
         quest.cancel();
     }
 
     function test_RevertIf_cancel_Unauthorized() public {
-        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
+        vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
         quest.cancel();
     }
 

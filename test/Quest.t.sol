@@ -156,8 +156,16 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         assertEq(quest.endTime(), block.timestamp + 15 minutes, "endTime should be 15 minutes from now");
     }
 
+    function test_cancel_alreadyCanceled() public {
+        vm.prank(questFactoryMock);
+        quest.cancel();
+        vm.expectRevert("Pausable: paused");
+        vm.prank(questFactoryMock);
+        quest.cancel();
+    }
+
     function test_RevertIf_cancel_Unauthorized() public {
-        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
+        vm.expectRevert(abi.encodeWithSelector(NotQuestFactory.selector));
         quest.cancel();
     }
 

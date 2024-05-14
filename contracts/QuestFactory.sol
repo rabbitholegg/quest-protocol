@@ -329,6 +329,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         );
     }
 
+    function cancelQuest(string calldata questId_) external {
+        Quest storage _questData = quests[questId_];
+        if (_questData.questCreator != msg.sender) revert Unauthorized();
+        IQuestOwnable quest = IQuestOwnable(_questData.questAddress);
+        quest.cancel();
+        emit QuestCancelled(_questData.questAddress, questId_, quest.endTime());
+    }
+
     /*//////////////////////////////////////////////////////////////
                                  CLAIM
     //////////////////////////////////////////////////////////////*/

@@ -124,7 +124,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
 
     /// @notice Cancels the Quest by setting the end time to 15 minutes from the current time and pausing the Quest. If the Quest has not yet started, it will end immediately.
     /// @dev Only the owner of the Quest can call this function.
-    function cancel() external onlyOwner whenNotPaused whenNotEnded {
+    function cancel() external onlyQuestFactory whenNotPaused whenNotEnded {
         _pause();
         endTime = startTime > block.timestamp ? block.timestamp : block.timestamp + 15 minutes;
     }

@@ -418,6 +418,83 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     }
 
     /*//////////////////////////////////////////////////////////////
+                                CANCEL
+    //////////////////////////////////////////////////////////////*/
+
+    function test_cancelQuest() public {
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
+            address(sampleERC20),
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
+        );
+
+        vm.startPrank(questCreator);
+        questFactory.cancelQuest(QUEST.QUEST_ID_STRING);
+
+        Quest quest = Quest(payable(questAddress));
+        assertEq(quest.paused(), true, "quest should be paused");
+        assertEq(quest.endTime(), block.timestamp, "endTime should be now");
+    }
+
+    function test_cancelQuest_alreadyStarted() public {
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
+            address(sampleERC20),
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
+        );
+
+        vm.warp(QUEST.START_TIME + 1);
+        vm.startPrank(questCreator);
+        questFactory.cancelQuest(QUEST.QUEST_ID_STRING);
+
+        Quest quest = Quest(payable(questAddress));
+        assertEq(quest.paused(), true, "quest should be paused");
+        assertEq(quest.endTime(), block.timestamp + 15 minutes, "endTime should be 15 minutes from now");
+    }
+
+    function test_cancelQuest_unauthorized() public {
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE));
+        address questAddress = questFactory.createERC20Quest(
+            QUEST.CHAIN_ID,
+            address(sampleERC20),
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME,
+            QUEST.REFERRAL_REWARD_FEE
+        );
+
+        vm.startPrank(anyone);
+        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector));
+        questFactory.cancelQuest(QUEST.QUEST_ID_STRING);
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 VIEW
     //////////////////////////////////////////////////////////////*/
     function test_questData() public {
