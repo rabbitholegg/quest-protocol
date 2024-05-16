@@ -44,6 +44,7 @@ interface IQuest {
     function startTime() external view returns (uint256);
     function endTime() external view returns (uint256);
     function singleClaim(address account) external;
+    function cancel() external;
     function rewardToken() external view returns (address);
     function rewardAmountInWei() external view returns (uint256);
     function totalTransferAmount() external view returns (uint256);

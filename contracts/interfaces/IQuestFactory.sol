@@ -111,6 +111,8 @@ interface IQuestFactory {
     event NftQuestFeeListSet(address[] addresses, uint256[] fees);
     event NftQuestFeeSet(uint256 nftQuestFee);
 
+    event QuestCancelled(address indexed questAddress, string questId, uint256 endsAt);
+
     event QuestClaimedData(
         address indexed recipient,
         address indexed questAddress,
