@@ -32,6 +32,7 @@ mantle = "https://rpc.mantle.xyz/"
 scroll = "https://rpc.scroll.io/"
 blast = "https://restless-divine-meme.blast-mainnet.quiknode.pro/${QUICKNODE_BLAST_API_KEY}/"
 zora = "https://rpc.zora.co"
+degen = "https://rpc.degen.tips"
 
 [etherscan]
 mainnet = { key = "${MAIN_ETHERSCAN_API_KEY}" }
