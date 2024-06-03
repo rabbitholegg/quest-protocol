@@ -3,12 +3,12 @@ pragma solidity ^0.8.19;
 
 import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 
-import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC1155Receiver} from "openzeppelin-contracts/token/ERC1155/IERC1155Receiver.sol";
+import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
+import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
 
-import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
-import {ReentrancyGuard} from "@solady/utils/ReentrancyGuard.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {ReentrancyGuard} from "solady/utils/ReentrancyGuard.sol";
 
 import {Budget} from "contracts/references/Budget.sol";
 import {Cloneable} from "contracts/references/Cloneable.sol";
@@ -134,7 +134,6 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         return true;
     }
 
-    /// @inheritdoc Budget
     /// @notice Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
@@ -160,8 +159,8 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         string memory questName_,
         string memory projectName_,
         uint256 referralRewardFee_
-    ) public virtual override onlyAuthorized returns (address) {
-        return IQuestFactory(QuestFactory).createERC20Quest(
+    ) public virtual onlyAuthorized returns (address) {
+        return IQuestFactory(questFactory).createERC20Quest(
             txHashChainId_,
             rewardTokenAddress_,
             endTime_,
@@ -212,6 +211,18 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     }
 
     /// @inheritdoc Budget
+    /// @notice Disburses assets from the budget to multiple recipients
+    /// @param data_ The packed array of {Transfer} requests
+    /// @return True if all disbursements were successful
+    function disburseBatch(bytes[] calldata data_) external virtual override returns (bool) {
+        for (uint256 i = 0; i < data_.length; i++) {
+            if (!disburse(data_[i])) return false;
+        }
+
+        return true;
+    }
+
+    /// @inheritdoc Budget
     function setAuthorized(address[] calldata account_, bool[] calldata authorized_)
         external
         virtual
@@ -232,7 +243,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @notice Set the QuestFactory contract address
     /// @param questFactory_ The address of the QuestFactory contract
     function setQuestFactory(address questFactory_) external virtual onlyOwner {
-        QuestFactory = questFactory_;
+        questFactory = questFactory_;
     }
 
     /// @notice Set the DisburseEnabled flag

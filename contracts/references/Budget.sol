@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {Ownable} from "@solady/auth/Ownable.sol";
-import {Receiver} from "@solady/accounts/Receiver.sol";
-import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
+import {Ownable} from "solady/auth/Ownable.sol";
+import {Receiver} from "solady/accounts/Receiver.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 import {BoostError} from "contracts/references/BoostError.sol";
 import {Cloneable} from "contracts/references/Cloneable.sol";

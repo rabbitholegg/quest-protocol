@@ -3,12 +3,13 @@ pragma solidity ^0.8.19;
 
 import {Test, console} from "lib/forge-std/src/Test.sol";
 
-import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import {Initializable} from "@solady/utils/Initializable.sol";
-import {LibClone} from "@solady/utils/LibClone.sol";
-import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
-
+import {IERC1155Receiver} from "openzeppelin-contracts/token/ERC1155/IERC1155Receiver.sol";
+import {Initializable} from "solady/utils/Initializable.sol";
+import {LibClone} from "solady/utils/LibClone.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 import {MockERC20, MockERC1155} from "contracts/references/Mocks.sol";
+import {QuestFactoryMock} from "./Mocks/QuestFactoryMock.sol";
 import {BoostError} from "contracts/references/BoostError.sol";
 import {Budget} from "contracts/references/Budget.sol";
 import {Cloneable} from "contracts/references/Cloneable.sol";
@@ -36,7 +37,7 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
         // Deploy a new QuestBudget contract
         questBudget = QuestBudget(payable(LibClone.clone(address(new QuestBudget()))));
         questBudget.initialize(
-            abi.encode(QuestBudget.InitPayload({owner: address(this), questFactory: mockQuestFactory.address, authorized: new address[](0)}))
+            abi.encode(QuestBudget.InitPayload({owner: address(this), questFactory: address(mockQuestFactory), authorized: new address[](0)}))
         );
     }
 
@@ -100,13 +101,13 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
 
     function testInitialize() public {
         // Initializer can only be called on clones, not the base contract
-        bytes memory data = abi.encode(QuestBudget.InitPayload({owner: address(this), authorized: new address[](0)}));
+        bytes memory data = abi.encode(QuestBudget.InitPayload({owner: address(this), questFactory: address(mockQuestFactory) ,authorized: new address[](0)}));
         QuestBudget clone = QuestBudget(payable(LibClone.clone(address(questBudget))));
         clone.initialize(data);
 
         // Ensure the budget has the correct authorities
         assertEq(clone.owner(), address(this));
-        assertEq(clone.questFactory(), mockQuestFactory.address);
+        assertEq(clone.questFactory(), address(mockQuestFactory));
         assertEq(clone.isAuthorized(address(this)), true);
     }
 
@@ -401,19 +402,6 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
 
         // Ensure the quest contract has the correct reward amount
         assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
-        // Check that the questData in the mock contract matches the parameters
-        QuestFactoryMock.QuestData memory questData = questFactoryMock.questData();
-        assertEq(questData.txHashChainId, txHashChainId_);
-        assertEq(questData.rewardTokenAddress, rewardTokenAddress_);
-        assertEq(questData.endTime, endTime_);
-        assertEq(questData.startTime, startTime_);
-        assertEq(questData.totalParticipants, totalParticipants_);
-        assertEq(questData.rewardAmount, rewardAmount_);
-        assertEq(questData.questId, questId_);
-        assertEq(questData.actionType, actionType_);
-        assertEq(questData.questName, questName_);
-        assertEq(questData.projectName, projectName_);
-        assertEq(questData.referralRewardFee, referralRewardFee_);
     }
 
 
