@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.19;
 
 import {Ownable} from "@solady/auth/Ownable.sol";
 import {Receiver} from "@solady/accounts/Receiver.sol";
