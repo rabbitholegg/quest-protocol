@@ -9,7 +9,7 @@ import {LibClone} from "solady/utils/LibClone.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 import {MockERC20, MockERC1155} from "contracts/references/Mocks.sol";
-import {QuestFactoryMock} from "./Mocks/QuestFactoryMock.sol";
+import {QuestFactoryMock} from "./mocks/QuestFactoryMock.sol";
 import {BoostError} from "contracts/references/BoostError.sol";
 import {Budget} from "contracts/references/Budget.sol";
 import {Cloneable} from "contracts/references/Cloneable.sol";
@@ -23,6 +23,7 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
     QuestBudget questBudget;
 
     function setUp() public {
+        address owner = address(this);
         // Deploy a new ERC20 contract and mint 100 tokens
         mockERC20 = new MockERC20();
         mockERC20.mint(address(this), 100 ether);
@@ -36,9 +37,12 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
 
         // Deploy a new QuestBudget contract
         questBudget = QuestBudget(payable(LibClone.clone(address(new QuestBudget()))));
+        address[] memory authorized = new address[](1);
+        authorized[0] = owner;
         questBudget.initialize(
-            abi.encode(QuestBudget.InitPayload({owner: address(this), questFactory: address(mockQuestFactory), authorized: new address[](0)}))
+            abi.encode(QuestBudget.InitPayload({owner: owner, questFactory: address(mockQuestFactory), authorized: authorized}))
         );
+        questBudget.setDisburseEnabled(true);
     }
 
     ////////////////////////////////

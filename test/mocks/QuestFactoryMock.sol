@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.19;
 
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+
 contract QuestFactoryMock {
     uint256 numberMinted;
     uint256 public mintFee;
@@ -80,6 +82,9 @@ contract QuestFactoryMock {
             projectName: projectName_,
             referralRewardFee: referralRewardFee_
         });
+
+        // Transfer rewardAmount_ tokens from the caller to this contract
+        require(IERC20(rewardTokenAddress_).transferFrom(msg.sender, address(this), rewardAmount_), "Transfer failed");
 
         // Return this contract's address as the "created" quest contract
         return address(this);

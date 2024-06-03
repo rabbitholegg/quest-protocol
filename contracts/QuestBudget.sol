@@ -29,7 +29,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     // @dev The address of the QuestFactory contract
     address public questFactory;
 
-    bool public DisburseEnabled;
+    bool public disburseEnabled;
 
     /// @dev The total amount of each fungible asset distributed from the budget
     mapping(address => uint256) private _distributedFungible;
@@ -160,6 +160,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         string memory projectName_,
         uint256 referralRewardFee_
     ) public virtual onlyAuthorized returns (address) {
+        rewardTokenAddress_.safeApprove(address(questFactory), rewardAmount_);
         return IQuestFactory(questFactory).createERC20Quest(
             txHashChainId_,
             rewardTokenAddress_,
@@ -181,7 +182,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @return True if the disbursement was successful
     /// @dev If the asset transfer fails, the disbursement will revert
     function disburse(bytes calldata data_) public virtual override onlyAuthorized returns (bool) {
-        if(!DisburseEnabled) {
+        if(!disburseEnabled) {
             revert Unauthorized();
         }
         Transfer memory request = abi.decode(data_, (Transfer));
@@ -249,7 +250,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @notice Set the DisburseEnabled flag
     /// @param enabled_ The flag to enable or disable disburse
     function setDisburseEnabled(bool enabled_) external virtual onlyOwner {
-        DisburseEnabled = enabled_;
+        disburseEnabled = enabled_;
     }
 
     /// @inheritdoc Budget
