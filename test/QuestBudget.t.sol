@@ -359,6 +359,65 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
     }
 
     ///////////////////////////
+    // QuestBudget.createERC20Quest //
+    ///////////////////////////
+    function testCreateERC20Quest() public {
+        // Define the parameters for the new quest
+        uint32 txHashChainId_ = 1;
+        address rewardTokenAddress_ = address(mockERC20);
+        uint256 endTime_ = block.timestamp + 1 days;
+        uint256 startTime_ = block.timestamp;
+        uint256 totalParticipants_ = 10;
+        uint256 rewardAmount_ = 100 ether;
+        string memory questId_ = "testQuest";
+        string memory actionType_ = "testAction";
+        string memory questName_ = "Test Quest";
+        string memory projectName_ = "Test Project";
+        uint256 referralRewardFee_ = 10 ether;
+
+        // Ensure the budget has enough tokens for the reward
+        mockERC20.approve(address(questBudget), rewardAmount_);
+        questBudget.allocate(
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), rewardAmount_)
+        );
+
+        // Create the new quest
+        address questAddress = questBudget.createERC20Quest(
+            txHashChainId_,
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            actionType_,
+            questName_,
+            projectName_,
+            referralRewardFee_
+        );
+
+        // Ensure the returned quest address is not the zero address
+        assertTrue(questAddress != address(0));
+
+        // Ensure the quest contract has the correct reward amount
+        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
+        // Check that the questData in the mock contract matches the parameters
+        QuestFactoryMock.QuestData memory questData = questFactoryMock.questData();
+        assertEq(questData.txHashChainId, txHashChainId_);
+        assertEq(questData.rewardTokenAddress, rewardTokenAddress_);
+        assertEq(questData.endTime, endTime_);
+        assertEq(questData.startTime, startTime_);
+        assertEq(questData.totalParticipants, totalParticipants_);
+        assertEq(questData.rewardAmount, rewardAmount_);
+        assertEq(questData.questId, questId_);
+        assertEq(questData.actionType, actionType_);
+        assertEq(questData.questName, questName_);
+        assertEq(questData.projectName, projectName_);
+        assertEq(questData.referralRewardFee, referralRewardFee_);
+    }
+
+
+    ///////////////////////////
     // QuestBudget.disburse //
     ///////////////////////////
 
@@ -628,6 +687,8 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
         // Ensure the total is 75 available + 25 distributed = 100 tokens
         assertEq(questBudget.total(address(mockERC20)), 100 ether);
     }
+
+
 
     ////////////////////////////
     // QuestBudget.available //
