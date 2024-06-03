@@ -34,6 +34,9 @@ contract QuestFactoryMock {
         uint256 tokenId
     );
 
+    event QuestCancelled(address indexed questAddress, string questId, uint256 endsAt);
+
+
     function setNumberMinted(uint256 numberminted_) external {
         numberMinted = numberminted_;
     }
@@ -88,6 +91,10 @@ contract QuestFactoryMock {
 
         // Return this contract's address as the "created" quest contract
         return address(this);
+    }
+
+    function cancelQuest(string calldata questId_) external {
+        emit QuestCancelled(address(this), '', 0);
     }
 
 }

@@ -99,7 +99,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         } else {
             // Unsupported asset type
             return false;
-        }
+    }
 
         return true;
     }
@@ -176,6 +176,12 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         );
     }
 
+    /// @notice Cancel a quest
+    /// @param questId_ The uuid of the quest
+    function cancelQuest(string calldata questId_) public virtual onlyOwner() {
+        IQuestFactory(questFactory).cancelQuest(questId_);
+    }
+ 
     /// @inheritdoc Budget
     /// @notice Disburses assets from the budget to a single recipient
     /// @param data_ The packed {Transfer} request

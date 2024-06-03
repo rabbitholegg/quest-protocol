@@ -14,13 +14,18 @@ import {BoostError} from "contracts/references/BoostError.sol";
 import {Budget} from "contracts/references/Budget.sol";
 import {Cloneable} from "contracts/references/Cloneable.sol";
 import {QuestBudget} from "contracts/QuestBudget.sol";
+import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
+import {TestUtils} from "./helpers/TestUtils.sol";
+import "forge-std/console.sol";
 
-contract QuestBudgetTest is Test, IERC1155Receiver {
+contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
     MockERC20 mockERC20;
     MockERC20 otherMockERC20;
     MockERC1155 mockERC1155;
     QuestFactoryMock mockQuestFactory;
     QuestBudget questBudget;
+
+    event QuestCancelled(address indexed questAddress, string questId, uint256 endsAt);
 
     function setUp() public {
         address owner = address(this);
@@ -408,6 +413,58 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
         assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
     }
 
+    ///////////////////////////
+    // QuestBudget.cancel //
+    ///////////////////////////
+
+    function test_cancel() public {
+                // Define the parameters for the new quest
+        uint32 txHashChainId_ = 1;
+        address rewardTokenAddress_ = address(mockERC20);
+        uint256 endTime_ = block.timestamp + 1 days;
+        uint256 startTime_ = block.timestamp;
+        uint256 totalParticipants_ = 10;
+        uint256 rewardAmount_ = 100 ether;
+        string memory questId_ = "testQuest";
+        string memory actionType_ = "testAction";
+        string memory questName_ = "Test Quest";
+        string memory projectName_ = "Test Project";
+        uint256 referralRewardFee_ = 10 ether;
+
+        // Ensure the budget has enough tokens for the reward
+        mockERC20.approve(address(questBudget), rewardAmount_);
+        bytes memory allocateBytes = _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), rewardAmount_);
+        questBudget.allocate(allocateBytes);
+        console.logBytes(allocateBytes);
+
+        // Create the new quest
+        address questAddress = questBudget.createERC20Quest(
+            txHashChainId_,
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            actionType_,
+            questName_,
+            projectName_,
+            referralRewardFee_
+        );
+
+        // Ensure the returned quest address is not the zero address
+        assertTrue(questAddress != address(0));
+
+        // Ensure the quest contract has the correct reward amount
+        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
+
+        vm.expectEmit();
+
+        emit QuestCancelled(questAddress, '', 0);
+
+        questBudget.cancelQuest('');
+
+    }
 
     ///////////////////////////
     // QuestBudget.disburse //

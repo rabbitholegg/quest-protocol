@@ -223,6 +223,8 @@ interface IQuestFactory {
 
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable;
 
+    function cancelQuest(string calldata questId_) external;
+
     // Set
     function setClaimSignerAddress(address claimSignerAddress_) external;
     function setErc1155QuestAddress(address erc1155QuestAddress_) external;
