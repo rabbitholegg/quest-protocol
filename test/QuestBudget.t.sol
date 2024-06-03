@@ -18,6 +18,7 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
     MockERC20 mockERC20;
     MockERC20 otherMockERC20;
     MockERC1155 mockERC1155;
+    QuestFactoryMock mockQuestFactory;
     QuestBudget questBudget;
 
     function setUp() public {
@@ -29,10 +30,13 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
         mockERC1155 = new MockERC1155();
         mockERC1155.mint(address(this), 42, 100);
 
+        // Deploy a new QuestFactoryMock contract
+        mockQuestFactory = new QuestFactoryMock();
+
         // Deploy a new QuestBudget contract
         questBudget = QuestBudget(payable(LibClone.clone(address(new QuestBudget()))));
         questBudget.initialize(
-            abi.encode(QuestBudget.InitPayload({owner: address(this), authorized: new address[](0)}))
+            abi.encode(QuestBudget.InitPayload({owner: address(this), questFactory: mockQuestFactory.address, authorized: new address[](0)}))
         );
     }
 
@@ -102,6 +106,7 @@ contract QuestBudgetTest is Test, IERC1155Receiver {
 
         // Ensure the budget has the correct authorities
         assertEq(clone.owner(), address(this));
+        assertEq(clone.questFactory(), mockQuestFactory.address);
         assertEq(clone.isAuthorized(address(this)), true);
     }
 
