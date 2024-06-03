@@ -57,6 +57,10 @@ contract QuestFactoryMock {
         return false;
     }
 
+    function questFee() external view returns (uint16) {
+        return 2000;
+    }
+
 
     function createERC20Quest(
         uint32 txHashChainId_,
@@ -71,6 +75,9 @@ contract QuestFactoryMock {
         string memory projectName_,
         uint256 referralRewardFee_
     ) external returns (address) {
+            uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 maxProtocolReward = (maxTotalRewards * 2000) / 10_000; // Assuming questFee is 2000
+        uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
         questData = QuestData({
             txHashChainId: txHashChainId_,
             rewardTokenAddress: rewardTokenAddress_,
@@ -87,7 +94,7 @@ contract QuestFactoryMock {
         });
 
         // Transfer rewardAmount_ tokens from the caller to this contract
-        require(IERC20(rewardTokenAddress_).transferFrom(msg.sender, address(this), rewardAmount_), "Transfer failed");
+        require(IERC20(rewardTokenAddress_).transferFrom(msg.sender, address(this), approvalAmount), "Transfer failed");
 
         // Return this contract's address as the "created" quest contract
         return address(this);

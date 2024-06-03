@@ -194,7 +194,8 @@ interface IQuestFactory {
         string memory actionType,
         string memory questName
     ) external pure returns (string memory);
-
+    function questFee() external view returns (uint16);
+    
     // Create
     function create1155QuestAndQueue(
         address rewardTokenAddress_,

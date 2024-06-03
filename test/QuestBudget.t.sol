@@ -378,17 +378,22 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 endTime_ = block.timestamp + 1 days;
         uint256 startTime_ = block.timestamp;
         uint256 totalParticipants_ = 10;
-        uint256 rewardAmount_ = 100 ether;
+        uint256 rewardAmount_ = 1 ether;
         string memory questId_ = "testQuest";
         string memory actionType_ = "testAction";
         string memory questName_ = "Test Quest";
         string memory projectName_ = "Test Project";
         uint256 referralRewardFee_ = 10 ether;
-
+        
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 questFee = uint256(mockQuestFactory.questFee());
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
+        uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
+        mockERC20.mint(address(this), approvalAmount);
         // Ensure the budget has enough tokens for the reward
-        mockERC20.approve(address(questBudget), rewardAmount_);
+        mockERC20.approve(address(questBudget), approvalAmount);
         questBudget.allocate(
-            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), rewardAmount_)
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount)
         );
 
         // Create the new quest
@@ -410,7 +415,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertTrue(questAddress != address(0));
 
         // Ensure the quest contract has the correct reward amount
-        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
+        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), approvalAmount);
     }
 
     ///////////////////////////
@@ -424,16 +429,21 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 endTime_ = block.timestamp + 1 days;
         uint256 startTime_ = block.timestamp;
         uint256 totalParticipants_ = 10;
-        uint256 rewardAmount_ = 100 ether;
+        uint256 rewardAmount_ = 1 ether;
         string memory questId_ = "testQuest";
         string memory actionType_ = "testAction";
         string memory questName_ = "Test Quest";
         string memory projectName_ = "Test Project";
         uint256 referralRewardFee_ = 10 ether;
 
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 questFee = uint256(mockQuestFactory.questFee());
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
+        uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
+        mockERC20.mint(address(this), approvalAmount);
         // Ensure the budget has enough tokens for the reward
-        mockERC20.approve(address(questBudget), rewardAmount_);
-        bytes memory allocateBytes = _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), rewardAmount_);
+        mockERC20.approve(address(questBudget), approvalAmount);
+        bytes memory allocateBytes = _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount);
         questBudget.allocate(allocateBytes);
         console.logBytes(allocateBytes);
 
@@ -456,7 +466,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertTrue(questAddress != address(0));
 
         // Ensure the quest contract has the correct reward amount
-        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), rewardAmount_);
+        assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), approvalAmount);
 
         vm.expectEmit();
 

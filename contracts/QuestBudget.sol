@@ -160,7 +160,11 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         string memory projectName_,
         uint256 referralRewardFee_
     ) public virtual onlyAuthorized returns (address) {
-        rewardTokenAddress_.safeApprove(address(questFactory), rewardAmount_);
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 questFee = uint256(IQuestFactory(questFactory).questFee());
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
+        uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
+        rewardTokenAddress_.safeApprove(address(questFactory), approvalAmount);
         return IQuestFactory(questFactory).createERC20Quest(
             txHashChainId_,
             rewardTokenAddress_,
