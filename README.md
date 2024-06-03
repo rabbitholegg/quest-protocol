@@ -141,6 +141,13 @@ sed -i '' "s/TEST_CLAIM_SIGNER_PRIVATE_KEY=/TEST_CLAIM_SIGNER_PRIVATE_KEY=0xac09
 forge test
 ```
 
+### Run a specific test Contract:
+
+Test QuestBudgetTest contracts:
+```bash
+forge test --match-contract QuestBudgetTest
+```
+
 ### Run test coverage report:
 
 ```bash
@@ -167,6 +174,8 @@ If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in For
 1. Deploy the ProtocolRewards
 `forge script script/ProtocolRewards.s.sol:ProtocolRewardsDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 1. Set any storage variables manually if needed
+1. Deploy the QuestBudget
+`forge script script/QuestBudget.s.sol:QuestBudgetDeploy --rpc-url sepolia --broadcast --verify -vvvv`
 
 
 ### with mantel, add:
