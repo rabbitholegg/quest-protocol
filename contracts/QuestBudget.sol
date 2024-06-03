@@ -22,11 +22,12 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @notice The payload for initializing a SimpleBudget
     struct InitPayload {
         address owner;
+        address questFactory;
         address[] authorized;
     }
 
     // @dev The address of the QuestFactory contract
-    address public QuestFactory;
+    address public questFactory;
 
     bool public DisburseEnabled;
 
@@ -56,6 +57,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     function initialize(bytes calldata data_) public virtual override initializer {
         InitPayload memory init_ = abi.decode(data_, (InitPayload));
         _initializeOwner(init_.owner);
+        questFactory = init_.questFactory;
         for (uint256 i = 0; i < init_.authorized.length; i++) {
             _isAuthorized[init_.authorized[i]] = true;
         }
