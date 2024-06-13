@@ -194,7 +194,8 @@ interface IQuestFactory {
         string memory actionType,
         string memory questName
     ) external pure returns (string memory);
-
+    function questFee() external view returns (uint16);
+    
     // Create
     function create1155QuestAndQueue(
         address rewardTokenAddress_,
@@ -206,7 +207,24 @@ interface IQuestFactory {
         string memory
     ) external payable returns (address);
 
+    function createERC20Quest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string calldata questId_,
+        string calldata actionType_,
+        string calldata questName_,
+        string calldata projectName_,
+        uint256 referralRewardFee_
+    ) external returns (address);
+
+
     function claimOptimized(bytes calldata signature_, bytes calldata data_) external payable;
+
+    function cancelQuest(string calldata questId_) external;
 
     // Set
     function setClaimSignerAddress(address claimSignerAddress_) external;
