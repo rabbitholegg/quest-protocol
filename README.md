@@ -162,6 +162,9 @@ forge snapshot
 
 ### Gotchas
 If you see something like this `expected error: 0xdd8133e6 != 0xce3f0005` in Forge logging, your best bet is to search for the hex string (`ce3f0005` don't prepend `0x`) in `Errors.json` within the build artifacts - that should have most error strings in it.
+
+If you run into an issue where there isn't enough funds to deploy on Optimism, but the account appears to have sufficient funds, [try adding the `--legacy` tag](https://github.com/foundry-rs/foundry/issues/7089) to the deploy command.
+
 ---
 
 ## Deployment
@@ -184,6 +187,9 @@ if you get `(code: -32000, message: invalid transaction: nonce too low, data: No
 
 ### with scroll, add:
 `--legacy --verifier blockscout --verifier-url "https://blockscout.scroll.io/api?module=contract&action=verify"`
+
+### with optimism, add:
+`--legacy`
 
 ### verify OZ TransparentProxy
 Note: This might not be needed, there is currently a bug in the mantle explorer that prevents it from marking create2 contracts as contracts
