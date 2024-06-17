@@ -35,6 +35,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     uint256 REWARD_AMOUNT = 10;
     uint16 QUEST_FEE = 2000;
     uint256 MINT_FEE = 100;
+    uint16 REFERRAL_REWARD_FEE = 250;
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questCreator = makeAddr(("questCreator"));
     address participant = makeAddr(("participant"));
@@ -71,7 +72,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     //////////////////////////////////////////////////////////////*/
     function test_claim_with_referrer() public {
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE, REFERRAL_REWARD_FEE));
         address questAddress = questFactory.createERC20Quest(
             101,
             address(sampleERC20),
@@ -82,8 +83,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
             "questName",
-            "projectName",
-            500
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);
@@ -108,7 +108,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     function test_claim_without_referrer() public {
         referrer = address(0);
         vm.startPrank(questCreator);
-        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE));
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE, REFERRAL_REWARD_FEE));
         address questAddress = questFactory.createERC20Quest(
             101,
             address(sampleERC20),
@@ -119,8 +119,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
             "550e8400-e29b-41d4-a716-446655440000",
             "actionType",
             "questName",
-            "projectName",
-            500
+            "projectName"
         );
 
         vm.warp(START_TIME + 1);

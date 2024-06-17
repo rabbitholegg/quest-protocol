@@ -24,7 +24,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     string QUEST_ID = "QUEST_ID";
     uint16 QUEST_FEE = 2000; // 20%
     uint256 CLAIM_FEE = 999;
-    uint256 REFERRAL_REWARD_FEE = 500; // 5%
+    uint16 REFERRAL_REWARD_FEE = 250; // 2.5%
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
     address questFactoryMock;
     Quest quest;
@@ -37,7 +37,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     string constant DEFAULT_ERC20_SYMBOL = "RTC";
 
     function setUp() public {
-        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE, REFERRAL_REWARD_FEE);
         rewardTokenAddress = address(
             new SampleERC20(
                 DEFAULT_ERC20_NAME,
@@ -58,8 +58,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            REFERRAL_REWARD_FEE
+            protocolFeeRecipient
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -97,8 +96,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            REFERRAL_REWARD_FEE
+            protocolFeeRecipient
         );
     }
 
@@ -115,26 +113,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            REFERRAL_REWARD_FEE
-        );
-    }
-
-    function test_RevertIf_initialize_ReferralRewardFeeTooHigh() public {
-        address payable questAddress = payable(address(new Quest()).cloneDeterministic(keccak256(abi.encodePacked(msg.sender, "SALT"))));
-        quest = Quest(questAddress);
-        vm.prank(questFactoryMock);
-        vm.expectRevert(abi.encodeWithSelector(ReferralRewardFeeTooHigh.selector));
-        quest.initialize(
-            rewardTokenAddress,
-            END_TIME,
-            START_TIME,
-            TOTAL_PARTICIPANTS,
-            REWARD_AMOUNT_IN_WEI,
-            QUEST_ID,
-            QUEST_FEE,
-            protocolFeeRecipient,
-            600
+            protocolFeeRecipient
         );
     }
 
@@ -197,7 +176,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         currentTime = bound(currentTime, startTime, endTime - 1);
         rewardAmountInWei = bound(rewardAmountInWei, 1, REWARD_AMOUNT_IN_WEI * REWARD_AMOUNT_IN_WEI);
         // Setup a reward token with fuzzed rewardAmountInWei
-        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, rewardAmountInWei, QUEST_FEE);
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, rewardAmountInWei, QUEST_FEE, REFERRAL_REWARD_FEE);
         rewardTokenAddress = address(
             new SampleERC20(
                 DEFAULT_ERC20_NAME,
@@ -221,8 +200,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             rewardAmountInWei,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            REFERRAL_REWARD_FEE
+            protocolFeeRecipient
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -268,7 +246,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // simulate ETH from TOTAL_PARTICIPANTS claims
         vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
 
-        uint256 totalFees = calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
+        uint256 totalFees = calculateTotalProtocolFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
 
@@ -322,15 +300,15 @@ contract TestQuest is Test, TestUtils, Errors, Events {
                         CLAIM REFERRAL FEES
     //////////////////////////////////////////////////////////////*/
 
-    function test_fuzz_claimReferralFees(uint96 timestamp, uint256 participants, uint256 referralRewardFee) public {
+    function test_fuzz_claimReferralFees(uint96 timestamp, uint256 participants) public {
         timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
         participants = bound(participants, 1, TOTAL_PARTICIPANTS);
-        referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
+        // referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
 
 
         vm.startPrank(admin);
         // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
-        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE, REFERRAL_REWARD_FEE);
         rewardTokenAddress = address(
             new SampleERC20(
                 DEFAULT_ERC20_NAME,
@@ -352,8 +330,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            referralRewardFee
+            protocolFeeRecipient
         );
 
         vm.startPrank(admin);
@@ -432,15 +409,15 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         );
     }
 
-    function test_fuzz_claimReferralFees_withdrawAfterClaim(uint96 timestamp, uint256 participants, uint256 referralRewardFee) public {
+    function test_fuzz_claimReferralFees_withdrawAfterClaim(uint96 timestamp, uint256 participants) public {
         timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
         participants = bound(participants, 1, TOTAL_PARTICIPANTS);
-        referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
+        // referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
 
 
         vm.startPrank(admin);
         // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
-        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
+        defaultTotalRewardsPlusFee = calculateTotalRewardsPlusFee(participants, REWARD_AMOUNT_IN_WEI, QUEST_FEE, REFERRAL_REWARD_FEE);
         rewardTokenAddress = address(
             new SampleERC20(
                 DEFAULT_ERC20_NAME,
@@ -462,8 +439,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient,
-            referralRewardFee
+            protocolFeeRecipient
         );
 
         vm.startPrank(admin);
@@ -586,7 +562,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_maxProtocolReward() public {
         assertEq(
             quest.maxProtocolReward(),
-            calculateTotalFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE),
+            calculateTotalProtocolFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE),
             "maxProtocolReward should be correct"
         );
     }
