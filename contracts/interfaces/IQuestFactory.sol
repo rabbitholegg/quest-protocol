@@ -89,7 +89,6 @@ interface IQuestFactory {
         string questName;
         string questType;
         string projectName;
-        uint256 referralRewardFee;
     }
 
     struct ERC1155QuestData {

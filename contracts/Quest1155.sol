@@ -35,7 +35,6 @@ contract Quest1155 is ERC1155Holder, ReentrancyGuardUpgradeable, PausableUpgrade
     uint256 public tokenId;
     uint256 public questFee;
     string public questId;
-    uint256 public referralRewardFee;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR

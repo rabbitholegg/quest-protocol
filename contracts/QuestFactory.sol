@@ -145,7 +145,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param actionType_ The action type for the quest
     /// @param questName_ The name of the quest
     /// @param projectName_ The name of the project/protocol used for the quest
-    /// @param referralRewardFee_ The fee amount for referrals. The value is counted against the `rewardAmount`
     /// @return address the quest contract address
     function createERC20Quest(
         uint32 txHashChainId_,
@@ -157,8 +156,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory questId_,
         string memory actionType_,
         string memory questName_,
-        string memory projectName_,
-        uint256 referralRewardFee_
+        string memory projectName_
     ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(
@@ -172,8 +170,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 actionType_,
                 questName_,
                 "erc20",
-                projectName_,
-                referralRewardFee_
+                projectName_
             )
         );
     }
@@ -294,8 +291,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 actionType_,
                 questName_,
                 "erc20",
-                "",
-                0
+                ""
             )
         );
     }
@@ -323,8 +319,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 "",
                 "",
                 "erc20",
-                "",
-                0
+                ""
             )
         );
     }
@@ -840,8 +835,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             data_.rewardAmount,
             data_.questId,
             questFee,
-            protocolFeeRecipient,
-            data_.referralRewardFee
+            protocolFeeRecipient
         );
 
         transferTokensAndOwnership(newQuest, data_.rewardTokenAddress);
