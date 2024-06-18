@@ -19,6 +19,7 @@ contract QuestFactoryMock {
         string questName;
         string questType;
         string projectName;
+        uint256 referralRewardFee;
     }
 
     QuestData public questData;
@@ -71,7 +72,8 @@ contract QuestFactoryMock {
         string memory questId_,
         string memory actionType_,
         string memory questName_,
-        string memory projectName_
+        string memory projectName_,
+        uint256 referralRewardFee_
     ) external returns (address) {
             uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 maxProtocolReward = (maxTotalRewards * 2000) / 10_000; // Assuming questFee is 2000
@@ -87,7 +89,8 @@ contract QuestFactoryMock {
             actionType: actionType_,
             questName: questName_,
             questType: "erc20",
-            projectName: projectName_
+            projectName: projectName_,
+            referralRewardFee: referralRewardFee_
         });
 
         // Transfer rewardAmount_ tokens from the caller to this contract

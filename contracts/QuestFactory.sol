@@ -146,7 +146,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     /// @param questName_ The name of the quest
     /// @param projectName_ The name of the project/protocol used for the quest
     /// @return address the quest contract address
-    function createERC20Quest(
+    function createERC20Boost(
         uint32 txHashChainId_,
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -157,6 +157,49 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         string memory actionType_,
         string memory questName_,
         string memory projectName_
+    ) external checkQuest(questId_) returns (address) {
+        return createERC20QuestInternal(
+            ERC20QuestData(
+                txHashChainId_,
+                rewardTokenAddress_,
+                endTime_,
+                startTime_,
+                totalParticipants_,
+                rewardAmount_,
+                questId_,
+                actionType_,
+                questName_,
+                "erc20",
+                projectName_
+            )
+        );
+    }
+
+       /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @param txHashChainId_ The chain id of the chain the txHash is on
+    /// @param rewardTokenAddress_ The contract address of the reward token
+    /// @param endTime_ The end time of the quest
+    /// @param startTime_ The start time of the quest
+    /// @param totalParticipants_ The total amount of participants (accounts) the quest will have
+    /// @param rewardAmount_ The reward amount for an erc20 quest
+    /// @param questId_ The id of the quest
+    /// @param actionType_ The action type for the quest
+    /// @param questName_ The name of the quest
+    /// @param projectName_ The name of the project/protocol used for the quest
+    /// @param referralRewardFee_ The fee amount for referrals -- this is no longer used since we now have a flat 2.5% fee
+    /// @return address the quest contract address
+    function createERC20Quest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_,
+        string memory projectName_,
+        uint256 referralRewardFee_
     ) external checkQuest(questId_) returns (address) {
         return createERC20QuestInternal(
             ERC20QuestData(

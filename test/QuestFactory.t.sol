@@ -116,14 +116,14 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_createERC20Quest() public{
+    function test_createERC20Boost() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
 
         vm.expectEmit(true,false,true,true);
         emit QuestCreated(questCreator, address(0), QUEST.PROJECT_NAME, QUEST.QUEST_NAME, QUEST.QUEST_ID_STRING, "erc20", QUEST.ACTION_TYPE, QUEST.CHAIN_ID, address(sampleERC20), QUEST.END_TIME, QUEST.START_TIME, QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT);
 
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -144,10 +144,10 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.stopPrank();
     }
 
-    function test_RevertIf_createERC20Quest_QuestIdUsed() public{
+    function test_RevertIf_createERC20Boost_QuestIdUsed() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        questFactory.createERC20Quest(
+        questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -161,7 +161,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
 
         vm.expectRevert(abi.encodeWithSelector(QuestIdUsed.selector));
-        questFactory.createERC20Quest(
+        questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -175,7 +175,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         );
     }
 
-    function test_RevertIf_createERC20Quest_Erc20QuestAddressNotSet() public{
+    function test_RevertIf_createERC20Boost_Erc20QuestAddressNotSet() public{
         vm.startPrank(owner);
         questFactory.setErc20QuestAddress(address(0));
 
@@ -183,7 +183,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
 
         vm.expectRevert(abi.encodeWithSelector(Erc20QuestAddressNotSet.selector));
-        questFactory.createERC20Quest(
+        questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -248,7 +248,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         vm.deal(participant, 1000000);
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -287,7 +287,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
 
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -318,7 +318,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -384,7 +384,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_claimOptimized_revert_deprecated() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        questFactory.createERC20Quest(
+        questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -415,7 +415,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_cancelQuest() public {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -439,7 +439,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_cancelQuest_alreadyStarted() public {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -464,7 +464,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_cancelQuest_unauthorized() public {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,
@@ -488,7 +488,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     function test_questData() public {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             QUEST.CHAIN_ID,
             address(sampleERC20),
             QUEST.END_TIME,

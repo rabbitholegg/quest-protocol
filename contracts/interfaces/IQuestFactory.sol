@@ -196,7 +196,7 @@ interface IQuestFactory {
     function questFee() external view returns (uint16);
     
     // Create
-    function createERC20Quest(
+    function createERC20Boost(
         uint32 txHashChainId_,
         address rewardTokenAddress_,
         uint256 endTime_,
@@ -207,6 +207,19 @@ interface IQuestFactory {
         string memory actionType_,
         string memory questName_,
         string memory projectName_
+    ) external returns (address);
+    function createERC20Quest(
+        uint32 txHashChainId_,
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_,
+        string memory projectName_,
+        uint256 referralRewardFee_
     ) external returns (address);
 
     function create1155QuestAndQueue(

@@ -73,7 +73,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
     function test_claim_with_referrer() public {
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE, REFERRAL_REWARD_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             101,
             address(sampleERC20),
             END_TIME,
@@ -109,7 +109,7 @@ contract TestQuestClaimable is Test, Errors, Events, TestUtils {
         referrer = address(0);
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(TOTAL_PARTICIPANTS, REWARD_AMOUNT, QUEST_FEE, REFERRAL_REWARD_FEE));
-        address questAddress = questFactory.createERC20Quest(
+        address questAddress = questFactory.createERC20Boost(
             101,
             address(sampleERC20),
             END_TIME,
