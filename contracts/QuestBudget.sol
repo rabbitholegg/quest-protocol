@@ -145,7 +145,6 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @param actionType_ The action type for the quest
     /// @param questName_ The name of the quest
     /// @param projectName_ The name of the project/protocol used for the quest
-    /// @param referralRewardFee_ The fee amount for referrals. The value is counted against the `rewardAmount`
     /// @return address the quest contract address
     function createERC20Quest(
         uint32 txHashChainId_,
@@ -157,8 +156,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         string memory questId_,
         string memory actionType_,
         string memory questName_,
-        string memory projectName_,
-        uint256 referralRewardFee_
+        string memory projectName_
     ) public virtual onlyAuthorized returns (address) {
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(IQuestFactory(questFactory).questFee());
@@ -175,8 +173,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
             questId_,
             actionType_,
             questName_,
-            projectName_,
-            referralRewardFee_
+            projectName_
         );
     }
 

@@ -383,7 +383,6 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         string memory actionType_ = "testAction";
         string memory questName_ = "Test Quest";
         string memory projectName_ = "Test Project";
-        uint256 referralRewardFee_ = 10 ether;
         
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
@@ -407,8 +406,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             questId_,
             actionType_,
             questName_,
-            projectName_,
-            referralRewardFee_
+            projectName_
         );
 
         // Ensure the returned quest address is not the zero address
@@ -434,7 +432,6 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         string memory actionType_ = "testAction";
         string memory questName_ = "Test Quest";
         string memory projectName_ = "Test Project";
-        uint256 referralRewardFee_ = 10 ether;
 
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
@@ -458,8 +455,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             questId_,
             actionType_,
             questName_,
-            projectName_,
-            referralRewardFee_
+            projectName_
         );
 
         // Ensure the returned quest address is not the zero address
