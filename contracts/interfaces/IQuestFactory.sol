@@ -208,6 +208,16 @@ interface IQuestFactory {
         string memory questName_,
         string memory projectName_
     ) external returns (address);
+    function createERC20Quest(
+        address rewardTokenAddress_,
+        uint256 endTime_,
+        uint256 startTime_,
+        uint256 totalParticipants_,
+        uint256 rewardAmount_,
+        string memory questId_,
+        string memory actionType_,
+        string memory questName_
+    ) external returns (address); // deprecated
     function create1155QuestAndQueue(
         address rewardTokenAddress_,
         uint256 endTime_,
