@@ -303,8 +303,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_fuzz_claimReferralFees(uint96 timestamp, uint256 participants) public {
         timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
         participants = bound(participants, 1, TOTAL_PARTICIPANTS);
-        // referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
-
 
         vm.startPrank(admin);
         // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
@@ -412,8 +410,6 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     function test_fuzz_claimReferralFees_withdrawAfterClaim(uint96 timestamp, uint256 participants) public {
         timestamp = uint96(bound(timestamp, START_TIME+10, END_TIME));
         participants = bound(participants, 1, TOTAL_PARTICIPANTS);
-        // referralRewardFee = bound(referralRewardFee, 1, REFERRAL_REWARD_FEE);
-
 
         vm.startPrank(admin);
         // Transfer the appropriate amount of Reward tokens to the quest based on fuzzed participants
