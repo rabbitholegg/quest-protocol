@@ -9,11 +9,11 @@ contract TestUtils is Test {
         uint256 totalParticipants,
         uint256 rewardAmount,
         uint16 questFee,
-        uint16 affiliateFee
+        uint16 referralFee
     ) internal pure returns (uint256) {
         return calculateTotalRewards(totalParticipants, rewardAmount)
             + calculateTotalProtocolFees(totalParticipants, rewardAmount, questFee)
-            + calculateTotalAffiliateFees(totalParticipants, rewardAmount, affiliateFee);
+            + calculateTotalReferralFees(totalParticipants, rewardAmount, referralFee);
     }
 
     function calculateTotalRewards(uint256 totalParticipants, uint256 rewardAmount) internal pure returns (uint256) {
@@ -28,12 +28,12 @@ contract TestUtils is Test {
         return (totalParticipants * rewardAmount * questFee) / 10_000;
     }
 
-    function calculateTotalAffiliateFees(
+    function calculateTotalReferralFees(
         uint256 totalParticipants,
         uint256 rewardAmount,
-        uint16 affiliateFee
+        uint16 referralFee
     ) internal pure returns (uint256) {
-        return (totalParticipants * rewardAmount * affiliateFee) / 10_000;
+        return (totalParticipants * rewardAmount * referralFee) / 10_000;
     }
 
     function signHash(bytes32 msgHash, uint256 privateKey) internal pure returns (bytes memory) {

@@ -187,9 +187,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
-    /// @dev The amount of tokens the quest creator needs to pay all redeemers, the protocol fee, and the affiliate fee
+    /// @dev The amount of tokens the quest creator needs to pay all redeemers, the protocol fee, and the referral fee
     function totalTransferAmount() external view returns (uint256) {
-        return this.maxTotalRewards() + this.maxProtocolReward() + this.maxAffiliateFee();
+        return this.maxTotalRewards() + this.maxProtocolReward() + this.maxReferralFee();
     }
 
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
@@ -205,7 +205,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         return (this.maxTotalRewards() * questFee) / 10_000;
     }
 
-    function maxAffiliateFee() external view returns (uint256) {
+    function maxReferralFee() external view returns (uint256) {
         return (this.maxTotalRewards() * referralRewardFee) / 10_000;
     }
 
