@@ -34,6 +34,7 @@ blast = "https://restless-divine-meme.blast-mainnet.quiknode.pro/${QUICKNODE_BLA
 zora = "https://rpc.zora.co"
 degen = "https://rpc.degen.tips"
 base-sepolia = "https://sepolia.base.org"
+cyber = "https://cyber.alt.technology"
 
 [etherscan]
 mainnet = { key = "${MAIN_ETHERSCAN_API_KEY}" }
