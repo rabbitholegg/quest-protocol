@@ -33,6 +33,7 @@ scroll = "https://rpc.scroll.io/"
 blast = "https://restless-divine-meme.blast-mainnet.quiknode.pro/${QUICKNODE_BLAST_API_KEY}/"
 zora = "https://rpc.zora.co"
 degen = "https://rpc.degen.tips"
+base-sepolia = "https://sepolia.base.org"
 
 [etherscan]
 mainnet = { key = "${MAIN_ETHERSCAN_API_KEY}" }
