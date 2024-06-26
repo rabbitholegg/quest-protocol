@@ -396,7 +396,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         assertEq(
             protocolFeeRecipientBalance,
-            (quest.protocolFee() / 2) - quest.referralClaimTotal(),
+            quest.protocolFee() / 2,
             "Protocol fee recipient should get their share of the rewards"
         );
 
@@ -497,7 +497,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         assertEq(
             protocolFeeRecipientBalance,
-            (quest.protocolFee() / 2) - quest.referralClaimTotal(),
+            quest.protocolFee() / 2,
             "Protocol fee recipient should get their share of the rewards"
         );
 
