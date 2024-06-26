@@ -57,7 +57,7 @@ contract QuestFactoryDeploy is Script {
             owner,                              // ownerAddress_
             500000000000000,                    // nftQuestFee_,
             5000,                               // referralFee_,
-            75000000000000                      // mintFee_
+            0                                   // mintFee_
         );
 
         vm.stopBroadcast();
