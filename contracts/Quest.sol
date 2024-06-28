@@ -163,7 +163,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         protocolFeeRecipient.safeTransferETH(protocolPayout);
 
         // transfer reward tokens
-        uint256 protocolFeeForRecipient = this.protocolFee() / 2;
+        uint256 protocolFeeForRecipient = this.protocolFee();
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this)) - (referralClaimTotal - totalReferralsFeesClaimed);

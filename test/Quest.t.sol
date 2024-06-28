@@ -246,7 +246,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
         // simulate ETH from TOTAL_PARTICIPANTS claims
         vm.deal(address(quest), (CLAIM_FEE * TOTAL_PARTICIPANTS * 2) / 3);
 
-        uint256 totalFees = calculateTotalProtocolFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE) / 2;
+        uint256 totalFees = calculateTotalProtocolFees(TOTAL_PARTICIPANTS, REWARD_AMOUNT_IN_WEI, QUEST_FEE);
         uint256 questBalance = SampleERC20(rewardTokenAddress).balanceOf(address(quest));
         uint256 questBalanceMinusFees = questBalance - totalFees;
 
@@ -396,7 +396,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         assertEq(
             protocolFeeRecipientBalance,
-            quest.protocolFee() / 2,
+            quest.protocolFee(),
             "Protocol fee recipient should get their share of the rewards"
         );
 
@@ -497,7 +497,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
 
         assertEq(
             protocolFeeRecipientBalance,
-            quest.protocolFee() / 2,
+            quest.protocolFee(),
             "Protocol fee recipient should get their share of the rewards"
         );
 
