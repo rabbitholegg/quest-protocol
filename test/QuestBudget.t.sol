@@ -388,13 +388,16 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
+        uint256 deployerFee = (maxTotalRewards * 500) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
-        mockERC20.mint(address(this), approvalAmount);
-        // Ensure the budget has enough tokens for the reward
-        mockERC20.approve(address(questBudget), approvalAmount);
+        mockERC20.mint(address(this), approvalAmount + deployerFee);
+        // Ensure the budget has enough tokens for the reward + deployerFee
+        mockERC20.approve(address(questBudget), approvalAmount + deployerFee);
         questBudget.allocate(
-            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount)
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount + deployerFee)
         );
+
+        uint256 deployerBalanceBeforeFee = mockERC20.balanceOf(address(this));
 
         // Create the new quest
         address questAddress = questBudget.createERC20Quest(
@@ -416,6 +419,9 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Ensure the quest contract has the correct reward amount
         assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), approvalAmount);
+
+        // Ensure the quest deployer gets the deployer fee
+        assertEq(IERC20(rewardTokenAddress_).balanceOf(address(this)), deployerBalanceBeforeFee + deployerFee);
     }
 
     ///////////////////////////
