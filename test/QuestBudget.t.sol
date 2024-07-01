@@ -445,11 +445,12 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
+        uint256 deployerFee = (maxTotalRewards * 500) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
-        mockERC20.mint(address(this), approvalAmount);
+        mockERC20.mint(address(this), approvalAmount + deployerFee);
         // Ensure the budget has enough tokens for the reward
-        mockERC20.approve(address(questBudget), approvalAmount);
-        bytes memory allocateBytes = _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount);
+        mockERC20.approve(address(questBudget), approvalAmount + deployerFee);
+        bytes memory allocateBytes = _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), approvalAmount + deployerFee);
         questBudget.allocate(allocateBytes);
         console.logBytes(allocateBytes);
 
