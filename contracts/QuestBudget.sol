@@ -161,6 +161,11 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         uint256 referralRewardFee_
     ) public virtual onlyAuthorized returns (address) {
         uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+
+        uint256 deployerFee = (maxTotalRewards * 500) / 10_000; // Deployer fee is 500 (5%)
+        rewardTokenAddress_.safeApprove(address(this), deployerFee);
+        rewardTokenAddress_.safeTransferFrom(address(this), msg.sender, deployerFee);
+
         uint256 questFee = uint256(IQuestFactory(questFactory).questFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000; // Assuming questFee is 2000
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
