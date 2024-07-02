@@ -57,7 +57,7 @@ contract QuestFactoryMock {
         return false;
     }
 
-    function questFee() external view returns (uint16) {
+    function questFee() external pure returns (uint16) {
         return 2000;
     }
 

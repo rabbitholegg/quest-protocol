@@ -8,22 +8,32 @@ contract TestUtils is Test {
     function calculateTotalRewardsPlusFee(
         uint256 totalParticipants,
         uint256 rewardAmount,
-        uint16 questFee
+        uint16 questFee,
+        uint16 referralFee
     ) internal pure returns (uint256) {
         return calculateTotalRewards(totalParticipants, rewardAmount)
-            + calculateTotalFees(totalParticipants, rewardAmount, questFee);
+            + calculateTotalProtocolFees(totalParticipants, rewardAmount, questFee)
+            + calculateTotalReferralFees(totalParticipants, rewardAmount, referralFee);
     }
 
     function calculateTotalRewards(uint256 totalParticipants, uint256 rewardAmount) internal pure returns (uint256) {
         return totalParticipants * rewardAmount;
     }
 
-    function calculateTotalFees(
+    function calculateTotalProtocolFees(
         uint256 totalParticipants,
         uint256 rewardAmount,
         uint16 questFee
     ) internal pure returns (uint256) {
         return (totalParticipants * rewardAmount * questFee) / 10_000;
+    }
+
+    function calculateTotalReferralFees(
+        uint256 totalParticipants,
+        uint256 rewardAmount,
+        uint16 referralFee
+    ) internal pure returns (uint256) {
+        return (totalParticipants * rewardAmount * referralFee) / 10_000;
     }
 
     function signHash(bytes32 msgHash, uint256 privateKey) internal pure returns (bytes memory) {

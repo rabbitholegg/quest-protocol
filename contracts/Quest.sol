@@ -63,13 +63,11 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_,
-        uint256 referralRewardFee_
+        address protocolFeeRecipient_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
         if (endTime_ <= startTime_) revert EndTimeLessThanOrEqualToStartTime();
-        if (referralRewardFee_ > 500) revert ReferralRewardFeeTooHigh(); // Maximum 5%
 
         // Process input parameters
         rewardToken = rewardTokenAddress_;
@@ -80,13 +78,13 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         questId = questId_;
         questFee = questFee_;
         protocolFeeRecipient = protocolFeeRecipient_;
-        referralRewardFee = referralRewardFee_;
 
         // Setup default state
         questFactoryContract = IQuestFactory(payable(msg.sender));
         queued = true;
         referralClaimTotal = 0;
         totalReferralsFeesClaimed = 0;
+        referralRewardFee = 250; // 2.5%
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -165,7 +163,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         protocolFeeRecipient.safeTransferETH(protocolPayout);
 
         // transfer reward tokens
-        uint256 protocolFeeForRecipient = (this.protocolFee() / 2) - referralClaimTotal;
+        uint256 protocolFeeForRecipient = this.protocolFee();
         rewardToken.safeTransfer(protocolFeeRecipient, protocolFeeForRecipient);
 
         uint256 remainingBalanceForOwner = rewardToken.balanceOf(address(this)) - (referralClaimTotal - totalReferralsFeesClaimed);
@@ -189,9 +187,9 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /*//////////////////////////////////////////////////////////////
                              EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
-    /// @dev The amount of tokens the quest needs to pay all redeemers plus the protocol fee
+    /// @dev The amount of tokens the quest creator needs to pay all redeemers, the protocol fee, and the referral fee
     function totalTransferAmount() external view returns (uint256) {
-        return this.maxTotalRewards() + this.maxProtocolReward();
+        return this.maxTotalRewards() + this.maxProtocolReward() + this.maxReferralFee();
     }
 
     /// @dev Function that gets the maximum amount of rewards that can be claimed by all users. It does not include the protocol fee
@@ -205,6 +203,10 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
     /// @return The maximum amount of rewards that can be claimed by the protocol or the quest deployer
     function maxProtocolReward() external view returns (uint256) {
         return (this.maxTotalRewards() * questFee) / 10_000;
+    }
+
+    function maxReferralFee() external view returns (uint256) {
+        return (this.maxTotalRewards() * referralRewardFee) / 10_000;
     }
 
     /// @notice Function that calculates the protocol fee

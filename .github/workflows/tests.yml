@@ -17,18 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: "recursive"
+          submodules: recursive
 
       - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
+        uses: foundry-rs/foundry-toolchain@v1
 
       - name: Install Dependencies
         run: forge install
 
-      # - name: Run Lint Check
-      #   run: forge fmt --check
-
-      - name: "Run Forge Tests"
-        run: "forge test"
+      - name: Run Forge Tests
+        run: forge test -vvv

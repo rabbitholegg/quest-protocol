@@ -24,7 +24,6 @@ interface IQuest {
     error OverMaxAllowedToMint();
     error AddressAlreadyMinted();
     error QuestEnded();
-    error ReferralRewardFeeTooHigh();
     error NoReferralFees();
 
     function initialize(
@@ -35,8 +34,7 @@ interface IQuest {
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_,
-        uint256 referralRewardFee_
+        address protocolFeeRecipient_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
