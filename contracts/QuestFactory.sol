@@ -388,6 +388,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         _claimCompressed(compressedData_, claimer);
     }
 
+    function batchClaimCompressedRef(bytes[] calldata compressedClaims_, address[] calldata claimers_) external payable {
+        if (compressedClaims_.length != claimers_.length) revert ArrayLengthMismatch();
+        for (uint256 i = 0; i < compressedClaims_.length; i++) {
+            _claimCompressed(compressedClaims_[i], claimers_[i]);
+        }
+    }
+
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     /// @param claimer The address of the claimer - where rewards are sent

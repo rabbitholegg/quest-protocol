@@ -24,6 +24,7 @@ interface IQuestFactory {
     error QuestAddressMismatch();
     error ClaimFailed();
     error txOriginMismatch();
+    error ArrayLengthMismatch();
 
     // Structs
 
