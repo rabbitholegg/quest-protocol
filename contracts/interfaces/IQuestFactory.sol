@@ -46,6 +46,7 @@ interface IQuestFactory {
         string actionType;
         string questName;
         uint32 txHashChainId;
+        uint16 referralRewardFee;
     }
 
     struct QuestData {
@@ -89,6 +90,7 @@ interface IQuestFactory {
         string questName;
         string questType;
         string projectName;
+        uint16 referralRewardFee;
     }
 
     struct ERC1155QuestData {

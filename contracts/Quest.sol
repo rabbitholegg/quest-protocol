@@ -63,7 +63,8 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        uint16 referralRewardFee_
     ) external initializer {
         // Validate inputs
         if (endTime_ <= block.timestamp) revert EndTimeInPast();
@@ -84,7 +85,7 @@ contract Quest is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownable, IQue
         queued = true;
         referralClaimTotal = 0;
         totalReferralsFeesClaimed = 0;
-        referralRewardFee = 250; // 2.5%
+        referralRewardFee = referralRewardFee_;
         _initializeOwner(msg.sender);
         __Pausable_init();
         __ReentrancyGuard_init();
