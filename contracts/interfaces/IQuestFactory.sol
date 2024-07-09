@@ -196,6 +196,7 @@ interface IQuestFactory {
         string memory questName
     ) external pure returns (string memory);
     function questFee() external view returns (uint16);
+    function referralRewardFee() external view returns (uint16);
     
     // Create
     function createERC20Boost(

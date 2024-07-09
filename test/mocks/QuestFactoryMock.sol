@@ -58,9 +58,12 @@ contract QuestFactoryMock {
     }
 
     function questFee() external pure returns (uint16) {
-        return 2000;
+        return 250;
     }
 
+    function referralRewardFee() external pure returns (uint16) {
+        return 250;
+    }
 
     function createERC20Quest(
         uint32 txHashChainId_,
@@ -75,9 +78,10 @@ contract QuestFactoryMock {
         string memory projectName_,
         uint256 referralRewardFee_
     ) external returns (address) {
-            uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
-        uint256 maxProtocolReward = (maxTotalRewards * 2000) / 10_000; // Assuming questFee is 2000
-        uint256 approvalAmount = maxTotalRewards + maxProtocolReward;
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 maxProtocolReward = (maxTotalRewards * this.questFee()) / 10_000;
+        uint256 maxReferralReward = (maxTotalRewards * this.referralRewardFee()) / 10_000;
+        uint256 approvalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
         questData = QuestData({
             txHashChainId: txHashChainId_,
             rewardTokenAddress: rewardTokenAddress_,
@@ -101,7 +105,7 @@ contract QuestFactoryMock {
     }
 
     function cancelQuest(string calldata questId_) external {
-        emit QuestCancelled(address(this), '', 0);
+        emit QuestCancelled(address(this), questId_, 0);
     }
 
 }
