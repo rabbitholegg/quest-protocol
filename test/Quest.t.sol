@@ -22,7 +22,7 @@ contract TestQuest is Test, TestUtils, Errors, Events {
     uint256 TOTAL_PARTICIPANTS = 300;
     uint256 REWARD_AMOUNT_IN_WEI = 10_000_000_000;
     string QUEST_ID = "QUEST_ID";
-    uint16 QUEST_FEE = 2000; // 20%
+    uint16 QUEST_FEE = 250; // 2.5%
     uint256 CLAIM_FEE = 999;
     uint16 REFERRAL_REWARD_FEE = 250; // 2.5%
     address protocolFeeRecipient = makeAddr("protocolFeeRecipient");
@@ -58,7 +58,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -96,7 +97,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
     }
 
@@ -113,7 +115,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
     }
 
@@ -200,7 +203,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             rewardAmountInWei,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
         // Transfer all tokens to quest
         vm.prank(admin);
@@ -328,7 +332,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
 
         vm.startPrank(admin);
@@ -435,7 +440,8 @@ contract TestQuest is Test, TestUtils, Errors, Events {
             REWARD_AMOUNT_IN_WEI,
             QUEST_ID,
             QUEST_FEE,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            REFERRAL_REWARD_FEE
         );
 
         vm.startPrank(admin);
