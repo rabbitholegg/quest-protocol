@@ -388,6 +388,30 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         _claimCompressed(compressedData_, claimer);
     }
 
+    /// @dev Claim rewards for multiple quests on behalf of multiple claimers
+    function claimCompressedRefBatch(BatchClaimData[] calldata batchClaimDataArray) external payable {
+        uint256 totalFees = 0;
+        for (uint256 i = 0; i < batchClaimDataArray.length; i++) {
+            totalFees += batchClaimDataArray[i].fee;
+        }
+        require(msg.value >= totalFees, "Insufficient ETH sent");
+
+        for (uint256 i = 0; i < batchClaimDataArray.length; i++) {
+            try this.claimCompressedRef{value: batchClaimDataArray[i].fee}(
+                batchClaimDataArray[i].compressedData,
+                batchClaimDataArray[i].claimer
+            ) {} catch (bytes memory reason) {
+                emit BatchClaimFailed(batchClaimDataArray[i].claimer, batchClaimDataArray[i].compressedData, reason);
+            }
+        }
+
+        // Refund any excess ETH
+        uint256 excess = msg.value - totalFees;
+        if (excess > 0) {
+            payable(msg.sender).transfer(excess);
+        }
+    }
+
     /// @dev Claim rewards for a quest
     /// @param compressedData_ The claim data in abi encoded bytes, compressed with cdCompress from solady LibZip
     /// @param claimer The address of the claimer - where rewards are sent

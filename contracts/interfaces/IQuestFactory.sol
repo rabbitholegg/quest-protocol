@@ -77,6 +77,13 @@ interface IQuestFactory {
         string extraData;
     }
 
+    /// @dev struct to allow for an array of claims in batch claim functions
+    struct BatchClaimData {
+        bytes compressedData;
+        address claimer;
+        uint256 fee;
+    }
+
     struct ERC20QuestData {
         uint32 txHashChainId;
         address rewardTokenAddress;
@@ -178,6 +185,9 @@ interface IQuestFactory {
         uint256 rewardAmountOrTokenId
     );
     event ReferralFeeSet(uint16 percent);
+
+    /// @dev event to track failed claims in batch claim functions
+    event BatchClaimFailed(address indexed claimer, bytes compressedData, bytes reason);
 
     // Read Functions
     function getAddressMinted(string memory questId_, address address_) external view returns (bool);
