@@ -405,7 +405,6 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             }
         }
 
-        // Refund any excess ETH
         uint256 excess = msg.value - totalFees;
         if (excess > 0) {
             payable(msg.sender).transfer(excess);
