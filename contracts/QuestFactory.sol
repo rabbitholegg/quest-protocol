@@ -56,6 +56,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     address private __deprecated_sablierV2LockupLinearAddress; // not used
     mapping(address => address) private __deprecated_mintFeeRecipientList; // not used
     uint256 public referralRewardTimestamp;
+    uint16 public referralRewardFee; // fee on erc20 token
     // insert new vars here at the end to keep the storage layout the same
 
     /*//////////////////////////////////////////////////////////////
@@ -76,7 +77,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 mintFee_
     ) external initializer {
         _initializeOwner(ownerAddress_);
-        questFee = 2000; // in BIPS
+        questFee = 250; // in BIPS
         locked = 1;
         claimSignerAddress = claimSignerAddress_;
         protocolFeeRecipient = protocolFeeRecipient_;
@@ -85,6 +86,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         referralFee = referralFee_;
         mintFee = mintFee_;
         referralRewardTimestamp = block.timestamp;
+        referralRewardFee = 250; // in BIPS
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -170,12 +172,13 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 actionType_,
                 questName_,
                 "erc20",
-                projectName_
+                projectName_,
+                referralRewardFee
             )
         );
     }
 
-       /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
+    /// @dev Create an erc20 quest and start it at the same time. The function will transfer the reward amount to the quest contract
     /// @param txHashChainId_ The chain id of the chain the txHash is on
     /// @param rewardTokenAddress_ The contract address of the reward token
     /// @param endTime_ The end time of the quest
@@ -213,7 +216,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 actionType_,
                 questName_,
                 "erc20",
-                projectName_
+                projectName_,
+                referralRewardFee
             )
         );
     }
@@ -334,7 +338,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 actionType_,
                 questName_,
                 "erc20",
-                ""
+                "",
+                referralRewardFee
             )
         );
     }
@@ -362,7 +367,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
                 "",
                 "",
                 "erc20",
-                ""
+                "",
+                referralRewardFee
             )
         );
     }
@@ -544,6 +550,14 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function setQuestFee(uint16 questFee_) external onlyOwner {
         if (questFee_ > 10_000) revert QuestFeeTooHigh();
         questFee = questFee_;
+    }
+
+    /// @dev set the referral reward fee (erc20 tokens)
+    /// @notice the referral reward fee should be in Basis Point units
+    /// @param referralRewardFee_ The referral reward fee value
+    function setReferralRewardFee(uint16 referralRewardFee_) external onlyOwner {
+        if (referralRewardFee_ > 10_000) revert ReferralFeeTooHigh();
+        referralRewardFee = referralRewardFee_;
     }
 
     /// @dev set the referral fee
@@ -853,6 +867,7 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         currentQuest.actionType = data_.actionType;
         currentQuest.questName = data_.questName;
         currentQuest.txHashChainId = data_.txHashChainId;
+        currentQuest.referralRewardFee = data_.referralRewardFee;
 
         emit QuestCreated(
             msg.sender,
@@ -878,7 +893,8 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
             data_.rewardAmount,
             data_.questId,
             questFee,
-            protocolFeeRecipient
+            protocolFeeRecipient,
+            referralRewardFee
         );
 
         transferTokensAndOwnership(newQuest, data_.rewardTokenAddress);

@@ -8,9 +8,9 @@ import {LibClone} from "solady/utils/LibClone.sol";
 
 contract QuestBudgetDeploy is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("TEST_CLAIM_SIGNER_PRIVATE_KEY");
-        address operator = vm.envAddress("MAINNET_QUEST_BUDGET_OPERATOR");
-        address owner = vm.envAddress("MAINNET_QUEST_BUDGET_OWNER");
+        uint256 deployerPrivateKey = vm.envUint("QUEST_BUDGET_DEPLOYER_PRIVATE_KEY");
+        address operator = vm.envAddress("QUEST_BUDGET_OPERATOR");
+        address owner = vm.envAddress("QUEST_BUDGET_OWNER");
         address[] memory authorized = new address[](1);
         authorized[0] = operator; // Add more authorized addresses if needed
 

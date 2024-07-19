@@ -34,7 +34,7 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
     uint256 claimSignerPrivateKey;
     uint16 REFERRAL_FEE = 250;
     uint256 NFT_QUEST_FEE = 10;
-    uint16 QUEST_FEE = 2000;
+    uint16 QUEST_FEE = 250;
     uint256 MINT_FEE = 100;
     QuestData.MockQuestData QUEST = QuestData.MockQuestData({
         END_TIME : 1_000_000_000,

@@ -34,7 +34,8 @@ interface IQuest {
         uint256 rewardAmountInWei_,
         string memory questId_,
         uint16 questFee_,
-        address protocolFeeRecipient_
+        address protocolFeeRecipient_,
+        uint16 referraalRewardFee_
     ) external;
     function getRewardAmount() external view returns (uint256);
     function getRewardToken() external view returns (address);
