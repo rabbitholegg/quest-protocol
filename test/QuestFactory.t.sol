@@ -315,6 +315,73 @@ contract TestQuestFactory is Test, Errors, Events, TestUtils {
         assertEq(Quest(payable(questAddress)).getReferralAmount(referrer), Quest(payable(questAddress)).referralRewardAmount());
     }
 
+    function test_claimCompressedRefBatch_erc20_mocked_data() public {
+        // Setup for two participants
+        address participant1 = address(0x1);
+        address participant2 = address(0x2);
+        address referrer1 = address(0x3);
+        address referrer2 = address(0x4);
+
+        // Generate signature data for both participants
+        bytes memory signData1 = abi.encode(participant1, referrer1, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
+        bytes memory signData2 = abi.encode(participant2, referrer2, QUEST.QUEST_ID_STRING, QUEST.JSON_MSG);
+
+        bytes32 msgHash1 = keccak256(signData1);
+        bytes32 msgHash2 = keccak256(signData2);
+        bytes32 digest1 = ECDSA.toEthSignedMessageHash(msgHash1);
+        bytes32 digest2 = ECDSA.toEthSignedMessageHash(msgHash2);
+        (, bytes32 r1, bytes32 vs1) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest1);
+        (, bytes32 r2, bytes32 vs2) = TestUtils.getSplitSignature(claimSignerPrivateKey, digest2);
+
+        vm.deal(participant1, 1000000);
+        vm.deal(participant2, 1000000);
+
+        vm.startPrank(questCreator);
+        sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
+        address questAddress = questFactory.createERC20Boost(
+            QUEST.CHAIN_ID,
+            address(sampleERC20),
+            QUEST.END_TIME,
+            QUEST.START_TIME,
+            QUEST.TOTAL_PARTICIPANTS,
+            QUEST.REWARD_AMOUNT,
+            QUEST.QUEST_ID_STRING,
+            QUEST.ACTION_TYPE,
+            QUEST.QUEST_NAME,
+            QUEST.PROJECT_NAME
+        );
+
+        vm.warp(QUEST.START_TIME + 1);
+
+        bytes memory data1 = abi.encode(QUEST.TX_HASH, r1, vs1, referrer1, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory data2 = abi.encode(QUEST.TX_HASH, r2, vs2, referrer2, QUEST.QUEST_ID, QUEST.CHAIN_ID);
+        bytes memory dataCompressed1 = LibZip.cdCompress(data1);
+        bytes memory dataCompressed2 = LibZip.cdCompress(data2);
+
+        IQuestFactory.BatchClaimData[] memory claimDataArray = new IQuestFactory.BatchClaimData[](2);
+        claimDataArray[0] = IQuestFactory.BatchClaimData({
+            compressedData: dataCompressed1,
+            claimer: participant1,
+            fee: MINT_FEE
+        });
+        claimDataArray[1] = IQuestFactory.BatchClaimData({
+            compressedData: dataCompressed2,
+            claimer: participant2,
+            fee: MINT_FEE
+        });
+
+        vm.startPrank(anyone, anyone);
+        questFactory.claimCompressedRefBatch{value: MINT_FEE * 2}(claimDataArray);
+
+        // Check ERC20 rewards
+        assertEq(sampleERC20.balanceOf(participant1), QUEST.REWARD_AMOUNT, "participant1 erc20 balance");
+        assertEq(sampleERC20.balanceOf(participant2), QUEST.REWARD_AMOUNT, "participant2 erc20 balance");
+
+        // Check referrer claimable amounts
+        assertEq(Quest(payable(questAddress)).getReferralAmount(referrer1), Quest(payable(questAddress)).referralRewardAmount(), "referrer1 claimable amount");
+        assertEq(Quest(payable(questAddress)).getReferralAmount(referrer2), Quest(payable(questAddress)).referralRewardAmount(), "referrer2 claimable amount");
+    }
+
     function test_claimCompressed_erc20_with_ref() public{
         vm.startPrank(questCreator);
         sampleERC20.approve(address(questFactory), calculateTotalRewardsPlusFee(QUEST.TOTAL_PARTICIPANTS, QUEST.REWARD_AMOUNT, QUEST_FEE, REFERRAL_FEE));
