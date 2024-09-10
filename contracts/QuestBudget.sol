@@ -232,8 +232,8 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     }
 
     /// @notice Allows the quest manager to claim the management fee for a completed quest
-/// @dev This function can only be called by the authorized quest manager after the quest rewards have been withdrawn
-/// @param questId_ The unique identifier of the quest for which the management fee is being claimed
+    /// @dev This function can only be called by the authorized quest manager after the quest rewards have been withdrawn
+    /// @param questId_ The unique identifier of the quest for which the management fee is being claimed
     function payManagementFee(string memory questId_) public onlyAuthorized {
         // Retrieve the quest data by calling the questData function and decoding the result
         IQuestFactory.QuestData memory quest = IQuestFactory(questFactory).questData(questId_);
