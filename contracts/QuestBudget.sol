@@ -50,6 +50,9 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @dev Total amount of funds reserved for management fees
     uint256 public reservedFunds;
 
+    /// @dev Emitted when the management fee is set or updated
+    event ManagementFeeSet(uint256 newFee);
+
     /// @notice A modifier that allows only authorized addresses to call the function
     modifier onlyAuthorized() {
         if (!isAuthorized(msg.sender)) revert Unauthorized();
@@ -196,6 +199,15 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @param questId_ The uuid of the quest
     function cancelQuest(string calldata questId_) public virtual onlyOwner() {
         IQuestFactory(questFactory).cancelQuest(questId_);
+    }
+
+    /// @notice Sets the management fee percentage
+    /// @dev Only the owner can call this function. The fee is in basis points (100 = 1%)
+    /// @param fee_ The new management fee percentage in basis points
+    function setManagementFee(uint256 fee_) external onlyOwner {
+        require(fee_ <= 10000, "Fee cannot exceed 100%");
+        managementFee = fee_;
+        emit ManagementFeeSet(fee_);
     }
  
     /// @inheritdoc Budget
