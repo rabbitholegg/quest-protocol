@@ -368,9 +368,9 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         questBudget.reclaim(data);
     }
 
-    ///////////////////////////
+    //////////////////////////////////
     // QuestBudget.createERC20Quest //
-    ///////////////////////////
+    //////////////////////////////////
     function testCreateERC20Quest() public {
         // Define the parameters for the new quest
         uint32 txHashChainId_ = 1;
@@ -420,6 +420,66 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(IERC20(rewardTokenAddress_).balanceOf(questAddress), approvalAmount);
     }
 
+    function testCreateERC20Quest_WithManagementFee() public {
+        // Set management fee
+        vm.prank(questBudget.owner());
+        questBudget.setManagementFee(500); // 5%
+
+        // Calculate the amounts needed for the quest
+        uint256 totalParticipants = 10;
+        uint256 rewardAmount = 1 ether;
+        uint256 maxTotalRewards = totalParticipants * rewardAmount;
+        uint256 questFee = uint256(mockQuestFactory.questFee());
+        uint256 referralRewardFee = 250; // 2.5%
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
+        uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
+        uint256 managementFee = (maxTotalRewards * 500) / 10_000; // 5% management fee
+        uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+        uint256 totalAllocationRequired = questFactoryApprovalAmount + managementFee;
+
+        // Approve questBudget to spend tokens
+        mockERC20.approve(address(questBudget), totalAllocationRequired);
+
+        // Allocate tokens to questBudget
+        questBudget.allocate(
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), totalAllocationRequired)
+        );
+
+        // Create quest
+        string memory questId = "testQuest";
+        address questAddress = questBudget.createERC20Quest(
+            1, // txHashChainId
+            address(mockERC20), // rewardTokenAddress
+            block.timestamp + 1 days, // endTime
+            block.timestamp, // startTime
+            totalParticipants, // totalParticipants
+            rewardAmount, // rewardAmount
+            questId, // questId
+            "testAction", // actionType
+            "Test Quest", // questName
+            "Test Project", // projectName
+            referralRewardFee // referralRewardFee
+        );
+
+        // Ensure the returned quest address is not the zero address
+        assertTrue(questAddress != address(0));
+
+        // Assert that the quest manager is set to the test contract
+        assertEq(questBudget.questManagers(questId), address(this));
+
+        // Assert that the reserved funds is equal to the management fee
+        assertEq(questBudget.reservedFunds(), managementFee);
+
+        // Calculate the expected available balance
+        uint256 expectedAvailable = totalAllocationRequired - questFactoryApprovalAmount - managementFee;
+
+        // Assert that the available balance is 0
+        assertEq(expectedAvailable, 0);
+
+        // Assert that the available balance is equal to the expected available balance
+        assertEq(questBudget.available(address(mockERC20)), expectedAvailable);
+    }
+    
     ///////////////////////////
     // QuestBudget.cancel //
     ///////////////////////////
