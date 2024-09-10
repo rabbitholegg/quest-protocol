@@ -178,8 +178,24 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         uint256 referralRewardFee = uint256(IQuestFactory(questFactory).referralRewardFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
+        uint256 maxManagementFee = (maxTotalRewards * managementFee) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+
+        // Ensure the available balance in the budget can cover the required approval amount plus the reserved management fee
+        require(
+            this.available(rewardTokenAddress_) >= approvalAmount + maxManagementFee,
+            "Insufficient funds for quest creation"
+        );
+
+        // Reserve the management fee so that the manager can be paid later
+        reservedFunds += maxManagementFee;
+
+        // Approve the QuestFactory contract to transfer the necessary tokens for this quest
         rewardTokenAddress_.safeApprove(address(questFactory), approvalAmount);
+
+        // Store the manager address (msg.sender) associated with the questId
+        questManagers[questId_] = msg.sender;
+
         return IQuestFactory(questFactory).createERC20Quest(
             txHashChainId_,
             rewardTokenAddress_,
