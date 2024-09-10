@@ -7,6 +7,7 @@ import {IERC1155Receiver} from "openzeppelin-contracts/token/ERC1155/IERC1155Rec
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {ReentrancyGuard} from "solady/utils/ReentrancyGuard.sol";
@@ -19,6 +20,7 @@ import {Cloneable} from "contracts/references/Cloneable.sol";
 /// @dev This type of budget supports ETH, ERC20, and ERC1155 assets only
 contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     using SafeTransferLib for address;
+    using SafeERC20 for IERC20;
 
     /// @notice The payload for initializing a SimpleBudget
     struct InitPayload {
@@ -52,6 +54,9 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
 
     /// @dev Emitted when the management fee is set or updated
     event ManagementFeeSet(uint256 newFee);
+
+    /// @dev Emitted when a management fee is paid
+    event ManagementFeePaid(string indexed questId, address indexed manager, uint256 amount);
 
     /// @notice A modifier that allows only authorized addresses to call the function
     modifier onlyAuthorized() {
@@ -224,6 +229,46 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         require(fee_ <= 10000, "Fee cannot exceed 100%");
         managementFee = fee_;
         emit ManagementFeeSet(fee_);
+    }
+
+    /// @notice Allows the quest manager to claim the management fee for a completed quest
+/// @dev This function can only be called by the authorized quest manager after the quest rewards have been withdrawn
+/// @param questId_ The unique identifier of the quest for which the management fee is being claimed
+    function payManagementFee(string memory questId_) public onlyAuthorized {
+        // Retrieve the quest data by calling the questData function and decoding the result
+        IQuestFactory.QuestData memory quest = IQuestFactory(questFactory).questData(questId_);
+
+        // Ensure the caller is the manager who created the quest
+        require(questManagers[questId_] == msg.sender, "Only the quest creator can claim the management fee");
+
+        // Ensure the quest has been marked as withdrawn
+        require(quest.hasWithdrawn, "Management fee cannot be claimed until the quest rewards are withdrawn");
+
+        // Extract relevant data from the QuestData struct
+        uint256 totalParticipants = quest.totalParticipants;
+        uint256 rewardAmount = quest.rewardAmountOrTokenId;
+        uint256 numberMinted = quest.numberMinted;
+
+        // Calculate the maximum possible management fee based on total participants
+        uint256 totalPossibleFee = (totalParticipants * rewardAmount * managementFee) / 10_000;
+
+        // Calculate the actual management fee to be paid based on the number of claims (numberMinted)
+        uint256 feeToPay = (numberMinted * rewardAmount * managementFee) / 10_000;
+
+        // Get the balance of reward tokens available in this contract
+        uint256 availableFunds = IERC20(quest.rewardToken).balanceOf(address(this));
+
+        // Ensure the contract has enough funds to pay out the management fee; they should be reserved and not available
+        require(availableFunds >= feeToPay, "Insufficient funds to pay management fee");
+
+        // Transfer the management fee to the manager
+        IERC20(quest.rewardToken).safeTransfer(msg.sender, feeToPay);
+
+        // Subtract the total possible management fee since we reserved the total amount to begin with
+        reservedFunds = reservedFunds - totalPossibleFee;
+
+        // Emit an event for logging purposes
+        emit ManagementFeePaid(questId_, msg.sender, feeToPay);
     }
  
     /// @inheritdoc Budget
