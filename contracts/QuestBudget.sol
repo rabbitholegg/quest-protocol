@@ -40,6 +40,15 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @dev The mapping of authorized addresses
     mapping(address => bool) private _isAuthorized;
 
+    /// @dev The management fee percentage (in basis points, i.e., 100 = 1%)
+    uint256 public managementFee;
+
+    /// @dev Mapping of quest IDs to their respective managers' addresses
+    mapping(string => address) public questManagers;
+
+    /// @dev Total amount of funds reserved for management fees
+    uint256 public reservedFunds;
+
     /// @notice A modifier that allows only authorized addresses to call the function
     modifier onlyAuthorized() {
         if (!isAuthorized(msg.sender)) revert Unauthorized();
