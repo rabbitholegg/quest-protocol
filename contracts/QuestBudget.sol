@@ -295,10 +295,11 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @notice Get the amount of assets available for distribution from the budget
     /// @param asset_ The address of the asset (or the zero address for native assets)
     /// @return The amount of assets available
-    /// @dev This is simply the current balance held by the budget
+    /// @dev This returns the current balance held by the budget minus reserved funds
     /// @dev If the zero address is passed, this function will return the native balance
     function available(address asset_) public view virtual override returns (uint256) {
-        return asset_ == address(0) ? address(this).balance : asset_.balanceOf(address(this));
+        uint256 totalBalance = asset_ == address(0) ? address(this).balance : IERC20(asset_).balanceOf(address(this));
+        return totalBalance > reservedFunds ? totalBalance - reservedFunds : 0;
     }
 
     /// @notice Get the amount of ERC1155 assets available for distribution from the budget
