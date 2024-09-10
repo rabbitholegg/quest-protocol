@@ -954,6 +954,38 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(questBudget.available(address(0)), 1 ether);
     }
 
+    //////////////////////////////////
+    // QuestBudget.setManagementFee //
+    //////////////////////////////////
+
+    function testSetManagementFee() public {
+        // Simulate a transaction from the owner of the questBudget contract
+        vm.prank(questBudget.owner());
+
+        // Call the setManagementFee function with a value of 5%
+        questBudget.setManagementFee(500);
+
+        // Assert that the managementFee has been correctly set to 5%
+        assertEq(questBudget.managementFee(), 500);
+    }
+
+    function testSetManagementFee_ExceedsMax() public {
+        // Simulate a transaction from the owner of the questBudget contract
+        vm.prank(questBudget.owner());
+        
+        // Set an initial valid management fee (5%)
+        questBudget.setManagementFee(500);
+        
+        // Expect the next transaction to revert with the specified error message
+        vm.expectRevert("Fee cannot exceed 100%");
+        
+        // Attempt to set a management fee that exceeds 100%
+        questBudget.setManagementFee(10001);
+        
+        // Assert that the management fee remains unchanged at 5%
+        assertEq(questBudget.managementFee(), 500);
+    }
+
     ///////////////////////////
     // Test Helper Functions //
     ///////////////////////////
