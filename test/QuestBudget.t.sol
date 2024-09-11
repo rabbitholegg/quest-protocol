@@ -438,9 +438,9 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 referralRewardFee = 250; // 2.5%
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
-        uint256 managementFee = (maxTotalRewards * 500) / 10_000; // 5% management fee
+        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000; // 5% management fee
         uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
-        uint256 totalAllocationRequired = questFactoryApprovalAmount + managementFee;
+        uint256 totalAllocationRequired = questFactoryApprovalAmount + maxManagementFee;
 
         // Approve questBudget to spend tokens
         mockERC20.approve(address(questBudget), totalAllocationRequired);
@@ -473,10 +473,10 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(questBudget.questManagers(questId), address(this));
 
         // Assert that the reserved funds is equal to the management fee
-        assertEq(questBudget.reservedFunds(), managementFee);
+        assertEq(questBudget.reservedFunds(), maxManagementFee);
 
         // Calculate the expected available balance
-        uint256 expectedAvailable = totalAllocationRequired - questFactoryApprovalAmount - managementFee;
+        uint256 expectedAvailable = totalAllocationRequired - questFactoryApprovalAmount - maxManagementFee;
 
         // Assert that the available balance is 0
         assertEq(expectedAvailable, 0);
@@ -498,16 +498,16 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 referralRewardFee = 250; // 2.5%
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
-        uint256 managementFee = (maxTotalRewards * 500) / 10_000; // 5% management fee
+        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000; // 5% management fee
         uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
-        uint256 totalAllocationRequired = questFactoryApprovalAmount + managementFee;
+        uint256 totalAllocationRequired = questFactoryApprovalAmount + maxManagementFee;
 
         // Approve questBudget to spend tokens
         mockERC20.approve(address(questBudget), totalAllocationRequired);
 
         // Allocate the needed amount minus the management fee
         questBudget.allocate(
-            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), totalAllocationRequired - managementFee)
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), totalAllocationRequired - maxManagementFee)
         );
 
         vm.expectRevert("Insufficient funds for quest creation");
