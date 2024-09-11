@@ -89,6 +89,11 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(questBudget.available(address(mockERC1155), 42), 0);
     }
 
+    function test_InitialManagementFee() public {
+        // Ensure the management fee is 0
+        assertEq(questBudget.managementFee(), 0);
+    }
+
     function test_InitializerDisabled() public {
         // Because the slot is private, we use `vm.load` to access it then parse out the bits:
         //   - [0] is the `initializing` flag (which should be 0 == false)
