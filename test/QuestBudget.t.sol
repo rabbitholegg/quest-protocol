@@ -479,7 +479,48 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         // Assert that the available balance is equal to the expected available balance
         assertEq(questBudget.available(address(mockERC20)), expectedAvailable);
     }
-    
+
+    function testCreateERC20Quest_InsufficientFunds() public {
+        // Set management fee
+        vm.prank(questBudget.owner());
+        questBudget.setManagementFee(500); // 5%
+
+        // Calculate the amounts needed for the quest
+        uint256 totalParticipants = 10;
+        uint256 rewardAmount = 1 ether;
+        uint256 maxTotalRewards = totalParticipants * rewardAmount;
+        uint256 questFee = uint256(mockQuestFactory.questFee());
+        uint256 referralRewardFee = 250; // 2.5%
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
+        uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
+        uint256 managementFee = (maxTotalRewards * 500) / 10_000; // 5% management fee
+        uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+        uint256 totalAllocationRequired = questFactoryApprovalAmount + managementFee;
+
+        // Approve questBudget to spend tokens
+        mockERC20.approve(address(questBudget), totalAllocationRequired);
+
+        // Allocate the needed amount minus the management fee
+        questBudget.allocate(
+            _makeFungibleTransfer(Budget.AssetType.ERC20, address(mockERC20), address(this), totalAllocationRequired - managementFee)
+        );
+
+        vm.expectRevert("Insufficient funds for quest creation");
+        questBudget.createERC20Quest(
+            1, // txHashChainId
+            address(mockERC20), // rewardTokenAddress
+            block.timestamp + 1 days, // endTime
+            block.timestamp, // startTime
+            totalParticipants, // totalParticipants
+            rewardAmount, // rewardAmount
+            "testQuest", // questId
+            "testAction", // actionType
+            "Test Quest", // questName
+            "Test Project", // projectName
+            referralRewardFee // referralRewardFee
+        );
+    }
+
     ///////////////////////////
     // QuestBudget.cancel //
     ///////////////////////////
