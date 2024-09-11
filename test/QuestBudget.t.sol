@@ -527,12 +527,12 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         );
     }
 
-    ///////////////////////////
+    ////////////////////////
     // QuestBudget.cancel //
-    ///////////////////////////
+    ////////////////////////
 
     function test_cancel() public {
-                // Define the parameters for the new quest
+        // Define the parameters for the new quest
         uint32 txHashChainId_ = 1;
         address rewardTokenAddress_ = address(mockERC20);
         uint256 endTime_ = block.timestamp + 1 days;
