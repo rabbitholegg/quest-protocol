@@ -545,7 +545,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
     function test_cancel() public {
         // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
-        address questAddress = createQuest(data, questBudget.owner());
+        address questAddress = _createQuestWithMockData(data, questBudget.owner());
 
         // Ensure the returned quest address is not the zero address
         assertTrue(questAddress != address(0));
@@ -1104,7 +1104,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Simulate that the quest has already withdrawn
         data.hasWithdrawn = true;
-        createQuest(data, questBudget.owner());
+        _createQuestWithMockData(data, questBudget.owner());
 
         // Get balance after the quest has withdrawn
         uint256 initialBalance = mockERC20.balanceOf(address(this));
@@ -1131,7 +1131,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
-        createQuest(data, questBudget.owner());
+        _createQuestWithMockData(data, questBudget.owner());
 
         vm.expectRevert("Management fee cannot be claimed until the quest rewards are withdrawn");
         questBudget.payManagementFee(data.questId);
@@ -1152,7 +1152,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
-        createQuest(data, questCreator);
+        _createQuestWithMockData(data, questCreator);
 
         // Attempt to call payManagementFee as budget owner (not quest creator)
         vm.prank(questBudget.owner());
@@ -1170,7 +1170,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Simulate that the quest has already withdrawn
         data.hasWithdrawn = true;
-        createQuest(data, questBudget.owner());
+        _createQuestWithMockData(data, questBudget.owner());
 
         // Transfer 1 wei out of the budget
         vm.prank(address(questBudget));
@@ -1197,7 +1197,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         data.numberMinted = 10;
 
         // Create quest
-        createQuest(data, questBudget.owner());
+        _createQuestWithMockData(data, questBudget.owner());
 
         // Calculate expected fee
         uint256 expectedFeeToPay = (data.numberMinted * data.rewardAmount * managementFeePercentage) / 10_000;
@@ -1226,6 +1226,9 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
     // Test Helper Functions //
     ///////////////////////////
 
+    /// @notice Sets up a default QuestSetupData struct with common test parameters
+    /// @dev This function provides a baseline set of quest data that can be easily modified for different test scenarios
+    /// @return A QuestSetupData struct populated with default values for testing purposes
     function setupQuestData() internal view returns (QuestSetupData memory) {
         return QuestSetupData({
             txHashChainId: 1,
@@ -1244,7 +1247,12 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         });
     }
 
-    function createQuest(QuestSetupData memory data, address questCreator) internal returns (address questAddress) {
+    /// @notice Creates a quest with mock data for testing purposes
+    /// @dev This function simulates the entire quest creation process, including token allocation and mocking quest data
+    /// @param data The struct containing all necessary quest setup data
+    /// @param questCreator The address that will be set as the quest creator
+    /// @return questAddress The address of the newly created quest contract
+    function _createQuestWithMockData(QuestSetupData memory data, address questCreator) internal returns (address questAddress) {
         uint256 maxTotalRewards = data.totalParticipants * data.rewardAmount;
         uint256 questFee = uint256(mockQuestFactory.questFee());
         uint256 referralRewardFee = uint256(mockQuestFactory.referralRewardFee());
