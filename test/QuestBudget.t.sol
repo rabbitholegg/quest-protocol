@@ -480,8 +480,8 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         // Ensure the returned quest address is not the zero address
         assertTrue(questAddress != address(0));
 
-        // Assert that the quest manager is set to the test contract
-        assertEq(questBudget.questManagers(questId), address(this));
+        // Assert that the quest manager is set to the questBudget owner
+        assertEq(questBudget.questManagers(questId), address(questBudget.owner()));
 
         // Assert that the reserved funds is equal to the management fee
         assertEq(questBudget.reservedFunds(), maxManagementFee);
