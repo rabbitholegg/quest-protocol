@@ -27,6 +27,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
     event QuestCancelled(address indexed questAddress, string questId, uint256 endsAt);
     event ManagementFeePaid(string indexed questId, address indexed manager, uint256 amount);
+    event ManagementFeeSet(uint256 newFee);
 
     function setUp() public {
         address owner = address(this);
@@ -1092,6 +1093,10 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
     function testSetManagementFee() public {
         // Simulate a transaction from the owner of the questBudget contract
         vm.prank(questBudget.owner());
+
+        // Expect the ManagementFeeSet event to be emitted
+        vm.expectEmit();
+        emit ManagementFeeSet(500);
 
         // Call the setManagementFee function with a value of 5%
         questBudget.setManagementFee(500);
