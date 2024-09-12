@@ -3,6 +3,8 @@ pragma solidity 0.8.19;
 
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
+import {IQuestFactory} from "../../contracts/interfaces/IQuestFactory.sol";
+
 contract QuestFactoryMock {
     uint256 numberMinted;
     uint256 public mintFee;
@@ -22,7 +24,9 @@ contract QuestFactoryMock {
         uint256 referralRewardFee;
     }
 
-    QuestData public questData;
+    QuestData public _questData;
+
+    mapping(string => IQuestFactory.QuestData) public questDataMap;
 
     event MintFeePaid(
         string questId,
@@ -82,7 +86,7 @@ contract QuestFactoryMock {
         uint256 maxProtocolReward = (maxTotalRewards * this.questFee()) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * this.referralRewardFee()) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
-        questData = QuestData({
+        _questData = QuestData({
             txHashChainId: txHashChainId_,
             rewardTokenAddress: rewardTokenAddress_,
             endTime: endTime_,
@@ -108,4 +112,7 @@ contract QuestFactoryMock {
         emit QuestCancelled(address(this), questId_, 0);
     }
 
+    function questData(string memory questId) public view returns (IQuestFactory.QuestData memory) {
+        return questDataMap[questId];
+    }
 }
