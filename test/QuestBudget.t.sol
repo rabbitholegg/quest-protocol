@@ -1168,12 +1168,19 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             rewardAmountOrTokenId: rewardAmount_,
             hasWithdrawn: true
         }));
+
+        // Get balance after the quest has withdrawn
         uint256 initialBalance = mockERC20.balanceOf(address(this));
 
+        // Expect the ManagementFeePaid event to be emitted
+        vm.expectEmit();
+        emit ManagementFeePaid(questId_, address(this), maxManagementFee);
         questBudget.payManagementFee(questId_);
 
+        // Get balance after the management fee is paid
         uint256 finalBalance = mockERC20.balanceOf(address(this));
 
+        // Verify the correct amount was transferred
         assertEq(finalBalance - initialBalance, maxManagementFee, "Incorrect management fee paid");
     }
 
