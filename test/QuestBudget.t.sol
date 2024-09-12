@@ -1174,7 +1174,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         uint256 finalBalance = mockERC20.balanceOf(address(this));
 
-        assertEq(finalBalance - initialBalance, 0.5 ether, "Incorrect management fee paid");
+        assertEq(finalBalance - initialBalance, maxManagementFee, "Incorrect management fee paid");
     }
 
     function testPayManagementFee_NotWithdrawn() public {
