@@ -55,7 +55,7 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @dev Emitted when the management fee is set or updated
     event ManagementFeeSet(uint256 newFee);
 
-    /// @dev Emitted when a management fee is paid
+    /// @dev Emitted when management fee is paid
     event ManagementFeePaid(string indexed questId, address indexed manager, uint256 amount);
 
     /// @notice A modifier that allows only authorized addresses to call the function
