@@ -1099,8 +1099,11 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         vm.prank(questBudget.owner());
         questBudget.setManagementFee(500); // 5%
 
-        // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
+        // Setup quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
+
+        // Simulate that the quest has already withdrawn
+        data.hasWithdrawn = true;
         createQuest(data, questBudget.owner());
 
         // Get balance after the quest has withdrawn
@@ -1128,7 +1131,6 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
-        data.hasWithdrawn = false;
         createQuest(data, questBudget.owner());
 
         vm.expectRevert("Management fee cannot be claimed until the quest rewards are withdrawn");
@@ -1163,8 +1165,11 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         vm.prank(questBudget.owner());
         questBudget.setManagementFee(500); // 5%
 
-        // Create quest with standard parameters (60 participants, 1 ETH reward per participant)
+        // Setup quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
+
+        // Simulate that the quest has already withdrawn
+        data.hasWithdrawn = true;
         createQuest(data, questBudget.owner());
 
         // Transfer 1 wei out of the budget
@@ -1184,6 +1189,9 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         // Setup quest with standard parameters (60 participants, 1 ETH reward per participant)
         QuestSetupData memory data = setupQuestData();
+
+        // Simulate that the quest has already withdrawn
+        data.hasWithdrawn = true;
 
         // Set number minted to 10 (instead of 60)
         data.numberMinted = 10;
@@ -1232,7 +1240,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             projectName: "Test Project",
             referralRewardFee: 250,
             numberMinted: 60,
-            hasWithdrawn: true
+            hasWithdrawn: false
         });
     }
 
