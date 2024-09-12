@@ -920,6 +920,27 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(questBudget.available(address(otherMockERC20)), 0);
     }
 
+    function testAvailable_ReservedFunds() public {
+        // Mint some tokens to the questBudget
+        uint256 totalBalance = 100 ether;
+        mockERC20.mint(address(questBudget), totalBalance);
+
+        // Set reserved funds equal to total balance
+        uint256 reservedFunds = totalBalance;
+        bytes32 reservedFundsSlot = bytes32(uint256(6)); // reservedFunds is at slot 6
+        vm.store(address(questBudget), reservedFundsSlot, bytes32(reservedFunds));
+
+        uint256 availableBalance = questBudget.available(address(mockERC20));
+        assertEq(availableBalance, 0, "Available balance should be 0 when reserved funds equal total balance");
+
+        // Set reserved funds greater than total balance
+        reservedFunds = totalBalance + 1 wei;
+        vm.store(address(questBudget), reservedFundsSlot, bytes32(reservedFunds));
+
+        availableBalance = questBudget.available(address(mockERC20));
+        assertEq(availableBalance, 0, "Available balance should be 0 when reserved funds are > total balance");
+    }
+
     //////////////////////////////
     // QuestBudget.distributed //
     //////////////////////////////
