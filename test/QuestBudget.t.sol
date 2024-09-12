@@ -1115,6 +1115,10 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         assertEq(questBudget.managementFee(), 500);
     }
 
+    //////////////////////////////////
+    // QuestBudget.payManagementFee //
+    //////////////////////////////////
+
     function testPayManagementFee() public {
         // Set management fee
         vm.prank(questBudget.owner());
@@ -1150,8 +1154,66 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             totalParticipants_, rewardAmount_, questId_, actionType_, questName_, projectName_, referralRewardFee_
         );
 
-        // Mock withdrawal
-        IQuestFactory.QuestData({
+        // Simulate valid quest data with hasWithdrawn set to true
+        mockQuestFactory.setQuestData(questId_, IQuestFactory.QuestData({
+            questAddress: questAddress,
+            rewardToken: address(mockERC20),
+            queued: false,
+            questFee: 250, // 2.5%
+            startTime: startTime_,
+            endTime: endTime_,
+            totalParticipants: totalParticipants_,
+            numberMinted: numberMinted_,
+            redeemedTokens: numberMinted_ * rewardAmount_,
+            rewardAmountOrTokenId: rewardAmount_,
+            hasWithdrawn: true
+        }));
+        uint256 initialBalance = mockERC20.balanceOf(address(this));
+
+        questBudget.payManagementFee(questId_);
+
+        uint256 finalBalance = mockERC20.balanceOf(address(this));
+
+        assertEq(finalBalance - initialBalance, 0.5 ether, "Incorrect management fee paid");
+    }
+
+    function testPayManagementFee_NotWithdrawn() public {
+        // Set management fee
+        vm.prank(questBudget.owner());
+        questBudget.setManagementFee(500); // 5%
+
+        // Set quest data
+        uint32 txHashChainId_ = 1;
+        address rewardTokenAddress_ = address(mockERC20);
+        uint256 endTime_ = block.timestamp + 1 days;
+        uint256 startTime_ = block.timestamp;
+        uint256 totalParticipants_ = 10;
+        uint256 rewardAmount_ = 1 ether;
+        string memory questId_ = "testQuest";
+        string memory actionType_ = "testAction";
+        string memory questName_ = "Test Quest";
+        string memory projectName_ = "Test Project";
+        uint256 referralRewardFee_ = 250;
+        uint256 numberMinted_ = 10;
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
+        uint256 questFee = uint256(mockQuestFactory.questFee());
+        uint256 referralRewardFee = uint256(mockQuestFactory.referralRewardFee());
+        uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
+        uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
+        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000;
+        uint256 requiredApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward + maxManagementFee;
+
+        // Allocate tokens to questBudget
+        mockERC20.mint(address(questBudget), requiredApprovalAmount);
+
+        // Create quest
+        address questAddress = questBudget.createERC20Quest(
+            txHashChainId_, rewardTokenAddress_, endTime_, startTime_,
+            totalParticipants_, rewardAmount_, questId_, actionType_, questName_, projectName_, referralRewardFee_
+        );
+
+        // Simulate quest data with hasWithdrawn set to false
+        mockQuestFactory.setQuestData(questId_, IQuestFactory.QuestData({
             questAddress: questAddress,
             rewardToken: address(mockERC20),
             queued: false,
@@ -1163,7 +1225,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
             redeemedTokens: numberMinted_ * rewardAmount_,
             rewardAmountOrTokenId: rewardAmount_,
             hasWithdrawn: false
-        });
+        }));
 
         vm.expectRevert("Management fee cannot be claimed until the quest rewards are withdrawn");
         questBudget.payManagementFee(questId_);
