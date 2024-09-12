@@ -112,6 +112,11 @@ contract QuestFactoryMock {
         emit QuestCancelled(address(this), questId_, 0);
     }
 
+    // test helper function to set mock quest data
+    function setQuestData(string memory questId, IQuestFactory.QuestData memory data) public {
+        questDataMap[questId] = data;
+    }
+
     function questData(string memory questId) public view returns (IQuestFactory.QuestData memory) {
         return questDataMap[questId];
     }
