@@ -398,6 +398,7 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
         mockERC20.mint(address(this), approvalAmount);
+
         // Ensure the budget has enough tokens for the reward
         mockERC20.approve(address(questBudget), approvalAmount);
         questBudget.allocate(
@@ -431,16 +432,28 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         vm.prank(questBudget.owner());
         questBudget.setManagementFee(500); // 5%
 
-        // Calculate the amounts needed for the quest
-        uint256 totalParticipants = 10;
-        uint256 rewardAmount = 1 ether;
-        uint256 maxTotalRewards = totalParticipants * rewardAmount;
+        // Define the parameters for the new quest
+        uint32 txHashChainId_ = 1;
+        address rewardTokenAddress_ = address(mockERC20);
+        uint256 endTime_ = block.timestamp + 1 days;
+        uint256 startTime_ = block.timestamp;
+        uint256 totalParticipants_ = 10;
+        uint256 rewardAmount_ = 1 ether;
+        string memory questId_ = "testQuest";
+        string memory actionType_ = "testAction";
+        string memory questName_ = "Test Quest";
+        string memory projectName_ = "Test Project";
+        uint256 referralRewardFee_ = 250;
+        
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
-        uint256 referralRewardFee = 250; // 2.5%
+        uint256 referralRewardFee = uint256(mockQuestFactory.referralRewardFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
-        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000; // 5% management fee
         uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+
+        // Calculate the amounts needed for the quest
+        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000;
         uint256 totalAllocationRequired = questFactoryApprovalAmount + maxManagementFee;
 
         // Approve questBudget to spend tokens
@@ -454,17 +467,17 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         // Create quest
         string memory questId = "testQuest";
         address questAddress = questBudget.createERC20Quest(
-            1, // txHashChainId
-            address(mockERC20), // rewardTokenAddress
-            block.timestamp + 1 days, // endTime
-            block.timestamp, // startTime
-            totalParticipants, // totalParticipants
-            rewardAmount, // rewardAmount
-            questId, // questId
-            "testAction", // actionType
-            "Test Quest", // questName
-            "Test Project", // projectName
-            referralRewardFee // referralRewardFee
+            txHashChainId_,
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            actionType_,
+            questName_,
+            projectName_,
+            referralRewardFee_
         );
 
         // Ensure the returned quest address is not the zero address
@@ -490,17 +503,28 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         // Set management fee
         vm.prank(questBudget.owner());
         questBudget.setManagementFee(500); // 5%
-
-        // Calculate the amounts needed for the quest
-        uint256 totalParticipants = 10;
-        uint256 rewardAmount = 1 ether;
-        uint256 maxTotalRewards = totalParticipants * rewardAmount;
+    
+        // Define the parameters for the new quest
+        uint32 txHashChainId_ = 1;
+        address rewardTokenAddress_ = address(mockERC20);
+        uint256 endTime_ = block.timestamp + 1 days;
+        uint256 startTime_ = block.timestamp;
+        uint256 totalParticipants_ = 10;
+        uint256 rewardAmount_ = 1 ether;
+        string memory questId_ = "testQuest";
+        string memory actionType_ = "testAction";
+        string memory questName_ = "Test Quest";
+        string memory projectName_ = "Test Project";
+        uint256 referralRewardFee_ = 250;
+        
+        uint256 maxTotalRewards = totalParticipants_ * rewardAmount_;
         uint256 questFee = uint256(mockQuestFactory.questFee());
-        uint256 referralRewardFee = 250; // 2.5%
+        uint256 referralRewardFee = uint256(mockQuestFactory.referralRewardFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
-        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000; // 5% management fee
         uint256 questFactoryApprovalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+
+        uint256 maxManagementFee = (maxTotalRewards * questBudget.managementFee()) / 10_000;
         uint256 totalAllocationRequired = questFactoryApprovalAmount + maxManagementFee;
 
         // Approve questBudget to spend tokens
@@ -513,17 +537,17 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
 
         vm.expectRevert("Insufficient funds for quest creation");
         questBudget.createERC20Quest(
-            1, // txHashChainId
-            address(mockERC20), // rewardTokenAddress
-            block.timestamp + 1 days, // endTime
-            block.timestamp, // startTime
-            totalParticipants, // totalParticipants
-            rewardAmount, // rewardAmount
-            "testQuest", // questId
-            "testAction", // actionType
-            "Test Quest", // questName
-            "Test Project", // projectName
-            referralRewardFee // referralRewardFee
+            txHashChainId_,
+            rewardTokenAddress_,
+            endTime_,
+            startTime_,
+            totalParticipants_,
+            rewardAmount_,
+            questId_,
+            actionType_,
+            questName_,
+            projectName_,
+            referralRewardFee_
         );
     }
 
