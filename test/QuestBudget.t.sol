@@ -1231,6 +1231,13 @@ contract QuestBudgetTest is Test, TestUtils, IERC1155Receiver {
         questBudget.payManagementFee(questId_);
     }
 
+    function testPayManagementFee_NotAuthorized() public {        
+        vm.prank(address(0xc0ffee));
+
+        vm.expectRevert(BoostError.Unauthorized.selector);
+        questBudget.payManagementFee("testQuest");
+    }
+
     ///////////////////////////
     // Test Helper Functions //
     ///////////////////////////
