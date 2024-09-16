@@ -6,6 +6,8 @@ import {IQuestFactory} from "contracts/interfaces/IQuestFactory.sol";
 import {IERC1155Receiver} from "openzeppelin-contracts/token/ERC1155/IERC1155Receiver.sol";
 import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
 import {IERC165} from "openzeppelin-contracts/utils/introspection/IERC165.sol";
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {ReentrancyGuard} from "solady/utils/ReentrancyGuard.sol";
@@ -18,6 +20,7 @@ import {Cloneable} from "contracts/references/Cloneable.sol";
 /// @dev This type of budget supports ETH, ERC20, and ERC1155 assets only
 contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     using SafeTransferLib for address;
+    using SafeERC20 for IERC20;
 
     /// @notice The payload for initializing a SimpleBudget
     struct InitPayload {
@@ -39,6 +42,21 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
 
     /// @dev The mapping of authorized addresses
     mapping(address => bool) private _isAuthorized;
+
+    /// @dev The management fee percentage (in basis points, i.e., 100 = 1%)
+    uint256 public managementFee;
+
+    /// @dev Mapping of quest IDs to their respective managers' addresses
+    mapping(string => address) public questManagers;
+
+    /// @dev Total amount of funds reserved for management fees
+    uint256 public reservedFunds;
+
+    /// @dev Emitted when the management fee is set or updated
+    event ManagementFeeSet(uint256 newFee);
+
+    /// @dev Emitted when management fee is paid
+    event ManagementFeePaid(string indexed questId, address indexed manager, uint256 amount);
 
     /// @notice A modifier that allows only authorized addresses to call the function
     modifier onlyAuthorized() {
@@ -165,8 +183,24 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
         uint256 referralRewardFee = uint256(IQuestFactory(questFactory).referralRewardFee());
         uint256 maxProtocolReward = (maxTotalRewards * questFee) / 10_000;
         uint256 maxReferralReward = (maxTotalRewards * referralRewardFee) / 10_000;
+        uint256 maxManagementFee = (maxTotalRewards * managementFee) / 10_000;
         uint256 approvalAmount = maxTotalRewards + maxProtocolReward + maxReferralReward;
+
+        // Ensure the available balance in the budget can cover the required approval amount plus the reserved management fee
+        require(
+            this.available(rewardTokenAddress_) >= approvalAmount + maxManagementFee,
+            "Insufficient funds for quest creation"
+        );
+
+        // Reserve the management fee so that the manager can be paid later
+        reservedFunds += maxManagementFee;
+
+        // Approve the QuestFactory contract to transfer the necessary tokens for this quest
         rewardTokenAddress_.safeApprove(address(questFactory), approvalAmount);
+
+        // Store the manager address (msg.sender) associated with the questId
+        questManagers[questId_] = msg.sender;
+
         return IQuestFactory(questFactory).createERC20Quest(
             txHashChainId_,
             rewardTokenAddress_,
@@ -186,6 +220,55 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @param questId_ The uuid of the quest
     function cancelQuest(string calldata questId_) public virtual onlyOwner() {
         IQuestFactory(questFactory).cancelQuest(questId_);
+    }
+
+    /// @notice Sets the management fee percentage
+    /// @dev Only the owner can call this function. The fee is in basis points (100 = 1%)
+    /// @param fee_ The new management fee percentage in basis points
+    function setManagementFee(uint256 fee_) external onlyOwner {
+        require(fee_ <= 10000, "Fee cannot exceed 100%");
+        managementFee = fee_;
+        emit ManagementFeeSet(fee_);
+    }
+
+    /// @notice Allows the quest manager to claim the management fee for a completed quest
+    /// @dev This function can only be called by the authorized quest manager after the quest rewards have been withdrawn
+    /// @param questId_ The unique identifier of the quest for which the management fee is being claimed
+    function payManagementFee(string memory questId_) public onlyAuthorized {
+        // Retrieve the quest data by calling the questData function and decoding the result
+        IQuestFactory.QuestData memory quest = IQuestFactory(questFactory).questData(questId_);
+
+        // Ensure the caller is the manager who created the quest
+        require(questManagers[questId_] == msg.sender, "Only the quest creator can claim the management fee");
+
+        // Ensure the quest has been marked as withdrawn
+        require(quest.hasWithdrawn, "Management fee cannot be claimed until the quest rewards are withdrawn");
+
+        // Extract relevant data from the QuestData struct
+        uint256 totalParticipants = quest.totalParticipants;
+        uint256 rewardAmount = quest.rewardAmountOrTokenId;
+        uint256 numberMinted = quest.numberMinted;
+
+        // Calculate the maximum possible management fee based on total participants
+        uint256 totalPossibleFee = (totalParticipants * rewardAmount * managementFee) / 10_000;
+
+        // Calculate the actual management fee to be paid based on the number of claims (numberMinted)
+        uint256 feeToPay = (numberMinted * rewardAmount * managementFee) / 10_000;
+
+        // Get the balance of reward tokens available in this contract
+        uint256 availableFunds = IERC20(quest.rewardToken).balanceOf(address(this));
+
+        // Ensure the contract has enough funds to pay out the management fee; they should be reserved and not available
+        require(availableFunds >= feeToPay, "Insufficient funds to pay management fee");
+
+        // Transfer the management fee to the manager
+        IERC20(quest.rewardToken).safeTransfer(msg.sender, feeToPay);
+
+        // Subtract the total possible management fee since we reserved the total amount to begin with
+        reservedFunds = reservedFunds - totalPossibleFee;
+
+        // Emit an event for logging purposes
+        emit ManagementFeePaid(questId_, msg.sender, feeToPay);
     }
  
     /// @inheritdoc Budget
@@ -286,10 +369,11 @@ contract QuestBudget is Budget, IERC1155Receiver, ReentrancyGuard {
     /// @notice Get the amount of assets available for distribution from the budget
     /// @param asset_ The address of the asset (or the zero address for native assets)
     /// @return The amount of assets available
-    /// @dev This is simply the current balance held by the budget
+    /// @dev This returns the current balance held by the budget minus reserved funds
     /// @dev If the zero address is passed, this function will return the native balance
     function available(address asset_) public view virtual override returns (uint256) {
-        return asset_ == address(0) ? address(this).balance : asset_.balanceOf(address(this));
+        uint256 totalBalance = asset_ == address(0) ? address(this).balance : IERC20(asset_).balanceOf(address(this));
+        return totalBalance > reservedFunds ? totalBalance - reservedFunds : 0;
     }
 
     /// @notice Get the amount of ERC1155 assets available for distribution from the budget
