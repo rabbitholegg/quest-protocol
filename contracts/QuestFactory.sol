@@ -904,18 +904,20 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
     function processMintFee(address ref_, address mintFeeRecipient_, string memory questId_) private returns (string memory) {
         returnChange();
         uint256 cachedMintFee = mintFee;
-        uint256 oneThirdMintfee = cachedMintFee / 3;
+        require(cachedMintFee > 0, "Zero mint fee");
+        
+        uint256 oneThirdMintfee = (cachedMintFee * 1000) / 3000; // Более точное деление
         uint256 protocolPayout;
         uint256 mintPayout;
         uint256 referrerPayout;
 
         if(ref_ == address(0)){
             protocolPayout = oneThirdMintfee * 2;
-            mintPayout = oneThirdMintfee;
+            mintPayout = cachedMintFee - protocolPayout; // Остаток идет в mintPayout
         } else {
             protocolPayout = oneThirdMintfee;
             mintPayout = oneThirdMintfee;
-            referrerPayout = oneThirdMintfee;
+            referrerPayout = cachedMintFee - (protocolPayout + mintPayout); // Остаток идет в referrerPayout
         }
 
         protocolFeeRecipient.safeTransferETH(protocolPayout);
