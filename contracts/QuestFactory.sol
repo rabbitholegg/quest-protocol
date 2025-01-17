@@ -906,18 +906,18 @@ contract QuestFactory is Initializable, LegacyStorage, OwnableRoles, IQuestFacto
         uint256 cachedMintFee = mintFee;
         require(cachedMintFee > 0, "Zero mint fee");
         
-        uint256 oneThirdMintfee = (cachedMintFee * 1000) / 3000; // Более точное деление
+        uint256 oneThirdMintfee = (cachedMintFee * 1000) / 3000; // More precise division
         uint256 protocolPayout;
         uint256 mintPayout;
         uint256 referrerPayout;
 
         if(ref_ == address(0)){
             protocolPayout = oneThirdMintfee * 2;
-            mintPayout = cachedMintFee - protocolPayout; // Остаток идет в mintPayout
+            mintPayout = cachedMintFee - protocolPayout; // The remainder goes to mintPayout
         } else {
             protocolPayout = oneThirdMintfee;
             mintPayout = oneThirdMintfee;
-            referrerPayout = cachedMintFee - (protocolPayout + mintPayout); // Остаток идет в referrerPayout
+            referrerPayout = cachedMintFee - (protocolPayout + mintPayout); // The remainder goes to referrerPayout
         }
 
         protocolFeeRecipient.safeTransferETH(protocolPayout);
